@@ -4,7 +4,7 @@ import AbsoluteElement from './abc_absolute_element';
 
 import RelativeElement from './abc_relative_element';
 
-var TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
+var TempoElement = function TempoElement(this: any, tempo: any, tuneNumber: any, createNoteHead: any) {
   this.type = "TempoElement";
   this.tempo = tempo;
   this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
@@ -18,17 +18,18 @@ var TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
   }
 };
 
-TempoElement.prototype.setX = function (x) {
+TempoElement.prototype.setX = function (x: any) {
   this.x = x;
 };
 
 TempoElement.prototype.createNote = function (
-  createNoteHead,
-  tempo,
-  tuneNumber
+  createNoteHead: any,
+  tempo: any,
+  tuneNumber: any
 ) {
   var temposcale = 0.75;
   var duration = tempo.duration[0]; // TODO when multiple durations
+  // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
   var absElem = new AbsoluteElement(tempo, duration, 1, "tempo", tuneNumber);
   // There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
   // merge all of the in between points.
@@ -95,6 +96,7 @@ TempoElement.prototype.createNote = function (
     var p2 = 5 * temposcale;
     var dx = tempoNote.dx + tempoNote.w;
     var width = -0.6;
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     stem = new RelativeElement(null, dx, 0, p1, {
       type: "stem",
       pitch2: p2,

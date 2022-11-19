@@ -7,7 +7,7 @@ import elementGroup from './group-elements';
  * if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
  * not scaled if not in printgroup
  */
-function printSymbol(renderer, x, offset, symbol, options) {
+function printSymbol(renderer: any, x: any, offset: any, symbol: any, options: any) {
   // TODO-PER: what happened to scalex, and scaley? That might have been a bug introduced in refactoring
   var el;
   var ycorr;
@@ -89,7 +89,7 @@ function printSymbol(renderer, x, offset, symbol, options) {
   }
 }
 
-function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
+function kernSymbols(lastSymbol: any, thisSymbol: any, lastSymbolWidth: any) {
   // This is just some adjustments to make it look better.
   var width = lastSymbolWidth;
   if (lastSymbol === "f" && thisSymbol === "f") width = (width * 2) / 3;

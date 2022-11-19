@@ -5,9 +5,18 @@ import parseCommon from './abc_common';
 import parseDirective from './abc_parse_directive';
 import parseKeyVoice from './abc_parse_key_voice';
 
-var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
-  this.reset = function (tokenizer, warn, multilineVars, tune) {
+var ParseHeader = function(
+  this: any,
+  tokenizer: any,
+  warn: any,
+  multilineVars: any,
+  tune: any,
+  tuneBuilder: any
+) {
+  this.reset = function (tokenizer: any, warn: any, multilineVars: any, tune: any) {
+    // @ts-expect-error TS(2339): Property 'initialize' does not exist on type '{}'.
     parseKeyVoice.initialize(tokenizer, warn, multilineVars, tune, tuneBuilder);
+    // @ts-expect-error TS(2339): Property 'initialize' does not exist on type '{}'.
     parseDirective.initialize(
       tokenizer,
       warn,
@@ -18,7 +27,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
   };
   this.reset(tokenizer, warn, multilineVars, tune);
 
-  this.setTitle = function (title) {
+  this.setTitle = function (title: any) {
     if (multilineVars.hasMainTitle)
       tuneBuilder.addSubtitle(
         tokenizer.translateString(tokenizer.stripComment(title)),
@@ -40,7 +49,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
     }
   };
 
-  this.setMeter = function (line) {
+  this.setMeter = function (line: any) {
     line = tokenizer.stripComment(line);
     if (line === "C") {
       if (multilineVars.havent_set_length === true) {
@@ -121,7 +130,9 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
           if (tok.token !== "/") throw "Expected slash in meter";
           tok = tokens.shift();
           if (tok.type !== "number") throw "Expected bottom number of meter";
+          // @ts-expect-error TS(2339): Property 'den' does not exist on type '{ value: nu... Remove this comment to see the full error message
           ret.den = tok.token;
+          // @ts-expect-error TS(2339): Property 'den' does not exist on type '{ value: nu... Remove this comment to see the full error message
           ret.value = ret.value / parseInt(ret.den);
           return ret;
         };
@@ -133,7 +144,9 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
           var ret = parseFraction();
           totalLength += ret.value;
           var mv = { num: ret.num };
+          // @ts-expect-error TS(2339): Property 'den' does not exist on type '{ value: nu... Remove this comment to see the full error message
           if (ret.den !== undefined) mv.den = ret.den;
+          // @ts-expect-error TS(2345): Argument of type '{ num: string; }' is not assigna... Remove this comment to see the full error message
           meter.value.push(mv);
           if (tokens.length === 0) break;
           //var tok = tokens.shift();
@@ -152,7 +165,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
     return null;
   };
 
-  this.calcTempo = function (relTempo) {
+  this.calcTempo = function (relTempo: any) {
     var dur = 1 / 4;
     if (multilineVars.meter && multilineVars.meter.type === "specified") {
       dur = 1 / parseInt(multilineVars.meter.value[0].den);
@@ -177,14 +190,16 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
     }
   };
 
-  this.addUserDefinition = function (line, start, end) {
+  this.addUserDefinition = function (line: any, start: any, end: any) {
     var equals = line.indexOf("=", start);
     if (equals === -1) {
       warn("Need an = in a macro definition", line, start);
       return;
     }
 
+    // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
     var before = parseCommon.strip(line.substring(start, equals));
+    // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
     var after = parseCommon.strip(line.substring(equals + 1));
 
     if (before.length !== 1) {
@@ -204,7 +219,8 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
     multilineVars.macros[before] = after;
   };
 
-  this.setDefaultLength = function (line, start, end) {
+  this.setDefaultLength = function (line: any, start: any, end: any) {
+    // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
     var len = parseCommon.gsub(line.substring(start, end), " ", "");
     var len_arr = len.split("/");
     if (len_arr.length === 2) {
@@ -249,7 +265,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
     prestissimo: 210
   };
 
-  this.setTempo = function (line, start, end, iChar) {
+  this.setTempo = function (line: any, start: any, end: any, iChar: any) {
     //Q - tempo; can be used to specify the notes per minute, e.g. If
     //the meter denominator is a 4 note then Q:120 or Q:C=120
     //is 120 quarter notes per minute. Similarly  Q:C3=40 would be 40
@@ -273,13 +289,17 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
       var delaySet = true;
       var token = tokens.shift();
       if (token.type === "quote") {
+        // @ts-expect-error TS(2339): Property 'preString' does not exist on type '{ sta... Remove this comment to see the full error message
         tempo.preString = token.token;
         token = tokens.shift();
         if (tokens.length === 0) {
           // It's ok to just get a string for the tempo
           // If the string is a well-known tempo, put in the bpm
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           if (tempoString[tempo.preString.toLowerCase()]) {
+            // @ts-expect-error TS(2339): Property 'bpm' does not exist on type '{ startChar... Remove this comment to see the full error message
             tempo.bpm = tempoString[tempo.preString.toLowerCase()];
+            // @ts-expect-error TS(2339): Property 'suppressBpm' does not exist on type '{ s... Remove this comment to see the full error message
             tempo.suppressBpm = true;
           }
           return { type: "immediate", tempo: tempo };
@@ -295,10 +315,13 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
           token = tokens.shift();
           if (token.type !== "number")
             throw "Expected number after = in Q: field";
+          // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ star... Remove this comment to see the full error message
           tempo.duration = [1];
+          // @ts-expect-error TS(2339): Property 'bpm' does not exist on type '{ startChar... Remove this comment to see the full error message
           tempo.bpm = parseInt(token.token);
         } else if (token.type === "number") {
           // This is a type 3 format.
+          // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ star... Remove this comment to see the full error message
           tempo.duration = [parseInt(token.token)];
           if (tokens.length === 0) throw "Missing = after duration in Q: field";
           token = tokens.shift();
@@ -308,6 +331,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
           token = tokens.shift();
           if (token.type !== "number")
             throw "Expected number after = in Q: field";
+          // @ts-expect-error TS(2339): Property 'bpm' does not exist on type '{ startChar... Remove this comment to see the full error message
           tempo.bpm = parseInt(token.token);
         } else throw "Expected number or equal after C in Q: field";
       } else if (token.type === "number") {
@@ -315,7 +339,9 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
         var num = parseInt(token.token);
         if (tokens.length === 0 || tokens[0].type === "quote") {
           // This is type 1
+          // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ star... Remove this comment to see the full error message
           tempo.duration = [1];
+          // @ts-expect-error TS(2339): Property 'bpm' does not exist on type '{ startChar... Remove this comment to see the full error message
           tempo.bpm = num;
         } else {
           // This is type 4
@@ -326,6 +352,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
           token = tokens.shift();
           if (token.type !== "number") throw "Expected fraction in Q: field";
           var den = parseInt(token.token);
+          // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ star... Remove this comment to see the full error message
           tempo.duration = [num / den];
           // We got the first fraction, keep getting more as long as we find them.
           while (
@@ -342,6 +369,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
             token = tokens.shift();
             if (token.type !== "number") throw "Expected fraction in Q: field";
             den = parseInt(token.token);
+            // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ star... Remove this comment to see the full error message
             tempo.duration.push(num / den);
           }
           token = tokens.shift();
@@ -349,17 +377,20 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
             throw "Expected = in Q: field";
           token = tokens.shift();
           if (token.type !== "number") throw "Expected tempo in Q: field";
+          // @ts-expect-error TS(2339): Property 'bpm' does not exist on type '{ startChar... Remove this comment to see the full error message
           tempo.bpm = parseInt(token.token);
         }
       } else throw "Unknown value in Q: field";
       if (tokens.length !== 0) {
         token = tokens.shift();
         if (token.type === "quote") {
+          // @ts-expect-error TS(2339): Property 'postString' does not exist on type '{ st... Remove this comment to see the full error message
           tempo.postString = token.token;
           token = tokens.shift();
         }
         if (tokens.length !== 0) throw "Unexpected string at end of Q: field";
       }
+      // @ts-expect-error TS(2339): Property 'suppress' does not exist on type '{ star... Remove this comment to see the full error message
       if (multilineVars.printTempo === false) tempo.suppress = true;
       return { type: delaySet ? "delaySet" : "immediate", tempo: tempo };
     } catch (msg) {
@@ -368,7 +399,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
     }
   };
 
-  this.letter_to_inline_header = function (line, i, startLine) {
+  this.letter_to_inline_header = function (line: any, i: any, startLine: any) {
     var ws = tokenizer.eatWhiteSpace(line, i);
     i += ws;
     if (
@@ -381,6 +412,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
       var endChar = multilineVars.iChar + e + 1;
       switch (line.substring(i, i + 3)) {
         case "[I:":
+          // @ts-expect-error TS(2339): Property 'addDirective' does not exist on type '{}... Remove this comment to see the full error message
           var err = parseDirective.addDirective(line.substring(i + 3, e));
           if (err) warn(err, line, i);
           return [e - i + 1 + ws];
@@ -396,6 +428,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
           else multilineVars.meter = meter;
           return [e - i + 1 + ws];
         case "[K:":
+          // @ts-expect-error TS(2339): Property 'parseKey' does not exist on type '{}'.
           var result = parseKeyVoice.parseKey(line.substring(i + 3, e), true);
           if (result.foundClef && tuneBuilder.hasBeginMusic())
             tuneBuilder.appendStartingElement(
@@ -409,6 +442,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
               "key",
               startChar,
               endChar,
+              // @ts-expect-error TS(2339): Property 'fixKey' does not exist on type '{}'.
               parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key)
             );
           return [e - i + 1 + ws];
@@ -470,6 +504,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
           break;
         case "[V:":
           if (e > 0) {
+            // @ts-expect-error TS(2339): Property 'parseVoice' does not exist on type '{}'.
             parseKeyVoice.parseVoice(line, i + 3, e);
             //startNewLine();
             return [
@@ -487,10 +522,11 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
     return [0];
   };
 
-  this.letter_to_body_header = function (line, i) {
+  this.letter_to_body_header = function (line: any, i: any) {
     if (line.length >= i + 3) {
       switch (line.substring(i, i + 2)) {
         case "I:":
+          // @ts-expect-error TS(2339): Property 'addDirective' does not exist on type '{}... Remove this comment to see the full error message
           var err = parseDirective.addDirective(line.substring(i + 2));
           if (err) warn(err, line, i);
           return [line.length];
@@ -505,6 +541,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
             );
           return [line.length];
         case "K:":
+          // @ts-expect-error TS(2339): Property 'parseKey' does not exist on type '{}'.
           var result = parseKeyVoice.parseKey(
             line.substring(i + 2),
             tuneBuilder.hasBeginMusic()
@@ -521,6 +558,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
               "key",
               multilineVars.iChar + i,
               multilineVars.iChar + line.length,
+              // @ts-expect-error TS(2339): Property 'fixKey' does not exist on type '{}'.
               parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key)
             );
           return [line.length];
@@ -554,13 +592,16 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
               multilineVars.iChar + line.length,
               tempo.tempo
             );
+          // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
           return [e, line.charAt(i), parseCommon.strip(line.substring(i + 2))];
         case "V:":
+          // @ts-expect-error TS(2339): Property 'parseVoice' does not exist on type '{}'.
           parseKeyVoice.parseVoice(line, i + 2, line.length);
           //						startNewLine();
           return [
             line.length,
             line.charAt(i),
+            // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
             parseCommon.strip(line.substring(i + 2))
           ];
         default:
@@ -586,12 +627,14 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
     Z: "transcription"
   };
 
-  this.parseHeader = function (line) {
+  this.parseHeader = function (line: any) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var field = metaTextHeaders[line.charAt(0)];
     if (field !== undefined) {
       if (field === "unalignedWords")
         tuneBuilder.addMetaTextArray(
           field,
+          // @ts-expect-error TS(2339): Property 'parseFontChangeLine' does not exist on t... Remove this comment to see the full error message
           parseDirective.parseFontChangeLine(
             tokenizer.translateString(tokenizer.stripComment(line.substring(2)))
           ),
@@ -642,6 +685,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
         case "K":
           // since the key is the last thing that can happen in the header, we can resolve the tempo now
           this.resolveTempo();
+          // @ts-expect-error TS(2339): Property 'parseKey' does not exist on type '{}'.
           var result = parseKeyVoice.parseKey(line.substring(2), false);
           if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic()) {
             if (result.foundClef)
@@ -656,6 +700,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
                 "key",
                 startChar,
                 endChar,
+                // @ts-expect-error TS(2339): Property 'fixKey' does not exist on type '{}'.
                 parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key)
               );
           }
@@ -712,6 +757,7 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
           this.addUserDefinition(line, 2, line.length);
           break;
         case "V":
+          // @ts-expect-error TS(2339): Property 'parseVoice' does not exist on type '{}'.
           parseKeyVoice.parseVoice(line, 2, line.length);
           if (!multilineVars.is_in_header) return { newline: true };
           break;

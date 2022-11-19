@@ -33,12 +33,13 @@ import unhighlight from './unhighlight';
 // minspacing - spacing which must be taken on top of the width defined by the duration
 // type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
 var AbsoluteElement = function AbsoluteElement(
-  abcelem,
-  duration,
-  minspacing,
-  type,
-  tuneNumber,
-  options
+  this: any,
+  abcelem: any,
+  duration: any,
+  minspacing: any,
+  type: any,
+  tuneNumber: any,
+  options: any
 ) {
   //	console.log("Absolute:",abcelem, duration, minspacing, type, tuneNumber, options);
   if (!options) options = {};
@@ -88,7 +89,7 @@ AbsoluteElement.prototype.getFixedCoords = function () {
   return { x: this.x, w: this.fixed.w, t: this.fixed.t, b: this.fixed.b };
 };
 
-AbsoluteElement.prototype.addExtra = function (extra) {
+AbsoluteElement.prototype.addExtra = function (extra: any) {
   // used for accidentals, multi-measure rest text,
   // left-side decorations, gracenote heads,
   // left annotations, gracenote stems.
@@ -111,13 +112,13 @@ AbsoluteElement.prototype.addExtra = function (extra) {
   this._addChild(extra);
 };
 
-AbsoluteElement.prototype.addHead = function (head) {
+AbsoluteElement.prototype.addHead = function (head: any) {
   if (head.dx < this.extraw) this.extraw = head.dx;
   this.heads[this.heads.length] = head;
   this.addRight(head);
 };
 
-AbsoluteElement.prototype.addRight = function (right) {
+AbsoluteElement.prototype.addRight = function (right: any) {
   // // used for clefs, note heads, bar lines, stems, key-signature accidentals, non-beamed flags, dots
   // if (!(right.c && right.c.indexOf("clefs") >= 0) &&
   // 	!(right.c && right.c.indexOf("noteheads") >= 0) &&
@@ -155,19 +156,19 @@ AbsoluteElement.prototype.addRight = function (right) {
   this._addChild(right);
 };
 
-AbsoluteElement.prototype.addFixed = function (elem) {
+AbsoluteElement.prototype.addFixed = function (elem: any) {
   // used for elements that can't move relative to other elements after they have been placed.
   // used for ledger lines, bar numbers, debug msgs, clef, key sigs, time sigs
   this._addChild(elem);
 };
 
-AbsoluteElement.prototype.addFixedX = function (elem) {
+AbsoluteElement.prototype.addFixedX = function (elem: any) {
   // used for elements that can't move horizontally relative to other elements after they have been placed.
   // used for parts, tempo, decorations
   this._addChild(elem);
 };
 
-AbsoluteElement.prototype.addCentered = function (elem) {
+AbsoluteElement.prototype.addCentered = function (elem: any) {
   // // used for chord labels, lyrics
   // if (!(elem.type === "chord" && elem.position === "above") &&
   // 	!(elem.type === "chord" && elem.position === "below") &&
@@ -182,13 +183,13 @@ AbsoluteElement.prototype.addCentered = function (elem) {
   this._addChild(elem);
 };
 
-AbsoluteElement.prototype.setLimit = function (member, child) {
+AbsoluteElement.prototype.setLimit = function (member: any, child: any) {
   if (!child[member]) return;
   if (!this.specialY[member]) this.specialY[member] = child[member];
   else this.specialY[member] = Math.max(this.specialY[member], child[member]);
 };
 
-AbsoluteElement.prototype._addChild = function (child) {
+AbsoluteElement.prototype._addChild = function (child: any) {
   //	console.log("Relative:",child);
   child.parent = this;
   this.children[this.children.length] = child;
@@ -207,26 +208,26 @@ AbsoluteElement.prototype._addChild = function (child) {
   this.setLimit("dynamicHeightBelow", child);
 };
 
-AbsoluteElement.prototype.pushTop = function (top) {
+AbsoluteElement.prototype.pushTop = function (top: any) {
   if (top !== undefined) {
     if (this.top === undefined) this.top = top;
     else this.top = Math.max(top, this.top);
   }
 };
 
-AbsoluteElement.prototype.pushBottom = function (bottom) {
+AbsoluteElement.prototype.pushBottom = function (bottom: any) {
   if (bottom !== undefined) {
     if (this.bottom === undefined) this.bottom = bottom;
     else this.bottom = Math.min(bottom, this.bottom);
   }
 };
 
-AbsoluteElement.prototype.setX = function (x) {
+AbsoluteElement.prototype.setX = function (x: any) {
   this.x = x;
   for (var i = 0; i < this.children.length; i++) this.children[i].setX(x);
 };
 
-AbsoluteElement.prototype.center = function (before, after) {
+AbsoluteElement.prototype.center = function (before: any, after: any) {
   // Used to center whole rests
   var midpoint = (after.x - before.x) / 2 + before.x;
   this.x = midpoint - this.w / 2;
@@ -237,11 +238,11 @@ AbsoluteElement.prototype.setHint = function () {
   this.hint = true;
 };
 
-AbsoluteElement.prototype.highlight = function (klass, color) {
+AbsoluteElement.prototype.highlight = function (klass: any, color: any) {
   highlight.bind(this)(klass, color);
 };
 
-AbsoluteElement.prototype.unhighlight = function (klass, color) {
+AbsoluteElement.prototype.unhighlight = function (klass: any, color: any) {
   unhighlight.bind(this)(klass, color);
 };
 

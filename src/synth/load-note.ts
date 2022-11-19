@@ -4,8 +4,10 @@
 // name = the pitch name (e.g. "A3")
 import soundsCache from './sounds-cache';
 
-var getNote = function (url, instrument, name, audioContext) {
+var getNote = function (url: any, instrument: any, name: any, audioContext: any) {
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   if (!soundsCache[instrument]) soundsCache[instrument] = {};
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   var instrumentCache = soundsCache[instrument];
 
   if (!instrumentCache[name])
@@ -19,7 +21,7 @@ var getNote = function (url, instrument, name, audioContext) {
           reject(Error("Can't load sound at " + noteUrl));
           return;
         }
-        var noteDecoded = function (audioBuffer) {
+        var noteDecoded = function (audioBuffer: any) {
           resolve({
             instrument: instrument,
             name: name,

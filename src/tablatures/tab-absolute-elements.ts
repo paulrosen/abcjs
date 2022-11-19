@@ -6,10 +6,10 @@ import AbsoluteElement from '../write/abc_absolute_element';
 import RelativeElement from '../write/abc_relative_element';
 import Transposer from './transposer';
 
-function isObject(a) {
+function isObject(a: any) {
   return a != null && a.constructor === Object;
 }
-function cloneObject(dest, src) {
+function cloneObject(dest: any, src: any) {
   for (var prop in src) {
     if (src.prototype.hasOwnProperty.call(prop)) {
       if (!(Array.isArray(src[prop]) || isObject(src[prop]))) {
@@ -19,7 +19,8 @@ function cloneObject(dest, src) {
   }
 }
 
-function cloneAbsolute(absSrc) {
+function cloneAbsolute(absSrc: any) {
+  // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
   var returned = new AbsoluteElement("", 0, 0, "", 0);
   cloneObject(returned, absSrc);
   returned.top = 0;
@@ -33,7 +34,7 @@ function cloneAbsolute(absSrc) {
   return returned;
 }
 
-function cloneAbsoluteAndRelatives(absSrc, plugin) {
+function cloneAbsoluteAndRelatives(absSrc: any, plugin: any) {
   var returned = cloneAbsolute(absSrc);
   if (plugin) {
     var children = absSrc.children;
@@ -41,6 +42,7 @@ function cloneAbsoluteAndRelatives(absSrc, plugin) {
     var first = true;
     for (var ii = 0; ii < children.length; ii++) {
       var child = children[ii];
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       var relative = new RelativeElement("", 0, 0, 0, "");
       cloneObject(relative, child);
       first = plugin.tablature.setRelative(child, relative, first);
@@ -50,7 +52,7 @@ function cloneAbsoluteAndRelatives(absSrc, plugin) {
   return returned;
 }
 
-function buildTabAbsolute(plugin, absX, relX) {
+function buildTabAbsolute(plugin: any, absX: any, relX: any) {
   var tabIcon = "tab.tiny";
   var tabYPos = 7.5;
   if (plugin.isTabBig) {
@@ -62,8 +64,10 @@ function buildTabAbsolute(plugin, absX, relX) {
     icon: tabIcon,
     Ypos: tabYPos
   };
+  // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
   var tabAbsolute = new AbsoluteElement(element, 0, 0, "symbol", 0);
   tabAbsolute.x = absX;
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var tabRelative = new RelativeElement(tabIcon, 0, 0, 7.5, "tab");
   tabRelative.x = relX;
   tabAbsolute.children.push(tabRelative);
@@ -73,7 +77,7 @@ function buildTabAbsolute(plugin, absX, relX) {
   return tabAbsolute;
 }
 
-function lyricsDim(abs) {
+function lyricsDim(abs: any) {
   if (abs.extra) {
     for (var ii = 0; ii < abs.extra.length; ii++) {
       var extra = abs.extra[ii];
@@ -87,11 +91,11 @@ function lyricsDim(abs) {
   }
   return null;
 }
-function TabAbsoluteElements() {
+function TabAbsoluteElements(this: any) {
   this.accidentals = null;
 }
 
-function getInitialStaffSize(staffGroup) {
+function getInitialStaffSize(staffGroup: any) {
   var returned = 0;
   for (var ii = 0; ii < staffGroup.length; ii++) {
     if (!staffGroup[ii].tabNameInfos) returned++;
@@ -99,7 +103,7 @@ function getInitialStaffSize(staffGroup) {
   return returned;
 }
 
-function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
+function buildRelativeTabNote(plugin: any, relX: any, def: any, curNote: any, isGrace: any) {
   var strNote = curNote.num;
   if (curNote.note.quarter != null) {
     // add tab quarter => needs to string conversion then
@@ -115,6 +119,7 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
   var opt = {
     type: "tabNumber"
   };
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var tabNoteRelative = new RelativeElement(strNote, 0, 0, pitch + 0.3, opt);
   tabNoteRelative.x = relX;
   tabNoteRelative.isGrace = isGrace;
@@ -122,7 +127,7 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
   return tabNoteRelative;
 }
 
-function getXGrace(abs, index) {
+function getXGrace(abs: any, index: any) {
   var found = 0;
   if (abs.extra) {
     for (var ii = 0; ii < abs.extra.length; ii++) {
@@ -138,7 +143,7 @@ function getXGrace(abs, index) {
   return -1;
 }
 
-function graceInRest(absElem) {
+function graceInRest(absElem: any) {
   if (absElem.abcelem) {
     var elem = absElem.abcelem;
     if (elem.rest) {
@@ -148,7 +153,7 @@ function graceInRest(absElem) {
   return null;
 }
 
-function checkTransposition(plugin, transposer, pitches, graceNotes) {
+function checkTransposition(plugin: any, transposer: any, pitches: any, graceNotes: any) {
   if (plugin.transpose) {
     //transposer.transpose(plugin.transpose);
     for (var jj = 0; jj < pitches.length; jj++) {
@@ -162,7 +167,7 @@ function checkTransposition(plugin, transposer, pitches, graceNotes) {
   }
 }
 
-function convertToNumber(plugin, pitches, graceNotes) {
+function convertToNumber(plugin: any, pitches: any, graceNotes: any) {
   var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
   if (tabPos.error) {
     plugin._super.setError(tabPos.error);
@@ -177,11 +182,11 @@ function convertToNumber(plugin, pitches, graceNotes) {
 }
 
 function buildGraceRelativesForRest(
-  plugin,
-  abs,
-  absChild,
-  graceNotes,
-  tabVoice
+  plugin: any,
+  abs: any,
+  absChild: any,
+  graceNotes: any,
+  tabVoice: any
 ) {
   for (var mm = 0; mm < graceNotes.length; mm++) {
     var defGrace = {
@@ -210,12 +215,12 @@ function buildGraceRelativesForRest(
  * @param {*} staffAbsolute
  */
 TabAbsoluteElements.prototype.build = function (
-  plugin,
-  staffAbsolute,
-  tabVoice,
-  voiceIndex,
-  staffIndex,
-  keySig
+  plugin: any,
+  staffAbsolute: any,
+  tabVoice: any,
+  voiceIndex: any,
+  staffIndex: any,
+  keySig: any
 ) {
   var staffSize = getInitialStaffSize(staffAbsolute);
   var source = staffAbsolute[staffIndex + voiceIndex];
@@ -245,6 +250,7 @@ TabAbsoluteElements.prototype.build = function (
         this.accidentals = absChild.abcelem.accidentals;
         plugin.semantics.strings.accidentals = this.accidentals;
         if (plugin.transpose) {
+          // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
           transposer = new Transposer(
             absChild.abcelem.accidentals,
             plugin.transpose
@@ -360,6 +366,7 @@ TabAbsoluteElements.prototype.build = function (
           );
           abs.children.push(tabNoteRelative);
         }
+        // @ts-expect-error TS(2339): Property 'abselem' does not exist on type '{ el_ty... Remove this comment to see the full error message
         defNote.abselem = abs;
         tabVoice.push(defNote);
         dest.children.push(abs);

@@ -1,6 +1,6 @@
 import getBarYAt from './getBarYAt';
 
-function layoutTriplet(element) {
+function layoutTriplet(element: any) {
   // TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
   if (element.anchor1 && element.anchor2) {
     element.hasBeam =
@@ -71,19 +71,19 @@ function layoutTriplet(element) {
   delete element.flatBeams;
 }
 
-function isAbove(beam) {
+function isAbove(beam: any) {
   return beam.stemsUp;
 }
 
 // We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16
-function heightAtMidpoint(startX, endX, beam) {
+function heightAtMidpoint(startX: any, endX: any, beam: any) {
   if (beam.beams.length === 0) return 0;
   beam = beam.beams[0];
   var midPoint = startX + (endX - startX) / 2;
   return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
 }
 
-function xAtMidpoint(startX, endX) {
+function xAtMidpoint(startX: any, endX: any) {
   return startX + (endX - startX) / 2;
 }
 

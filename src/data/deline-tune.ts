@@ -1,4 +1,4 @@
-function delineTune(inputLines, options) {
+function delineTune(inputLines: any, options: any) {
   if (!options) options = {};
   var lineBreaks = !!options.lineBreaks;
   var outputLines = [];
@@ -131,7 +131,7 @@ function delineTune(inputLines, options) {
 // 		}
 // 	}
 // }
-function replacer(key, value) {
+function replacer(key: any, value: any) {
   // Filtering out properties
   if (key === "abselem") {
     return "abselem";
@@ -139,7 +139,7 @@ function replacer(key, value) {
   return value;
 }
 
-function addMeterToVoices(meter, voices) {
+function addMeterToVoices(meter: any, voices: any) {
   meter.el_type = "meter";
   meter.startChar = -1;
   meter.endChar = -1;
@@ -148,7 +148,7 @@ function addMeterToVoices(meter, voices) {
   }
 }
 
-function addKeyToVoices(key, voices) {
+function addKeyToVoices(key: any, voices: any) {
   key.el_type = "key";
   key.startChar = -1;
   key.endChar = -1;
@@ -157,7 +157,7 @@ function addKeyToVoices(key, voices) {
   }
 }
 
-function addClefToVoices(clef, voices) {
+function addClefToVoices(clef: any, voices: any) {
   clef.el_type = "clef";
   clef.startChar = -1;
   clef.endChar = -1;
@@ -166,7 +166,7 @@ function addClefToVoices(clef, voices) {
   }
 }
 
-function addFontToVoices(font, voices, type) {
+function addFontToVoices(font: any, voices: any, type: any) {
   font.el_type = "font";
   font.type = type;
   font.startChar = -1;
@@ -176,32 +176,38 @@ function addFontToVoices(font, voices, type) {
   }
 }
 
-function objEqual(input, output) {
+function objEqual(input: any, output: any) {
   if (!input) return true; // the default is whatever the old output is.
   var inputValue = JSON.stringify(input, replacer);
   var outputValue = JSON.stringify(output, replacer);
   return inputValue === outputValue;
 }
 
-function cloneLine(line) {
+function cloneLine(line: any) {
   var output = {};
   var keys = Object.keys(line);
   for (var i = 0; i < keys.length; i++) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     if (keys[i] !== "staff") output[keys[i]] = line[keys[i]];
     else {
+      // @ts-expect-error TS(2339): Property 'staff' does not exist on type '{}'.
       output.staff = [];
       for (var j = 0; j < line.staff.length; j++) {
         var staff = {};
         var keys2 = Object.keys(line.staff[j]);
         for (var k = 0; k < keys2.length; k++) {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           if (keys2[k] !== "voices") staff[keys2[k]] = line.staff[j][keys2[k]];
           else {
+            // @ts-expect-error TS(2339): Property 'voices' does not exist on type '{}'.
             staff.voices = [];
             for (var v = 0; v < line.staff[j].voices.length; v++) {
+              // @ts-expect-error TS(2339): Property 'voices' does not exist on type '{}'.
               staff.voices.push([].concat(line.staff[j].voices[v]));
             }
           }
         }
+        // @ts-expect-error TS(2339): Property 'staff' does not exist on type '{}'.
         output.staff.push(staff);
       }
     }

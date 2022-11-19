@@ -1,3 +1,4 @@
+// @ts-expect-error TS(2614): Module '"./relative-major"' has no exported member... Remove this comment to see the full error message
 import { relativeMajor } from './relative-major';
 
 var key1sharp = { acc: "sharp", note: "f" };
@@ -51,7 +52,8 @@ var keys = {
   none: []
 };
 
-function keyAccidentals(key) {
+function keyAccidentals(key: any) {
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   var newKey = keys[relativeMajor(key)];
   if (!newKey)
     // If we don't recognize the key then there is no change

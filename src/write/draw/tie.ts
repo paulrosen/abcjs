@@ -1,7 +1,7 @@
 import sprintf from './sprintf';
 import roundNumber from './round-number';
 
-function drawTie(renderer, params, linestartx, lineendx, selectables) {
+function drawTie(renderer: any, params: any, linestartx: any, lineendx: any, selectables: any) {
   layout(params, linestartx, lineendx);
 
   var klass = "";
@@ -37,7 +37,7 @@ function drawTie(renderer, params, linestartx, lineendx, selectables) {
 }
 
 // TODO-PER: I think params part should have been done earlier in the layout pass.
-var layout = function (params, lineStartX, lineEndX) {
+var layout = function (params: any, lineStartX: any, lineEndX: any) {
   // We now have all of the input variables set, so we can figure out the start and ending x,y coordinates, and finalize the direction of the arc.
 
   // Ties and slurs are handled a little differently, so do calculations for them separately.
@@ -63,15 +63,15 @@ var layout = function (params, lineStartX, lineEndX) {
 };
 
 var drawArc = function (
-  renderer,
-  x1,
-  x2,
-  pitch1,
-  pitch2,
-  above,
-  klass,
-  isTie,
-  dotted
+  renderer: any,
+  x1: any,
+  x2: any,
+  pitch1: any,
+  pitch2: any,
+  above: any,
+  klass: any,
+  isTie: any,
+  dotted: any
 ) {
   // If it is a tie vs. a slur, draw it shallower.
   var spacing = isTie ? 1.2 : 1.5;
@@ -106,6 +106,7 @@ var drawArc = function (
   if (dotted) {
     klass += " dotted";
     var pathString2 = sprintf(
+      // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
       "M %f %f C %f %f %f %f %f %f",
       x1,
       y1,
@@ -126,6 +127,7 @@ var drawArc = function (
     });
   } else {
     var pathString = sprintf(
+      // @ts-expect-error TS(2554): Expected 0 arguments, but got 15.
       "M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
       x1,
       y1,

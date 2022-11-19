@@ -1,7 +1,7 @@
 import drawRelativeElement from './relative';
 import renderText from './text';
 
-function drawTempo(renderer, params) {
+function drawTempo(renderer: any, params: any) {
   var x = params.x;
   if (params.pitch === undefined)
     window.console.error("Tempo Element y-coordinate not set.");
@@ -47,6 +47,7 @@ function drawTempo(renderer, params) {
       drawRelativeElement(renderer, params.note.children[i], x);
     x += params.note.w + 5;
     var str = "= " + params.tempo.bpm;
+    // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
     text = renderText(renderer, {
       x: x,
       y: y,

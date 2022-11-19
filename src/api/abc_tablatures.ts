@@ -25,13 +25,14 @@ var abcTablatures = {
    * to be called once per plugin for registration
    * @param {*} plugin
    */
-  register: function (plugin) {
+  register: function (plugin: any) {
     var name = plugin.name;
     var tablature = plugin.tablature;
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     this.plugins[name] = tablature;
   },
 
-  setError: function (tune, msg) {
+  setError: function (tune: any, msg: any) {
     if (tune.warnings) {
       tune.warning.push(msg);
     } else {
@@ -46,7 +47,7 @@ var abcTablatures = {
    * @param {*} params params to be processed for tablature
    * @return prepared tablatures plugin instances for current tune
    */
-  preparePlugins: function (tune, tuneNumber, params) {
+  preparePlugins: function (tune: any, tuneNumber: any, params: any) {
     var returned = null;
     var nbPlugins = 0;
     if (params.tablature) {
@@ -60,9 +61,11 @@ var abcTablatures = {
           this.setError(tune, "tablature 'instrument' is missing");
           return returned;
         }
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         var tabName = pluginTab[instrument];
         var plugin = null;
         if (tabName) {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           plugin = this.plugins[tabName];
         }
         if (plugin) {
@@ -97,7 +100,7 @@ var abcTablatures = {
    * @param {*} renderer
    * @param {*} abcTune
    */
-  layoutTablatures: function (renderer, abcTune) {
+  layoutTablatures: function (renderer: any, abcTune: any) {
     var tabs = abcTune.tablatures;
     // chack tabs request for each staffs
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
@@ -133,7 +136,9 @@ var abcTablatures = {
   init: function () {
     // just register plugin hosted by abcjs
     if (!this.inited) {
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       this.register(new ViolinTablature());
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       this.register(new GuitarTablature());
       this.inited = true;
     }

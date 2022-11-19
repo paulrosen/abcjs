@@ -47,6 +47,7 @@ var sprintf = function () {
           f
         ))
     ) {
+      // @ts-expect-error TS(7015): Element implicitly has an 'any' type because index... Remove this comment to see the full error message
       if ((a = arguments[m[1] || i++]) == null || a == undefined)
         throw "Too few arguments.";
       if (/[^s]/.test(m[7]) && typeof a != "number")
@@ -65,12 +66,14 @@ var sprintf = function () {
           a = m[6] ? a.toExponential(m[6]) : a.toExponential();
           break;
         case "f":
+          // @ts-expect-error TS(2345): Argument of type 'string' is not assignable to par... Remove this comment to see the full error message
           a = m[6] ? parseFloat(a).toFixed(m[6]) : parseFloat(a);
           break;
         case "o":
           a = a.toString(8);
           break;
         case "s":
+          // @ts-expect-error TS(2345): Argument of type 'string' is not assignable to par... Remove this comment to see the full error message
           a = (a = String(a)) && m[6] ? a.substring(0, m[6]) : a;
           break;
         case "u":
@@ -85,7 +88,9 @@ var sprintf = function () {
       }
       a = /[def]/.test(m[7]) && m[2] && a > 0 ? "+" + a : a;
       c = m[3] ? (m[3] == "0" ? "0" : m[3].charAt(1)) : " ";
+      // @ts-expect-error TS(2362): The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
       x = m[5] - String(a).length;
+      // @ts-expect-error TS(2304): Cannot find name 'str_repeat'.
       p = m[5] ? str_repeat(c, x) : "";
       o.push(m[4] ? a + p : p + a);
     } else throw "Huh ?!";

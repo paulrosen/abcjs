@@ -1,6 +1,6 @@
 import spacing from './abc_spacing';
 
-function setupSelection(engraver, svgs) {
+function setupSelection(engraver: any, svgs: any) {
   engraver.rangeHighlight = rangeHighlight;
   if (engraver.dragging) {
     for (var h = 0; h < engraver.selectables.length; h++) {
@@ -24,7 +24,7 @@ function setupSelection(engraver, svgs) {
   }
 }
 
-function getCoord(ev) {
+function getCoord(ev: any) {
   var scaleX = 1;
   var scaleY = 1;
   var svg = ev.target.closest("svg");
@@ -60,7 +60,7 @@ function getCoord(ev) {
   return [x, y + yOffset];
 }
 
-function elementFocused(ev) {
+function elementFocused(this: any, ev: any) {
   // If there had been another element focused and is being dragged, then report that before setting the new element up.
   if (
     this.dragMechanism === "keyboard" &&
@@ -78,7 +78,7 @@ function elementFocused(ev) {
   this.dragYStep = 0;
 }
 
-function keyboardDown(ev) {
+function keyboardDown(ev: any) {
   // Swallow the up and down arrow events - they will be used for dragging with the keyboard
   switch (ev.keyCode) {
     case 38:
@@ -87,7 +87,7 @@ function keyboardDown(ev) {
   }
 }
 
-function keyboardSelection(ev) {
+function keyboardSelection(this: any, ev: any) {
   // "this" is the EngraverController because of the bind(this) when setting the event listener.
   var handled = false;
   var index = ev.target.dataset.index;
@@ -110,6 +110,7 @@ function keyboardSelection(ev) {
         this.dragYStep--;
         this.dragTarget.svgEl.setAttribute(
           "transform",
+          // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
           "translate(0," + this.dragYStep * spacing.STEP + ")"
         );
       }
@@ -125,6 +126,7 @@ function keyboardSelection(ev) {
         this.dragYStep++;
         this.dragTarget.svgEl.setAttribute(
           "transform",
+          // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
           "translate(0," + this.dragYStep * spacing.STEP + ")"
         );
       }
@@ -142,14 +144,14 @@ function keyboardSelection(ev) {
   if (handled) ev.preventDefault();
 }
 
-function findElementInHistory(selectables, el) {
+function findElementInHistory(selectables: any, el: any) {
   for (var i = 0; i < selectables.length; i++) {
     if (el.dataset.index === selectables[i].svgEl.dataset.index) return i;
   }
   return -1;
 }
 
-function findElementByCoord(self, x, y) {
+function findElementByCoord(self: any, x: any, y: any) {
   var minDistance = 9999999;
   var closestIndex = -1;
   for (var i = 0; i < self.selectables.length && minDistance > 0; i++) {
@@ -205,7 +207,7 @@ function findElementByCoord(self, x, y) {
   return closestIndex >= 0 && minDistance <= 12 ? closestIndex : -1;
 }
 
-function getBestMatchCoordinates(dim, ev, scale) {
+function getBestMatchCoordinates(dim: any, ev: any, scale: any) {
   // Different browsers have conflicting meanings for the coordinates that are returned.
   // If the item we want is clicked on directly, then we will just see what is the best match.
   // This seems like less of a hack than browser sniffing.
@@ -227,7 +229,7 @@ function getBestMatchCoordinates(dim, ev, scale) {
   else return [ev.layerX, ev.layerY];
 }
 
-function getTarget(target) {
+function getTarget(target: any) {
   // This searches up the dom for the first item containing the attribute "selectable", or stopping at the SVG.
   if (target.tagName === "svg") return target;
 
@@ -243,7 +245,7 @@ function getTarget(target) {
   return target;
 }
 
-function getMousePosition(self, ev) {
+function getMousePosition(self: any, ev: any) {
   // if the user clicked exactly on an element that we're interested in, then we already have the answer.
   // This is more reliable than the calculations because firefox returns different coords for offsetX, offsetY
   var x;
@@ -271,7 +273,7 @@ function getMousePosition(self, ev) {
   return { x: x, y: y, clickedOn: clickedOn };
 }
 
-function attachMissingTouchEventAttributes(touchEv) {
+function attachMissingTouchEventAttributes(touchEv: any) {
   if (
     !touchEv ||
     !touchEv.target ||
@@ -290,7 +292,7 @@ function attachMissingTouchEventAttributes(touchEv) {
   touchEv.touches[0].layerY = touchEv.touches[0].pageY;
 }
 
-function mouseDown(ev) {
+function mouseDown(this: any, ev: any) {
   // "this" is the EngraverController because of the bind(this) when setting the event listener.
   var _ev = ev;
   if (ev.type === "touchstart") {
@@ -317,7 +319,7 @@ function mouseDown(ev) {
   }
 }
 
-function mouseMove(ev) {
+function mouseMove(this: any, ev: any) {
   var _ev = ev;
   if (ev.type === "touchmove") {
     attachMissingTouchEventAttributes(ev);
@@ -338,18 +340,20 @@ function mouseMove(ev) {
   var positioning = getMousePosition(this, _ev);
 
   var yDist = Math.round(
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     (positioning.y - this.dragMouseStart.y) / spacing.STEP
   );
   if (yDist !== this.dragYStep) {
     this.dragYStep = yDist;
     this.dragTarget.svgEl.setAttribute(
       "transform",
+      // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
       "translate(0," + yDist * spacing.STEP + ")"
     );
   }
 }
 
-function mouseUp(ev) {
+function mouseUp(this: any, ev: any) {
   // "this" is the EngraverController because of the bind(this) when setting the event listener.
   var _ev = ev;
   if (ev.type === "touchend" && this.lastTouchMove) {
@@ -385,7 +389,7 @@ function mouseUp(ev) {
   removeGlobalClass(this.renderer.svg, "abcjs-dragging-in-progress");
 }
 
-function setSelection(dragIndex) {
+function setSelection(this: any, dragIndex: any) {
   if (dragIndex >= 0 && dragIndex < this.selectables.length) {
     this.dragTarget = this.selectables[dragIndex];
     this.dragIndex = dragIndex;
@@ -394,7 +398,14 @@ function setSelection(dragIndex) {
   }
 }
 
-function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
+function notifySelect(
+  this: any,
+  target: any,
+  dragStep: any,
+  dragMax: any,
+  dragIndex: any,
+  ev: any
+) {
   var classes = [];
   if (target.absEl.elemset) {
     var classObj = {};
@@ -402,6 +413,7 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
       var es = target.absEl.elemset[j];
       if (es) {
         var klass = es.getAttribute("class").split(" ");
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         for (var k = 0; k < klass.length; k++) classObj[klass[k]] = true;
       }
     }
@@ -414,6 +426,7 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
     findNumber(classes[ii], "abcjs-l", analysis, "line");
     findNumber(classes[ii], "abcjs-m", analysis, "measure");
   }
+  // @ts-expect-error TS(2339): Property 'staffPos' does not exist on type '{}'.
   if (target.staffPos) analysis.staffPos = target.staffPos;
   var closest = ev.target;
   while (
@@ -431,10 +444,15 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
     parent.tagName.toLowerCase() !== "svg"
   )
     parent = parent.parentNode;
+  // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
   analysis.name = parent.dataset.name;
+  // @ts-expect-error TS(2339): Property 'clickedName' does not exist on type '{}'... Remove this comment to see the full error message
   analysis.clickedName = closest.dataset.name;
+  // @ts-expect-error TS(2339): Property 'parentClasses' does not exist on type '{... Remove this comment to see the full error message
   analysis.parentClasses = parent.classList;
+  // @ts-expect-error TS(2339): Property 'clickedClasses' does not exist on type '... Remove this comment to see the full error message
   analysis.clickedClasses = closest.classList;
+  // @ts-expect-error TS(2339): Property 'selectableElement' does not exist on typ... Remove this comment to see the full error message
   analysis.selectableElement = target.svgEl;
 
   for (var i = 0; i < this.listeners.length; i++) {
@@ -454,7 +472,7 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
   }
 }
 
-function findNumber(klass, match, target, name) {
+function findNumber(klass: any, match: any, target: any, name: any) {
   if (klass.indexOf(match) === 0) {
     var value = klass.replace(match, "");
     var num = parseInt(value, 10);
@@ -462,14 +480,14 @@ function findNumber(klass, match, target, name) {
   }
 }
 
-function clearSelection() {
+function clearSelection(this: any) {
   for (var i = 0; i < this.selected.length; i++) {
     this.selected[i].unhighlight(undefined, this.renderer.foregroundColor);
   }
   this.selected = [];
 }
 
-function rangeHighlight(start, end) {
+function rangeHighlight(this: any, start: any, end: any) {
   clearSelection.bind(this)();
   for (var line = 0; line < this.staffgroups.length; line++) {
     var voices = this.staffgroups[line].voices;
@@ -493,16 +511,17 @@ function rangeHighlight(start, end) {
   }
 }
 
-function getClassSet(el) {
+function getClassSet(el: any) {
   var oldClass = el.getAttribute("class");
   if (!oldClass) oldClass = "";
   var klasses = oldClass.split(" ");
   var obj = {};
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   for (var i = 0; i < klasses.length; i++) obj[klasses[i]] = true;
   return obj;
 }
 
-function setClassSet(el, klassSet) {
+function setClassSet(el: any, klassSet: any) {
   var klasses = [];
   for (var key in klassSet) {
     if (klassSet.prototype.hasOwnProperty.call(key)) klasses.push(key);
@@ -510,17 +529,19 @@ function setClassSet(el, klassSet) {
   el.setAttribute("class", klasses.join(" "));
 }
 
-function addGlobalClass(svg, klass) {
+function addGlobalClass(svg: any, klass: any) {
   if (svg) {
     var obj = getClassSet(svg.svg);
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     obj[klass] = true;
     setClassSet(svg.svg, obj);
   }
 }
 
-function removeGlobalClass(svg, klass) {
+function removeGlobalClass(svg: any, klass: any) {
   if (svg) {
     var obj = getClassSet(svg.svg);
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     delete obj[klass];
     setClassSet(svg.svg, obj);
   }

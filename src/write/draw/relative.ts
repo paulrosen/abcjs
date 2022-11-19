@@ -3,7 +3,7 @@ import printStem from './print-stem';
 import printStaffLine from './staff-line';
 import printSymbol from './print-symbol';
 
-function drawRelativeElement(renderer, params, bartop) {
+function drawRelativeElement(renderer: any, params: any, bartop: any) {
   if (params.pitch === undefined)
     window.console.error(
       params.type + " Relative Element y-coordinate not set."
@@ -209,6 +209,7 @@ function drawRelativeElement(renderer, params, bartop) {
       );
       break;
     case "ledger":
+      // @ts-expect-error TS(2554): Expected 7 arguments, but got 6.
       params.graphelem = printStaffLine(
         renderer,
         params.x,
@@ -232,7 +233,7 @@ function drawRelativeElement(renderer, params, bartop) {
   return params.graphelem;
 }
 
-function scaleExistingElem(paper, elem, scaleX, scaleY, x, y) {
+function scaleExistingElem(paper: any, elem: any, scaleX: any, scaleY: any, x: any, y: any) {
   paper.setAttributeOnElement(elem, {
     style:
       "transform:scale(" +

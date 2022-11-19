@@ -57,9 +57,10 @@ var pitchMap = {
   x13: "b"
 };
 
-function pitchesToPerc(pitchObj) {
+function pitchesToPerc(pitchObj: any) {
   var pitch =
     (pitchObj.accidental ? pitchObj.accidental[0] : "x") + pitchObj.verticalPos;
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   return pitchMap[pitch];
 }
 export default pitchesToPerc;

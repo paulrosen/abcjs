@@ -1,4 +1,4 @@
-var TimingCallbacks = function (target, params) {
+var TimingCallbacks = function(this: any, target: any, params: any) {
   var self = this;
   if (!params) params = {};
   self.qpm = params.qpm ? parseInt(params.qpm, 10) : null;
@@ -20,7 +20,7 @@ var TimingCallbacks = function (target, params) {
     : 1; // how many callbacks per beat is desired.
   self.joggerTimer = null;
 
-  self.replaceTarget = function (newTarget) {
+  self.replaceTarget = function (newTarget: any) {
     self.noteTimings = newTarget.setTiming(
       self.qpm,
       self.extraMeasuresAtBeginning
@@ -54,7 +54,7 @@ var TimingCallbacks = function (target, params) {
 
   self.replaceTarget(target);
 
-  self.doTiming = function (timestamp) {
+  self.doTiming = function (timestamp: any) {
     // This is called 60 times a second, that is, every 16 msecs.
     //console.log("doTiming", timestamp, timestamp-self.lastTimestamp);
     if (self.lastTimestamp === timestamp) return; // If there are multiple seeks or other calls, then we can easily get multiple callbacks for the same instant.
@@ -119,7 +119,7 @@ var TimingCallbacks = function (target, params) {
           // At the end, the event callback can return "continue" to keep from stopping.
           // The event callback can either be a promise or not.
           var promise = self.eventCallback(null);
-          self.shouldStop(promise).then(function (shouldStop) {
+          self.shouldStop(promise).then(function (shouldStop: any) {
             if (shouldStop) self.stop();
           });
         } else self.stop();
@@ -127,21 +127,21 @@ var TimingCallbacks = function (target, params) {
     }
   };
 
-  self.shouldStop = function (promise) {
+  self.shouldStop = function (promise: any) {
     // The return of the last event callback can be "continue" or a promise that returns "continue".
     // If it is then don't call stop. Any other value calls stop.
     return new Promise(function (resolve) {
       if (!promise) return resolve(true);
       if (promise === "continue") return resolve(false);
       if (promise.then) {
-        promise.then(function (result) {
+        promise.then(function (result: any) {
           resolve(result !== "continue");
         });
       }
     });
   };
 
-  self.doBeatCallback = function (timestamp) {
+  self.doBeatCallback = function (timestamp: any) {
     if (self.beatCallback) {
       var next = self.currentEvent;
       while (
@@ -162,7 +162,9 @@ var TimingCallbacks = function (target, params) {
       var position = {};
       var debugInfo = {};
       if (ev) {
+        // @ts-expect-error TS(2339): Property 'top' does not exist on type '{}'.
         position.top = ev.top;
+        // @ts-expect-error TS(2339): Property 'height' does not exist on type '{}'.
         position.height = ev.height;
 
         // timestamp = the time passed in from the animation timer
@@ -178,6 +180,7 @@ var TimingCallbacks = function (target, params) {
         var gapMs = endMs - ev.milliseconds; // Length of this event in time
         var gapPx = ev.endX - ev.left; // The length in pixels
         var offPx = (offMs * gapPx) / gapMs;
+        // @ts-expect-error TS(2339): Property 'left' does not exist on type '{}'.
         position.left = ev.left + offPx;
         debugInfo = {
           timestamp: timestamp,
@@ -228,7 +231,7 @@ var TimingCallbacks = function (target, params) {
     }
   };
 
-  self.start = function (offsetPercent, units) {
+  self.start = function (offsetPercent: any, units: any) {
     self.isRunning = true;
     if (self.isPaused) {
       self.isPaused = false;
@@ -272,7 +275,7 @@ var TimingCallbacks = function (target, params) {
     self.pause();
     self.reset();
   };
-  self.setProgress = function (position, units) {
+  self.setProgress = function (position: any, units: any) {
     // the effect of this function is to move startTime so that the callbacks happen correctly for the new seek.
     var percent;
     switch (units) {
@@ -350,7 +353,7 @@ var TimingCallbacks = function (target, params) {
   };
 };
 
-function getLineEndTimings(timings, anticipation) {
+function getLineEndTimings(timings: any, anticipation: any) {
   // Returns an array of milliseconds to call the lineEndCallback.
   // This figures out the timing of the beginning of each line and subtracts the anticipation from it.
   var callbackTimes = [];

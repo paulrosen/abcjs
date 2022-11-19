@@ -3,7 +3,7 @@
 // The equation is:
 // Two to the power of cents divided by 1200
 
-function centsToFactor(cents) {
+function centsToFactor(cents: any) {
   return Math.pow(2, cents / 1200);
 }
 

@@ -28,7 +28,7 @@ empty list will be returned. A validation error will have two properties:
  */
 
 var JSONSchema = {
-  validate: function (/*Any*/ instance, /*Object*/ schema) {
+  validate: function (/*Any*/ instance: any, /*Object*/ schema: any) {
     "use strict";
     // Summary:
     //  	To use the validator call JSONSchema.validate with an instance object and an optional schema object.
@@ -45,26 +45,26 @@ var JSONSchema = {
     return this._validate(instance, schema, false);
   },
   _validate: function (
-    /*Any*/ instance,
-    /*Object*/ schema,
-    /*Boolean*/ _changing
+    /*Any*/ instance: any,
+    /*Object*/ schema: any,
+    /*Boolean*/ _changing: any
   ) {
     "use strict";
     var recursion = -1;
-    var errors = [];
-    var prettyPrint = [];
-    function addPrint(indent, message) {
+    var errors: any = [];
+    var prettyPrint: any = [];
+    function addPrint(indent: any, message: any) {
       var str = "";
       for (var i = 0; i < indent; i++) str += "\t";
       prettyPrint.push(str + message);
     }
-    function appendPrint(message) {
+    function appendPrint(message: any) {
       if (prettyPrint.length > 0)
         prettyPrint[prettyPrint.length - 1] += " " + message;
     }
 
     // validate a value against a property definition
-    function checkProp(value, schema, path, i, recursion) {
+    function checkProp(value: any, schema: any, path: any, i: any, recursion: any) {
       var l;
       path += path
         ? typeof i === "number"
@@ -73,7 +73,7 @@ var JSONSchema = {
           ? ""
           : "." + i
         : i;
-      function addError(message) {
+      function addError(message: any) {
         errors.push({ property: path, message: message });
       }
 
@@ -100,7 +100,8 @@ var JSONSchema = {
         checkProp(value, schema["extends"], path, i, recursion);
       }
       // validate a value against a type definition
-      function checkType(type, value) {
+      // @ts-expect-error TS(7023): 'checkType' implicitly has return type 'any' becau... Remove this comment to see the full error message
+      function checkType(type: any, value: any) {
         if (type) {
           if (
             typeof type === "string" &&
@@ -140,6 +141,7 @@ var JSONSchema = {
           } else if (typeof type === "object") {
             var priorErrors = errors;
             errors = [];
+            // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
             checkProp(value, type, path, recursion);
             var theseErrors = errors;
             errors = priorErrors;
@@ -243,6 +245,7 @@ var JSONSchema = {
             if (schema.additionalProperties !== true) {
               for (i in value) {
                 if (
+                  // @ts-expect-error TS(2339): Property 'prototype' does not exist on type 'any[]... Remove this comment to see the full error message
                   value.prototype.hasOwnProperty.call(i) &&
                   typeof value[i] !== "function"
                 ) {
@@ -342,7 +345,7 @@ var JSONSchema = {
       return null;
     }
 
-    function checkAllProps(instance, objTypeDef, path, recursion) {
+    function checkAllProps(instance: any, objTypeDef: any, path: any, recursion: any) {
       for (var i in objTypeDef) {
         if (objTypeDef.prototype.hasOwnProperty.call(i)) {
           var value = instance[i];
@@ -358,7 +361,7 @@ var JSONSchema = {
     }
 
     // validate an object against a schema
-    function checkObj(instance, objTypeDef, path, additionalProp, recursion) {
+    function checkObj(instance: any, objTypeDef: any, path: any, additionalProp: any, recursion: any) {
       checkAllProps(instance, objTypeDef, path, recursion);
 
       for (var i in instance) {

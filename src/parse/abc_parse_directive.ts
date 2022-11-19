@@ -4,17 +4,18 @@ var parseDirective = {};
 
 (function () {
   "use strict";
-  var tokenizer;
-  var warn;
-  var multilineVars;
-  var tune;
-  var tuneBuilder;
+  var tokenizer: any;
+  var warn: any;
+  var multilineVars: any;
+  var tune: any;
+  var tuneBuilder: any;
+  // @ts-expect-error TS(2339): Property 'initialize' does not exist on type '{}'.
   parseDirective.initialize = function (
-    tokenizer_,
-    warn_,
-    multilineVars_,
-    tune_,
-    tuneBuilder_
+    tokenizer_: any,
+    warn_: any,
+    multilineVars_: any,
+    tune_: any,
+    tuneBuilder_: any
   ) {
     tokenizer = tokenizer_;
     warn = warn_;
@@ -203,7 +204,7 @@ var parseDirective = {};
     voicefont: true
   };
 
-  var fontTranslation = function (fontFace) {
+  var fontTranslation = function (fontFace: any) {
     // This translates Postscript fonts for a web alternative.
     // Note that the postscript fonts contain italic and bold info in them, so what is returned is a hash.
 
@@ -457,7 +458,7 @@ var parseDirective = {};
     }
   };
 
-  var getFontParameter = function (tokens, currentSetting, str, position, cmd) {
+  var getFontParameter = function (tokens: any, currentSetting: any, str: any, position: any, cmd: any) {
     // Every font parameter has the following format:
     // <face> <utf8> <size> <modifiers> <box>
     // Where:
@@ -499,6 +500,7 @@ var parseDirective = {};
       if (
         tokens.length === 1 &&
         tokens[0].token === "box" &&
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         fontTypeCanHaveBox[cmd]
       )
         return {
@@ -534,7 +536,7 @@ var parseDirective = {};
     }
 
     // format 3: whole definition
-    var face = [];
+    var face: any = [];
     var size;
     var weight = "normal";
     var style = "normal";
@@ -581,6 +583,7 @@ var parseDirective = {};
             else if (word === "italic") style = "italic";
             else if (word === "underline") decoration = "underline";
             else if (word === "box") {
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               if (fontTypeCanHaveBox[cmd]) box = true;
               else
                 warn('This font style doesn\'t support "box"', str, position);
@@ -617,6 +620,7 @@ var parseDirective = {};
           else if (word === "italic") style = "italic";
           else if (word === "underline") decoration = "underline";
           else if (word === "box") {
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             if (fontTypeCanHaveBox[cmd]) box = true;
             else warn('This font style doesn\'t support "box"', str, position);
             state = "finished";
@@ -662,24 +666,36 @@ var parseDirective = {};
     var psFont = fontTranslation(face);
     var font = {};
     if (psFont) {
+      // @ts-expect-error TS(2339): Property 'face' does not exist on type '{}'.
       font.face = psFont.face;
+      // @ts-expect-error TS(2339): Property 'weight' does not exist on type '{}'.
       font.weight = psFont.weight;
+      // @ts-expect-error TS(2339): Property 'style' does not exist on type '{}'.
       font.style = psFont.style;
+      // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{}'.
       font.decoration = psFont.decoration;
+      // @ts-expect-error TS(2339): Property 'size' does not exist on type '{}'.
       font.size = size;
+      // @ts-expect-error TS(2339): Property 'box' does not exist on type '{}'.
       if (box) font.box = true;
       return font;
     }
+    // @ts-expect-error TS(2339): Property 'face' does not exist on type '{}'.
     font.face = face;
+    // @ts-expect-error TS(2339): Property 'weight' does not exist on type '{}'.
     font.weight = weight;
+    // @ts-expect-error TS(2339): Property 'style' does not exist on type '{}'.
     font.style = style;
+    // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{}'.
     font.decoration = decoration;
+    // @ts-expect-error TS(2339): Property 'size' does not exist on type '{}'.
     font.size = size;
+    // @ts-expect-error TS(2339): Property 'box' does not exist on type '{}'.
     if (box) font.box = true;
     return font;
   };
 
-  var getChangingFont = function (cmd, tokens, str) {
+  var getChangingFont = function (cmd: any, tokens: any, str: any) {
     if (tokens.length === 0)
       return 'Directive "' + cmd + '" requires a font as a parameter.';
     multilineVars[cmd] = getFontParameter(
@@ -694,7 +710,7 @@ var parseDirective = {};
       tune.formatting[cmd] = multilineVars[cmd];
     return null;
   };
-  var getGlobalFont = function (cmd, tokens, str) {
+  var getGlobalFont = function (cmd: any, tokens: any, str: any) {
     if (tokens.length === 0)
       return 'Directive "' + cmd + '" requires a font as a parameter.';
     tune.formatting[cmd] = getFontParameter(
@@ -707,9 +723,10 @@ var parseDirective = {};
     return null;
   };
 
-  var setScale = function (cmd, tokens) {
+  var setScale = function (cmd: any, tokens: any) {
     var scratch = "";
-    parseCommon.each(tokens, function (tok) {
+    // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+    parseCommon.each(tokens, function (tok: any) {
       scratch += tok.token;
     });
     var num = parseFloat(scratch);
@@ -768,7 +785,7 @@ var parseDirective = {};
     "open-triangle"
   ];
 
-  var interpretPercMap = function (restOfString) {
+  var interpretPercMap = function (restOfString: any) {
     var tokens = restOfString.split(/\s+/); // Allow multiple spaces.
     if (tokens.length !== 2 && tokens.length !== 3)
       return {
@@ -784,11 +801,12 @@ var parseDirective = {};
     if (isNaN(pitch) || pitch < 35 || pitch > 81)
       return { error: 'Expected drum name, received "' + tokens[1] + '"' };
     var value = { sound: pitch };
+    // @ts-expect-error TS(2339): Property 'noteHead' does not exist on type '{ soun... Remove this comment to see the full error message
     if (tokens.length === 3) value.noteHead = tokens[2];
     return { key: key, value: value };
   };
 
-  var getRequiredMeasurement = function (cmd, tokens) {
+  var getRequiredMeasurement = function (cmd: any, tokens: any) {
     var points = tokenizer.getMeasurement(tokens);
     if (points.used === 0 || tokens.length !== 0)
       return {
@@ -796,7 +814,7 @@ var parseDirective = {};
       };
     return points.value;
   };
-  var oneParameterMeasurement = function (cmd, tokens) {
+  var oneParameterMeasurement = function (cmd: any, tokens: any) {
     var points = tokenizer.getMeasurement(tokens);
     if (points.used === 0 || tokens.length !== 0)
       return 'Directive "' + cmd + '" requires a measurement as a parameter.';
@@ -804,7 +822,7 @@ var parseDirective = {};
     return null;
   };
 
-  var addMultilineVar = function (key, cmd, tokens, min, max) {
+  var addMultilineVar = function (key: any, cmd: any, tokens: any, min: any, max: any) {
     if (tokens.length !== 1 || tokens[0].type !== "number")
       return 'Directive "' + cmd + '" requires a number as a parameter.';
     var i = tokens[0].intt;
@@ -828,7 +846,7 @@ var parseDirective = {};
     return null;
   };
 
-  var addMultilineVarBool = function (key, cmd, tokens) {
+  var addMultilineVarBool = function (key: any, cmd: any, tokens: any) {
     if (
       tokens.length === 1 &&
       (tokens[0].token === "true" || tokens[0].token === "false")
@@ -842,7 +860,7 @@ var parseDirective = {};
     return null;
   };
 
-  var addMultilineVarOneParamChoice = function (key, cmd, tokens, choices) {
+  var addMultilineVarOneParamChoice = function (key: any, cmd: any, tokens: any, choices: any) {
     if (tokens.length !== 1)
       return (
         'Directive "' +
@@ -919,7 +937,7 @@ var parseDirective = {};
   var midiCmdParamFraction = ["expand", "grace", "trim"];
   var midiCmdParam1StringVariableIntegers = ["drum", "chordname"];
 
-  var parseMidiCommand = function (midi, tune, restOfString) {
+  var parseMidiCommand = function (midi: any, tune: any, restOfString: any) {
     var midi_cmd = midi.shift().token;
     var midi_params = [];
     if (midiCmdParam0.indexOf(midi_cmd) >= 0) {
@@ -1160,7 +1178,8 @@ var parseDirective = {};
     }
   };
 
-  parseDirective.parseFontChangeLine = function (textstr) {
+  // @ts-expect-error TS(2339): Property 'parseFontChangeLine' does not exist on t... Remove this comment to see the full error message
+  parseDirective.parseFontChangeLine = function (textstr: any) {
     var textParts = textstr.split("$");
     if (textParts.length > 1 && multilineVars.setfont) {
       var textarr = [{ text: textParts[0] }];
@@ -1169,21 +1188,25 @@ var parseDirective = {};
           textarr.push({ text: textParts[i].substring(1) });
         else if (textParts[i].charAt(0) === "1" && multilineVars.setfont[1])
           textarr.push({
+            // @ts-expect-error TS(2345): Argument of type '{ font: any; text: any; }' is no... Remove this comment to see the full error message
             font: multilineVars.setfont[1],
             text: textParts[i].substring(1)
           });
         else if (textParts[i].charAt(0) === "2" && multilineVars.setfont[2])
           textarr.push({
+            // @ts-expect-error TS(2345): Argument of type '{ font: any; text: any; }' is no... Remove this comment to see the full error message
             font: multilineVars.setfont[2],
             text: textParts[i].substring(1)
           });
         else if (textParts[i].charAt(0) === "3" && multilineVars.setfont[3])
           textarr.push({
+            // @ts-expect-error TS(2345): Argument of type '{ font: any; text: any; }' is no... Remove this comment to see the full error message
             font: multilineVars.setfont[3],
             text: textParts[i].substring(1)
           });
         else if (textParts[i].charAt(0) === "4" && multilineVars.setfont[4])
           textarr.push({
+            // @ts-expect-error TS(2345): Argument of type '{ font: any; text: any; }' is no... Remove this comment to see the full error message
             font: multilineVars.setfont[4],
             text: textParts[i].substring(1)
           });
@@ -1195,7 +1218,8 @@ var parseDirective = {};
   };
 
   var positionChoices = ["auto", "above", "below", "hidden"];
-  parseDirective.addDirective = function (str) {
+  // @ts-expect-error TS(2339): Property 'addDirective' does not exist on type '{}... Remove this comment to see the full error message
+  parseDirective.addDirective = function (str: any) {
     var tokens = tokenizer.tokenize(str, 0, str.length); // 3 or more % in a row, or just spaces after %% is just a comment
     if (tokens.length === 0 || tokens[0].type !== "alpha") return null;
     var restOfString = str.substring(
@@ -1347,6 +1371,7 @@ var parseDirective = {};
         return null;
       case "vskip":
         var vskip = Math.round(getRequiredMeasurement(cmd, tokens));
+        // @ts-expect-error TS(2339): Property 'error' does not exist on type 'number'.
         if (vskip.error) return vskip.error;
         tuneBuilder.addSpacing(vskip);
         return null;
@@ -1394,6 +1419,7 @@ var parseDirective = {};
         }
         break;
       case "barsperstaff":
+        // @ts-expect-error TS(2322): Type 'string | null' is not assignable to type 'st... Remove this comment to see the full error message
         scratch = addMultilineVar("barsperstaff", cmd, tokens);
         if (scratch !== null) return scratch;
         break;
@@ -1411,20 +1437,24 @@ var parseDirective = {};
           );
         break;
       case "printtempo":
+        // @ts-expect-error TS(2322): Type 'string | null' is not assignable to type 'st... Remove this comment to see the full error message
         scratch = addMultilineVarBool("printTempo", cmd, tokens);
         if (scratch !== null) return scratch;
         break;
       case "partsbox":
+        // @ts-expect-error TS(2322): Type 'string | null' is not assignable to type 'st... Remove this comment to see the full error message
         scratch = addMultilineVarBool("partsBox", cmd, tokens);
         if (scratch !== null) return scratch;
         multilineVars.partsfont.box = multilineVars.partsBox;
         break;
       case "freegchord":
+        // @ts-expect-error TS(2322): Type 'string | null' is not assignable to type 'st... Remove this comment to see the full error message
         scratch = addMultilineVarBool("freegchord", cmd, tokens);
         if (scratch !== null) return scratch;
         break;
       case "measurenb":
       case "barnumbers":
+        // @ts-expect-error TS(2322): Type 'string | null' is not assignable to type 'st... Remove this comment to see the full error message
         scratch = addMultilineVar("barNumbers", cmd, tokens);
         if (scratch !== null) return scratch;
         break;
@@ -1440,6 +1470,7 @@ var parseDirective = {};
         var textBlock = "";
         line = tokenizer.nextLine();
         while (line && line.indexOf("%%endtext") !== 0) {
+          // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
           if (parseCommon.startsWith(line, "%%"))
             textBlock += line.substring(2) + "\n";
           else textBlock += line + "\n";
@@ -1469,6 +1500,7 @@ var parseDirective = {};
         break;
       case "text":
         var textstr = tokenizer.translateString(restOfString);
+        // @ts-expect-error TS(2339): Property 'parseFontChangeLine' does not exist on t... Remove this comment to see the full error message
         tuneBuilder.addText(parseDirective.parseFontChangeLine(textstr), {
           startChar: multilineVars.iChar,
           endChar: multilineVars.iChar + restOfString.length + 7
@@ -1476,6 +1508,7 @@ var parseDirective = {};
         break;
       case "center":
         var centerstr = tokenizer.translateString(restOfString);
+        // @ts-expect-error TS(2339): Property 'parseFontChangeLine' does not exist on t... Remove this comment to see the full error message
         tuneBuilder.addCentered(parseDirective.parseFontChangeLine(centerstr));
         break;
       case "font":
@@ -1540,13 +1573,14 @@ var parseDirective = {};
       case "staves":
       case "score":
         multilineVars.score_is_present = true;
-        var addVoice = function (id, newStaff, bracket, brace, continueBar) {
+        var addVoice = function (id: any, newStaff: any, bracket: any, brace: any, continueBar: any) {
           if (newStaff || multilineVars.staves.length === 0) {
             multilineVars.staves.push({
               index: multilineVars.staves.length,
               numVoices: 0
             });
           }
+          // @ts-expect-error TS(2339): Property 'last' does not exist on type '{}'.
           var staff = parseCommon.last(multilineVars.staves);
           if (bracket !== undefined && staff.bracket === undefined)
             staff.bracket = bracket;
@@ -1569,7 +1603,7 @@ var parseDirective = {};
         var justOpenBracket = false;
         var justOpenBrace = false;
         var continueBar = false;
-        var lastVoice;
+        var lastVoice: any;
         var addContinueBar = function () {
           continueBar = true;
           if (lastVoice) {
@@ -1756,7 +1790,8 @@ var parseDirective = {};
     }
     return null;
   };
-  parseDirective.globalFormatting = function (formatHash) {
+  // @ts-expect-error TS(2339): Property 'globalFormatting' does not exist on type... Remove this comment to see the full error message
+  parseDirective.globalFormatting = function (formatHash: any) {
     for (var cmd in formatHash) {
       if (formatHash.prototype.hasOwnProperty.call(cmd)) {
         var value = "" + formatHash[cmd];
@@ -1815,7 +1850,7 @@ var parseDirective = {};
     }
   };
 
-  function parseStretchLast(tokens) {
+  function parseStretchLast(tokens: any) {
     if (tokens.length === 0)
       return {
         value: 1

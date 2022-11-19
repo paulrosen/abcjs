@@ -10,10 +10,12 @@ import Svg from './svg';
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
  * @param {Object} paper
  */
-var Renderer = function (paper) {
+var Renderer = function(this: any, paper: any) {
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.paper = new Svg(paper);
   this.controller = null;
 
+  // @ts-expect-error TS(2339): Property 'SPACE' does not exist on type '{}'.
   this.space = 3 * spacing.SPACE;
   this.padding = {}; // renderer's padding is managed by the controller
   this.reset();
@@ -28,7 +30,7 @@ Renderer.prototype.reset = function () {
   this.initVerticalSpace();
 };
 
-Renderer.prototype.newTune = function (abcTune) {
+Renderer.prototype.newTune = function (abcTune: any) {
   this.abctune = abcTune; // TODO-PER: this is just to get the font info.
   this.setVerticalSpace(abcTune.formatting);
   //this.measureNumber = null;
@@ -37,7 +39,7 @@ Renderer.prototype.newTune = function (abcTune) {
   this.setPadding(abcTune);
 };
 
-Renderer.prototype.setPaddingOverride = function (params) {
+Renderer.prototype.setPaddingOverride = function (params: any) {
   this.paddingOverride = {
     top: params.paddingtop,
     bottom: params.paddingbottom,
@@ -46,16 +48,16 @@ Renderer.prototype.setPaddingOverride = function (params) {
   };
 };
 
-Renderer.prototype.setPadding = function (abctune) {
+Renderer.prototype.setPadding = function (abctune: any) {
   // If the padding is set in the tune, then use that.
   // Otherwise, if the padding is set in the override, use that.
   // Otherwise, use the defaults (there are a different set of defaults for screen and print.)
   function setPaddingVariable(
-    self,
-    paddingKey,
-    formattingKey,
-    printDefault,
-    screenDefault
+    self: any,
+    paddingKey: any,
+    formattingKey: any,
+    printDefault: any,
+    screenDefault: any
   ) {
     if (abctune.formatting[formattingKey] !== undefined)
       self.padding[paddingKey] = abctune.formatting[formattingKey];
@@ -76,7 +78,7 @@ Renderer.prototype.setPadding = function (abctune) {
  * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
  * @param {float} scale
  */
-Renderer.prototype.adjustNonScaledItems = function (scale) {
+Renderer.prototype.adjustNonScaledItems = function (scale: any) {
   this.padding.top /= scale;
   this.padding.bottom /= scale;
   this.padding.left /= scale;
@@ -141,6 +143,7 @@ the <float> fraction of the page width.
 	 */
 };
 
+// @ts-expect-error TS(7006): Parameter 'formatting' implicitly has an 'any' typ... Remove this comment to see the full error message
 Renderer.prototype.setVerticalSpace = function (formatting) {
   // conversion from pts to px 4/3
   if (formatting.staffsep !== undefined)
@@ -175,15 +178,19 @@ Renderer.prototype.setVerticalSpace = function (formatting) {
  * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
  * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
  */
+// @ts-expect-error TS(7006): Parameter 'ofs' implicitly has an 'any' type.
 Renderer.prototype.calcY = function (ofs) {
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   return this.y - ofs * spacing.STEP;
 };
 
+// @ts-expect-error TS(7006): Parameter 'em' implicitly has an 'any' type.
 Renderer.prototype.moveY = function (em, numLines) {
   if (numLines === undefined) numLines = 1;
   this.y += em * numLines;
 };
 
+// @ts-expect-error TS(7006): Parameter 'y' implicitly has an 'any' type.
 Renderer.prototype.absolutemoveY = function (y) {
   this.y = y;
 };

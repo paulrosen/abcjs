@@ -8,7 +8,7 @@ import glyphs from './abc_glyphs';
 import RelativeElement from './abc_relative_element';
 import TieElem from './abc_tie_element';
 
-var Decoration = function Decoration() {
+var Decoration = function Decoration(this: any) {
   this.startDiminuendoX = undefined;
   this.startCrescendoX = undefined;
   this.minTop = 12; // TODO-PER: this is assuming a 5-line staff. Pass that info in.
@@ -16,14 +16,14 @@ var Decoration = function Decoration() {
 };
 
 var closeDecoration = function (
-  voice,
-  decoration,
-  pitch,
-  width,
-  abselem,
-  roomtaken,
-  dir,
-  minPitch
+  voice: any,
+  decoration: any,
+  pitch: any,
+  width: any,
+  abselem: any,
+  roomtaken: any,
+  dir: any,
+  minPitch: any
 ) {
   var yPos;
   for (var i = 0; i < decoration.length; i++) {
@@ -59,17 +59,21 @@ var closeDecoration = function (
         deltaX -= glyphs.getSymbolWidth(symbol) / 2;
       }
       abselem.addFixedX(
+        // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
         new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos)
       );
     }
     if (decoration[i] === "slide" && abselem.heads[0]) {
       var yPos2 = abselem.heads[0].pitch;
       yPos2 -= 2; // TODO-PER: not sure what this fudge factor is.
+      // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
       var blank1 = new RelativeElement("", -roomtaken - 15, 0, yPos2 - 1);
+      // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
       var blank2 = new RelativeElement("", -roomtaken - 5, 0, yPos2 + 1);
       abselem.addFixedX(blank1);
       abselem.addFixedX(blank2);
       voice.addOther(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new TieElem({ anchor1: blank1, anchor2: blank2, fixedY: true })
       );
     }
@@ -79,7 +83,7 @@ var closeDecoration = function (
   return { above: yPos, below: abselem.bottom };
 };
 
-var volumeDecoration = function (voice, decoration, abselem, positioning) {
+var volumeDecoration = function (voice: any, decoration: any, abselem: any, positioning: any) {
   for (var i = 0; i < decoration.length; i++) {
     switch (decoration[i]) {
       case "p":
@@ -93,13 +97,14 @@ var volumeDecoration = function (voice, decoration, abselem, positioning) {
       case "ffff":
       case "sfz":
       case "mf":
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         var elem = new DynamicDecoration(abselem, decoration[i], positioning);
         voice.addOther(elem);
     }
   }
 };
 
-var compoundDecoration = function (decoration, pitch, width, abselem, dir) {
+var compoundDecoration = function (decoration: any, pitch: any, width: any, abselem: any, dir: any) {
   function highestPitch() {
     if (abselem.heads.length === 0) return 10; // TODO-PER: I don't know if this can happen, but we'll return the top of the staff if so.
     var pitch = abselem.heads[0].pitch;
@@ -114,7 +119,7 @@ var compoundDecoration = function (decoration, pitch, width, abselem, dir) {
       pitch = Math.min(pitch, abselem.heads[i].pitch);
     return pitch;
   }
-  function compoundDecoration(symbol, count) {
+  function compoundDecoration(symbol: any, count: any) {
     var placement = dir === "down" ? lowestPitch() + 1 : highestPitch() + 9;
     if (dir !== "down" && count === 1) placement--;
     var deltaX = width / 2;
@@ -122,6 +127,7 @@ var compoundDecoration = function (decoration, pitch, width, abselem, dir) {
     for (var i = 0; i < count; i++) {
       placement -= 1;
       abselem.addFixedX(
+        // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
         new RelativeElement(
           symbol,
           deltaX,
@@ -151,19 +157,19 @@ var compoundDecoration = function (decoration, pitch, width, abselem, dir) {
 };
 
 var stackedDecoration = function (
-  decoration,
-  width,
-  abselem,
-  yPos,
-  positioning,
-  minTop,
-  minBottom
+  decoration: any,
+  width: any,
+  abselem: any,
+  yPos: any,
+  positioning: any,
+  minTop: any,
+  minBottom: any
 ) {
-  function incrementPlacement(placement, height) {
+  function incrementPlacement(placement: any, height: any) {
     if (placement === "above") yPos.above += height;
     else yPos.below -= height;
   }
-  function getPlacement(placement) {
+  function getPlacement(placement: any) {
     var y;
     if (placement === "above") {
       y = yPos.above;
@@ -174,12 +180,13 @@ var stackedDecoration = function (
     }
     return y;
   }
-  function textDecoration(text, placement) {
+  function textDecoration(text: any, placement: any) {
     var y = getPlacement(placement);
     var textFudge = 2;
     var textHeight = 5;
     // TODO-PER: Get the height of the current font and use that for the thickness.
     abselem.addFixedX(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(text, width / 2, 0, y + textFudge, {
         type: "decoration",
         klass: "ornament",
@@ -189,7 +196,7 @@ var stackedDecoration = function (
 
     incrementPlacement(placement, textHeight);
   }
-  function symbolDecoration(symbol, placement) {
+  function symbolDecoration(symbol: any, placement: any) {
     var deltaX = width / 2;
     if (glyphs.getSymbolAlign(symbol) !== "center") {
       deltaX -= glyphs.getSymbolWidth(symbol) / 2;
@@ -198,6 +205,7 @@ var stackedDecoration = function (
     var y = getPlacement(placement);
     y = placement === "above" ? y + height / 2 : y - height / 2; // Center the element vertically.
     abselem.addFixedX(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, {
         klass: "ornament",
         thickness: glyphs.symbolHeightInPitches(symbol)
@@ -279,10 +287,12 @@ var stackedDecoration = function (
       case "umarcato":
       case "coda":
       case "segno":
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         symbolDecoration(symbolList[decoration[i]], positioning);
         hasOne = true;
         break;
       case "invertedfermata":
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         symbolDecoration(symbolList[decoration[i]], "below");
         hasOne = true;
         break;
@@ -294,7 +304,7 @@ var stackedDecoration = function (
   return hasOne;
 };
 
-function leftDecoration(decoration, abselem, roomtaken) {
+function leftDecoration(decoration: any, abselem: any, roomtaken: any) {
   for (var i = 0; i < decoration.length; i++) {
     switch (decoration[i]) {
       case "arpeggio":
@@ -307,6 +317,7 @@ function leftDecoration(decoration, abselem, roomtaken) {
           j += 2
         ) {
           abselem.addExtra(
+            // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
             new RelativeElement(
               "scripts.arpeggio",
               -glyphs.getSymbolWidth("scripts.arpeggio") * 2 - roomtaken,
@@ -325,10 +336,10 @@ function leftDecoration(decoration, abselem, roomtaken) {
 }
 
 Decoration.prototype.dynamicDecoration = function (
-  voice,
-  decoration,
-  abselem,
-  positioning
+  voice: any,
+  decoration: any,
+  abselem: any,
+  positioning: any
 ) {
   var diminuendo;
   var crescendo;
@@ -363,30 +374,33 @@ Decoration.prototype.dynamicDecoration = function (
   }
   if (diminuendo) {
     voice.addOther(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new CrescendoElem(diminuendo.start, diminuendo.stop, ">", positioning)
     );
   }
   if (crescendo) {
     voice.addOther(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new CrescendoElem(crescendo.start, crescendo.stop, "<", positioning)
     );
   }
   if (glissando) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     voice.addOther(new GlissandoElem(glissando.start, glissando.stop));
   }
 };
 
 Decoration.prototype.createDecoration = function (
-  voice,
-  decoration,
-  pitch,
-  width,
-  abselem,
-  roomtaken,
-  dir,
-  minPitch,
-  positioning,
-  hasVocals
+  voice: any,
+  decoration: any,
+  pitch: any,
+  width: any,
+  abselem: any,
+  roomtaken: any,
+  dir: any,
+  minPitch: any,
+  positioning: any,
+  hasVocals: any
 ) {
   if (!positioning)
     positioning = {

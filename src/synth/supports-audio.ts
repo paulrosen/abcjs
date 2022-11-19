@@ -15,8 +15,11 @@ function supportsAudio() {
 
   if (
     !window.AudioContext &&
+    // @ts-expect-error TS(2339): Property 'webkitAudioContext' does not exist on ty... Remove this comment to see the full error message
     !window.webkitAudioContext &&
+    // @ts-expect-error TS(2339): Property 'mozAudioContext' does not exist on type ... Remove this comment to see the full error message
     !navigator.mozAudioContext &&
+    // @ts-expect-error TS(2339): Property 'msAudioContext' does not exist on type '... Remove this comment to see the full error message
     !navigator.msAudioContext
   )
     return false;

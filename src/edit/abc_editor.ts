@@ -51,13 +51,14 @@ import supportsAudio from '../synth/supports-audio';
 import renderAbc from '../api/abc_tunebook_svg';
 import EditArea from './abc_editarea';
 
-function gatherAbcParams(params) {
+function gatherAbcParams(params: any) {
   // There used to be a bunch of ways parameters can be passed in. This just simplifies it.
   var abcjsParams = {};
   var key;
   if (params.abcjsParams) {
     for (key in params.abcjsParams) {
       if (params.abcjsParams.prototype.hasOwnProperty.call(key)) {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         abcjsParams[key] = params.abcjsParams[key];
       }
     }
@@ -65,6 +66,7 @@ function gatherAbcParams(params) {
   if (params.midi_options) {
     for (key in params.midi_options) {
       if (params.midi_options.prototype.hasOwnProperty.call(key)) {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         abcjsParams[key] = params.midi_options[key];
       }
     }
@@ -72,6 +74,7 @@ function gatherAbcParams(params) {
   if (params.parser_options) {
     for (key in params.parser_options) {
       if (params.parser_options.prototype.hasOwnProperty.call(key)) {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         abcjsParams[key] = params.parser_options[key];
       }
     }
@@ -79,6 +82,7 @@ function gatherAbcParams(params) {
   if (params.render_options) {
     for (key in params.render_options) {
       if (params.render_options.prototype.hasOwnProperty.call(key)) {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         abcjsParams[key] = params.render_options[key];
       }
     }
@@ -88,50 +92,70 @@ function gatherAbcParams(params) {
 		abcjsParams['tablatures'] = params.tablature_options;
 	}
 	*/
+  // @ts-expect-error TS(2339): Property 'tablature' does not exist on type '{}'.
   if (abcjsParams.tablature) {
     if (params.warnings_id) {
       // store for plugin error handling
+      // @ts-expect-error TS(2339): Property 'tablature' does not exist on type '{}'.
       abcjsParams.tablature.warnings_id = params.warnings_id;
     }
   }
   return abcjsParams;
 }
 
+// @ts-expect-error TS(7006): Parameter 'editarea' implicitly has an 'any' type.
 var Editor = function (editarea, params) {
   // Copy all the options that will be passed through
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.abcjsParams = gatherAbcParams(params);
 
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   if (params.indicate_changed) this.indicate_changed = true;
   if (typeof editarea === "string") {
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.editarea = new EditArea(editarea);
   } else {
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.editarea = editarea;
   }
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.editarea.addSelectionListener(this);
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.editarea.addChangeListener(this);
 
   if (params.canvas_id) {
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.div = params.canvas_id;
   } else if (params.paper_id) {
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.div = params.paper_id;
   } else {
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.div = document.createElement("DIV");
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.editarea
       .getElem()
+      // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
       .parentNode.insertBefore(this.div, this.editarea.getElem());
   }
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   if (typeof this.div === "string")
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.div = document.getElementById(this.div);
 
   if (params.selectionChangeCallback) {
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.selectionChangeCallback = params.selectionChangeCallback;
   }
 
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.clientClickListener = this.abcjsParams.clickListener;
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.abcjsParams.clickListener = this.highlight.bind(this);
 
   if (params.synth) {
     if (supportsAudio()) {
+      // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
       this.synth = {
         el: params.synth.el,
         cursorControl: params.synth.cursorControl,
@@ -142,42 +166,61 @@ var Editor = function (editarea, params) {
   // If the user wants midi, then store the elements that it will be written to. The element could either be passed in as an id,
   // an element, or nothing. If nothing is passed in, then just put the midi on top of the generated music.
   if (params.generate_midi) {
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.generate_midi = params.generate_midi;
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     if (this.abcjsParams.generateDownload) {
       if (typeof params.midi_download_id === "string")
+        // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
         this.downloadMidi = document.getElementById(params.midi_download_id);
       else if (params.midi_download_id)
         // assume, if the var is not a string it is an element. If not, it will crash soon enough.
+        // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
         this.downloadMidi = params.midi_download_id;
     }
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     if (this.abcjsParams.generateInline !== false) {
       // The default for this is true, so undefined is also true.
       if (typeof params.midi_id === "string")
+        // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
         this.inlineMidi = document.getElementById(params.midi_id);
       else if (params.midi_id)
         // assume, if the var is not a string it is an element. If not, it will crash soon enough.
+        // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
         this.inlineMidi = params.midi_id;
     }
   }
 
   if (params.warnings_id) {
     if (typeof params.warnings_id === "string")
+      // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
       this.warningsdiv = document.getElementById(params.warnings_id);
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     else this.warningsdiv = params.warnings_id;
   } else if (params.generate_warnings) {
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.warningsdiv = document.createElement("div");
+    // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
     this.div.parentNode.insertBefore(this.warningsdiv, this.div);
   }
 
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.onchangeCallback = params.onchange;
 
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.currentAbc = "";
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.tunes = [];
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.bReentry = false;
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.parseABC();
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.modelChanged();
 
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.addClassName = function (element, className) {
+    // @ts-expect-error TS(7006): Parameter 'element' implicitly has an 'any' type.
     var hasClassName = function (element, className) {
       var elementClassName = element.className;
       return (
@@ -192,7 +235,9 @@ var Editor = function (editarea, params) {
     return element;
   };
 
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.removeClassName = function (element, className) {
+    // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
     element.className = parseCommon.strip(
       element.className.replace(
         new RegExp("(^|\\s+)" + className + "(\\s+|$)"),
@@ -202,6 +247,7 @@ var Editor = function (editarea, params) {
     return element;
   };
 
+  // @ts-expect-error TS(2683): 'this' implicitly has type 'any' because it does n... Remove this comment to see the full error message
   this.setReadOnly = function (readOnly) {
     var readonlyClass = "abc_textarea_readonly";
     var el = this.editarea.getElem();
@@ -231,6 +277,7 @@ Editor.prototype.redrawMidi = function () {
   if (this.synth) {
     var userAction = this.synth.synthControl; // Can't really tell if there was a user action before drawing, but we assume that if the synthControl was created already there was a user action.
     if (!this.synth.synthControl) {
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       this.synth.synthControl = new SynthController();
       this.synth.synthControl.load(
         this.synth.el,
@@ -254,6 +301,7 @@ Editor.prototype.modelChanged = function () {
     if (this.synth && this.synth.synthControl)
       this.synth.synthControl.disable(true);
 
+    // @ts-expect-error TS(2554): Expected 5 arguments, but got 3.
     this.tunes = renderAbc(this.div, this.currentAbc, this.abcjsParams);
     if (this.tunes.length > 0) {
       this.warnings = this.tunes[0].warnings;
@@ -262,6 +310,7 @@ Editor.prototype.modelChanged = function () {
   } catch (error) {
     console.error("ABCJS error: ", error);
     if (!this.warnings) this.warnings = [];
+    // @ts-expect-error TS(2571): Object is of type 'unknown'.
     this.warnings.push(error.message);
   }
 
@@ -275,6 +324,7 @@ Editor.prototype.modelChanged = function () {
 };
 
 // Call this to reparse in response to the client changing the parameters on the fly
+// @ts-expect-error TS(7006): Parameter 'engraverParams' implicitly has an 'any'... Remove this comment to see the full error message
 Editor.prototype.paramChanged = function (engraverParams) {
   if (engraverParams) {
     for (var key in engraverParams) {
@@ -287,6 +337,7 @@ Editor.prototype.paramChanged = function (engraverParams) {
   this.fireChanged();
 };
 
+// @ts-expect-error TS(7006): Parameter 'options' implicitly has an 'any' type.
 Editor.prototype.synthParamChanged = function (options) {
   if (!this.synth) return;
   this.synth.options = {};
@@ -328,9 +379,12 @@ Editor.prototype.fireSelectionChanged = function () {
   this.updateSelection();
 };
 
+// @ts-expect-error TS(7006): Parameter 'isDirty' implicitly has an 'any' type.
 Editor.prototype.setDirtyStyle = function (isDirty) {
   if (this.indicate_changed === undefined) return;
+  // @ts-expect-error TS(7006): Parameter 'element' implicitly has an 'any' type.
   var addClassName = function (element, className) {
+    // @ts-expect-error TS(7006): Parameter 'element' implicitly has an 'any' type.
     var hasClassName = function (element, className) {
       var elementClassName = element.className;
       return (
@@ -345,7 +399,9 @@ Editor.prototype.setDirtyStyle = function (isDirty) {
     return element;
   };
 
+  // @ts-expect-error TS(7006): Parameter 'element' implicitly has an 'any' type.
   var removeClassName = function (element, className) {
+    // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
     element.className = parseCommon.strip(
       element.className.replace(
         new RegExp("(^|\\s+)" + className + "(\\s+|$)"),
@@ -396,11 +452,17 @@ Editor.prototype.isDirty = function () {
 };
 
 Editor.prototype.highlight = function (
+  // @ts-expect-error TS(7006): Parameter 'abcelem' implicitly has an 'any' type.
   abcelem,
+  // @ts-expect-error TS(7006): Parameter 'tuneNumber' implicitly has an 'any' typ... Remove this comment to see the full error message
   tuneNumber,
+  // @ts-expect-error TS(7006): Parameter 'classes' implicitly has an 'any' type.
   classes,
+  // @ts-expect-error TS(7006): Parameter 'analysis' implicitly has an 'any' type.
   analysis,
+  // @ts-expect-error TS(7006): Parameter 'drag' implicitly has an 'any' type.
   drag,
+  // @ts-expect-error TS(7006): Parameter 'mouseEvent' implicitly has an 'any' typ... Remove this comment to see the full error message
   mouseEvent
 ) {
   // TODO-PER: The marker appears to get off by one for each tune parsed. I'm not sure why, but adding the tuneNumber in corrects it for the time being.
@@ -420,6 +482,7 @@ Editor.prototype.highlight = function (
     );
 };
 
+// @ts-expect-error TS(7006): Parameter 'shouldPause' implicitly has an 'any' ty... Remove this comment to see the full error message
 Editor.prototype.pause = function (shouldPause) {
   this.bIsPaused = shouldPause;
   if (!shouldPause) this.fireChanged();
@@ -435,6 +498,7 @@ Editor.prototype.millisecondsPerMeasure = function () {
   return this.synth.synthControl.visualObj.millisecondsPerMeasure();
 };
 
+// @ts-expect-error TS(7006): Parameter 'shouldPause' implicitly has an 'any' ty... Remove this comment to see the full error message
 Editor.prototype.pauseMidi = function (shouldPause) {
   this.midiPause = shouldPause;
   if (!shouldPause) this.redrawMidi();

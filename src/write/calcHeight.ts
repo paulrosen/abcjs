@@ -1,4 +1,4 @@
-var calcHeight = function (staffGroup) {
+var calcHeight = function (staffGroup: any) {
   // the height is calculated here in a parallel way to the drawing below in hopes that both of these functions will be modified together.
   // TODO-PER: also add the space between staves. (That's systemStaffSeparation, which is the minimum distance between the staff LINES.)
   var height = 0;

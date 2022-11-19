@@ -1,9 +1,9 @@
-var GetFontAndAttr = function GetFontAndAttr(formatting, classes) {
+var GetFontAndAttr = function GetFontAndAttr(this: any, formatting: any, classes: any) {
   this.formatting = formatting;
   this.classes = classes;
 };
 
-GetFontAndAttr.prototype.updateFonts = function (fontOverrides) {
+GetFontAndAttr.prototype.updateFonts = function (fontOverrides: any) {
   if (fontOverrides.gchordfont)
     this.formatting.gchordfont = fontOverrides.gchordfont;
   if (fontOverrides.tripletfont)
@@ -14,7 +14,7 @@ GetFontAndAttr.prototype.updateFonts = function (fontOverrides) {
     this.formatting.vocalfont = fontOverrides.vocalfont;
 };
 
-GetFontAndAttr.prototype.calc = function (type, klass) {
+GetFontAndAttr.prototype.calc = function (type: any, klass: any) {
   var font;
   if (typeof type === "string") {
     font = this.formatting[type];
@@ -48,6 +48,7 @@ GetFontAndAttr.prototype.calc = function (type, klass) {
   var paddingPercent = this.formatting.fontboxpadding
     ? this.formatting.fontboxpadding
     : 0.1;
+  // @ts-expect-error TS(2339): Property 'padding' does not exist on type '{ face:... Remove this comment to see the full error message
   font.padding = font.size * paddingPercent;
 
   var attr = {

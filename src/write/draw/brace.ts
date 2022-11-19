@@ -2,14 +2,18 @@ import sprintf from './sprintf';
 import spacing from '../abc_spacing';
 import renderText from './text';
 
-function drawBrace(renderer, params, selectables) {
+function drawBrace(renderer: any, params: any, selectables: any) {
   // The absoluteY number is the spot where the note on the first ledger line is drawn (i.e. middle C if treble clef)
   // The STEP offset here moves it to the top and bottom lines
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   var startY = params.startVoice.staff.absoluteY - spacing.STEP * 10;
   if (params.endVoice && params.endVoice.staff)
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     params.endY = params.endVoice.staff.absoluteY - spacing.STEP * 2;
   else if (params.lastContinuedVoice && params.lastContinuedVoice.staff)
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     params.endY = params.lastContinuedVoice.staff.absoluteY - spacing.STEP * 2;
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   else params.endY = params.startVoice.staff.absoluteY - spacing.STEP * 2;
   return draw(
     renderer,
@@ -22,13 +26,17 @@ function drawBrace(renderer, params, selectables) {
   );
 }
 
-function straightPath(renderer, xLeft, yTop, yBottom, type) {
+function straightPath(renderer: any, xLeft: any, yTop: any, yBottom: any, type: any) {
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   xLeft += spacing.STEP;
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   var xLineWidth = spacing.STEP * 0.75;
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   var yOverlap = spacing.STEP * 0.75;
   var height = yBottom - yTop;
   // Straight line
   var pathString = sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
     "M %f %f l %f %f l %f %f l %f %f z",
     xLeft,
     yTop - yOverlap, // top left line
@@ -40,9 +48,12 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
     -(height + yOverlap * 2) // top right line
   );
   // Top arm
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   var wCurve = spacing.STEP * 2;
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   var hCurve = spacing.STEP;
   pathString += sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 11.
     "M %f %f q %f %f %f %f q %f %f %f %f z",
     xLeft + xLineWidth,
     yTop - yOverlap, // top left arm
@@ -53,10 +64,12 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
     -wCurve * 0.1,
     hCurve * 0.3,
     -wCurve,
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     hCurve + spacing.STEP // left bottom
   );
   // Bottom arm
   pathString += sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 11.
     "M %f %f q %f %f %f %f q %f %f %f %f z",
     xLeft + xLineWidth,
     yTop + yOverlap + height, // bottom left arm
@@ -67,6 +80,7 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
     -wCurve * 0.1,
     -hCurve * 0.3,
     -wCurve,
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     -hCurve - spacing.STEP // left bottom
   );
   return renderer.paper.path({
@@ -78,7 +92,7 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
   });
 }
 
-function curvyPath(renderer, xLeft, yTop, yBottom, type) {
+function curvyPath(renderer: any, xLeft: any, yTop: any, yBottom: any, type: any) {
   var yHeight = yBottom - yTop;
 
   var pathString = curve(
@@ -120,8 +134,9 @@ function curvyPath(renderer, xLeft, yTop, yBottom, type) {
   });
 }
 
-function curve(xLeft, yTop, xCurve, yCurve) {
+function curve(xLeft: any, yTop: any, xCurve: any, yCurve: any) {
   return sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 15.
     "M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z",
     xLeft + xCurve[0],
     yTop + yCurve[0],
@@ -141,13 +156,13 @@ function curve(xLeft, yTop, xCurve, yCurve) {
 }
 
 var draw = function (
-  renderer,
-  xLeft,
-  yTop,
-  yBottom,
-  type,
-  header,
-  selectables
+  renderer: any,
+  xLeft: any,
+  yTop: any,
+  yBottom: any,
+  type: any,
+  header: any,
+  selectables: any
 ) {
   //Tony
   var ret;
@@ -167,6 +182,7 @@ var draw = function (
         1
       );
 
+    // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
     renderText(renderer, {
       x: renderer.padding.left,
       y: position,

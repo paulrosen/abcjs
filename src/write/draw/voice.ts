@@ -8,7 +8,7 @@ import drawBeam from './beam';
 import renderText from './text';
 import drawAbsolute from './absolute';
 
-function drawVoice(renderer, params, bartop, selectables, staffPos) {
+function drawVoice(renderer: any, params: any, bartop: any, selectables: any, staffPos: any) {
   var width = params.w - 1;
   renderer.staffbottom = params.staff.bottom;
 
@@ -82,6 +82,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
     var beam = params.beams[i];
     if (beam === "bar") {
       renderer.controller.classes.incrMeasure();
+    // @ts-expect-error TS(2554): Expected 2 arguments, but got 3.
     } else drawBeam(renderer, beam, selectables); // beams must be drawn first for proper printing of triplets, slurs and ties.
   }
 
@@ -130,6 +131,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
             params.startx + 10,
             width,
             selectables,
+            // @ts-expect-error TS(2554): Expected 5 arguments, but got 6.
             staffPos
           );
       }
@@ -137,7 +139,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
   }
 }
 
-function isNonSpacerRest(elem) {
+function isNonSpacerRest(elem: any) {
   if (elem.type !== "rest") return false;
   if (elem.abcelem && elem.abcelem.rest && elem.abcelem.rest.type !== "spacer")
     return true;

@@ -2,7 +2,7 @@ import sprintf from './sprintf';
 import printPath from './print-path';
 import roundNumber from './round-number';
 
-function drawCrescendo(renderer, params, selectables) {
+function drawCrescendo(renderer: any, params: any, selectables: any) {
   if (params.pitch === undefined)
     window.console.error("Crescendo Element y-coordinate not set.");
   var y = renderer.calcY(params.pitch) + 4; // This is the top pixel to use (it is offset a little so that it looks good with the volume marks.)
@@ -41,7 +41,7 @@ function drawCrescendo(renderer, params, selectables) {
   return [el];
 }
 
-var drawLine = function (renderer, y1, y2, y3, y4, left, right) {
+var drawLine = function (renderer: any, y1: any, y2: any, y3: any, y4: any, left: any, right: any) {
   y1 = roundNumber(y1);
   y2 = roundNumber(y2);
   y3 = roundNumber(y3);
@@ -50,6 +50,7 @@ var drawLine = function (renderer, y1, y2, y3, y4, left, right) {
   right = roundNumber(right);
 
   var pathString = sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
     "M %f %f L %f %f M %f %f L %f %f",
     left,
     y1,
@@ -60,6 +61,7 @@ var drawLine = function (renderer, y1, y2, y3, y4, left, right) {
     right,
     y4
   );
+  // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
   return printPath(renderer, {
     path: pathString,
     highlight: "stroke",

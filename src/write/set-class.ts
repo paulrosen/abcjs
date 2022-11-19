@@ -1,4 +1,4 @@
-var setClass = function (elemset, addClass, removeClass, color) {
+var setClass = function (elemset: any, addClass: any, removeClass: any, color: any) {
   if (!elemset) return;
   for (var i = 0; i < elemset.length; i++) {
     var el = elemset[i];

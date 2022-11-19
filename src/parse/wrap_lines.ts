@@ -1,6 +1,6 @@
 //    wrap_lines.js: does line wrap on an already parsed tune.
 
-function wrapLines(tune, lineBreaks, barNumbers) {
+function wrapLines(tune: any, lineBreaks: any, barNumbers: any) {
   if (!lineBreaks || tune.lines.length === 0) return;
 
   // tune.lines contains nested arrays: there is an array of lines (that's the part this function rewrites),
@@ -13,7 +13,7 @@ function wrapLines(tune, lineBreaks, barNumbers) {
   tune.lineBreaks = linesBreakElements;
 }
 
-function addLineBreaks(lines, linesBreakElements, barNumbers) {
+function addLineBreaks(lines: any, linesBreakElements: any, barNumbers: any) {
   // linesBreakElements is an array of all of the elements that break for a new line
   // The objects in the array look like:
   // {"ogLine":0,"line":0,"staff":0,"voice":0,"start":0, "end":21}
@@ -74,7 +74,7 @@ function addLineBreaks(lines, linesBreakElements, barNumbers) {
             root: currVoice[kk].root,
             acc: currVoice[kk].acc,
             mode: currVoice[kk].mode,
-            accidentals: currVoice[kk].accidentals.filter(function (acc) {
+            accidentals: currVoice[kk].accidentals.filter(function (acc: any) {
               return acc.acc !== "natural";
             })
           };
@@ -109,7 +109,7 @@ function addLineBreaks(lines, linesBreakElements, barNumbers) {
   // There could be some missing info - if the tune passed in was incomplete or had different lengths for different voices or was missing a voice altogether - just fill in the gaps.
   for (var ii = 0; ii < outputLines.length; ii++) {
     if (outputLines[ii].staff) {
-      outputLines[ii].staff = outputLines[ii].staff.filter(function (el) {
+      outputLines[ii].staff = outputLines[ii].staff.filter(function (el: any) {
         return el != null;
       });
     }
@@ -117,7 +117,7 @@ function addLineBreaks(lines, linesBreakElements, barNumbers) {
   return outputLines;
 }
 
-function findLineBreaks(lines, lineBreakArray) {
+function findLineBreaks(lines: any, lineBreakArray: any) {
   // lineBreakArray is an array of all of the sections of the tune - often there will just be one
   // section unless there is a subtitle or other non-music lines. Each of the elements of
   // Each element of lineBreakArray is an array of the zero-based last measure of the line.
@@ -181,7 +181,7 @@ function findLineBreaks(lines, lineBreakArray) {
   return lineBreakIndexes;
 }
 
-function freeFormLineBreaks(widths, lineBreakPoint) {
+function freeFormLineBreaks(widths: any, lineBreakPoint: any) {
   var lineBreaks = [];
   var totals = [];
   var totalThisLine = 0;
@@ -212,24 +212,24 @@ function freeFormLineBreaks(widths, lineBreakPoint) {
   return { lineBreaks: lineBreaks, totals: totals };
 }
 
-function clone(arr) {
+function clone(arr: any) {
   var newArr = [];
   for (var i = 0; i < arr.length; i++) newArr.push(arr[i]);
   return newArr;
 }
 
 function oneTry(
-  measureWidths,
-  idealWidths,
-  accumulator,
-  lineAccumulator,
-  lineWidths,
-  lastVariance,
-  highestVariance,
-  currLine,
-  lineBreaks,
-  startIndex,
-  otherTries
+  measureWidths: any,
+  idealWidths: any,
+  accumulator: any,
+  lineAccumulator: any,
+  lineWidths: any,
+  lastVariance: any,
+  highestVariance: any,
+  currLine: any,
+  lineBreaks: any,
+  startIndex: any,
+  otherTries: any
 ) {
   for (var i = startIndex; i < measureWidths.length; i++) {
     var measureWidth = measureWidths[i];
@@ -287,7 +287,7 @@ function oneTry(
   lineWidths.push(lineAccumulator);
 }
 
-function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
+function optimizeLineWidths(widths: any, lineBreakPoint: any, lineBreaks: any, explanation: any) {
   //	figure out how many lines
   var numLines = Math.ceil(widths.total / lineBreakPoint); // + 1 TODO-PER: this used to be plus one - not sure why
 
@@ -332,18 +332,25 @@ function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
   }
   for (i = 0; i < otherTries.length; i++) {
     var otherTry = otherTries[i];
+    // @ts-expect-error TS(2339): Property 'variances' does not exist on type '{ acc... Remove this comment to see the full error message
     otherTry.variances = [];
+    // @ts-expect-error TS(2339): Property 'aveVariance' does not exist on type '{ a... Remove this comment to see the full error message
     otherTry.aveVariance = 0;
     for (var j = 0; j < otherTry.lineWidths.length; j++) {
       var lineWidth = otherTry.lineWidths[j];
+      // @ts-expect-error TS(2339): Property 'variances' does not exist on type '{ acc... Remove this comment to see the full error message
       otherTry.variances.push(lineWidth - idealWidths[0]);
+      // @ts-expect-error TS(2339): Property 'aveVariance' does not exist on type '{ a... Remove this comment to see the full error message
       otherTry.aveVariance += Math.abs(lineWidth - idealWidths[0]);
     }
+    // @ts-expect-error TS(2339): Property 'aveVariance' does not exist on type '{ a... Remove this comment to see the full error message
     otherTry.aveVariance = otherTry.aveVariance / otherTry.lineWidths.length;
     explanation.attempts.push({
       type: "optimizeLineWidths",
       lineBreaks: otherTry.lineBreaks,
+      // @ts-expect-error TS(2339): Property 'variances' does not exist on type '{ acc... Remove this comment to see the full error message
       variances: otherTry.variances,
+      // @ts-expect-error TS(2339): Property 'aveVariance' does not exist on type '{ a... Remove this comment to see the full error message
       aveVariance: otherTry.aveVariance,
       widths: widths.measureWidths
     });
@@ -352,7 +359,9 @@ function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
   var smallestIndex = -1;
   for (i = 0; i < otherTries.length; i++) {
     otherTry = otherTries[i];
+    // @ts-expect-error TS(2339): Property 'aveVariance' does not exist on type '{ a... Remove this comment to see the full error message
     if (otherTry.aveVariance < smallest) {
+      // @ts-expect-error TS(2339): Property 'aveVariance' does not exist on type '{ a... Remove this comment to see the full error message
       smallest = otherTry.aveVariance;
       smallestIndex = i;
     }
@@ -365,9 +374,9 @@ function optimizeLineWidths(widths, lineBreakPoint, lineBreaks, explanation) {
 }
 
 function fixedMeasureLineBreaks(
-  widths,
-  lineBreakPoint,
-  preferredMeasuresPerLine
+  widths: any,
+  lineBreakPoint: any,
+  preferredMeasuresPerLine: any
 ) {
   var lineBreaks = [];
   var totals = [];
@@ -389,7 +398,7 @@ function fixedMeasureLineBreaks(
   return { failed: failed, totals: totals, lineBreaks: lineBreaks };
 }
 
-function getRevisedTuneParams(lineBreaks, staffWidth, params) {
+function getRevisedTuneParams(lineBreaks: any, staffWidth: any, params: any) {
   var revisedParams = {
     lineBreaks: lineBreaks,
     staffwidth: staffWidth
@@ -400,6 +409,7 @@ function getRevisedTuneParams(lineBreaks, staffWidth, params) {
       key !== "wrap" &&
       key !== "staffwidth"
     ) {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       revisedParams[key] = params[key];
     }
   }
@@ -407,7 +417,7 @@ function getRevisedTuneParams(lineBreaks, staffWidth, params) {
   return { revisedParams: revisedParams };
 }
 
-function calcLineWraps(tune, widths, params) {
+function calcLineWraps(tune: any, widths: any, params: any) {
   // For calculating how much can go on the line, it depends on the width of the line. It is a convenience to just divide it here
   // by the minimum spacing instead of multiplying the min spacing later.
   // The scaling works differently: this is done by changing the scaling of the outer SVG, so the scaling needs to be compensated
@@ -445,6 +455,7 @@ function calcLineWraps(tune, widths, params) {
     var section = widths[s];
     var usableWidth = params.staffwidth - section.left;
     var lineBreakPoint = usableWidth / minSpacing / scale;
+    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     var minLineSize = usableWidth / maxSpacing / scale;
     var allowableVariance = usableWidth / minSpacingLimit / scale;
     var explanation = {
@@ -465,10 +476,15 @@ function calcLineWraps(tune, widths, params) {
         preferredMeasuresPerLine
       );
       explanation.attempts.push({
+        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         type: "Fixed Measures Per Line",
+        // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
         preferredMeasuresPerLine: preferredMeasuresPerLine,
+        // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
         lineBreaks: f.lineBreaks,
+        // @ts-expect-error TS(2322): Type 'boolean' is not assignable to type 'never'.
         failed: f.failed,
+        // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
         totals: f.totals
       });
       if (!f.failed) lineBreaks = f.lineBreaks;
@@ -479,8 +495,11 @@ function calcLineWraps(tune, widths, params) {
     if (!lineBreaks) {
       var ff = freeFormLineBreaks(section.measureWidths, lineBreakPoint);
       explanation.attempts.push({
+        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         type: "Free Form",
+        // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
         lineBreaks: ff.lineBreaks,
+        // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
         totals: ff.totals
       });
       lineBreaks = ff.lineBreaks;
@@ -489,6 +508,7 @@ function calcLineWraps(tune, widths, params) {
       if (lineBreaks.length > 0 && section.measureWidths.length < 25) {
         // Only do this if everything doesn't fit on one line.
         // This is an intensive operation and it is optional so just do it for shorter music.
+        // @ts-expect-error TS(2741): Property 'totals' is missing in type '{ failed: bo... Remove this comment to see the full error message
         ff = optimizeLineWidths(
           section,
           lineBreakPoint,
@@ -496,12 +516,18 @@ function calcLineWraps(tune, widths, params) {
           explanation
         );
         explanation.attempts.push({
+          // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
           type: "Optimize",
+          // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
           failed: ff.failed,
+          // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
           reason: ff.reason,
+          // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
           lineBreaks: ff.lineBreaks,
+          // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
           totals: ff.totals
         });
+        // @ts-expect-error TS(2339): Property 'failed' does not exist on type '{ lineBr... Remove this comment to see the full error message
         if (!ff.failed) lineBreaks = ff.lineBreaks;
       }
     }
@@ -511,7 +537,9 @@ function calcLineWraps(tune, widths, params) {
   // If the vertical space exceeds targetHeight, remove a line and try again. If that is too crowded, then don't use it.
   var staffWidth = params.staffwidth;
   var ret = getRevisedTuneParams(accumulatedLineBreaks, staffWidth, params);
+  // @ts-expect-error TS(2339): Property 'explanation' does not exist on type '{ r... Remove this comment to see the full error message
   ret.explanation = explanations;
+  // @ts-expect-error TS(2339): Property 'reParse' does not exist on type '{ revis... Remove this comment to see the full error message
   ret.reParse = true;
   return ret;
 }

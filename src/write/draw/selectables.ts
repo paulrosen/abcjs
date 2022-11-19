@@ -1,7 +1,7 @@
 import highlight from '../highlight';
 import unhighlight from '../unhighlight';
 
-function Selectables(paper, selectTypes, tuneNumber) {
+function Selectables(this: any, paper: any, selectTypes: any, tuneNumber: any) {
   this.elements = [];
   this.paper = paper;
   this.tuneNumber = tuneNumber;
@@ -13,10 +13,10 @@ Selectables.prototype.getElements = function () {
 };
 
 Selectables.prototype.add = function (
-  absEl,
-  svgEl,
-  isNoteOrTabNumber,
-  staffPos
+  absEl: any,
+  svgEl: any,
+  isNoteOrTabNumber: any,
+  staffPos: any
 ) {
   if (!this.canSelect(absEl)) return;
   var params;
@@ -33,11 +33,12 @@ Selectables.prototype.add = function (
     };
   this.paper.setAttributeOnElement(svgEl, params);
   var sel = { absEl: absEl, svgEl: svgEl, isDraggable: isNoteOrTabNumber };
+  // @ts-expect-error TS(2339): Property 'staffPos' does not exist on type '{ absE... Remove this comment to see the full error message
   if (staffPos !== undefined) sel.staffPos = staffPos;
   this.elements.push(sel);
 };
 
-Selectables.prototype.canSelect = function (absEl) {
+Selectables.prototype.canSelect = function (absEl: any) {
   if (this.selectTypes === false) return false;
   if (!absEl || !absEl.abcelem) return false;
   if (this.selectTypes === true) return true;
@@ -54,7 +55,7 @@ Selectables.prototype.canSelect = function (absEl) {
   return this.selectTypes.indexOf(absEl.abcelem.el_type) >= 0;
 };
 
-Selectables.prototype.wrapSvgEl = function (abcelem, el) {
+Selectables.prototype.wrapSvgEl = function (abcelem: any, el: any) {
   var absEl = {
     tuneNumber: this.tuneNumber,
     abcelem: abcelem,

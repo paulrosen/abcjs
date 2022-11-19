@@ -1,17 +1,17 @@
-var GetTextSize = function GetTextSize(getFontAndAttr, svg) {
+var GetTextSize = function GetTextSize(this: any, getFontAndAttr: any, svg: any) {
   this.getFontAndAttr = getFontAndAttr;
   this.svg = svg;
 };
 
-GetTextSize.prototype.updateFonts = function (fontOverrides) {
+GetTextSize.prototype.updateFonts = function (fontOverrides: any) {
   this.getFontAndAttr.updateFonts(fontOverrides);
 };
 
-GetTextSize.prototype.attr = function (type, klass) {
+GetTextSize.prototype.attr = function (type: any, klass: any) {
   return this.getFontAndAttr.calc(type, klass);
 };
 
-GetTextSize.prototype.calc = function (text, type, klass, el) {
+GetTextSize.prototype.calc = function (text: any, type: any, klass: any, el: any) {
   var hash;
   // This can be passed in either a string or a font. If it is a string it names one of the standard fonts.
   if (typeof type === "string") hash = this.attr(type, klass);
@@ -46,11 +46,11 @@ GetTextSize.prototype.calc = function (text, type, klass, el) {
 };
 
 GetTextSize.prototype.baselineToCenter = function (
-  text,
-  type,
-  klass,
-  index,
-  total
+  text: any,
+  type: any,
+  klass: any,
+  index: any,
+  total: any
 ) {
   // This is for the case where SVG wants to use the baseline of the first line as the Y coordinate.
   // If there are multiple lines of text or there is an array of text then that will not be centered so this adjusts it.

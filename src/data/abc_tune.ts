@@ -3,7 +3,9 @@
 import parseCommon from '../parse/abc_common';
 
 import spacing from '../write/abc_spacing';
+// @ts-expect-error TS(7034): Variable 'sequence' implicitly has type 'any' in s... Remove this comment to see the full error message
 import sequence from '../synth/abc_midi_sequencer';
+// @ts-expect-error TS(7034): Variable 'flatten' implicitly has type 'any' in so... Remove this comment to see the full error message
 import flatten from '../synth/abc_midi_flattener';
 import delineTune from './deline-tune';
 
@@ -12,7 +14,7 @@ import delineTune from './deline-tune';
  * Also known as the ABCJS Abstract Syntax Tree
  * @alternateClassName ABCJS.Tune
  */
-var Tune = function () {
+var Tune = function(this: any) {
   this.reset = function () {
     this.version = "1.1.0";
     this.media = "screen";
@@ -28,12 +30,12 @@ var Tune = function () {
   };
   this.reset();
 
-  function copy(dest, src, prop, attrs) {
+  function copy(dest: any, src: any, prop: any, attrs: any) {
     for (var i = 0; i < attrs.length; i++)
       dest[prop][attrs[i]] = src[prop][attrs[i]];
   }
 
-  this.copyTopInfo = function (src) {
+  this.copyTopInfo = function (src: any) {
     var attrs = [
       "tempo",
       "title",
@@ -48,7 +50,7 @@ var Tune = function () {
     copy(this, src, "metaTextInfo", attrs);
   };
 
-  this.copyBottomInfo = function (src) {
+  this.copyBottomInfo = function (src: any) {
     var attrs = [
       "unalignedWords",
       "book",
@@ -110,7 +112,7 @@ var Tune = function () {
     return multiplier / meter.den;
   };
 
-  function computePickupLength(lines, barLength) {
+  function computePickupLength(lines: any, barLength: any) {
     var pickupLength = 0;
     for (var i = 0; i < lines.length; i++) {
       if (lines[i].staff) {
@@ -163,7 +165,7 @@ var Tune = function () {
     return this.totalBeats;
   };
 
-  this.millisecondsPerMeasure = function (bpmOverride) {
+  this.millisecondsPerMeasure = function (bpmOverride: any) {
     var bpm;
     if (bpmOverride) {
       bpm = bpmOverride;
@@ -232,7 +234,7 @@ var Tune = function () {
     return {};
   };
 
-  this.getElementFromChar = function (char) {
+  this.getElementFromChar = function (char: any) {
     for (var i = 0; i < this.lines.length; i++) {
       var line = this.lines[i];
       if (line.staff) {
@@ -257,7 +259,7 @@ var Tune = function () {
     return null;
   };
 
-  function addVerticalInfo(timingEvents) {
+  function addVerticalInfo(timingEvents: any) {
     // Add vertical info to the bar events: put the next event's top, and the event after the next measure's top.
     var lastBarTop;
     var lastBarBottom;
@@ -280,7 +282,7 @@ var Tune = function () {
     }
   }
 
-  function makeSortedArray(hash) {
+  function makeSortedArray(hash: any) {
     var arr = [];
     for (var k in hash) {
       if (hash.prototype.hasOwnProperty.call(k)) arr.push(hash[k]);
@@ -298,16 +300,16 @@ var Tune = function () {
   }
 
   this.addElementToEvents = function (
-    eventHash,
-    element,
-    voiceTimeMilliseconds,
-    top,
-    height,
-    line,
-    measureNumber,
-    timeDivider,
-    isTiedState,
-    nextIsBar
+    eventHash: any,
+    element: any,
+    voiceTimeMilliseconds: any,
+    top: any,
+    height: any,
+    line: any,
+    measureNumber: any,
+    timeDivider: any,
+    isTiedState: any,
+    nextIsBar: any
   ) {
     if (element.hint) return { isTiedState: undefined, duration: 0 };
     var realDuration = element.durationClass
@@ -364,11 +366,13 @@ var Tune = function () {
             startCharArray: [element.abcelem.startChar],
             endCharArray: [element.abcelem.endChar],
             midiPitches: element.abcelem.midiPitches
+              // @ts-expect-error TS(2339): Property 'cloneArray' does not exist on type '{}'.
               ? parseCommon.cloneArray(element.abcelem.midiPitches)
               : []
           };
           if (element.abcelem.midiGraceNotePitches)
             eventHash["event" + voiceTimeMilliseconds].midiGraceNotePitches =
+              // @ts-expect-error TS(2339): Property 'cloneArray' does not exist on type '{}'.
               parseCommon.cloneArray(element.abcelem.midiGraceNotePitches);
         } else {
           // If there is more than one voice then two notes can fall at the same time. Usually they would be lined up in the same place, but if it is a whole rest, then it is placed funny. In any case, the left most element wins.
@@ -447,9 +451,11 @@ var Tune = function () {
       if (group && group.staffs && group.staffs.length > 0) {
         var firstStaff = group.staffs[0];
         var middleC = firstStaff.absoluteY;
+        // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
         var top = middleC - firstStaff.top * spacing.STEP;
         var lastStaff = group.staffs[group.staffs.length - 1];
         middleC = lastStaff.absoluteY;
+        // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
         var bottom = middleC - lastStaff.bottom * spacing.STEP;
         var height = bottom - top;
 
@@ -461,12 +467,18 @@ var Tune = function () {
           var elements = voices[v].children;
           for (var elem = 0; elem < elements.length; elem++) {
             if (elements[elem].type === "tempo")
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
             voicesArr[v].push({
+              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
               top: top,
+              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
               height: height,
+              // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
               line: group.line,
+              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
               measureNumber: measureNumber[v],
+              // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
               elem: elements[elem]
             });
             if (elements[elem].type === "bar" && noteFound)
@@ -485,7 +497,7 @@ var Tune = function () {
     return voicesArr;
   };
 
-  this.setupEvents = function (startingDelay, timeDivider, startingBpm, warp) {
+  this.setupEvents = function (startingDelay: any, timeDivider: any, startingBpm: any, warp: any) {
     if (!warp) warp = 1;
     var timingEvents = [];
 
@@ -514,6 +526,7 @@ var Tune = function () {
           tempoDone = thisMeasure;
         }
         var element = elements[elem].elem;
+        // @ts-expect-error TS(7022): 'ret' implicitly has type 'any' because it does no... Remove this comment to see the full error message
         var ret = this.addElementToEvents(
           eventHash,
           element,
@@ -530,6 +543,7 @@ var Tune = function () {
         nextIsBar = ret.nextIsBar;
         voiceTime += ret.duration;
         var lastHash;
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         if (element.duration > 0 && eventHash["event" + voiceTimeMilliseconds])
           // This won't exist if this is the end of a tie.
           lastHash = "event" + voiceTimeMilliseconds;
@@ -546,6 +560,7 @@ var Tune = function () {
           if (endRepeat) {
             // Force the end of the previous note to the position of the measure - the cursor won't go past the end repeat
             if (elem > 0) {
+              // @ts-expect-error TS(2538): Type 'undefined' cannot be used as an index type.
               eventHash[lastHash].endX = element.x;
             }
 
@@ -581,8 +596,10 @@ var Tune = function () {
               lastVoiceTimeMilliseconds = voiceTimeMilliseconds;
               voiceTimeMilliseconds = Math.round(voiceTime * 1000);
             }
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             if (eventHash["event" + lastVoiceTimeMilliseconds])
               // This won't exist if it is the beginning of the next line. That's ok because we will just count the end of the last line as the end.
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               eventHash["event" + lastVoiceTimeMilliseconds].endX =
                 elements[endingRepeatElem].elem.x;
             nextIsBar = true;
@@ -606,7 +623,7 @@ var Tune = function () {
     return timingEvents;
   };
 
-  this.addUsefulCallbackInfo = function (timingEvents, bpm) {
+  this.addUsefulCallbackInfo = function (timingEvents: any, bpm: any) {
     var millisecondsPerMeasure = this.millisecondsPerMeasure(bpm);
     for (var i = 0; i < timingEvents.length; i++) {
       var ev = timingEvents[i];
@@ -614,11 +631,11 @@ var Tune = function () {
     }
   };
 
-  function skipTies(elements, index) {
+  function skipTies(elements: any, index: any) {
     while (index < elements.length && elements[index].left === null) index++;
     return elements[index];
   }
-  function addEndPoints(lines, elements) {
+  function addEndPoints(lines: any, elements: any) {
     if (elements.length < 1) return;
     for (var i = 0; i < elements.length - 1; i++) {
       var el = elements[i];
@@ -639,7 +656,7 @@ var Tune = function () {
     lastEl.endX = lines[lastEl.line].staffGroup.w;
   }
 
-  this.getBpm = function (tempo) {
+  this.getBpm = function (tempo: any) {
     var bpm;
     if (tempo) {
       bpm = tempo.bpm;
@@ -661,7 +678,7 @@ var Tune = function () {
     return bpm;
   };
 
-  this.setTiming = function (bpm, measuresOfDelay) {
+  this.setTiming = function (bpm: any, measuresOfDelay: any) {
     measuresOfDelay = measuresOfDelay || 0;
     if (!this.engraver || !this.engraver.staffgroups) {
       console.log("setTiming cannot be called before the tune is drawn.");
@@ -702,12 +719,14 @@ var Tune = function () {
     return this.noteTimings;
   };
 
-  this.setUpAudio = function (options) {
+  this.setUpAudio = function (options: any) {
     if (!options) options = {};
+    // @ts-expect-error TS(7005): Variable 'sequence' implicitly has an 'any' type.
     var seq = sequence(this, options);
+    // @ts-expect-error TS(7005): Variable 'flatten' implicitly has an 'any' type.
     return flatten(seq, options, this.formatting.percmap);
   };
-  this.deline = function (options) {
+  this.deline = function (options: any) {
     return delineTune(this.lines, options);
   };
 };

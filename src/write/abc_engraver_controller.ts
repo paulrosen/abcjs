@@ -31,7 +31,7 @@ import tablatures from '../api/abc_tablatures';
  * in the renderer for highlighting purposes
  *
  */
-var EngraverController = function (paper, params) {
+var EngraverController = function(this: any, paper: any, params: any) {
   params = params || {};
   this.oneSvgPerLine = params.oneSvgPerLine;
   this.selectionColor = params.selectionColor;
@@ -39,9 +39,11 @@ var EngraverController = function (paper, params) {
   this.dragging = !!params.dragging;
   this.selectTypes = params.selectTypes;
   this.responsive = params.responsive;
+  // @ts-expect-error TS(2339): Property 'SPACE' does not exist on type '{}'.
   this.space = 3 * spacing.SPACE;
   this.initialClef = params.initialClef;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.classes = new Classes({ shouldAddClasses: params.add_classes });
   if (!(this.scale > 0.1)) this.scale = undefined;
 
@@ -57,6 +59,7 @@ var EngraverController = function (paper, params) {
   this.listeners = [];
   if (params.clickListener) this.addSelectListener(params.clickListener);
 
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.renderer = new Renderer(paper);
   this.renderer.setPaddingOverride(params);
   if (params.showDebug) this.renderer.showDebug = params.showDebug;
@@ -88,9 +91,9 @@ EngraverController.prototype.reset = function () {
  * run the engraving process
  */
 EngraverController.prototype.engraveABC = function (
-  abctunes,
-  tuneNumber,
-  lineOffset
+  abctunes: any,
+  tuneNumber: any,
+  lineOffset: any
 ) {
   if (abctunes[0] === undefined) {
     abctunes = [abctunes];
@@ -99,10 +102,12 @@ EngraverController.prototype.engraveABC = function (
 
   for (var i = 0; i < abctunes.length; i++) {
     if (tuneNumber === undefined) tuneNumber = i;
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     this.getFontAndAttr = new GetFontAndAttr(
       abctunes[i].formatting,
       this.classes
     );
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     this.getTextSize = new GetTextSize(
       this.getFontAndAttr,
       this.renderer.paper
@@ -114,14 +119,16 @@ EngraverController.prototype.engraveABC = function (
 /**
  * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
  */
-EngraverController.prototype.adjustNonScaledItems = function (scale) {
+EngraverController.prototype.adjustNonScaledItems = function (scale: any) {
   this.width /= scale;
   this.renderer.adjustNonScaledItems(scale);
 };
 
-EngraverController.prototype.getMeasureWidths = function (abcTune) {
+EngraverController.prototype.getMeasureWidths = function (abcTune: any) {
   this.reset();
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.getFontAndAttr = new GetFontAndAttr(abcTune.formatting, this.classes);
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
 
   this.setupTune(abcTune, 0);
@@ -156,11 +163,14 @@ EngraverController.prototype.getMeasureWidths = function (abcTune) {
           var child = voice.children[k];
           if (!foundNotStaffExtra && !child.isClef && !child.isKeySig) {
             foundNotStaffExtra = true;
+            // @ts-expect-error TS(2532): Object is possibly 'undefined'.
             section.left = child.x;
             lastXPosition = child.x;
           }
           if (child.type === "bar") {
+            // @ts-expect-error TS(2532): Object is possibly 'undefined'.
             section.measureWidths.push(child.x - lastXPosition);
+            // @ts-expect-error TS(2532): Object is possibly 'undefined'.
             section.total += child.x - lastXPosition;
             lastXPosition = child.x;
           }
@@ -172,13 +182,14 @@ EngraverController.prototype.getMeasureWidths = function (abcTune) {
   return ret;
 };
 
-EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
+EngraverController.prototype.setupTune = function (abcTune: any, tuneNumber: any) {
   this.classes.reset();
 
   if (abcTune.formatting.jazzchords !== undefined)
     this.jazzchords = abcTune.formatting.jazzchords;
 
   this.renderer.newTune(abcTune);
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
     bagpipes: abcTune.formatting.bagpipes,
     flatbeams: abcTune.formatting.flatbeams,
@@ -207,7 +218,8 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
   return scale;
 };
 
-EngraverController.prototype.constructTuneElements = function (abcTune) {
+EngraverController.prototype.constructTuneElements = function (abcTune: any) {
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   abcTune.topText = new TopText(
     abcTune.metaText,
     abcTune.metaTextInfo,
@@ -239,6 +251,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
       // If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
       if (hasSeenNonSubtitle) {
         var center = this.width / 2 + this.renderer.padding.left;
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         abcLine.nonMusic = new Subtitle(
           this.renderer.spacing.subtitle,
           abcTune.formatting,
@@ -250,6 +263,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
       }
     } else if (abcLine.text !== undefined) {
       hasSeenNonSubtitle = true;
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       abcLine.nonMusic = new FreeText(
         abcLine.text,
         abcLine.vskip,
@@ -263,6 +277,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
       abcLine.separator.lineLength
     ) {
       hasSeenNonSubtitle = true;
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       abcLine.nonMusic = new Separator(
         abcLine.separator.spaceAbove,
         abcLine.separator.lineLength,
@@ -270,6 +285,7 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
       );
     }
   }
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   abcTune.bottomText = new BottomText(
     abcTune.metaText,
     this.width,
@@ -281,9 +297,9 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 };
 
 EngraverController.prototype.engraveTune = function (
-  abcTune,
-  tuneNumber,
-  lineOffset
+  abcTune: any,
+  tuneNumber: any,
+  lineOffset: any
 ) {
   var scale = this.setupTune(abcTune, tuneNumber);
 
@@ -323,7 +339,7 @@ EngraverController.prototype.engraveTune = function (
   setupSelection(this, this.svgs);
 };
 
-function splitSvgIntoLines(output, title, responsive) {
+function splitSvgIntoLines(output: any, title: any, responsive: any) {
   // Each line is a top level <g> in the svg. To split it into separate
   // svgs iterate through each of those and put them in a new svg. Since
   // they are placed absolutely, the viewBox needs to be manipulated to
@@ -355,6 +371,7 @@ function splitSvgIntoLines(output, title, responsive) {
     var fullTitle = 'Sheet Music for "' + title + '" section ' + (i + 1);
     svg.setAttribute("aria-label", fullTitle);
     if (responsive !== "resize") svg.setAttribute("height", height);
+    // @ts-expect-error TS(2339): Property 'style' does not exist on type 'Element'.
     if (responsive === "resize") svg.style.position = "";
     svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + height);
     svg.appendChild(style.cloneNode(true));
@@ -375,7 +392,7 @@ function splitSvgIntoLines(output, title, responsive) {
   return svgs;
 }
 
-function duplicateSvg(source) {
+function duplicateSvg(source: any) {
   var svgNS = "http://www.w3.org/2000/svg";
   var svg = document.createElementNS(svgNS, "svg");
   for (var i = 0; i < source.attributes.length; i++) {
@@ -386,7 +403,7 @@ function duplicateSvg(source) {
   return svg;
 }
 
-EngraverController.prototype.getDim = function (historyEl) {
+EngraverController.prototype.getDim = function (historyEl: any) {
   // Get the dimensions on demand because the getBBox call is expensive.
   if (!historyEl.dim) {
     var box = historyEl.svgEl.getBBox();
@@ -400,7 +417,7 @@ EngraverController.prototype.getDim = function (historyEl) {
   return historyEl.dim;
 };
 
-EngraverController.prototype.addSelectListener = function (clickListener) {
+EngraverController.prototype.addSelectListener = function (clickListener: any) {
   this.listeners[this.listeners.length] = clickListener;
 };
 

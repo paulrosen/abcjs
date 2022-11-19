@@ -1,6 +1,6 @@
 import printStaffLine from './staff-line';
 
-function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
+function printStaff(renderer: any, startx: any, endx: any, numLines: any, linePitch: any, dy: any) {
   var klass = "abcjs-top-line";
   var pitch = 2;
   if (linePitch) {
@@ -14,6 +14,7 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
   var firstYLine = 0;
   var lastYLine = 0;
   if (numLines === 1) {
+    // @ts-expect-error TS(2554): Expected 7 arguments, but got 5.
     printStaffLine(renderer, startx, endx, 6, klass);
     firstYLine = renderer.calcY(10);
     lastYLine = renderer.calcY(2);
@@ -25,6 +26,7 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
         firstYLine = lastYLine;
       }
       printStaffLine(renderer, startx, endx, curpitch, klass, null, dy);
+      // @ts-expect-error TS(2322): Type 'undefined' is not assignable to type 'string... Remove this comment to see the full error message
       klass = undefined;
     }
   }

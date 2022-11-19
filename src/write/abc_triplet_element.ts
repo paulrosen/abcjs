@@ -1,6 +1,6 @@
 //    abc_triplet_element.js: Definition of the TripletElem class.
 
-var TripletElem = function TripletElem(number, anchor1, options) {
+var TripletElem = function TripletElem(this: any, number: any, anchor1: any, options: any) {
   this.type = "TripletElem";
   this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
   this.number = number;
@@ -16,11 +16,11 @@ TripletElem.prototype.isClosed = function () {
   return !!this.anchor2;
 };
 
-TripletElem.prototype.middleNote = function (elem) {
+TripletElem.prototype.middleNote = function (elem: any) {
   this.middleElems.push(elem);
 };
 
-TripletElem.prototype.setCloseAnchor = function (anchor2) {
+TripletElem.prototype.setCloseAnchor = function (anchor2: any) {
   this.anchor2 = anchor2;
   // TODO-PER: This used to be just for beamed triplets but it looks like bracketed triplets need extra room, too. The only one that doesn't is stem down and beamed
   //if (this.anchor1.parent.beam)

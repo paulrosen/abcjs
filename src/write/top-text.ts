@@ -1,15 +1,16 @@
 import addTextIf from './add-text-if';
 
 function TopText(
-  metaText,
-  metaTextInfo,
-  formatting,
-  lines,
-  width,
-  isPrint,
-  paddingLeft,
-  spacing,
-  getTextSize
+  this: any,
+  metaText: any,
+  metaTextInfo: any,
+  formatting: any,
+  lines: any,
+  width: any,
+  isPrint: any,
+  paddingLeft: any,
+  spacing: any,
+  getTextSize: any
 ) {
   this.rows = [];
 

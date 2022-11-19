@@ -6,14 +6,14 @@ import parseCommon from '../parse/abc_common';
 (function () {
   "use strict";
 
-  var measureLength;
+  var measureLength: any;
   // The abc is provided to us line by line. It might have repeats in it. We want to re arrange the elements to
   // be an array of voices with all the repeats embedded, and no lines. Then it is trivial to go through the events
   // one at a time and turn it into midi.
 
   var PERCUSSION_PROGRAM = 128;
 
-  sequence = function (abctune, options) {
+  sequence = function (abctune: any, options: any) {
     // Global options
     options = options || {};
     var qpm;
@@ -119,13 +119,14 @@ import parseCommon from '../parse/abc_common';
     //					array abcelem
 
     // visit each voice completely in turn
-    var voices = [];
-    var inCrescendo = [];
-    var inDiminuendo = [];
+    var voices: any = [];
+    var inCrescendo: any = [];
+    var inDiminuendo: any = [];
     var durationCounter = [0];
     var tempoChanges = {};
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     tempoChanges["0"] = { el_type: "tempo", qpm: qpm, timing: 0 };
-    var currentVolume;
+    var currentVolume: any;
     var startRepeatPlaceholder = []; // There is a place holder for each voice.
     var skipEndingPlaceholder = []; // This is the place where the first ending starts.
     var startingDrumSet = false;
@@ -259,9 +260,12 @@ import parseCommon from '../parse/abc_common';
                       el_type: "note",
                       timing: durationCounter[voiceNumber]
                     }; // Make a copy so that modifications aren't kept except for adding the midiPitches
+                    // @ts-expect-error TS(2339): Property 'style' does not exist on type '{ elem: a... Remove this comment to see the full error message
                     if (elem.style) noteElem.style = elem.style;
                     else if (style[voiceNumber])
+                      // @ts-expect-error TS(2339): Property 'style' does not exist on type '{ elem: a... Remove this comment to see the full error message
                       noteElem.style = style[voiceNumber];
+                    // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                     noteElem.duration =
                       elem.duration === 0 ? 0.25 : elem.duration;
                     if (elem.startTriplet) {
@@ -279,36 +283,51 @@ import parseCommon from '../parse/abc_common';
                             tripletMultiplier * durationTotal;
                         }
                       }
+                      // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                       noteElem.duration = noteElem.duration * tripletMultiplier;
+                      // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                       noteElem.duration =
+                        // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                         Math.round(noteElem.duration * 1000000) / 1000000;
+                      // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                       tripletDurationCount = noteElem.duration;
                     } else if (tripletMultiplier) {
                       if (elem.endTriplet) {
                         tripletMultiplier = 0;
+                        // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                         noteElem.duration =
                           Math.round(
                             (tripletDurationTotal - tripletDurationCount) *
                               1000000
                           ) / 1000000;
                       } else {
+                        // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                         noteElem.duration =
+                          // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                           noteElem.duration * tripletMultiplier;
+                        // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                         noteElem.duration =
+                          // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                           Math.round(noteElem.duration * 1000000) / 1000000;
+                        // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                         tripletDurationCount += noteElem.duration;
                       }
                     }
+                    // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{ elem: an... Remove this comment to see the full error message
                     if (elem.rest) noteElem.rest = elem.rest;
                     if (elem.decoration)
+                      // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{ el... Remove this comment to see the full error message
                       noteElem.decoration = elem.decoration.slice(0);
                     if (elem.pitches)
+                      // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{ elem:... Remove this comment to see the full error message
                       noteElem.pitches = parseCommon.cloneArray(elem.pitches);
                     if (elem.gracenotes)
+                      // @ts-expect-error TS(2339): Property 'gracenotes' does not exist on type '{ el... Remove this comment to see the full error message
                       noteElem.gracenotes = parseCommon.cloneArray(
                         elem.gracenotes
                       );
                     if (elem.chord)
+                      // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{ elem: a... Remove this comment to see the full error message
                       noteElem.chord = parseCommon.cloneArray(elem.chord);
 
                     voices[voiceNumber].push(noteElem);
@@ -317,6 +336,7 @@ import parseCommon from '../parse/abc_common';
                       chordVoiceOffThisBar(voices);
                     }
                     noteEventsInBar++;
+                    // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{ elem... Remove this comment to see the full error message
                     durationCounter[voiceNumber] += noteElem.duration;
                   }
                   break;
@@ -353,6 +373,7 @@ import parseCommon from '../parse/abc_common';
                     qpm: qpm,
                     timing: durationCounter[voiceNumber]
                   });
+                  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                   tempoChanges["" + durationCounter[voiceNumber]] = {
                     el_type: "tempo",
                     qpm: qpm,
@@ -382,8 +403,10 @@ import parseCommon from '../parse/abc_common';
                     if (!e) e = voices[voiceNumber].length; // If there wasn't a first ending marker, then we copy everything.
                     // duplicate each of the elements - this has to be a deep copy.
                     for (var z = s; z < e; z++) {
+                      // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
                       var item = parseCommon.clone(voices[voiceNumber][z]);
                       if (item.pitches)
+                        // @ts-expect-error TS(2339): Property 'cloneArray' does not exist on type '{}'.
                         item.pitches = parseCommon.cloneArray(item.pitches);
                       voices[voiceNumber].push(item);
                     }
@@ -531,7 +554,7 @@ import parseCommon from '../parse/abc_common';
           }
         }
 
-        function setDynamics(elem) {
+        function setDynamics(elem: any) {
           var volumes = {
             pppp: [15, 10, 5, 1],
             ppp: [30, 20, 10, 1],
@@ -559,6 +582,7 @@ import parseCommon from '../parse/abc_common';
             else if (elem.decoration.indexOf("ffff") >= 0) dynamicType = "ffff";
 
             if (dynamicType) {
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               currentVolume = volumes[dynamicType].slice(0);
               voices[voiceNumber].push({
                 el_type: "beat",
@@ -572,6 +596,7 @@ import parseCommon from '../parse/abc_common';
               var n = numNotesToDecoration(voice, v, "crescendo)");
               var top = Math.min(127, currentVolume[0] + crescendoSize);
               var endDec = endingVolume(voice, v + n + 1, Object.keys(volumes));
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               if (endDec) top = volumes[endDec][0];
               if (n > 0)
                 inCrescendo[k] = Math.floor((top - currentVolume[0]) / n);
@@ -587,6 +612,7 @@ import parseCommon from '../parse/abc_common';
                 v + n2 + 1,
                 Object.keys(volumes)
               );
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               if (endDec2) bottom = volumes[endDec2][0];
               inCrescendo[k] = false;
               if (n2 > 0)
@@ -643,7 +669,7 @@ import parseCommon from '../parse/abc_common';
     return voices;
   };
 
-  function numNotesToDecoration(voice, start, decoration) {
+  function numNotesToDecoration(voice: any, start: any, decoration: any) {
     var counter = 0;
     for (var i = start + 1; i < voice.length; i++) {
       if (voice[i].el_type === "note") counter++;
@@ -652,7 +678,7 @@ import parseCommon from '../parse/abc_common';
     }
     return counter;
   }
-  function endingVolume(voice, start, volumeDecorations) {
+  function endingVolume(voice: any, start: any, volumeDecorations: any) {
     var end = Math.min(voice.length, start + 3); // If we have a volume within a couple notes of the end then assume that is the destination.
     for (var i = start; i < end; i++) {
       if (voice[i].el_type === "note") {
@@ -667,7 +693,7 @@ import parseCommon from '../parse/abc_common';
     return null;
   }
 
-  function insertTempoChanges(voices, tempoChanges) {
+  function insertTempoChanges(voices: any, tempoChanges: any) {
     if (!tempoChanges || tempoChanges.length === 0) return;
     var changePositions = Object.keys(tempoChanges);
     for (var i = 0; i < voices.length; i++) {
@@ -698,7 +724,7 @@ import parseCommon from '../parse/abc_common';
     }
   }
 
-  function chordVoiceOffThisBar(voices) {
+  function chordVoiceOffThisBar(voices: any) {
     for (var i = 0; i < voices.length; i++) {
       var voice = voices[i];
       var j = voice.length - 1;
@@ -709,13 +735,13 @@ import parseCommon from '../parse/abc_common';
     }
   }
 
-  function getTrackTitle(staff, voiceNumber) {
+  function getTrackTitle(staff: any, voiceNumber: any) {
     if (!staff || staff.length <= voiceNumber || !staff[voiceNumber].title)
       return undefined;
     return staff[voiceNumber].title.join(" ");
   }
 
-  function interpretTempo(element, beatLength) {
+  function interpretTempo(element: any, beatLength: any) {
     var duration = 1 / 4;
     if (element.duration) {
       duration = element.duration[0];
@@ -728,7 +754,7 @@ import parseCommon from '../parse/abc_common';
     return (duration * bpm) / beatLength;
   }
 
-  function interpretMeter(element) {
+  function interpretMeter(element: any) {
     var meter;
     switch (element.type) {
       case "common_time":
@@ -753,14 +779,14 @@ import parseCommon from '../parse/abc_common';
     return meter;
   }
 
-  function removeNaturals(accidentals) {
+  function removeNaturals(accidentals: any) {
     var acc = [];
     for (var i = 0; i < accidentals.length; i++) {
       if (accidentals[i].acc !== "natural") acc.push(accidentals[i]);
     }
     return acc;
   }
-  function addKey(arr, key) {
+  function addKey(arr: any, key: any) {
     var newKey;
     if (key.root === "HP")
       newKey = {
@@ -775,11 +801,11 @@ import parseCommon from '../parse/abc_common';
       newKey = { el_type: "key", accidentals: removeNaturals(key.accidentals) };
     addIfDifferent(arr, newKey);
   }
-  function addMeter(arr, meter) {
+  function addMeter(arr: any, meter: any) {
     var newMeter = interpretMeter(meter);
     addIfDifferent(arr, newMeter);
   }
-  function addIfDifferent(arr, item) {
+  function addIfDifferent(arr: any, item: any) {
     for (var i = arr.length - 1; i >= 0; i--) {
       if (arr[i].el_type === item.el_type) {
         if (JSON.stringify(arr[i]) !== JSON.stringify(item)) arr.push(item);

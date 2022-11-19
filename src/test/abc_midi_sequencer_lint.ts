@@ -4,7 +4,7 @@
 
 /*globals toString */
 
-var midiSequencerLint = function (tune) {
+var midiSequencerLint = function (tune: any) {
   "use strict";
 
   var breakSynonyms = ["break", "(break)", "no chord", "n.c.", "tacet"];

@@ -1,4 +1,4 @@
-function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
+function getLeftEdgeOfStaff(renderer: any, getTextSize: any, voices: any, brace: any, bracket: any) {
   var x = renderer.padding.left;
 
   // find out how much space will be taken up by voice headers
@@ -27,7 +27,7 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
   return x + ofs;
 }
 
-function addBraceSize(voiceheaderw, brace, getTextSize) {
+function addBraceSize(voiceheaderw: any, brace: any, getTextSize: any) {
   if (brace) {
     for (var i = 0; i < brace.length; i++) {
       if (brace[i].header) {
@@ -39,7 +39,7 @@ function addBraceSize(voiceheaderw, brace, getTextSize) {
   return voiceheaderw;
 }
 
-function setBraceLocation(brace, x, ofs) {
+function setBraceLocation(brace: any, x: any, ofs: any) {
   if (brace) {
     for (var i = 0; i < brace.length; i++) {
       setLocation(x, brace[i]);
@@ -49,7 +49,7 @@ function setBraceLocation(brace, x, ofs) {
   return ofs;
 }
 
-function setLocation(x, element) {
+function setLocation(x: any, element: any) {
   element.x = x;
 }
 

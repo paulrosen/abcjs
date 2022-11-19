@@ -3,7 +3,7 @@ import renderText from './text';
 import printPath from './print-path';
 import roundNumber from './round-number';
 
-function drawTriplet(renderer, params, selectables) {
+function drawTriplet(renderer: any, params: any, selectables: any) {
   renderer.paper.openGroup({
     klass: renderer.controller.classes.generate(
       "triplet " + params.durationClass
@@ -39,8 +39,9 @@ function drawTriplet(renderer, params, selectables) {
   return g;
 }
 
-function drawLine(l, t, r, b) {
+function drawLine(l: any, t: any, r: any, b: any) {
   return sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 5.
     "M %f %f L %f %f",
     roundNumber(l),
     roundNumber(t),
@@ -49,7 +50,7 @@ function drawLine(l, t, r, b) {
   );
 }
 
-function drawBracket(renderer, x1, y1, x2, y2) {
+function drawBracket(renderer: any, x1: any, y1: any, x2: any, y2: any) {
   y1 = renderer.calcY(y1);
   y2 = renderer.calcY(y2);
   var bracketHeight = 5;
@@ -70,6 +71,7 @@ function drawBracket(renderer, x1, y1, x2, y2) {
   var rightStartX = midX + gapWidth;
   var rightStartY = y1 + (rightStartX - x1) * slope;
   pathString += drawLine(rightStartX, rightStartY, x2, y2);
+  // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
   printPath(renderer, {
     path: pathString,
     stroke: renderer.foregroundColor,

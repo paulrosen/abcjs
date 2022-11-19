@@ -4,11 +4,11 @@
 
 import roundNumber from './round-number';
 
-function Group() {
+function Group(this: any) {
   this.ingroup = false;
 }
 
-Group.prototype.beginGroup = function (paper, controller) {
+Group.prototype.beginGroup = function (paper: any, controller: any) {
   this.paper = paper;
   this.controller = controller;
   this.path = [];
@@ -21,7 +21,7 @@ Group.prototype.isInGroup = function () {
   return this.ingroup;
 };
 
-Group.prototype.addPath = function (path) {
+Group.prototype.addPath = function (path: any) {
   path = path || [];
   if (path.length === 0) return;
   path[0][0] = "m";
@@ -42,7 +42,7 @@ Group.prototype.addPath = function (path) {
 /**
  * End a group of glyphs that will always be moved, scaled and highlighted together
  */
-Group.prototype.endGroup = function (klass, name) {
+Group.prototype.endGroup = function (klass: any, name: any) {
   this.ingroup = false;
   //if (this.path.length === 0) return null;
   var path = "";
@@ -60,6 +60,7 @@ Group.prototype.endGroup = function (klass, name) {
 };
 
 // There is just a singleton of this object.
+// @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
 var elementGroup = new Group();
 
 export default elementGroup;

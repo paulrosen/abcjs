@@ -3,7 +3,7 @@ import CreateSynth from './create-synth';
 import TimingCallbacks from '../api/abc_timing_callbacks';
 import activeAudioContext from './active-audio-context';
 
-function SynthController() {
+function SynthController(this: any) {
   var self = this;
   self.warp = 100;
   self.cursorControl = null;
@@ -18,8 +18,9 @@ function SynthController() {
   self.isLoaded = false;
   self.isLoading = false;
 
-  self.load = function (selector, cursorControl, visualOptions) {
+  self.load = function (selector: any, cursorControl: any, visualOptions: any) {
     if (!visualOptions) visualOptions = {};
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     self.control = new CreateSynthControl(selector, {
       loopHandler: visualOptions.displayLoop ? self.toggleLoop : undefined,
       restartHandler: visualOptions.displayRestart ? self.restart : undefined,
@@ -34,11 +35,11 @@ function SynthController() {
     self.disable(true);
   };
 
-  self.disable = function (isDisabled) {
+  self.disable = function (isDisabled: any) {
     if (self.control) self.control.disable(isDisabled);
   };
 
-  self.setTune = function (visualObj, userAction, audioParams) {
+  self.setTune = function (visualObj: any, userAction: any, audioParams: any) {
     self.visualObj = visualObj;
     self.disable(false);
     self.options = audioParams;
@@ -67,19 +68,20 @@ function SynthController() {
     );
     if (self.control) self.control.setTempo(self.currentTempo);
     self.percent = 0;
-    var loadingResponse;
+    var loadingResponse: any;
 
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     if (!self.midiBuffer) self.midiBuffer = new CreateSynth();
     return activeAudioContext()
       .resume()
-      .then(function (response) {
+      .then(function (response: any) {
         return self.midiBuffer.init({
           visualObj: self.visualObj,
           options: self.options,
           millisecondsPerMeasure: millisecondsPerMeasure
         });
       })
-      .then(function (response) {
+      .then(function (response: any) {
         loadingResponse = response;
         return self.midiBuffer.prime();
       })
@@ -94,6 +96,7 @@ function SynthController() {
           subdivisions = parseInt(self.cursorControl.beatSubdivisions, 10);
 
         // Need to create the TimingCallbacks after priming the midi so that the midi data is available for the callbacks.
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         self.timer = new TimingCallbacks(self.visualObj, {
           beatCallback: self.beatCallback,
           eventCallback: self.eventCallback,
@@ -141,13 +144,13 @@ function SynthController() {
     return self.runWhenReady(self._play, undefined);
   };
 
-  function sleep(ms) {
+  function sleep(ms: any) {
     return new Promise(function (resolve) {
       setTimeout(resolve, ms);
     });
   }
 
-  self.runWhenReady = function (fn, arg1) {
+  self.runWhenReady = function (fn: any, arg1: any) {
     if (!self.visualObj) return Promise.resolve({ status: "loading" });
     if (self.isLoading) {
       // Some other promise is waiting for the tune to be loaded, so just wait.
@@ -206,11 +209,11 @@ function SynthController() {
     }
   };
 
-  self.randomAccess = function (ev) {
+  self.randomAccess = function (ev: any) {
     return self.runWhenReady(self._randomAccess, ev);
   };
 
-  self._randomAccess = function (ev) {
+  self._randomAccess = function (ev: any) {
     var background = ev.target.classList.contains(
       "abcjs-midi-progress-indicator"
     )
@@ -223,14 +226,14 @@ function SynthController() {
     return Promise.resolve({ status: "ok" });
   };
 
-  self.seek = function (percent, units) {
+  self.seek = function (percent: any, units: any) {
     if (self.timer && self.midiBuffer) {
       self.timer.setProgress(percent, units);
       self.midiBuffer.seek(percent, units);
     }
   };
 
-  self.setWarp = function (newWarp) {
+  self.setWarp = function (newWarp: any) {
     if (parseInt(newWarp, 10) > 0) {
       self.warp = parseInt(newWarp, 10);
       var wasPlaying = self.isStarted;
@@ -253,12 +256,12 @@ function SynthController() {
     return Promise.resolve();
   };
 
-  self.onWarp = function (ev) {
+  self.onWarp = function (ev: any) {
     var newWarp = ev.target.value;
     return self.setWarp(newWarp);
   };
 
-  self.setProgress = function (percent, totalTime) {
+  self.setProgress = function (percent: any, totalTime: any) {
     self.percent = percent;
     if (self.control) self.control.setProgress(percent, totalTime);
   };
@@ -287,7 +290,7 @@ function SynthController() {
     }
   };
 
-  self.beatCallback = function (beatNumber, totalBeats, totalTime, position) {
+  self.beatCallback = function (beatNumber: any, totalBeats: any, totalTime: any, position: any) {
     var percent = beatNumber / totalBeats;
     self.setProgress(percent, totalTime);
     if (
@@ -298,7 +301,7 @@ function SynthController() {
       self.cursorControl.onBeat(beatNumber, totalBeats, totalTime, position);
   };
 
-  self.eventCallback = function (event) {
+  self.eventCallback = function (event: any) {
     if (event) {
       if (
         self.cursorControl &&
@@ -311,7 +314,7 @@ function SynthController() {
     }
   };
 
-  self.lineEndCallback = function (lineEvent, leftEvent) {
+  self.lineEndCallback = function (lineEvent: any, leftEvent: any) {
     if (
       self.cursorControl &&
       self.cursorControl.onLineEnd &&
@@ -324,7 +327,7 @@ function SynthController() {
     return self.midiBuffer.download();
   };
 
-  self.download = function (fileName) {
+  self.download = function (fileName: any) {
     var url = self.getUrl();
     var link = document.createElement("a");
     document.body.appendChild(link);

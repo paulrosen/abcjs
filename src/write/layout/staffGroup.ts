@@ -1,6 +1,6 @@
 import layoutVoiceElements from './VoiceElements';
 
-function checkLastBarX(voices) {
+function checkLastBarX(voices: any) {
   var maxX = 0;
   for (var i = 0; i < voices.length; i++) {
     var curVoice = voices[i];
@@ -20,11 +20,11 @@ function checkLastBarX(voices) {
 }
 
 var layoutStaffGroup = function (
-  spacing,
-  renderer,
-  debug,
-  staffGroup,
-  leftEdge
+  spacing: any,
+  renderer: any,
+  debug: any,
+  staffGroup: any,
+  leftEdge: any
 ) {
   var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
   var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
@@ -37,15 +37,18 @@ var layoutStaffGroup = function (
   var currentduration = 0;
   if (debug) console.log("init layout", spacing);
   for (i = 0; i < staffGroup.voices.length; i++) {
+    // @ts-expect-error TS(2339): Property 'beginLayout' does not exist on type '() ... Remove this comment to see the full error message
     layoutVoiceElements.beginLayout(x, staffGroup.voices[i]);
   }
 
   var spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
   while (!finished(staffGroup.voices)) {
     // find first duration level to be laid out among candidates across voices
+    // @ts-expect-error TS(2322): Type 'null' is not assignable to type 'number'.
     currentduration = null; // candidate smallest duration level
     for (i = 0; i < staffGroup.voices.length; i++) {
       if (
+        // @ts-expect-error TS(2339): Property 'layoutEnded' does not exist on type '() ... Remove this comment to see the full error message
         !layoutVoiceElements.layoutEnded(staffGroup.voices[i]) &&
         (!currentduration ||
           getDurationIndex(staffGroup.voices[i]) < currentduration)
@@ -73,8 +76,11 @@ var layoutStaffGroup = function (
     var spacingduration = 0;
     for (i = 0; i < currentvoices.length; i++) {
       //console.log("greatest spacing unit", x, layoutVoiceElements.getNextX(currentvoices[i]), layoutVoiceElements.getSpacingUnits(currentvoices[i]), currentvoices[i].spacingduration);
+      // @ts-expect-error TS(2339): Property 'getNextX' does not exist on type '() => ... Remove this comment to see the full error message
       if (layoutVoiceElements.getNextX(currentvoices[i]) > x) {
+        // @ts-expect-error TS(2339): Property 'getNextX' does not exist on type '() => ... Remove this comment to see the full error message
         x = layoutVoiceElements.getNextX(currentvoices[i]);
+        // @ts-expect-error TS(2339): Property 'getSpacingUnits' does not exist on type ... Remove this comment to see the full error message
         spacingunit = layoutVoiceElements.getSpacingUnits(currentvoices[i]);
         spacingduration = currentvoices[i].spacingduration;
       }
@@ -94,6 +100,7 @@ var layoutStaffGroup = function (
           ? currentvoices[lastTopVoice]
           : undefined;
       if (!isSameStaff(v, topVoice)) topVoice = undefined;
+      // @ts-expect-error TS(2339): Property 'layoutOneItem' does not exist on type '(... Remove this comment to see the full error message
       var voicechildx = layoutVoiceElements.layoutOneItem(
         x,
         spacing,
@@ -106,6 +113,7 @@ var layoutStaffGroup = function (
         x = voicechildx; //update x
         for (var j = 0; j < i; j++) {
           // shift over all previously laid out elements
+          // @ts-expect-error TS(2339): Property 'shiftRight' does not exist on type '() =... Remove this comment to see the full error message
           layoutVoiceElements.shiftRight(dx, currentvoices[j]);
         }
       }
@@ -114,20 +122,25 @@ var layoutStaffGroup = function (
     // remove the value of already counted spacing units in other voices (e.g. if a voice had planned to use up 5 spacing units but is not in line to be laid out at this duration level - where we've used 2 spacing units - then we must use up 3 spacing units, not 5)
     for (i = 0; i < othervoices.length; i++) {
       othervoices[i].spacingduration -= spacingduration;
+      // @ts-expect-error TS(2339): Property 'updateNextX' does not exist on type '() ... Remove this comment to see the full error message
       layoutVoiceElements.updateNextX(x, spacing, othervoices[i]); // adjust other voices expectations
     }
 
     // update indexes of currently laid out elems
     for (i = 0; i < currentvoices.length; i++) {
       var voice = currentvoices[i];
+      // @ts-expect-error TS(2339): Property 'updateIndices' does not exist on type '(... Remove this comment to see the full error message
       layoutVoiceElements.updateIndices(voice);
     }
   } // finished laying out
 
   // find the greatest remaining x as a base for the width
   for (i = 0; i < staffGroup.voices.length; i++) {
+    // @ts-expect-error TS(2339): Property 'getNextX' does not exist on type '() => ... Remove this comment to see the full error message
     if (layoutVoiceElements.getNextX(staffGroup.voices[i]) > x) {
+      // @ts-expect-error TS(2339): Property 'getNextX' does not exist on type '() => ... Remove this comment to see the full error message
       x = layoutVoiceElements.getNextX(staffGroup.voices[i]);
+      // @ts-expect-error TS(2339): Property 'getSpacingUnits' does not exist on type ... Remove this comment to see the full error message
       spacingunit = layoutVoiceElements.getSpacingUnits(staffGroup.voices[i]);
     }
   }
@@ -141,14 +154,15 @@ var layoutStaffGroup = function (
   return { spacingUnits: spacingunits, minSpace: minspace };
 };
 
-function finished(voices) {
+function finished(voices: any) {
   for (var i = 0; i < voices.length; i++) {
+    // @ts-expect-error TS(2339): Property 'layoutEnded' does not exist on type '() ... Remove this comment to see the full error message
     if (!layoutVoiceElements.layoutEnded(voices[i])) return false;
   }
   return true;
 }
 
-function getDurationIndex(element) {
+function getDurationIndex(element: any) {
   return (
     element.durationindex -
     (element.children[element.i] && element.children[element.i].duration > 0
@@ -157,7 +171,7 @@ function getDurationIndex(element) {
   ); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
 }
 
-function isSameStaff(voice1, voice2) {
+function isSameStaff(voice1: any, voice2: any) {
   if (
     !voice1 ||
     !voice1.staff ||

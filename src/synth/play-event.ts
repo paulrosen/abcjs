@@ -2,7 +2,8 @@ import SynthSequence from './synth-sequence';
 import CreateSynth from './create-synth';
 import activeAudioContext from './active-audio-context';
 
-function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
+function playEvent(midiPitches: any, midiGracePitches: any, millisecondsPerMeasure: any) {
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var sequence = new SynthSequence();
 
   for (var i = 0; i < midiPitches.length; i++) {
@@ -40,7 +41,8 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
   }
 }
 
-function doPlay(sequence, millisecondsPerMeasure) {
+function doPlay(sequence: any, millisecondsPerMeasure: any) {
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var buffer = new CreateSynth();
   return buffer
     .init({

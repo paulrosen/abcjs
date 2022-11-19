@@ -10,11 +10,13 @@ import wrap from './wrap_lines';
 import Tune from '../data/abc_tune';
 import TuneBuilder from '../parse/tune-builder';
 
-var Parse = function () {
+var Parse = function(this: any) {
   "use strict";
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var tune = new Tune();
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var tuneBuilder = new TuneBuilder(tune);
-  var tokenizer;
+  var tokenizer: any;
   var wordsContinuation = "";
   var symbolContinuation = "";
 
@@ -47,17 +49,19 @@ var Parse = function () {
       setUpAudio: tune.setUpAudio,
       deline: tune.deline
     };
+    // @ts-expect-error TS(2339): Property 'lineBreaks' does not exist on type '{ fo... Remove this comment to see the full error message
     if (tune.lineBreaks) t.lineBreaks = tune.lineBreaks;
+    // @ts-expect-error TS(2339): Property 'visualTranspose' does not exist on type ... Remove this comment to see the full error message
     if (tune.visualTranspose) t.visualTranspose = tune.visualTranspose;
     return t;
   };
 
-  function addPositioning(el, type, value) {
+  function addPositioning(el: any, type: any, value: any) {
     if (!el.positioning) el.positioning = {};
     el.positioning[type] = value;
   }
 
-  function addFont(el, type, value) {
+  function addFont(el: any, type: any, value: any) {
     if (!el.fonts) el.fonts = {};
     el.fonts[type] = value;
   }
@@ -66,141 +70,231 @@ var Parse = function () {
     reset: function () {
       for (var property in this) {
         if (
+          // @ts-expect-error TS(2339): Property 'prototype' does not exist on type '{ res... Remove this comment to see the full error message
           this.prototype.hasOwnProperty.call(property) &&
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           typeof this[property] !== "function"
         ) {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           delete this[property];
         }
       }
+      // @ts-expect-error TS(2339): Property 'iChar' does not exist on type '{ reset: ... Remove this comment to see the full error message
       this.iChar = 0;
+      // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ reset: ()... Remove this comment to see the full error message
       this.key = { accidentals: [], root: "none", acc: "", mode: "" };
+      // @ts-expect-error TS(2339): Property 'meter' does not exist on type '{ reset: ... Remove this comment to see the full error message
       this.meter = null; // if no meter is specified, free meter is assumed
+      // @ts-expect-error TS(2339): Property 'origMeter' does not exist on type '{ res... Remove this comment to see the full error message
       this.origMeter = null; // this is for new voices that are created after we set the meter.
+      // @ts-expect-error TS(2339): Property 'hasMainTitle' does not exist on type '{ ... Remove this comment to see the full error message
       this.hasMainTitle = false;
+      // @ts-expect-error TS(2339): Property 'default_length' does not exist on type '... Remove this comment to see the full error message
       this.default_length = 0.125;
+      // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ reset: (... Remove this comment to see the full error message
       this.clef = { type: "treble", verticalPos: 0 };
+      // @ts-expect-error TS(2339): Property 'next_note_duration' does not exist on ty... Remove this comment to see the full error message
       this.next_note_duration = 0;
+      // @ts-expect-error TS(2339): Property 'start_new_line' does not exist on type '... Remove this comment to see the full error message
       this.start_new_line = true;
+      // @ts-expect-error TS(2339): Property 'is_in_header' does not exist on type '{ ... Remove this comment to see the full error message
       this.is_in_header = true;
+      // @ts-expect-error TS(2339): Property 'partForNextLine' does not exist on type ... Remove this comment to see the full error message
       this.partForNextLine = {};
+      // @ts-expect-error TS(2339): Property 'tempoForNextLine' does not exist on type... Remove this comment to see the full error message
       this.tempoForNextLine = [];
+      // @ts-expect-error TS(2339): Property 'havent_set_length' does not exist on typ... Remove this comment to see the full error message
       this.havent_set_length = true;
+      // @ts-expect-error TS(2339): Property 'voices' does not exist on type '{ reset:... Remove this comment to see the full error message
       this.voices = {};
+      // @ts-expect-error TS(2339): Property 'staves' does not exist on type '{ reset:... Remove this comment to see the full error message
       this.staves = [];
+      // @ts-expect-error TS(2339): Property 'macros' does not exist on type '{ reset:... Remove this comment to see the full error message
       this.macros = {};
+      // @ts-expect-error TS(2339): Property 'currBarNumber' does not exist on type '{... Remove this comment to see the full error message
       this.currBarNumber = 1;
+      // @ts-expect-error TS(2339): Property 'barCounter' does not exist on type '{ re... Remove this comment to see the full error message
       this.barCounter = {};
+      // @ts-expect-error TS(2339): Property 'ignoredDecorations' does not exist on ty... Remove this comment to see the full error message
       this.ignoredDecorations = [];
+      // @ts-expect-error TS(2339): Property 'score_is_present' does not exist on type... Remove this comment to see the full error message
       this.score_is_present = false; // Can't have original V: lines when there is the score directive
+      // @ts-expect-error TS(2339): Property 'inEnding' does not exist on type '{ rese... Remove this comment to see the full error message
       this.inEnding = false;
+      // @ts-expect-error TS(2339): Property 'inTie' does not exist on type '{ reset: ... Remove this comment to see the full error message
       this.inTie = [];
+      // @ts-expect-error TS(2339): Property 'inTieChord' does not exist on type '{ re... Remove this comment to see the full error message
       this.inTieChord = {};
+      // @ts-expect-error TS(2339): Property 'vocalPosition' does not exist on type '{... Remove this comment to see the full error message
       this.vocalPosition = "auto";
+      // @ts-expect-error TS(2339): Property 'dynamicPosition' does not exist on type ... Remove this comment to see the full error message
       this.dynamicPosition = "auto";
+      // @ts-expect-error TS(2339): Property 'chordPosition' does not exist on type '{... Remove this comment to see the full error message
       this.chordPosition = "auto";
+      // @ts-expect-error TS(2339): Property 'ornamentPosition' does not exist on type... Remove this comment to see the full error message
       this.ornamentPosition = "auto";
+      // @ts-expect-error TS(2339): Property 'volumePosition' does not exist on type '... Remove this comment to see the full error message
       this.volumePosition = "auto";
+      // @ts-expect-error TS(2339): Property 'openSlurs' does not exist on type '{ res... Remove this comment to see the full error message
       this.openSlurs = [];
+      // @ts-expect-error TS(2339): Property 'freegchord' does not exist on type '{ re... Remove this comment to see the full error message
       this.freegchord = false;
+      // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
       this.endingHoldOver = {};
     },
-    differentFont: function (type, defaultFonts) {
+    differentFont: function (type: any, defaultFonts: any) {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       if (this[type].decoration !== defaultFonts[type].decoration) return true;
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       if (this[type].face !== defaultFonts[type].face) return true;
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       if (this[type].size !== defaultFonts[type].size) return true;
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       if (this[type].style !== defaultFonts[type].style) return true;
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       if (this[type].weight !== defaultFonts[type].weight) return true;
       return false;
     },
-    addFormattingOptions: function (el, defaultFonts, elType) {
+    addFormattingOptions: function (el: any, defaultFonts: any, elType: any) {
       if (elType === "note") {
+        // @ts-expect-error TS(2339): Property 'vocalPosition' does not exist on type '{... Remove this comment to see the full error message
         if (this.vocalPosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'vocalPosition' does not exist on type '{... Remove this comment to see the full error message
           addPositioning(el, "vocalPosition", this.vocalPosition);
+        // @ts-expect-error TS(2339): Property 'dynamicPosition' does not exist on type ... Remove this comment to see the full error message
         if (this.dynamicPosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'dynamicPosition' does not exist on type ... Remove this comment to see the full error message
           addPositioning(el, "dynamicPosition", this.dynamicPosition);
+        // @ts-expect-error TS(2339): Property 'chordPosition' does not exist on type '{... Remove this comment to see the full error message
         if (this.chordPosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'chordPosition' does not exist on type '{... Remove this comment to see the full error message
           addPositioning(el, "chordPosition", this.chordPosition);
+        // @ts-expect-error TS(2339): Property 'ornamentPosition' does not exist on type... Remove this comment to see the full error message
         if (this.ornamentPosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'ornamentPosition' does not exist on type... Remove this comment to see the full error message
           addPositioning(el, "ornamentPosition", this.ornamentPosition);
+        // @ts-expect-error TS(2339): Property 'volumePosition' does not exist on type '... Remove this comment to see the full error message
         if (this.volumePosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'volumePosition' does not exist on type '... Remove this comment to see the full error message
           addPositioning(el, "volumePosition", this.volumePosition);
         if (this.differentFont("annotationfont", defaultFonts))
+          // @ts-expect-error TS(2339): Property 'annotationfont' does not exist on type '... Remove this comment to see the full error message
           addFont(el, "annotationfont", this.annotationfont);
         if (this.differentFont("gchordfont", defaultFonts))
+          // @ts-expect-error TS(2339): Property 'gchordfont' does not exist on type '{ re... Remove this comment to see the full error message
           addFont(el, "gchordfont", this.gchordfont);
         if (this.differentFont("vocalfont", defaultFonts))
+          // @ts-expect-error TS(2339): Property 'vocalfont' does not exist on type '{ res... Remove this comment to see the full error message
           addFont(el, "vocalfont", this.vocalfont);
         if (this.differentFont("tripletfont", defaultFonts))
+          // @ts-expect-error TS(2339): Property 'tripletfont' does not exist on type '{ r... Remove this comment to see the full error message
           addFont(el, "tripletfont", this.tripletfont);
       } else if (elType === "bar") {
+        // @ts-expect-error TS(2339): Property 'dynamicPosition' does not exist on type ... Remove this comment to see the full error message
         if (this.dynamicPosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'dynamicPosition' does not exist on type ... Remove this comment to see the full error message
           addPositioning(el, "dynamicPosition", this.dynamicPosition);
+        // @ts-expect-error TS(2339): Property 'chordPosition' does not exist on type '{... Remove this comment to see the full error message
         if (this.chordPosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'chordPosition' does not exist on type '{... Remove this comment to see the full error message
           addPositioning(el, "chordPosition", this.chordPosition);
+        // @ts-expect-error TS(2339): Property 'ornamentPosition' does not exist on type... Remove this comment to see the full error message
         if (this.ornamentPosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'ornamentPosition' does not exist on type... Remove this comment to see the full error message
           addPositioning(el, "ornamentPosition", this.ornamentPosition);
+        // @ts-expect-error TS(2339): Property 'volumePosition' does not exist on type '... Remove this comment to see the full error message
         if (this.volumePosition !== "auto")
+          // @ts-expect-error TS(2339): Property 'volumePosition' does not exist on type '... Remove this comment to see the full error message
           addPositioning(el, "volumePosition", this.volumePosition);
         if (this.differentFont("measurefont", defaultFonts))
+          // @ts-expect-error TS(2339): Property 'measurefont' does not exist on type '{ r... Remove this comment to see the full error message
           addFont(el, "measurefont", this.measurefont);
         if (this.differentFont("repeatfont", defaultFonts))
+          // @ts-expect-error TS(2339): Property 'repeatfont' does not exist on type '{ re... Remove this comment to see the full error message
           addFont(el, "repeatfont", this.repeatfont);
       }
     },
     duplicateStartEndingHoldOvers: function () {
+      // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
       this.endingHoldOver = {
         inTie: [],
         inTieChord: {}
       };
+      // @ts-expect-error TS(2339): Property 'inTie' does not exist on type '{ reset: ... Remove this comment to see the full error message
       for (var i = 0; i < this.inTie.length; i++) {
+        // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
         this.endingHoldOver.inTie.push([]);
+        // @ts-expect-error TS(2339): Property 'inTie' does not exist on type '{ reset: ... Remove this comment to see the full error message
         if (this.inTie[i]) {
           // if a voice is suppressed there might be a gap in the array.
+          // @ts-expect-error TS(2339): Property 'inTie' does not exist on type '{ reset: ... Remove this comment to see the full error message
           for (var j = 0; j < this.inTie[i].length; j++) {
+            // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
             this.endingHoldOver.inTie[i].push(this.inTie[i][j]);
           }
         }
       }
+      // @ts-expect-error TS(2339): Property 'inTieChord' does not exist on type '{ re... Remove this comment to see the full error message
       for (var key in this.inTieChord) {
+        // @ts-expect-error TS(2339): Property 'inTieChord' does not exist on type '{ re... Remove this comment to see the full error message
         if (this.inTieChord.prototype.hasOwnProperty.call(key))
+          // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
           this.endingHoldOver.inTieChord[key] = this.inTieChord[key];
       }
     },
     restoreStartEndingHoldOvers: function () {
+      // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
       if (!this.endingHoldOver.inTie) return;
+      // @ts-expect-error TS(2339): Property 'inTie' does not exist on type '{ reset: ... Remove this comment to see the full error message
       this.inTie = [];
+      // @ts-expect-error TS(2339): Property 'inTieChord' does not exist on type '{ re... Remove this comment to see the full error message
       this.inTieChord = {};
+      // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
       for (var i = 0; i < this.endingHoldOver.inTie.length; i++) {
+        // @ts-expect-error TS(2339): Property 'inTie' does not exist on type '{ reset: ... Remove this comment to see the full error message
         this.inTie.push([]);
+        // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
         for (var j = 0; j < this.endingHoldOver.inTie[i].length; j++) {
+          // @ts-expect-error TS(2339): Property 'inTie' does not exist on type '{ reset: ... Remove this comment to see the full error message
           this.inTie[i].push(this.endingHoldOver.inTie[i][j]);
         }
       }
+      // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
       for (var key in this.endingHoldOver.inTieChord) {
+        // @ts-expect-error TS(2339): Property 'endingHoldOver' does not exist on type '... Remove this comment to see the full error message
         if (this.endingHoldOver.inTieChord.prototype.hasOwnProperty.call(key))
+          // @ts-expect-error TS(2339): Property 'inTieChord' does not exist on type '{ re... Remove this comment to see the full error message
           this.inTieChord[key] = this.endingHoldOver.inTieChord[key];
       }
     }
   };
 
-  var addWarning = function (str) {
+  var addWarning = function (str: any) {
+    // @ts-expect-error TS(2339): Property 'warnings' does not exist on type '{ rese... Remove this comment to see the full error message
     if (!multilineVars.warnings) multilineVars.warnings = [];
+    // @ts-expect-error TS(2339): Property 'warnings' does not exist on type '{ rese... Remove this comment to see the full error message
     multilineVars.warnings.push(str);
   };
 
-  var addWarningObject = function (warningObject) {
+  var addWarningObject = function (warningObject: any) {
+    // @ts-expect-error TS(2339): Property 'warningObjects' does not exist on type '... Remove this comment to see the full error message
     if (!multilineVars.warningObjects) multilineVars.warningObjects = [];
+    // @ts-expect-error TS(2339): Property 'warningObjects' does not exist on type '... Remove this comment to see the full error message
     multilineVars.warningObjects.push(warningObject);
   };
 
-  var encode = function (str) {
+  var encode = function (str: any) {
+    // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
     var ret = parseCommon.gsub(str, "\x12", " ");
+    // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
     ret = parseCommon.gsub(ret, "&", "&amp;");
+    // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
     ret = parseCommon.gsub(ret, "<", "&lt;");
+    // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
     return parseCommon.gsub(ret, ">", "&gt;");
   };
 
-  var warn = function (str, line, col_num) {
+  var warn = function (str: any, line: any, col_num: any) {
     if (!line) line = " ";
     var bad_char = line.charAt(col_num);
     if (bad_char === " ") bad_char = "SPACE";
@@ -223,22 +317,25 @@ var Parse = function () {
     addWarningObject({
       message: str,
       line: line,
+      // @ts-expect-error TS(2339): Property 'iChar' does not exist on type '{ reset: ... Remove this comment to see the full error message
       startChar: multilineVars.iChar + col_num,
       column: col_num
     });
   };
 
-  var header;
-  var music;
+  var header: any;
+  var music: any;
 
   this.getWarnings = function () {
+    // @ts-expect-error TS(2339): Property 'warnings' does not exist on type '{ rese... Remove this comment to see the full error message
     return multilineVars.warnings;
   };
   this.getWarningObjects = function () {
+    // @ts-expect-error TS(2339): Property 'warningObjects' does not exist on type '... Remove this comment to see the full error message
     return multilineVars.warningObjects;
   };
 
-  var addWords = function (line, words) {
+  var addWords = function (line: any, words: any) {
     if (words.indexOf("\x12") >= 0) {
       wordsContinuation += words;
       return;
@@ -250,17 +347,20 @@ var Parse = function () {
       warn("Can't add words before the first line of music", line, 0);
       return;
     }
+    // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
     words = parseCommon.strip(words);
     if (words.charAt(words.length - 1) !== "-") words = words + " "; // Just makes it easier to parse below, since every word has a divider after it.
-    var word_list = [];
+    var word_list: any = [];
     // first make a list of words from the string we are passed. A word is divided on either a space or dash.
     var last_divider = 0;
     var replace = false;
-    var addWord = function (i) {
+    var addWord = function (i: any) {
+      // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
       var word = parseCommon.strip(words.substring(last_divider, i));
       word = word.replace(/\\([-_*|~])/g, "$1");
       last_divider = i + 1;
       if (word.length > 0) {
+        // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
         if (replace) word = parseCommon.gsub(word, "~", " ");
         var div = words.charAt(i);
         if (div !== "_" && div !== "-") div = " ";
@@ -282,6 +382,7 @@ var Parse = function () {
           break;
         case "-":
           if (!escNext && !addWord(i) && word_list.length > 0) {
+            // @ts-expect-error TS(2339): Property 'last' does not exist on type '{}'.
             parseCommon.last(word_list).divider = "-";
             word_list.push({ skip: true, to: "next" });
           }
@@ -314,7 +415,8 @@ var Parse = function () {
     }
 
     var inSlur = false;
-    parseCommon.each(line, function (el) {
+    // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+    parseCommon.each(line, function (el: any) {
       if (word_list.length !== 0) {
         if (word_list[0].skip) {
           switch (word_list[0].to) {
@@ -348,7 +450,7 @@ var Parse = function () {
     });
   };
 
-  var addSymbols = function (line, words) {
+  var addSymbols = function (line: any, words: any) {
     if (words.indexOf("\x12") >= 0) {
       symbolContinuation += words;
       return;
@@ -361,16 +463,19 @@ var Parse = function () {
       warn("Can't add symbols before the first line of music", line, 0);
       return;
     }
+    // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
     words = parseCommon.strip(words);
     if (words.charAt(words.length - 1) !== "-") words = words + " "; // Just makes it easier to parse below, since every word has a divider after it.
-    var word_list = [];
+    var word_list: any = [];
     // first make a list of words from the string we are passed. A word is divided on either a space or dash.
     var last_divider = 0;
     var replace = false;
-    var addWord = function (i) {
+    var addWord = function (i: any) {
+      // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
       var word = parseCommon.strip(words.substring(last_divider, i));
       last_divider = i + 1;
       if (word.length > 0) {
+        // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
         if (replace) word = parseCommon.gsub(word, "~", " ");
         var div = words.charAt(i);
         if (div !== "_" && div !== "-") div = " ";
@@ -391,6 +496,7 @@ var Parse = function () {
           break;
         case "-":
           if (!addWord(i) && word_list.length > 0) {
+            // @ts-expect-error TS(2339): Property 'last' does not exist on type '{}'.
             parseCommon.last(word_list).divider = "-";
             word_list.push({ skip: true, to: "next" });
           }
@@ -414,7 +520,8 @@ var Parse = function () {
     }
 
     var inSlur = false;
-    parseCommon.each(line, function (el) {
+    // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+    parseCommon.each(line, function (el: any) {
       if (word_list.length !== 0) {
         if (word_list[0].skip) {
           switch (word_list[0].to) {
@@ -441,8 +548,10 @@ var Parse = function () {
     });
   };
 
-  var parseLine = function (line) {
+  var parseLine = function (line: any) {
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     if (parseCommon.startsWith(line, "%%")) {
+      // @ts-expect-error TS(2339): Property 'addDirective' does not exist on type '{}... Remove this comment to see the full error message
       var err = parseDirective.addDirective(line.substring(2));
       if (err) warn(err, line, 2);
       return;
@@ -475,19 +584,20 @@ var Parse = function () {
       addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
   };
 
-  function appendLastMeasure(voice, nextVoice) {
+  function appendLastMeasure(voice: any, nextVoice: any) {
     voice.push({
       el_type: "hint"
     });
     for (var i = 0; i < nextVoice.length; i++) {
       var element = nextVoice[i];
+      // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
       var hint = parseCommon.clone(element);
       voice.push(hint);
       if (element.el_type === "bar") return;
     }
   }
 
-  function addHintMeasure(staff, nextStaff) {
+  function addHintMeasure(staff: any, nextStaff: any) {
     for (var i = 0; i < staff.length; i++) {
       var stave = staff[i];
       var nextStave = nextStaff[i];
@@ -519,7 +629,7 @@ var Parse = function () {
     }
   }
 
-  this.parse = function (strTune, switches, startPos) {
+  this.parse = function (strTune: any, switches: any, startPos: any) {
     // the switches are optional and cause a difference in the way the tune is parsed.
     // switches.header_only : stop parsing when the header is finished
     // switches.stop_on_warning : stop at the first warning encountered.
@@ -549,17 +659,21 @@ var Parse = function () {
     // take care of line continuations right away, but keep the same number of characters
     strTune = strTune.replace(
       /\\([ \t]*)(%.*)*\n/g,
-      function (all, backslash, comment) {
+      function (all: any, backslash: any, comment: any) {
         var padding = comment ? Array(comment.length + 1).join(" ") : "";
         return backslash + "\x12" + padding + "\n";
       }
     );
     var lines = strTune.split("\n");
+    // @ts-expect-error TS(2339): Property 'last' does not exist on type '{}'.
     if (parseCommon.last(lines).length === 0)
       // remove the blank line we added above.
       lines.pop();
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     tokenizer = new Tokenizer(lines, multilineVars);
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     header = new ParseHeader(tokenizer, warn, multilineVars, tune, tuneBuilder);
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     music = new ParseMusic(
       tokenizer,
       warn,
@@ -571,15 +685,21 @@ var Parse = function () {
 
     if (switches.print) tune.media = "print";
     multilineVars.reset();
+    // @ts-expect-error TS(2339): Property 'iChar' does not exist on type '{ reset: ... Remove this comment to see the full error message
     multilineVars.iChar = startPos;
     if (switches.visualTranspose) {
+      // @ts-expect-error TS(2339): Property 'globalTranspose' does not exist on type ... Remove this comment to see the full error message
       multilineVars.globalTranspose = parseInt(switches.visualTranspose);
+      // @ts-expect-error TS(2339): Property 'globalTranspose' does not exist on type ... Remove this comment to see the full error message
       if (multilineVars.globalTranspose === 0)
+        // @ts-expect-error TS(2339): Property 'globalTranspose' does not exist on type ... Remove this comment to see the full error message
         multilineVars.globalTranspose = undefined;
       else tuneBuilder.setVisualTranspose(switches.visualTranspose);
+    // @ts-expect-error TS(2339): Property 'globalTranspose' does not exist on type ... Remove this comment to see the full error message
     } else multilineVars.globalTranspose = undefined;
     if (switches.lineBreaks) {
       // The line break numbers are 0-based and they reflect the last measure of the current line.
+      // @ts-expect-error TS(2339): Property 'lineBreaks' does not exist on type '{ re... Remove this comment to see the full error message
       multilineVars.lineBreaks = switches.lineBreaks;
       //multilineVars.continueall = true;
     }
@@ -587,24 +707,33 @@ var Parse = function () {
 
     try {
       if (switches.format) {
+        // @ts-expect-error TS(2339): Property 'globalFormatting' does not exist on type... Remove this comment to see the full error message
         parseDirective.globalFormatting(switches.format);
       }
       var line = tokenizer.nextLine();
       while (line) {
+        // @ts-expect-error TS(2339): Property 'is_in_header' does not exist on type '{ ... Remove this comment to see the full error message
         if (switches.header_only && multilineVars.is_in_header === false)
           throw "normal_abort";
+        // @ts-expect-error TS(2339): Property 'warnings' does not exist on type '{ rese... Remove this comment to see the full error message
         if (switches.stop_on_warning && multilineVars.warnings)
           throw "normal_abort";
 
+        // @ts-expect-error TS(2339): Property 'is_in_header' does not exist on type '{ ... Remove this comment to see the full error message
         var wasInHeader = multilineVars.is_in_header;
         parseLine(line);
+        // @ts-expect-error TS(2339): Property 'is_in_header' does not exist on type '{ ... Remove this comment to see the full error message
         if (wasInHeader && !multilineVars.is_in_header) {
           tuneBuilder.setRunningFont(
             "annotationfont",
+            // @ts-expect-error TS(2339): Property 'annotationfont' does not exist on type '... Remove this comment to see the full error message
             multilineVars.annotationfont
           );
+          // @ts-expect-error TS(2339): Property 'gchordfont' does not exist on type '{ re... Remove this comment to see the full error message
           tuneBuilder.setRunningFont("gchordfont", multilineVars.gchordfont);
+          // @ts-expect-error TS(2339): Property 'tripletfont' does not exist on type '{ r... Remove this comment to see the full error message
           tuneBuilder.setRunningFont("tripletfont", multilineVars.tripletfont);
+          // @ts-expect-error TS(2339): Property 'vocalfont' does not exist on type '{ res... Remove this comment to see the full error message
           tuneBuilder.setRunningFont("vocalfont", multilineVars.vocalfont);
         }
         line = tokenizer.nextLine();
@@ -616,9 +745,13 @@ var Parse = function () {
       if (symbolContinuation) {
         addSymbols(tuneBuilder.getCurrentVoice(), "");
       }
+      // @ts-expect-error TS(2339): Property 'openSlurs' does not exist on type '{ res... Remove this comment to see the full error message
       multilineVars.openSlurs = tuneBuilder.cleanUp(
+        // @ts-expect-error TS(2339): Property 'barsperstaff' does not exist on type '{ ... Remove this comment to see the full error message
         multilineVars.barsperstaff,
+        // @ts-expect-error TS(2339): Property 'staffnonote' does not exist on type '{ r... Remove this comment to see the full error message
         multilineVars.staffnonote,
+        // @ts-expect-error TS(2339): Property 'openSlurs' does not exist on type '{ res... Remove this comment to see the full error message
         multilineVars.openSlurs
       );
     } catch (err) {
@@ -627,6 +760,7 @@ var Parse = function () {
 
     var ph = 11 * 72;
     var pl = 8.5 * 72;
+    // @ts-expect-error TS(2339): Property 'papersize' does not exist on type '{ res... Remove this comment to see the full error message
     switch (multilineVars.papersize) {
       //case "letter": ph = 11*72; pl = 8.5*72; break;
       case "legal":
@@ -638,6 +772,7 @@ var Parse = function () {
         pl = 8.3 * 72;
         break;
     }
+    // @ts-expect-error TS(2339): Property 'landscape' does not exist on type '{ res... Remove this comment to see the full error message
     if (multilineVars.landscape) {
       var x = ph;
       ph = pl;
@@ -650,6 +785,7 @@ var Parse = function () {
       addHintMeasures();
     }
 
+    // @ts-expect-error TS(2339): Property 'lineBreaks' does not exist on type '{ re... Remove this comment to see the full error message
     wrap.wrapLines(tune, multilineVars.lineBreaks, multilineVars.barNumbers);
   };
 };

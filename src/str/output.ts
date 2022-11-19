@@ -1,4 +1,5 @@
 import keyAccidentals from '../const/key-accidentals';
+// @ts-expect-error TS(2614): Module '"../const/relative-major"' has no exported... Remove this comment to see the full error message
 import { relativeMajor, transposeKey, relativeMode } from '../const/relative-major';
 import transposeChordName from '../parse/transpose-chord';
 
@@ -6,7 +7,7 @@ var strTranspose;
 
 (function () {
   "use strict";
-  strTranspose = function (abc, abcTune, steps) {
+  strTranspose = function (abc: any, abcTune: any, steps: any) {
     if (abcTune === "TEST")
       // Backdoor way to get entry points for unit tests
       return {
@@ -17,13 +18,14 @@ var strTranspose;
         transposeChordName: transposeChordName
       };
     steps = parseInt(steps, 10);
-    var changes = [];
+    var changes: any = [];
     var i;
     for (i = 0; i < abcTune.length; i++)
       changes = changes.concat(transposeOneTune(abc, abcTune[i], steps));
 
     // Reverse sort so that we are replacing strings from the end to the beginning so that the indexes aren't invalidated as we go.
     // (Because voices can be written in different ways we can't count on the notes being encountered in the order they appear in the string.)
+    // @ts-expect-error TS(7006): Parameter 'a' implicitly has an 'any' type.
     changes = changes.sort(function (a, b) {
       return b.start - a.start;
     });
@@ -35,8 +37,8 @@ var strTranspose;
     return output.join("");
   };
 
-  function transposeOneTune(abc, abcTune, steps) {
-    var changes = [];
+  function transposeOneTune(abc: any, abcTune: any, steps: any) {
+    var changes: any = [];
 
     // Don't transpose bagpipe music - that is a special case and is always a particular key
     var key = abcTune.getKeySignature();
@@ -59,7 +61,7 @@ var strTranspose;
     return changes;
   }
 
-  function changeAllKeySigs(abc, steps) {
+  function changeAllKeySigs(abc: any, steps: any) {
     var changes = [];
     var arr = abc.split("K:");
     // now each line except the first one will start with whatever is right after "K:"
@@ -83,8 +85,8 @@ var strTranspose;
     return changes;
   }
 
-  function transposeVoices(abc, voices, key, steps) {
-    var changes = [];
+  function transposeVoices(abc: any, voices: any, key: any, steps: any) {
+    var changes: any = [];
     var destinationKey = newKey(key, steps);
     for (var i = 0; i < voices.length; i++) {
       changes = changes.concat(
@@ -101,17 +103,19 @@ var strTranspose;
     return changes;
   }
 
-  function createKeyAccidentals(key) {
+  function createKeyAccidentals(key: any) {
     var ret = {};
     for (var i = 0; i < key.accidentals.length; i++) {
       var acc = key.accidentals[i];
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       if (acc.acc === "flat") ret[acc.note.toUpperCase()] = "_";
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       else if (acc.acc === "sharp") ret[acc.note.toUpperCase()] = "^";
     }
     return ret;
   }
 
-  function setLetterDistance(destinationKey, keyRoot, steps) {
+  function setLetterDistance(destinationKey: any, keyRoot: any, steps: any) {
     var letterDistance =
       letters.indexOf(destinationKey.root) - letters.indexOf(keyRoot);
     if (keyRoot === "none")
@@ -134,12 +138,12 @@ var strTranspose;
   }
 
   function transposeVoice(
-    abc,
-    voice,
-    keyRoot,
-    keyAccidentals,
-    destinationKey,
-    steps
+    abc: any,
+    voice: any,
+    keyRoot: any,
+    keyAccidentals: any,
+    destinationKey: any,
+    steps: any
   ) {
     var changes = [];
     var letterDistance = setLetterDistance(destinationKey, keyRoot, steps);
@@ -178,6 +182,7 @@ var strTranspose;
             keyAccidentals,
             measureAccidentals
           );
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           if (note.acc) measureAccidentals[note.name.toUpperCase()] = note.acc;
           var newPitch = transposePitch(
             note,
@@ -186,6 +191,7 @@ var strTranspose;
             transposedMeasureAccidentals
           );
           if (newPitch.acc)
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             transposedMeasureAccidentals[newPitch.upper] = newPitch.acc;
           changes.push(
             replaceNote(
@@ -206,6 +212,7 @@ var strTranspose;
               measureAccidentals
             );
             if (grace.acc)
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               measureAccidentals[grace.name.toUpperCase()] = grace.acc;
             var newGrace = transposePitch(
               grace,
@@ -214,6 +221,7 @@ var strTranspose;
               measureAccidentals
             );
             if (newGrace.acc)
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               transposedMeasureAccidentals[newGrace.upper] = newGrace.acc;
             changes.push(
               replaceGrace(
@@ -242,7 +250,7 @@ var strTranspose;
   var letters = "CDEFGAB";
   var octaves = [",,,,", ",,,", ",,", ",", "", "'", "''", "'''", "''''"];
 
-  function newKey(key, steps) {
+  function newKey(key: any, steps: any) {
     if (key.root === "none") {
       return {
         root: transposeKey("C", steps),
@@ -263,7 +271,8 @@ var strTranspose;
     };
   }
 
-  function transposePitch(note, key, letterDistance, measureAccidentals) {
+  // @ts-expect-error TS(7023): 'transposePitch' implicitly has return type 'any' ... Remove this comment to see the full error message
+  function transposePitch(note: any, key: any, letterDistance: any, measureAccidentals: any) {
     // Depending on what the current note and new note are, the octave might have changed
     // The letterDistance is how far the change is to see if we passed "C" when transposing.
 
@@ -315,15 +324,24 @@ var strTranspose;
       case -3:
         // This requires a triple flat, so bump down the pitch and try again
         var newNote = {};
+        // @ts-expect-error TS(2339): Property 'pitch' does not exist on type '{}'.
         newNote.pitch = note.pitch - 1;
+        // @ts-expect-error TS(2339): Property 'oct' does not exist on type '{}'.
         newNote.oct = note.oct;
+        // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
         newNote.name = letters[letters.indexOf(note.name) - 1];
+        // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
         if (!newNote.name) {
+          // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
           newNote.name = "B";
+          // @ts-expect-error TS(2339): Property 'oct' does not exist on type '{}'.
           newNote.oct--;
         }
+        // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
         if (newNote.name === "B" || newNote.name === "E")
+          // @ts-expect-error TS(2339): Property 'adj' does not exist on type '{}'.
           newNote.adj = note.adj + 1;
+        // @ts-expect-error TS(2339): Property 'adj' does not exist on type '{}'.
         else newNote.adj = note.adj + 2;
         return transposePitch(
           newNote,
@@ -334,15 +352,24 @@ var strTranspose;
       case 3:
         // This requires a triple sharp, so bump up the pitch and try again
         var newNote = {};
+        // @ts-expect-error TS(2339): Property 'pitch' does not exist on type '{}'.
         newNote.pitch = note.pitch + 1;
+        // @ts-expect-error TS(2339): Property 'oct' does not exist on type '{}'.
         newNote.oct = note.oct;
+        // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
         newNote.name = letters[letters.indexOf(note.name) + 1];
+        // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
         if (!newNote.name) {
+          // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
           newNote.name = "C";
+          // @ts-expect-error TS(2339): Property 'oct' does not exist on type '{}'.
           newNote.oct++;
         }
+        // @ts-expect-error TS(2339): Property 'name' does not exist on type '{}'.
         if (newNote.name === "C" || newNote.name === "F")
+          // @ts-expect-error TS(2339): Property 'adj' does not exist on type '{}'.
           newNote.adj = note.adj - 1;
+        // @ts-expect-error TS(2339): Property 'adj' does not exist on type '{}'.
         else newNote.adj = note.adj - 2;
         return transposePitch(
           newNote,
@@ -398,7 +425,7 @@ var strTranspose;
   // This the relationship of the note to the tonic and an octave. So what is returned is a distance in steps from the tonic and the amount of adjustment from
   // a normal scale. That is - in the key of D an F# is two steps from the tonic and no adjustment. A G# is three steps from the tonic and one half-step higher.
   // I don't think there is any adjustment needed for minor keys since the adjustment is based on the key signature and the accidentals.
-  function parseNote(note, keyRoot, keyAccidentals, measureAccidentals) {
+  function parseNote(note: any, keyRoot: any, keyAccidentals: any, measureAccidentals: any) {
     var root = keyRoot === "none" ? 0 : letters.indexOf(keyRoot);
     var reg = note.match(regPitch);
     // reg[1] : "__", "_", "", "=", "^", or "^^"
@@ -426,7 +453,7 @@ var strTranspose;
     };
   }
 
-  function replaceNote(abc, start, end, newPitch, index) {
+  function replaceNote(abc: any, start: any, end: any, newPitch: any, index: any) {
     // There may be more than just the note between the start and end - there could be spaces, there could be a chord symbol, there could be a decoration.
     // This could also be a part of a chord. If so, then the particular note needs to be teased out.
     var note = abc.substring(start, end);
@@ -481,7 +508,7 @@ var strTranspose;
     return { start: start, end: end, note: newPitch };
   }
 
-  function replaceGrace(abc, start, end, newGrace, index) {
+  function replaceGrace(abc: any, start: any, end: any, newGrace: any, index: any) {
     var note = abc.substring(start, end);
     // I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
     var regOpenBrace = /\{/;
@@ -533,7 +560,7 @@ var strTranspose;
     return { start: start, end: end, note: newGrace };
   }
 
-  function replaceChord(abc, start, end, newChord) {
+  function replaceChord(abc: any, start: any, end: any, newChord: any) {
     // Isolate the chord and just replace that
     var match = abc.substring(start, end).match(/([^"]+)?(".+")+/);
     if (match[1]) start += match[1].length;
@@ -542,7 +569,7 @@ var strTranspose;
     return { start: start + 1, end: end - 1, note: newChord };
   }
 
-  function calcAdjustment(thisAccidental, keyAccidental, measureAccidental) {
+  function calcAdjustment(thisAccidental: any, keyAccidental: any, measureAccidental: any) {
     if (!thisAccidental && measureAccidental) {
       // There was no accidental on this note, but there was earlier in the measure, so we'll use that
       thisAccidental = measureAccidental;

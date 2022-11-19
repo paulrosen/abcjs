@@ -4,7 +4,7 @@
 
 import pitchToNoteName from '../synth/pitch-to-note-name';
 
-var midiLint = function (tune) {
+var midiLint = function (tune: any) {
   "use strict";
 
   var ret = "Tempo: " + tune.tempo + "\nInstrument: " + tune.instrument + "\n";
@@ -24,6 +24,7 @@ var midiLint = function (tune) {
         case "note":
           ret +=
             "\tNote: pitch=" +
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             pitchToNoteName[event.pitch] +
             " (" +
             event.pitch +

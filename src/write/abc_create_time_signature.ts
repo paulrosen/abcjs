@@ -5,8 +5,9 @@ import AbsoluteElement from './abc_absolute_element';
 import glyphs from './abc_glyphs';
 import RelativeElement from './abc_relative_element';
 
-var createTimeSignature = function (elem, tuneNumber) {
+var createTimeSignature = function (elem: any, tuneNumber: any) {
   elem.el_type = "timeSignature";
+  // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
   var abselem = new AbsoluteElement(
     elem,
     0,
@@ -19,6 +20,7 @@ var createTimeSignature = function (elem, tuneNumber) {
     for (var i = 0; i < elem.value.length; i++) {
       if (i !== 0) {
         abselem.addRight(
+          // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
           new RelativeElement("+", x + 1, glyphs.getSymbolWidth("+"), 6, {
             thickness: glyphs.symbolHeightInPitches("+")
           })
@@ -34,6 +36,7 @@ var createTimeSignature = function (elem, tuneNumber) {
           denWidth += glyphs.getSymbolWidth(elem.value[i].den.charAt(i2));
         var maxWidth = Math.max(numWidth, denWidth);
         abselem.addRight(
+          // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
           new RelativeElement(
             elem.value[i].num,
             x + (maxWidth - numWidth) / 2,
@@ -47,6 +50,7 @@ var createTimeSignature = function (elem, tuneNumber) {
           )
         );
         abselem.addRight(
+          // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
           new RelativeElement(
             elem.value[i].den,
             x + (maxWidth - denWidth) / 2,
@@ -65,6 +69,7 @@ var createTimeSignature = function (elem, tuneNumber) {
         for (var i3 = 0; i3 < elem.value[i].num.length; i3++)
           thisWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i3));
         abselem.addRight(
+          // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
           new RelativeElement(elem.value[i].num, x, thisWidth, 6, {
             thickness: glyphs.symbolHeightInPitches(
               elem.value[i].num.charAt(0)
@@ -76,6 +81,7 @@ var createTimeSignature = function (elem, tuneNumber) {
     }
   } else if (elem.type === "common_time") {
     abselem.addRight(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(
         "timesig.common",
         0,
@@ -86,6 +92,7 @@ var createTimeSignature = function (elem, tuneNumber) {
     );
   } else if (elem.type === "cut_time") {
     abselem.addRight(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(
         "timesig.cut",
         0,
@@ -96,6 +103,7 @@ var createTimeSignature = function (elem, tuneNumber) {
     );
   } else if (elem.type === "tempus_imperfectum") {
     abselem.addRight(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(
         "timesig.imperfectum",
         0,
@@ -106,6 +114,7 @@ var createTimeSignature = function (elem, tuneNumber) {
     );
   } else if (elem.type === "tempus_imperfectum_prolatio") {
     abselem.addRight(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(
         "timesig.imperfectum2",
         0,
@@ -116,6 +125,7 @@ var createTimeSignature = function (elem, tuneNumber) {
     );
   } else if (elem.type === "tempus_perfectum") {
     abselem.addRight(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(
         "timesig.perfectum",
         0,
@@ -126,6 +136,7 @@ var createTimeSignature = function (elem, tuneNumber) {
     );
   } else if (elem.type === "tempus_perfectum_prolatio") {
     abselem.addRight(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(
         "timesig.perfectum2",
         0,

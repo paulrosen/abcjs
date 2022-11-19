@@ -1,12 +1,13 @@
 import addTextIf from './add-text-if';
 
 function BottomText(
-  metaText,
-  width,
-  isPrint,
-  paddingLeft,
-  spacing,
-  getTextSize
+  this: any,
+  metaText: any,
+  width: any,
+  isPrint: any,
+  paddingLeft: any,
+  spacing: any,
+  getTextSize: any
 ) {
   this.rows = [];
   if (metaText.unalignedWords && metaText.unalignedWords.length > 0)
@@ -22,10 +23,10 @@ function BottomText(
 }
 
 BottomText.prototype.unalignedWords = function (
-  unalignedWords,
-  paddingLeft,
-  spacing,
-  getTextSize
+  unalignedWords: any,
+  paddingLeft: any,
+  spacing: any,
+  getTextSize: any
 ) {
   var indent = 50;
   var klass = "meta-bottom unaligned-words";
@@ -88,10 +89,10 @@ BottomText.prototype.unalignedWords = function (
 };
 
 BottomText.prototype.extraText = function (
-  metaText,
-  marginLeft,
-  spacing,
-  getTextSize
+  metaText: any,
+  marginLeft: any,
+  spacing: any,
+  getTextSize: any
 ) {
   var extraText = "";
   if (metaText.book) extraText += "Book: " + metaText.book + "\n";
@@ -126,10 +127,10 @@ BottomText.prototype.extraText = function (
 };
 
 BottomText.prototype.footer = function (
-  footer,
-  width,
-  paddingLeft,
-  getTextSize
+  footer: any,
+  width: any,
+  paddingLeft: any,
+  getTextSize: any
 ) {
   var klass = "header meta-bottom";
   var font = "footerfont";

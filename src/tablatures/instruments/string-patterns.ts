@@ -1,12 +1,13 @@
 import TabNote from './tab-note';
 import TabNotes from './tab-notes';
 
-function buildCapo(self) {
+function buildCapo(self: any) {
   var capoTuning = null;
   var tuning = self.tuning;
   if (self.capo > 0) {
     capoTuning = [];
     for (var iii = 0; iii < tuning.length; iii++) {
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       var curNote = new TabNote.TabNote(tuning[iii]);
       for (var jjj = 0; jjj < self.capo; jjj++) {
         curNote = curNote.nextNote();
@@ -17,7 +18,7 @@ function buildCapo(self) {
   return capoTuning;
 }
 
-function buildPatterns(self) {
+function buildPatterns(self: any) {
   var strings = [];
   var tuning = self.tuning;
   if (self.capo > 0) {
@@ -29,6 +30,7 @@ function buildPatterns(self) {
     if (iii != tuning.length - 1) {
       nextNote = tuning[iii + 1];
     }
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var tabNotes = new TabNotes(tuning[iii], nextNote);
     var stringNotes = tabNotes.build();
     if (stringNotes.error) {
@@ -39,7 +41,7 @@ function buildPatterns(self) {
   return strings;
 }
 
-function buildSecond(first) {
+function buildSecond(first: any) {
   var seconds = [];
   seconds[0] = [];
   var strings = first.strings;
@@ -49,7 +51,7 @@ function buildSecond(first) {
   return seconds;
 }
 
-function sameString(self, chord) {
+function sameString(self: any, chord: any) {
   for (var jjjj = 0; jjjj < chord.length - 1; jjjj++) {
     var curPos = chord[jjjj];
     var nextPos = chord[jjjj + 1];
@@ -90,9 +92,10 @@ function sameString(self, chord) {
   return null;
 }
 
-function handleChordNotes(self, notes) {
+function handleChordNotes(self: any, notes: any) {
   var retNotes = [];
   for (var iiii = 0; iiii < notes.length; iiii++) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var note = new TabNote.TabNote(notes[iiii].name);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
@@ -101,7 +104,7 @@ function handleChordNotes(self, notes) {
   return retNotes;
 }
 
-function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
+function noteToNumber(self: any, note: any, stringNumber: any, secondPosition: any, firstSize: any) {
   var strings = self.strings;
   note.checkKeyAccidentals(self.accidentals);
   if (secondPosition) {
@@ -130,10 +133,11 @@ function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
   return null;
 }
 
-function toNumber(self, note) {
+function toNumber(self: any, note: any) {
   var num = null;
   var str = 0;
   var lowestString = self.strings[self.strings.length - 1];
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var lowestNote = new TabNote.TabNote(lowestString[0]);
   if (note.isLowerThan(lowestNote)) {
     return {
@@ -144,6 +148,7 @@ function toNumber(self, note) {
     };
   }
   while (str < self.strings.length) {
+    // @ts-expect-error TS(2554): Expected 5 arguments, but got 3.
     num = noteToNumber(self, note, str);
     if (num) {
       return num;
@@ -153,13 +158,13 @@ function toNumber(self, note) {
   return null; // not found
 }
 
-StringPatterns.prototype.stringToPitch = function (stringNumber) {
+StringPatterns.prototype.stringToPitch = function (stringNumber: any) {
   var startingPitch = 5.3;
   var bottom = this.strings.length - 1;
   return startingPitch + (bottom - stringNumber) * this.linePitch;
 };
 
-function invalidNumber(retNotes, note) {
+function invalidNumber(retNotes: any, note: any) {
   var number = {
     num: "?",
     str: 0,
@@ -169,11 +174,11 @@ function invalidNumber(retNotes, note) {
   retNotes.error = note.emit() + ": unexpected note for instrument";
 }
 
-StringPatterns.prototype.notesToNumber = function (notes, graces) {
+StringPatterns.prototype.notesToNumber = function (notes: any, graces: any) {
   var note;
   var number;
   var error = null;
-  var retNotes = null;
+  var retNotes: any = null;
   if (notes) {
     retNotes = [];
     if (notes.length > 1) {
@@ -182,6 +187,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         error = retNotes.error;
       }
     } else {
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       note = new TabNote.TabNote(notes[0].name);
       number = toNumber(this, note);
       if (number) {
@@ -197,6 +203,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   if (graces) {
     retGraces = [];
     for (var iiii = 0; iiii < graces.length; iiii++) {
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       note = new TabNote.TabNote(graces[iiii].name);
       number = toNumber(this, note);
       if (number) {
@@ -219,7 +226,7 @@ StringPatterns.prototype.toString = function () {
   return this.tuning.join("").replaceAll(",", "").toUpperCase();
 };
 
-StringPatterns.prototype.tabInfos = function (plugin) {
+StringPatterns.prototype.tabInfos = function (plugin: any) {
   var _super = plugin._super;
   var name = _super.params.label;
   if (name) {
@@ -244,7 +251,7 @@ StringPatterns.prototype.tabInfos = function (plugin) {
  * @param {*} capo
  * @param {*} highestNote
  */
-function StringPatterns(plugin) {
+function StringPatterns(this: any, plugin: any) {
   var tuning = plugin.tuning;
   var capo = plugin.capo;
   var highestNote = plugin._super.params.highestNote;

@@ -2,7 +2,7 @@ import layoutBeam from './beam';
 import getBarYAt from './getBarYAt';
 import layoutTriplet from './triplet';
 
-var layoutVoice = function (voice) {
+var layoutVoice = function (voice: any) {
   for (var i = 0; i < voice.beams.length; i++) {
     if (voice.beams[i].type === "BeamElem") {
       layoutBeam(voice.beams[i]);
@@ -27,7 +27,7 @@ var layoutVoice = function (voice) {
   voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
 };
 
-function moveDecorations(beam) {
+function moveDecorations(beam: any) {
   var padding = 1.5; // This is the vertical padding between elements, in pitches.
   for (var ch = 0; ch < beam.elems.length; ch++) {
     var child = beam.elems[ch];
@@ -50,7 +50,7 @@ function moveDecorations(beam) {
   }
 }
 
-function placeInLane(rightMost, relElem) {
+function placeInLane(rightMost: any, relElem: any) {
   // These items are centered so figure the coordinates accordingly.
   // The font reports some extra space so the margin is built in.
   var xCoords = relElem.getChordDim();
@@ -69,7 +69,7 @@ function placeInLane(rightMost, relElem) {
   }
 }
 
-function setLaneForChord(absElems) {
+function setLaneForChord(absElems: any) {
   // Criteria:
   // 1) lane numbers start from the bottom so that as many items as possible are in lane 0, closest to the music.
   // 2) a chord can have more than one line (for instance "C\nD") each line is a lane.
@@ -103,7 +103,7 @@ function setLaneForChord(absElems) {
   return { above: rightMostAbove.length, below: rightMostBelow.length };
 }
 
-function numAnnotationsBelow(absElem) {
+function numAnnotationsBelow(absElem: any) {
   var count = 0;
   for (var j = 0; j < absElem.children.length; j++) {
     var relElem = absElem.children[j];
@@ -112,7 +112,7 @@ function numAnnotationsBelow(absElem) {
   return count;
 }
 
-function setLane(absElems, numLanesAbove, numLanesBelow) {
+function setLane(absElems: any, numLanesAbove: any, numLanesBelow: any) {
   for (var i = 0; i < absElems.length; i++) {
     var below = numAnnotationsBelow(absElems[i]);
     for (var j = 0; j < absElems[i].children.length; j++) {
@@ -126,7 +126,7 @@ function setLane(absElems, numLanesAbove, numLanesBelow) {
   }
 }
 
-function yAtNote(element, beam) {
+function yAtNote(element: any, beam: any) {
   beam = beam.beams[0];
   return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
 }

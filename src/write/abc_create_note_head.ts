@@ -1,7 +1,7 @@
 import glyphs from './abc_glyphs';
 import RelativeElement from './abc_relative_element';
 
-var createNoteHead = function (abselem, c, pitchelem, options) {
+var createNoteHead = function (abselem: any, c: any, pitchelem: any, options: any) {
   if (!options) options = {};
   var dir = options.dir !== undefined ? options.dir : null;
   var headx = options.headx !== undefined ? options.headx : 0;
@@ -25,9 +25,11 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
   var extraLeft = 0;
   if (c === undefined)
     abselem.addFixed(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement("pitch is undefined", 0, 0, 0, { type: "debug" })
     );
   else if (c === "") {
+    // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
     notehead = new RelativeElement(null, 0, 0, pitch);
   } else {
     var shiftheadx = headx;
@@ -44,6 +46,7 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
       thickness: glyphs.symbolHeightInPitches(c) * scale,
       name: pitchelem.name
     };
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     notehead = new RelativeElement(
       c,
       shiftheadx,
@@ -62,6 +65,7 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
       //if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
       var xdelta = dir === "down" ? headx : headx + notehead.w - 0.6;
       abselem.addRight(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement(
           flag,
           xdelta,
@@ -75,6 +79,7 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
     for (; dot > 0; dot--) {
       var dotadjusty = 1 - (Math.abs(pitch) % 2); //PER: take abs value of the pitch. And the shift still happens on ledger lines.
       abselem.addRight(
+        // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
         new RelativeElement(
           "dots.dot",
           notehead.w + dotshiftx - 2 + 5 * dot,
@@ -128,6 +133,7 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
     }
     var h = glyphs.symbolHeightInPitches(symb);
     abselem.addExtra(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, {
         scalex: scale,
         scaley: scale,

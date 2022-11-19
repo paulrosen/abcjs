@@ -5,10 +5,11 @@ import AbsoluteElement from './abc_absolute_element';
 import glyphs from './abc_glyphs';
 import RelativeElement from './abc_relative_element';
 
-var createClef = function (elem, tuneNumber) {
+var createClef = function (elem: any, tuneNumber: any) {
   var clef;
   var octave = 0;
   elem.el_type = "clef";
+  // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
   var abselem = new AbsoluteElement(
     elem,
     0,
@@ -69,6 +70,7 @@ var createClef = function (elem, tuneNumber) {
       break;
     default:
       abselem.addFixed(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement("clef=" + elem.type, 0, 0, undefined, {
           type: "debug"
         })
@@ -82,6 +84,7 @@ var createClef = function (elem, tuneNumber) {
     var height = glyphs.symbolHeightInPitches(clef);
     var ofs = clefOffsets(clef);
     abselem.addRight(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos, {
         top: height + elem.clefPos + ofs,
         bottom: elem.clefPos + ofs
@@ -101,6 +104,7 @@ var createClef = function (elem, tuneNumber) {
         adjustspacing = 0;
       }
       abselem.addRight(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement(
           "8",
           dx + adjustspacing,
@@ -120,7 +124,7 @@ var createClef = function (elem, tuneNumber) {
   return abselem;
 };
 
-function clefOffsets(clef) {
+function clefOffsets(clef: any) {
   switch (clef) {
     case "clefs.G":
       return -5;

@@ -10,34 +10,40 @@ var tunebook = {};
 (function () {
   "use strict";
 
-  tunebook.numberOfTunes = function (abc) {
+  // @ts-expect-error TS(2339): Property 'numberOfTunes' does not exist on type '{... Remove this comment to see the full error message
+  tunebook.numberOfTunes = function (abc: any) {
     var tunes = abc.split("\nX:");
     var num = tunes.length;
     if (num === 0) num = 1;
     return num;
   };
 
-  var TuneBook = (tunebook.TuneBook = function (book) {
+  // @ts-expect-error TS(2339): Property 'TuneBook' does not exist on type '{}'.
+  var TuneBook = (tunebook.TuneBook = function (book: any) {
     var parsed = bookParser(book);
+    // @ts-expect-error TS(2339): Property 'header' does not exist on type '{}'.
     this.header = parsed.header;
+    // @ts-expect-error TS(2339): Property 'tunes' does not exist on type '{}'.
     this.tunes = parsed.tunes;
   });
 
-  TuneBook.prototype.getTuneById = function (id) {
+  TuneBook.prototype.getTuneById = function (id: any) {
     for (var i = 0; i < this.tunes.length; i++) {
       if (this.tunes[i].id === "" + id) return this.tunes[i];
     }
     return null;
   };
 
-  TuneBook.prototype.getTuneByTitle = function (title) {
+  TuneBook.prototype.getTuneByTitle = function (title: any) {
     for (var i = 0; i < this.tunes.length; i++) {
       if (this.tunes[i].title === title) return this.tunes[i];
     }
     return null;
   };
 
-  tunebook.parseOnly = function (abc, params) {
+  // @ts-expect-error TS(2339): Property 'parseOnly' does not exist on type '{}'.
+  tunebook.parseOnly = function (abc: any, params: any) {
+    // @ts-expect-error TS(2339): Property 'numberOfTunes' does not exist on type '{... Remove this comment to see the full error message
     var numTunes = tunebook.numberOfTunes(abc);
 
     // this just needs to be passed in because this tells the engine how many tunes to process.
@@ -48,12 +54,14 @@ var tunebook = {};
     function callback() {
       // Don't need to do anything with the parsed tunes.
     }
+    // @ts-expect-error TS(2339): Property 'renderEngine' does not exist on type '{}... Remove this comment to see the full error message
     return tunebook.renderEngine(callback, output, abc, params);
   };
 
-  tunebook.renderEngine = function (callback, output, abc, params) {
+  // @ts-expect-error TS(2339): Property 'renderEngine' does not exist on type '{}... Remove this comment to see the full error message
+  tunebook.renderEngine = function (callback: any, output: any, abc: any, params: any) {
     var ret = [];
-    var isArray = function (testObject) {
+    var isArray = function (testObject: any) {
       return (
         testObject &&
         !testObject.propertyIsEnumerable("length") &&
@@ -71,7 +79,9 @@ var tunebook = {};
       : 0;
 
     // parse the abc string
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var book = new TuneBook(abc);
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var abcParser = new Parse();
 
     // output each tune, if it exists. Otherwise clear the div.
@@ -112,7 +122,7 @@ var tunebook = {};
     return ret;
   };
 
-  function flattenTune(tuneObj) {
+  function flattenTune(tuneObj: any) {
     // This removes the line breaks and removes the non-music lines.
     var staves = [];
     for (var j = 0; j < tuneObj.lines.length; j++) {
@@ -136,7 +146,7 @@ var tunebook = {};
     return staves;
   }
 
-  function measuresParser(staff, tune) {
+  function measuresParser(staff: any, tune: any) {
     var voices = [];
     var lastChord = null;
     var measureStartChord = null;
@@ -160,13 +170,20 @@ var tunebook = {};
             var measure = { abc: frag };
             lastChord =
               measureStartChord &&
+              // @ts-expect-error TS(2339): Property 'chord' does not exist on type 'never'.
               measureStartChord.chord &&
+              // @ts-expect-error TS(2339): Property 'chord' does not exist on type 'never'.
               measureStartChord.chord.length > 0
+                // @ts-expect-error TS(2339): Property 'chord' does not exist on type 'never'.
                 ? measureStartChord.chord[0].name
                 : null;
+            // @ts-expect-error TS(2339): Property 'lastChord' does not exist on type '{ abc... Remove this comment to see the full error message
             if (lastChord) measure.lastChord = lastChord;
+            // @ts-expect-error TS(2339): Property 'startEnding' does not exist on type '{ a... Remove this comment to see the full error message
             if (elem.startEnding) measure.startEnding = elem.startEnding;
+            // @ts-expect-error TS(2339): Property 'endEnding' does not exist on type '{ abc... Remove this comment to see the full error message
             if (elem.endEnding) measure.endEnding = elem.endEnding;
+            // @ts-expect-error TS(2345): Argument of type '{ abc: any; }' is not assignable... Remove this comment to see the full error message
             voices[i].push(measure);
             fragStart = null;
             hasNotes = false;
@@ -179,8 +196,10 @@ var tunebook = {};
     return voices;
   }
 
-  tunebook.extractMeasures = function (abc) {
+  // @ts-expect-error TS(2339): Property 'extractMeasures' does not exist on type ... Remove this comment to see the full error message
+  tunebook.extractMeasures = function (abc: any) {
     var tunes = [];
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var book = new TuneBook(abc);
     for (var i = 0; i < book.tunes.length; i++) {
       var tune = book.tunes[i];
@@ -192,6 +211,7 @@ var tunebook = {};
       var fragStart = null;
       var measures = [];
       var hasNotes = false;
+      // @ts-expect-error TS(2339): Property 'parseOnly' does not exist on type '{}'.
       var tuneObj = tunebook.parseOnly(tune.abc)[0];
       var hasPickup = tuneObj.getPickupLength() > 0;
       // var staves = flattenTune(tuneObj);
@@ -238,13 +258,19 @@ var tunebook = {};
                     var measure = { abc: frag };
                     lastChord =
                       measureStartChord &&
+                      // @ts-expect-error TS(2339): Property 'chord' does not exist on type 'never'.
                       measureStartChord.chord &&
+                      // @ts-expect-error TS(2339): Property 'chord' does not exist on type 'never'.
                       measureStartChord.chord.length > 0
+                        // @ts-expect-error TS(2339): Property 'chord' does not exist on type 'never'.
                         ? measureStartChord.chord[0].name
                         : null;
+                    // @ts-expect-error TS(2339): Property 'lastChord' does not exist on type '{ abc... Remove this comment to see the full error message
                     if (lastChord) measure.lastChord = lastChord;
                     if (elem.startEnding)
+                      // @ts-expect-error TS(2339): Property 'startEnding' does not exist on type '{ a... Remove this comment to see the full error message
                       measure.startEnding = elem.startEnding;
+                    // @ts-expect-error TS(2339): Property 'endEnding' does not exist on type '{ abc... Remove this comment to see the full error message
                     if (elem.endEnding) measure.endEnding = elem.endEnding;
                     measures.push(measure);
                     fragStart = null;

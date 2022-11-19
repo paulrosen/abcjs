@@ -1,4 +1,4 @@
-function addTextIf(rows, params, getTextSize) {
+function addTextIf(rows: any, params: any, getTextSize: any) {
   if (!params.text) return;
   if (!params.marginLeft) params.marginLeft = 0;
   if (!params.klass) params.klass = "";
@@ -14,8 +14,11 @@ function addTextIf(rows, params, getTextSize) {
     startChar: params.info.startChar,
     endChar: params.info.endChar
   };
+  // @ts-expect-error TS(2339): Property 'absElemType' does not exist on type '{ l... Remove this comment to see the full error message
   if (params.absElemType) attr.absElemType = params.absElemType;
+  // @ts-expect-error TS(2339): Property 'klass' does not exist on type '{ left: a... Remove this comment to see the full error message
   if (!params.inGroup) attr.klass = params.klass;
+  // @ts-expect-error TS(2339): Property 'name' does not exist on type '{ left: an... Remove this comment to see the full error message
   if (params.name) attr.name = params.name;
 
   rows.push(attr);

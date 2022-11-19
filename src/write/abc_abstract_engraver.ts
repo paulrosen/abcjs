@@ -22,7 +22,7 @@ import addChord from './add-chord';
 import pitchesToPerc from '../synth/pitches-to-perc';
 import parseCommon from '../parse/abc_common';
 
-var getDuration = function (elem) {
+var getDuration = function (elem: any) {
   var d = 0;
   if (elem.duration) {
     d = elem.duration;
@@ -118,7 +118,8 @@ var chartable = {
   }
 };
 
-var AbstractEngraver = function (getTextSize, tuneNumber, options) {
+var AbstractEngraver = function(this: any, getTextSize: any, tuneNumber: any, options: any) {
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.decoration = new Decoration();
   this.getTextSize = getTextSize;
   this.tuneNumber = tuneNumber;
@@ -152,22 +153,23 @@ AbstractEngraver.prototype.reset = function () {
   this.stemdir = undefined;
 };
 
-AbstractEngraver.prototype.setStemHeight = function (heightInPixels) {
+AbstractEngraver.prototype.setStemHeight = function (heightInPixels: any) {
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   this.stemHeight = Math.round((heightInPixels * 10) / spacing.STEP) / 10;
 };
 
-AbstractEngraver.prototype.getCurrentVoiceId = function (s, v) {
+AbstractEngraver.prototype.getCurrentVoiceId = function (s: any, v: any) {
   return "s" + s + "v" + v;
 };
 
-AbstractEngraver.prototype.pushCrossLineElems = function (s, v) {
+AbstractEngraver.prototype.pushCrossLineElems = function (s: any, v: any) {
   this.slursbyvoice[this.getCurrentVoiceId(s, v)] = this.slurs;
   this.tiesbyvoice[this.getCurrentVoiceId(s, v)] = this.ties;
   this.endingsbyvoice[this.getCurrentVoiceId(s, v)] = this.partstartelem;
   this.scaleByVoice[this.getCurrentVoiceId(s, v)] = this.voiceScale;
 };
 
-AbstractEngraver.prototype.popCrossLineElems = function (s, v) {
+AbstractEngraver.prototype.popCrossLineElems = function (s: any, v: any) {
   this.slurs = this.slursbyvoice[this.getCurrentVoiceId(s, v)] || {};
   this.ties = this.tiesbyvoice[this.getCurrentVoiceId(s, v)] || [];
   this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(s, v)];
@@ -175,7 +177,7 @@ AbstractEngraver.prototype.popCrossLineElems = function (s, v) {
   if (this.voiceScale === undefined) this.voiceScale = 1;
 };
 
-AbstractEngraver.prototype.containsLyrics = function (staves) {
+AbstractEngraver.prototype.containsLyrics = function (staves: any) {
   for (var i = 0; i < staves.length; i++) {
     for (var j = 0; j < staves[i].voices.length; j++) {
       for (var k = 0; k < staves[i].voices[j].length; k++) {
@@ -191,10 +193,11 @@ AbstractEngraver.prototype.containsLyrics = function (staves) {
   }
 };
 
-AbstractEngraver.prototype.createABCLine = function (staffs, tempo, l) {
+AbstractEngraver.prototype.createABCLine = function (staffs: any, tempo: any, l: any) {
   this.minY = 2; // PER: This will be the lowest that any note reaches. It will be used to set the dynamics row.
   // See if there are any lyrics on this line.
   this.containsLyrics(staffs);
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var staffgroup = new StaffGroupElement(this.getTextSize);
   this.tempoSet = false;
   for (var s = 0; s < staffs.length; s++) {
@@ -206,15 +209,16 @@ AbstractEngraver.prototype.createABCLine = function (staffs, tempo, l) {
 };
 
 AbstractEngraver.prototype.createABCStaff = function (
-  staffgroup,
-  abcstaff,
-  tempo,
-  s,
-  l
+  staffgroup: any,
+  abcstaff: any,
+  tempo: any,
+  s: any,
+  l: any
 ) {
   // If the tempo is passed in, then the first element should get the tempo attached to it.
   staffgroup.getTextSize.updateFonts(abcstaff);
   for (var v = 0; v < abcstaff.voices.length; v++) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var voice = new VoiceElement(v, abcstaff.voices.length);
     if (v === 0) {
       voice.barfrom =
@@ -237,6 +241,7 @@ AbstractEngraver.prototype.createABCStaff = function (
           v,
           abcstaff.voices.length
         ) /
+          // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
           spacing.STEP;
     }
     if (abcstaff.clef && abcstaff.clef.type === "perc")
@@ -285,6 +290,7 @@ AbstractEngraver.prototype.createABCStaff = function (
       // only do brace and bracket processing on the first voice, otherwise it would be done twice.
       if (abcstaff.brace === "start" || (!staffgroup.brace && abcstaff.brace)) {
         if (!staffgroup.brace) staffgroup.brace = [];
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         staffgroup.brace.push(new BraceElem(voice, "brace"));
       } else if (abcstaff.brace === "end" && staffgroup.brace) {
         staffgroup.brace[staffgroup.brace.length - 1].setBottomStaff(voice);
@@ -296,6 +302,7 @@ AbstractEngraver.prototype.createABCStaff = function (
         (!staffgroup.bracket && abcstaff.bracket)
       ) {
         if (!staffgroup.bracket) staffgroup.bracket = [];
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         staffgroup.bracket.push(new BraceElem(voice, "bracket"));
       } else if (abcstaff.bracket === "end" && staffgroup.bracket) {
         staffgroup.bracket[staffgroup.bracket.length - 1].setBottomStaff(voice);
@@ -306,7 +313,7 @@ AbstractEngraver.prototype.createABCStaff = function (
   }
 };
 
-function getBeamGroup(abcline, pos) {
+function getBeamGroup(abcline: any, pos: any) {
   // If there are notes beamed together, they are handled as a group, so find all of them here.
   var elem = abcline[pos];
   if (elem.el_type !== "note" || !elem.startBeam || elem.endBeam)
@@ -322,17 +329,18 @@ function getBeamGroup(abcline, pos) {
 }
 
 AbstractEngraver.prototype.createABCVoice = function (
-  abcline,
-  tempo,
-  s,
-  v,
-  isSingleLineStaff,
-  voice
+  abcline: any,
+  tempo: any,
+  s: any,
+  v: any,
+  isSingleLineStaff: any,
+  voice: any
 ) {
   this.popCrossLineElems(s, v);
   this.stemdir = this.isBagpipes ? "down" : null;
   this.abcline = abcline;
   if (this.partstartelem) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     this.partstartelem = new EndingElem("", null, null);
     voice.addOther(this.partstartelem);
   }
@@ -340,6 +348,7 @@ AbstractEngraver.prototype.createABCVoice = function (
   for (var slur in this.slurs) {
     if (this.slurs.prototype.hasOwnProperty.call(slur)) {
       // this is already a slur element, but it was created for the last line, so recreate it.
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       this.slurs[slur] = new TieElem({
         force: this.slurs[slur].force,
         voiceNumber: voiceNumber,
@@ -352,6 +361,7 @@ AbstractEngraver.prototype.createABCVoice = function (
   }
   for (var i = 0; i < this.ties.length; i++) {
     // this is already a tie element, but it was created for the last line, so recreate it.
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     this.ties[i] = new TieElem({
       force: this.ties[i].force,
       stemDir: this.ties[i].stemDir,
@@ -381,6 +391,7 @@ AbstractEngraver.prototype.createABCVoice = function (
       for (i = 0; i < abselems.length; i++) {
         if (!this.tempoSet && tempo && !tempo.suppress) {
           this.tempoSet = true;
+          // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
           var tempoElement = new AbsoluteElement(
             tempo,
             0,
@@ -390,6 +401,7 @@ AbstractEngraver.prototype.createABCVoice = function (
             {}
           );
           tempoElement.addFixedX(
+            // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
             new TempoElement(tempo, this.tuneNumber, createNoteHead)
           );
           voice.addChild(tempoElement);
@@ -403,16 +415,24 @@ AbstractEngraver.prototype.createABCVoice = function (
 };
 
 AbstractEngraver.prototype.saveState = function () {
+  // @ts-expect-error TS(2339): Property 'cloneArray' does not exist on type '{}'.
   this.tiesSave = parseCommon.cloneArray(this.ties);
+  // @ts-expect-error TS(2339): Property 'cloneHashOfHash' does not exist on type ... Remove this comment to see the full error message
   this.slursSave = parseCommon.cloneHashOfHash(this.slurs);
+  // @ts-expect-error TS(2339): Property 'cloneHashOfHash' does not exist on type ... Remove this comment to see the full error message
   this.slursbyvoiceSave = parseCommon.cloneHashOfHash(this.slursbyvoice);
+  // @ts-expect-error TS(2339): Property 'cloneHashOfArrayOfHash' does not exist o... Remove this comment to see the full error message
   this.tiesbyvoiceSave = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoice);
 };
 
 AbstractEngraver.prototype.restoreState = function () {
+  // @ts-expect-error TS(2339): Property 'cloneArray' does not exist on type '{}'.
   this.ties = parseCommon.cloneArray(this.tiesSave);
+  // @ts-expect-error TS(2339): Property 'cloneHashOfHash' does not exist on type ... Remove this comment to see the full error message
   this.slurs = parseCommon.cloneHashOfHash(this.slursSave);
+  // @ts-expect-error TS(2339): Property 'cloneHashOfHash' does not exist on type ... Remove this comment to see the full error message
   this.slursbyvoice = parseCommon.cloneHashOfHash(this.slursbyvoiceSave);
+  // @ts-expect-error TS(2339): Property 'cloneHashOfArrayOfHash' does not exist o... Remove this comment to see the full error message
   this.tiesbyvoice = parseCommon.cloneHashOfArrayOfHash(this.tiesbyvoiceSave);
 };
 
@@ -429,10 +449,10 @@ AbstractEngraver.prototype.restoreState = function () {
 
 // return an array of AbsoluteElement
 AbstractEngraver.prototype.createABCElement = function (
-  isFirstStaff,
-  isSingleLineStaff,
-  voice,
-  elem
+  isFirstStaff: any,
+  isSingleLineStaff: any,
+  voice: any,
+  elem: any
 ) {
   var elemset = [];
   switch (elem.el_type) {
@@ -475,19 +495,24 @@ AbstractEngraver.prototype.createABCElement = function (
       this.stemdir = elem.direction === "auto" ? undefined : elem.direction;
       break;
     case "part":
+      // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
       var abselem = new AbsoluteElement(elem, 0, 0, "part", this.tuneNumber);
       var dim = this.getTextSize.calc(elem.title, "partsfont", "part");
       abselem.addFixedX(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement(elem.title, 0, 0, undefined, {
           type: "part",
+          // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
           height: dim.height / spacing.STEP
         })
       );
       elemset[0] = abselem;
       break;
     case "tempo":
+      // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
       var abselem3 = new AbsoluteElement(elem, 0, 0, "tempo", this.tuneNumber);
       abselem3.addFixedX(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new TempoElement(elem, this.tuneNumber, createNoteHead)
       );
       elemset[0] = abselem3;
@@ -508,6 +533,7 @@ AbstractEngraver.prototype.createABCElement = function (
       break;
 
     default:
+      // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
       var abselem2 = new AbsoluteElement(
         elem,
         0,
@@ -516,6 +542,7 @@ AbstractEngraver.prototype.createABCElement = function (
         this.tuneNumber
       );
       abselem2.addFixed(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement("element type " + elem.el_type, 0, 0, undefined, {
           type: "debug"
         })
@@ -526,7 +553,7 @@ AbstractEngraver.prototype.createABCElement = function (
   return elemset;
 };
 
-function setAveragePitch(elem) {
+function setAveragePitch(elem: any) {
   if (elem.pitches) {
     sortPitch(elem);
     var sum = 0;
@@ -540,12 +567,13 @@ function setAveragePitch(elem) {
 }
 
 AbstractEngraver.prototype.createBeam = function (
-  isSingleLineStaff,
-  voice,
-  elems
+  isSingleLineStaff: any,
+  voice: any,
+  elems: any
 ) {
   var abselemset = [];
 
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var beamelem = new BeamElem(
     this.stemHeight * this.voiceScale,
     this.stemdir,
@@ -577,7 +605,7 @@ AbstractEngraver.prototype.createBeam = function (
   return abselemset;
 };
 
-var sortPitch = function (elem) {
+var sortPitch = function (elem: any) {
   var sorted;
   do {
     sorted = true;
@@ -593,19 +621,20 @@ var sortPitch = function (elem) {
 };
 
 var ledgerLines = function (
-  abselem,
-  minPitch,
-  maxPitch,
-  isRest,
-  symbolWidth,
-  additionalLedgers,
-  dir,
-  dx,
-  scale
+  abselem: any,
+  minPitch: any,
+  maxPitch: any,
+  isRest: any,
+  symbolWidth: any,
+  additionalLedgers: any,
+  dir: any,
+  dx: any,
+  scale: any
 ) {
   for (var i = maxPitch; i > 11; i--) {
     if (i % 2 === 0 && !isRest) {
       abselem.addFixed(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement(null, dx, (symbolWidth + 4) * scale, i, {
           type: "ledger"
         })
@@ -616,6 +645,7 @@ var ledgerLines = function (
   for (i = minPitch; i < 1; i++) {
     if (i % 2 === 0 && !isRest) {
       abselem.addFixed(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement(null, dx, (symbolWidth + 4) * scale, i, {
           type: "ledger"
         })
@@ -628,6 +658,7 @@ var ledgerLines = function (
     var ofs = symbolWidth;
     if (dir === "down") ofs = -ofs;
     abselem.addFixed(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(
         null,
         ofs + dx,
@@ -640,13 +671,13 @@ var ledgerLines = function (
 };
 
 AbstractEngraver.prototype.addGraceNotes = function (
-  elem,
-  voice,
-  abselem,
-  notehead,
-  stemHeight,
-  isBagpipes,
-  roomtaken
+  elem: any,
+  voice: any,
+  abselem: any,
+  notehead: any,
+  stemHeight: any,
+  isBagpipes: any,
+  roomtaken: any
 ) {
   var gracescale = 3 / 5;
   var graceScaleStem = 3.5 / 5; // TODO-PER: empirically found constant.
@@ -655,6 +686,7 @@ AbstractEngraver.prototype.addGraceNotes = function (
   var flag;
 
   if (elem.gracenotes.length > 1) {
+    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
     gracebeam = new BeamElem(stemHeight, "grace", isBagpipes);
     if (hint) gracebeam.setHint();
     gracebeam.mainNote = abselem; // this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
@@ -675,7 +707,7 @@ AbstractEngraver.prototype.addGraceNotes = function (
     var gracepitch = elem.gracenotes[i].verticalPos;
 
     flag = gracebeam ? null : chartable.uflags[isBagpipes ? 5 : 3];
-    var accidentalSlot = [];
+    var accidentalSlot: any = [];
     var ret = createNoteHead(abselem, "noteheads.quarter", elem.gracenotes[i], {
       dir: "up",
       headx: -graceoffsets[i],
@@ -694,6 +726,7 @@ AbstractEngraver.prototype.addGraceNotes = function (
       var pos = elem.gracenotes[i].verticalPos + 7 * gracescale; // the same formula that determines the flag position.
       var dAcciaccatura = gracebeam ? 5 : 6; // just an offset to make it line up correctly.
       abselem.addRight(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement(
           "flags.ugrace",
           -graceoffsets[i] + dAcciaccatura,
@@ -724,6 +757,7 @@ AbstractEngraver.prototype.addGraceNotes = function (
       var dx = grace.dx + grace.w;
       var width = -0.6;
       abselem.addExtra(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement(null, dx, 0, p1, {
           type: "stem",
           pitch2: p2,
@@ -753,6 +787,7 @@ AbstractEngraver.prototype.addGraceNotes = function (
     if (i === 0 && !isBagpipes && this.graceSlurs && !isInvisibleRest) {
       // This is the overall slur that is under the grace notes.
       voice.addOther(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new TieElem({ anchor1: grace, anchor2: notehead, isGrace: true })
       );
     }
@@ -766,15 +801,15 @@ AbstractEngraver.prototype.addGraceNotes = function (
 };
 
 function addRestToAbsElement(
-  abselem,
-  elem,
-  duration,
-  dot,
-  isMultiVoice,
-  stemdir,
-  isSingleLineStaff,
-  durlog,
-  voiceScale
+  abselem: any,
+  elem: any,
+  duration: any,
+  dot: any,
+  isMultiVoice: any,
+  stemdir: any,
+  isSingleLineStaff: any,
+  durlog: any,
+  voiceScale: any
 ) {
   var c;
   var restpitch = 7;
@@ -804,7 +839,9 @@ function addRestToAbsElement(
     case "rest":
       if (elem.style === "rhythm")
         // special case for rhythm: rests are a handy way to express the rhythm.
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         c = chartable.rhythm[-durlog];
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       else c = chartable.rest[-durlog];
       elem.averagepitch = restpitch;
       elem.minpitch = restpitch;
@@ -825,7 +862,9 @@ function addRestToAbsElement(
       elem.maxpitch = restpitch;
       dot = 0;
       var mmWidth = glyphs.getSymbolWidth(c);
+      // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
       abselem.addHead(new RelativeElement(c, mmWidth, mmWidth * 2, 7));
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       var numMeasures = new RelativeElement(
         "" + elem.rest.text,
         mmWidth,
@@ -859,7 +898,7 @@ function addRestToAbsElement(
   };
 }
 
-function addIfNotExist(arr, item) {
+function addIfNotExist(arr: any, item: any) {
   for (var i = 0; i < arr.length; i++) {
     if (JSON.stringify(arr[i]) === JSON.stringify(item)) return;
   }
@@ -867,15 +906,15 @@ function addIfNotExist(arr, item) {
 }
 
 AbstractEngraver.prototype.addNoteToAbcElement = function (
-  abselem,
-  elem,
-  dot,
-  stemdir,
-  style,
-  zeroDuration,
-  durlog,
-  nostem,
-  voice
+  abselem: any,
+  elem: any,
+  dot: any,
+  stemdir: any,
+  style: any,
+  zeroDuration: any,
+  durlog: any,
+  nostem: any,
+  voice: any
 ) {
   var dotshiftx = 0; // room taken by chords with displaced noteheads which cause dots to shift
   var noteHead;
@@ -888,7 +927,7 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (
   // and contains a pitch, which is the last pitch that contains an accidental in that slot. The slots are numbered
   // from closest to the note to farther left. We only need to know the last accidental we placed because
   // we know that the pitches are sorted by now.
-  var accidentalSlot = [];
+  var accidentalSlot: any = [];
   var symbolWidth = 0;
 
   var dir = elem.averagepitch >= 6 ? "down" : "up";
@@ -897,7 +936,9 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (
   style = elem.style ? elem.style : style; // get the style of note head.
   if (!style || style === "normal") style = "note";
   var noteSymbol;
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   if (zeroDuration) noteSymbol = chartable[style].nostem;
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   else noteSymbol = chartable[style][-durlog];
   if (!noteSymbol) console.log("noteSymbol:", style, durlog, zeroDuration);
 
@@ -934,18 +975,22 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (
         // not the stemmed elem of the chord
         flag = null;
       } else {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         flag = chartable[dir === "down" ? "dflags" : "uflags"][-durlog];
       }
     }
     var c;
     if (elem.pitches[p].style) {
       // There is a style for the whole group of pitches, but there could also be an override for a particular pitch.
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       c = chartable[elem.pitches[p].style][-durlog];
     } else if (voice.isPercussion && this.percmap) {
       c = noteSymbol;
       var percHead = this.percmap[pitchesToPerc(elem.pitches[p])];
       if (percHead && percHead.noteHead) {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         if (chartable[percHead.noteHead])
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           c = chartable[percHead.noteHead][-durlog];
       }
     } else c = noteSymbol;
@@ -1015,6 +1060,7 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (
   }
 
   // draw stem from the furthest note to a pitch above/below the stemmed note
+  // @ts-expect-error TS(2454): Variable 'hasStem' is used before being assigned.
   if (hasStem) {
     var stemHeight = Math.round(70 * this.voiceScale) / 10;
     var p1 =
@@ -1034,6 +1080,7 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (
       else p1 += 1;
     }
     abselem.addRight(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(null, dx, 0, p1, {
         type: "stem",
         pitch2: p2,
@@ -1055,18 +1102,21 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (
   };
 };
 
-AbstractEngraver.prototype.addLyric = function (abselem, elem) {
+AbstractEngraver.prototype.addLyric = function (abselem: any, elem: any) {
   var lyricStr = "";
-  parseCommon.each(elem.lyric, function (ly) {
+  // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+  parseCommon.each(elem.lyric, function (ly: any) {
     var div = ly.divider === " " ? "" : ly.divider;
     lyricStr += ly.syllable + div + "\n";
   });
   var lyricDim = this.getTextSize.calc(lyricStr, "vocalfont", "lyric");
   var position = elem.positioning ? elem.positioning.vocalPosition : "below";
   abselem.addCentered(
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     new RelativeElement(lyricStr, 0, lyricDim.width, undefined, {
       type: "lyric",
       position: position,
+      // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
       height: lyricDim.height / spacing.STEP,
       dim: this.getTextSize.attr("vocalfont", "lyric")
     })
@@ -1074,10 +1124,10 @@ AbstractEngraver.prototype.addLyric = function (abselem, elem) {
 };
 
 AbstractEngraver.prototype.createNote = function (
-  elem,
-  nostem,
-  isSingleLineStaff,
-  voice
+  elem: any,
+  nostem: any,
+  isSingleLineStaff: any,
+  voice: any
 ) {
   //stem presence: true for drawing stemless notehead
   var notehead = null;
@@ -1113,6 +1163,7 @@ AbstractEngraver.prototype.createNote = function (
   if (elem.rest && elem.rest.type === "invisible-multimeasure")
     durationForSpacing = this.measureLength * elem.rest.text;
   var absType = elem.rest ? "rest" : "note";
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var abselem = new AbsoluteElement(
     elem,
     durationForSpacing,
@@ -1143,7 +1194,9 @@ AbstractEngraver.prototype.createNote = function (
       this.voiceScale
     );
     notehead = ret1.noteHead;
+    // @ts-expect-error TS(2322): Type 'number | undefined' is not assignable to typ... Remove this comment to see the full error message
     roomtaken = ret1.roomTaken;
+    // @ts-expect-error TS(2322): Type 'number | undefined' is not assignable to typ... Remove this comment to see the full error message
     roomtakenright = ret1.roomTakenRight;
   } else {
     var ret2 = this.addNoteToAbcElement(
@@ -1199,6 +1252,7 @@ AbstractEngraver.prototype.createNote = function (
 
   if (elem.barNumber) {
     abselem.addFixed(
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       new RelativeElement(elem.barNumber, -10, 0, 0, { type: "barNumber" })
     );
   }
@@ -1231,6 +1285,7 @@ AbstractEngraver.prototype.createNote = function (
   }
 
   if (elem.startTriplet) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     this.triplet = new TripletElem(elem.startTriplet, notehead, {
       flatBeams: this.flatBeams
     }); // above is opposite from case of slurs
@@ -1253,12 +1308,12 @@ AbstractEngraver.prototype.createNote = function (
 };
 
 AbstractEngraver.prototype.addSlursAndTies = function (
-  abselem,
-  pitchelem,
-  notehead,
-  voice,
-  dir,
-  isGrace
+  abselem: any,
+  pitchelem: any,
+  notehead: any,
+  voice: any,
+  dir: any,
+  isGrace: any
 ) {
   if (pitchelem.endTie) {
     if (this.ties.length > 0) {
@@ -1286,6 +1341,7 @@ AbstractEngraver.prototype.addSlursAndTies = function (
 
   var voiceNumber = voice.voicetotal < 2 ? -1 : voice.voicenumber;
   if (pitchelem.startTie) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var tie = new TieElem({
       anchor1: notehead,
       force: this.stemdir === "down" || this.stemdir === "up",
@@ -1315,6 +1371,7 @@ AbstractEngraver.prototype.addSlursAndTies = function (
         voice.setRange(slur);
         delete this.slurs[slurid];
       } else {
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         slur = new TieElem({
           anchor2: notehead,
           stemDir: this.stemdir,
@@ -1338,6 +1395,7 @@ AbstractEngraver.prototype.addSlursAndTies = function (
   if (pitchelem.startSlur) {
     for (i = 0; i < pitchelem.startSlur.length; i++) {
       slurid = pitchelem.startSlur[i].label;
+      // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
       slur = new TieElem({
         anchor1: notehead,
         stemDir: this.stemdir,
@@ -1351,7 +1409,7 @@ AbstractEngraver.prototype.addSlursAndTies = function (
   }
 };
 
-AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
+AbstractEngraver.prototype.addMeasureNumber = function (number: any, abselem: any) {
   var measureNumDim = this.getTextSize.calc(
     number,
     "measurefont",
@@ -1364,10 +1422,12 @@ AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
   var vert =
     measureNumDim.width > 10 && abselem.abcelem.type === "treble" ? 13 : 11;
   abselem.addFixed(
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     new RelativeElement(
       number,
       dx,
       measureNumDim.width,
+      // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
       vert + measureNumDim.height / spacing.STEP,
       {
         type: "barNumber",
@@ -1378,12 +1438,13 @@ AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 };
 
 AbstractEngraver.prototype.createBarLine = function (
-  voice,
-  elem,
-  isFirstStaff
+  voice: any,
+  elem: any,
+  isFirstStaff: any
 ) {
   // bar_thin, bar_thin_thick, bar_thin_thin, bar_thick_thin, bar_right_repeat, bar_left_repeat, bar_double_repeat
 
+  // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
   var abselem = new AbsoluteElement(elem, 0, 10, "bar", this.tuneNumber);
   var anchor = null; // place to attach part lines
   var dx = 0;
@@ -1423,12 +1484,15 @@ AbstractEngraver.prototype.createBarLine = function (
   }
 
   if (firstdots) {
+    // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
     abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
+    // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
     abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
     dx += 6; //2 hardcoded, twice;
   }
 
   if (firstthin) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     anchor = new RelativeElement(null, dx, 1, 2, {
       type: "bar",
       pitch2: 10,
@@ -1438,6 +1502,7 @@ AbstractEngraver.prototype.createBarLine = function (
   }
 
   if (elem.type === "bar_invisible") {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     anchor = new RelativeElement(null, dx, 1, 2, {
       type: "none",
       pitch2: 10,
@@ -1463,6 +1528,7 @@ AbstractEngraver.prototype.createBarLine = function (
 
   if (thick) {
     dx += 4; //3 hardcoded;
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     anchor = new RelativeElement(null, dx, 4, 2, {
       type: "bar",
       pitch2: 10,
@@ -1484,6 +1550,7 @@ AbstractEngraver.prototype.createBarLine = function (
 
   if (secondthin) {
     dx += 3; //3 hardcoded;
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     anchor = new RelativeElement(null, dx, 1, 2, {
       type: "bar",
       pitch2: 10,
@@ -1494,7 +1561,9 @@ AbstractEngraver.prototype.createBarLine = function (
 
   if (seconddots) {
     dx += 3; //3 hardcoded;
+    // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
     abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
+    // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
     abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
   } // 2 is hardcoded
 
@@ -1506,6 +1575,7 @@ AbstractEngraver.prototype.createBarLine = function (
       ""
     ).width;
     abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
     voice.addOther(this.partstartelem);
   }

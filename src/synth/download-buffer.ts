@@ -1,9 +1,9 @@
-var downloadBuffer = function (buffer) {
+var downloadBuffer = function (buffer: any) {
   return window.URL.createObjectURL(bufferToWave(buffer.audioBuffers));
 };
 
 // Convert an AudioBuffer to a Blob using WAVE representation
-function bufferToWave(audioBuffers) {
+function bufferToWave(audioBuffers: any) {
   var audioBuffer = audioBuffers[0];
   var numOfChan = audioBuffer.numberOfChannels;
   var length = audioBuffer.length * numOfChan * 2 + 44;
@@ -49,12 +49,12 @@ function bufferToWave(audioBuffers) {
   // create Blob
   return new Blob([buffer], { type: "audio/wav" });
 
-  function setUint16(data) {
+  function setUint16(data: any) {
     view.setUint16(pos, data, true);
     pos += 2;
   }
 
-  function setUint32(data) {
+  function setUint32(data: any) {
     view.setUint32(pos, data, true);
     pos += 4;
   }

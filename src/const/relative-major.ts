@@ -99,12 +99,13 @@ var keys = {
   }
 };
 
-var keyReverse = null;
+var keyReverse: any = null;
 
 function createKeyReverse() {
   keyReverse = {};
   var allKeys = Object.keys(keys);
   for (var i = 0; i < allKeys.length; i++) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var keyObj = keys[allKeys[i]];
     keyReverse[allKeys[i].toLowerCase()] = allKeys[i];
     for (var j = 0; j < keyObj.modes.length; j++) {
@@ -114,7 +115,7 @@ function createKeyReverse() {
   }
 }
 
-function relativeMajor(key) {
+function relativeMajor(key: any) {
   // Translate a key to its relative major. If it doesn't exist, do the best we can
   // by just returning the original key.
   // There are alternate spellings of these - so the search needs to be case insensitive.
@@ -133,9 +134,10 @@ function relativeMajor(key) {
   return key;
 }
 
-function relativeMode(majorKey, mode) {
+function relativeMode(majorKey: any, mode: any) {
   // The reverse of the relativeMajor. Translate it back to the original mode.
   // If it isn't a recognized mode or it is already major, then just return the major key.
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   var group = keys[majorKey];
   if (!group) return majorKey;
   if (mode === "") return majorKey;
@@ -151,15 +153,17 @@ function relativeMode(majorKey, mode) {
   return majorKey;
 }
 
-function transposeKey(key, steps) {
+function transposeKey(key: any, steps: any) {
   // This takes a major key and adds the desired steps.
   // It assigns each key a number that is the number of steps from C so that there can just be arithmetic.
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   var match = keys[key];
   if (!match) return key;
   while (steps < 0) steps += 12;
   var fromC = (match.stepsFromC + steps) % 12;
   for (var i = 0; i < Object.keys(keys).length; i++) {
     var k = Object.keys(keys)[i];
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     if (keys[k].stepsFromC === fromC) return k;
   }
   return key;

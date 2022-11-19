@@ -1,9 +1,10 @@
 import sprintf from './sprintf';
 
-function printVerticalLine(renderer, x, y1, y2) {
+function printVerticalLine(renderer: any, x: any, y1: any, y2: any) {
   var dy = 0.35;
   var fill = "#00aaaa";
   var pathString = sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
     "M %f %f L %f %f L %f %f L %f %f z",
     x - dy,
     y1,
@@ -21,6 +22,7 @@ function printVerticalLine(renderer, x, y1, y2) {
     class: renderer.controller.classes.generate("staff")
   });
   pathString = sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
     "M %f %f L %f %f L %f %f L %f %f z",
     x - 20,
     y1,
@@ -38,6 +40,7 @@ function printVerticalLine(renderer, x, y1, y2) {
     class: renderer.controller.classes.generate("staff")
   });
   pathString = sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
     "M %f %f L %f %f L %f %f L %f %f z",
     x + 20,
     y2,

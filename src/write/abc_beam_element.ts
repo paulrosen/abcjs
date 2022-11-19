@@ -15,7 +15,7 @@
 //
 // Setup phase
 //
-var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
+var BeamElem = function BeamElem(this: any, stemHeight: any, type: any, flat: any, firstElement: any) {
   // type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
   this.type = "BeamElem";
   this.isflat = !!flat;
@@ -41,7 +41,7 @@ BeamElem.prototype.setHint = function () {
   this.hint = true;
 };
 
-BeamElem.prototype.runningDirection = function (abcelem) {
+BeamElem.prototype.runningDirection = function (abcelem: any) {
   var pitch = abcelem.averagepitch;
   if (pitch === undefined) return; // don't include elements like spacers in beams
   this.total = Math.round(this.total + pitch);
@@ -49,7 +49,7 @@ BeamElem.prototype.runningDirection = function (abcelem) {
   this.count++;
 };
 
-BeamElem.prototype.add = function (abselem) {
+BeamElem.prototype.add = function (abselem: any) {
   var pitch = abselem.abcelem.averagepitch;
   if (pitch === undefined) return; // don't include elements like spacers in beams
   if (!abselem.abcelem.rest) this.allrests = false;
@@ -64,7 +64,7 @@ BeamElem.prototype.add = function (abselem) {
   }
 };
 
-BeamElem.prototype.addBeam = function (beam) {
+BeamElem.prototype.addBeam = function (beam: any) {
   this.beams.push(beam);
 };
 
@@ -101,7 +101,7 @@ BeamElem.prototype.calcDir = function () {
   }
 };
 
-function calcAverage(total, numElements) {
+function calcAverage(total: any, numElements: any) {
   if (!numElements) return 0;
   return total / numElements;
 }

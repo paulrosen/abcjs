@@ -2,16 +2,16 @@
 
 import instrumentIndexToName from './instrument-index-to-name';
 
-var createNoteMap = function (sequence) {
-  var map = [];
+var createNoteMap = function (sequence: any) {
+  var map: any = [];
   for (var i = 0; i < sequence.tracks.length; i++) map.push([]);
 
   // TODO-PER: handle more than one note in a track
   var nextNote = {};
   var currentInstrument = instrumentIndexToName[0];
   // ev.start and ev.duration are in whole notes. Need to turn them into
-  sequence.tracks.forEach(function (track, i) {
-    track.forEach(function (ev) {
+  sequence.tracks.forEach(function (track: any, i: any) {
+    track.forEach(function (ev: any) {
       switch (ev.cmd) {
         case "note":
           // ev contains:
@@ -28,9 +28,13 @@ var createNoteMap = function (sequence) {
               end: Math.round((ev.start + len - gap) * 1000000) / 1000000,
               volume: ev.volume
             };
+            // @ts-expect-error TS(2339): Property 'startChar' does not exist on type '{ pit... Remove this comment to see the full error message
             if (ev.startChar) obj.startChar = ev.startChar;
+            // @ts-expect-error TS(2339): Property 'endChar' does not exist on type '{ pitch... Remove this comment to see the full error message
             if (ev.endChar) obj.endChar = ev.endChar;
+            // @ts-expect-error TS(2339): Property 'style' does not exist on type '{ pitch: ... Remove this comment to see the full error message
             if (ev.style) obj.style = ev.style;
+            // @ts-expect-error TS(2339): Property 'cents' does not exist on type '{ pitch: ... Remove this comment to see the full error message
             if (ev.cents) obj.cents = ev.cents;
             map[i].push(obj);
           }

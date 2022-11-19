@@ -3849,6 +3849,7 @@ var glyphs = {
 };
 
 // Custom characters that weren't generated from the font:
+// @ts-expect-error TS(2551): Property 'noteheads.slash.whole' does not exist on... Remove this comment to see the full error message
 glyphs["noteheads.slash.whole"] = {
   d: [
     ["M", 5, -5],
@@ -3876,12 +3877,14 @@ glyphs["noteheads.slash.whole"] = {
   h: 15.63
 };
 
+// @ts-expect-error TS(2551): Property 'noteheads.slash.quarter' does not exist ... Remove this comment to see the full error message
 glyphs["noteheads.slash.quarter"] = {
   d: [["M", 9, -6], ["l", 0, 4], ["l", -9, 9], ["l", 0, -4], ["z"]],
   w: 9,
   h: 9
 };
 
+// @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
 glyphs["noteheads.harmonic.quarter"] = {
   d: [
     ["M", 3.63, -4.02],
@@ -3900,24 +3903,26 @@ glyphs["noteheads.harmonic.quarter"] = {
   h: 8.165
 };
 
+// @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
 glyphs["noteheads.triangle.quarter"] = {
   d: [["M", 0, 0], ["l", 9, 0], ["l", -4.5, -9], ["z"]],
   w: 9,
   h: 9
 };
 
-var pathClone = function (pathArray) {
+var pathClone = function (pathArray: any) {
   var res = [];
   for (var i = 0, ii = pathArray.length; i < ii; i++) {
     res[i] = [];
     for (var j = 0, jj = pathArray[i].length; j < jj; j++) {
+      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
       res[i][j] = pathArray[i][j];
     }
   }
   return res;
 };
 
-var pathScale = function (pathArray, kx, ky) {
+var pathScale = function (pathArray: any, kx: any, ky: any) {
   for (var i = 0, ii = pathArray.length; i < ii; i++) {
     var p = pathArray[i];
     var j, jj;
@@ -3928,10 +3933,14 @@ var pathScale = function (pathArray, kx, ky) {
 };
 
 var Glyphs = {
-  printSymbol: function (x, y, symb, paper, attrs) {
+  printSymbol: function (x: any, y: any, symb: any, paper: any, attrs: any) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     if (!glyphs[symb]) return null;
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var pathArray = pathClone(glyphs[symb].d);
+    // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
     pathArray[0][1] += x;
+    // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
     pathArray[0][2] += y;
     var path = "";
     for (var i = 0; i < pathArray.length; i++) path += pathArray[i].join(" ");
@@ -3939,36 +3948,43 @@ var Glyphs = {
     return paper.path(attrs);
   },
 
-  getPathForSymbol: function (x, y, symb, scalex, scaley) {
+  getPathForSymbol: function (x: any, y: any, symb: any, scalex: any, scaley: any) {
     scalex = scalex || 1;
     scaley = scaley || 1;
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     if (!glyphs[symb]) return null;
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var pathArray = pathClone(glyphs[symb].d);
     if (scalex !== 1 || scaley !== 1) pathScale(pathArray, scalex, scaley);
+    // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
     pathArray[0][1] += x;
+    // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
     pathArray[0][2] += y;
 
     return pathArray;
   },
 
-  getSymbolWidth: function (symbol) {
+  getSymbolWidth: function (symbol: any) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     if (glyphs[symbol]) return glyphs[symbol].w;
     return 0;
   },
 
-  symbolHeightInPitches: function (symbol) {
+  symbolHeightInPitches: function (symbol: any) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var height = glyphs[symbol] ? glyphs[symbol].h : 0;
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     return height / spacing.STEP;
   },
 
-  getSymbolAlign: function (symbol) {
+  getSymbolAlign: function (symbol: any) {
     if (symbol.substring(0, 7) === "scripts" && symbol !== "scripts.roll") {
       return "center";
     }
     return "left";
   },
 
-  getYCorr: function (symbol) {
+  getYCorr: function (symbol: any) {
     switch (symbol) {
       case "0":
       case "1":
@@ -4029,7 +4045,8 @@ var Glyphs = {
         return 0;
     }
   },
-  setSymbol: function (name, path) {
+  setSymbol: function (name: any, path: any) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     glyphs[name] = path;
   }
 };

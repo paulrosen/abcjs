@@ -20,7 +20,7 @@ function initSpecialY() {
   };
 }
 
-function getLyricHeight(voice) {
+function getLyricHeight(voice: any) {
   var maxLyricHeight = 0;
   for (var ii = 0; ii < voice.children.length; ii++) {
     var curAbs = voice.children[ii];
@@ -33,7 +33,7 @@ function getLyricHeight(voice) {
   return maxLyricHeight; // add spacing
 }
 
-function buildTabName(self, dest) {
+function buildTabName(self: any, dest: any) {
   var stringSemantics = self.plugin.semantics.strings;
   var controller = self.renderer.controller;
   var textSize = controller.getTextSize;
@@ -53,10 +53,11 @@ function buildTabName(self, dest) {
  * @param {*} staffIndex
  * @param {*} tablatureLayout
  */
-function TabRenderer(plugin, renderer, line, staffIndex) {
+function TabRenderer(this: any, plugin: any, renderer: any, line: any, staffIndex: any) {
   this.renderer = renderer;
   this.plugin = plugin;
   this.line = line;
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.absolutes = new TabAbsoluteElements();
   this.staffIndex = staffIndex;
   this.tabStaff = {
@@ -67,7 +68,7 @@ function TabRenderer(plugin, renderer, line, staffIndex) {
   this.tabSize = plugin.linePitch * plugin.nbLines;
 }
 
-function islastTabInStaff(index, staffGroup) {
+function islastTabInStaff(index: any, staffGroup: any) {
   if (staffGroup[index].isTabStaff) {
     if (index === staffGroup.length - 1) return true;
     if (staffGroup[index + 1].isTabStaff) {
@@ -79,7 +80,7 @@ function islastTabInStaff(index, staffGroup) {
   return false;
 }
 
-function getStaffNumbers(staffs) {
+function getStaffNumbers(staffs: any) {
   var nbStaffs = 0;
   for (var ii = 0; ii < staffs.length; ii++) {
     if (!staffs[ii].isTabStaff) {
@@ -89,7 +90,7 @@ function getStaffNumbers(staffs) {
   return nbStaffs;
 }
 
-function getParentStaffIndex(staffs, index) {
+function getParentStaffIndex(staffs: any, index: any) {
   for (var ii = index; ii >= 0; ii--) {
     if (!staffs[ii].isTabStaff) {
       return ii;
@@ -98,7 +99,7 @@ function getParentStaffIndex(staffs, index) {
   return -1;
 }
 
-function linkStaffAndTabs(staffs) {
+function linkStaffAndTabs(staffs: any) {
   for (var ii = 0; ii < staffs.length; ii++) {
     if (staffs[ii].isTabStaff) {
       // link to parent staff
@@ -110,14 +111,14 @@ function linkStaffAndTabs(staffs) {
   }
 }
 
-function isMultiVoiceSingleStaff(staffs, parent) {
+function isMultiVoiceSingleStaff(staffs: any, parent: any) {
   if (getStaffNumbers(staffs) === 1) {
     if (parent.voices.length > 1) return true;
   }
   return false;
 }
 
-function getNextTabPos(self, staffGroup) {
+function getNextTabPos(self: any, staffGroup: any) {
   var tabIndex = self.staffIndex;
   var startIndex = 0;
   var handledVoices = 0;
@@ -147,7 +148,7 @@ function getNextTabPos(self, staffGroup) {
   }
 }
 
-function getLastStaff(staffs, lastTab) {
+function getLastStaff(staffs: any, lastTab: any) {
   for (var ii = lastTab; ii >= 0; ii--) {
     if (!staffs[ii].isTabStaff) {
       return staffs[ii];
@@ -156,7 +157,7 @@ function getLastStaff(staffs, lastTab) {
   return null;
 }
 
-function checkVoiceKeySig(voices, ii) {
+function checkVoiceKeySig(voices: any, ii: any) {
   var curVoice = voices[ii];
   // on multivoice multistaff only the first voice has key signature
   // folling consecutive do not have one => we should provide the first voice key sig back then
@@ -208,6 +209,7 @@ TabRenderer.prototype.doLayout = function () {
   };
   var nextTabPos = getNextTabPos(this, staffGroup.staffs);
   if (nextTabPos === -1) return;
+  // @ts-expect-error TS(2339): Property 'parentIndex' does not exist on type '{ b... Remove this comment to see the full error message
   staffGroupInfos.parentIndex = nextTabPos - 1;
   staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
@@ -220,9 +222,12 @@ TabRenderer.prototype.doLayout = function () {
   // build from staff
   this.tabStaff.voices = [];
   for (var ii = 0; ii < nbVoices; ii++) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var tabVoice = new VoiceElement(0, 0);
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
     staffGroup.staffs[this.staffIndex].top += nameHeight;
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
     voices.splice(voices.length, 0, tabVoice);

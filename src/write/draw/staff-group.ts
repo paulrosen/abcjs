@@ -6,13 +6,13 @@ import printDebugBox from './debug-box';
 import printStem from './print-stem';
 import nonMusic from './non-music';
 
-function drawStaffGroup(renderer, params, selectables, lineNumber) {
+function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber: any) {
   // We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
   // All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
   // renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
   // If there are multiple staves, then renderer.y will be incremented for each new staff.
 
-  var colorIndex;
+  var colorIndex: any;
 
   // An invisible marker is useful to be able to find where each system starts.
   //addInvisibleMarker(renderer, "abcjs-top-of-system");
@@ -22,6 +22,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
   for (var j = 0; j < params.staffs.length; j++) {
     var staff1 = params.staffs[j];
     //renderer.printHorizontalLine(50, renderer.y, "start");
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     renderer.moveY(spacing.STEP, staff1.top);
     staff1.absoluteY = renderer.y;
     if (renderer.showDebug) {
@@ -36,6 +37,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
           y2: startY,
           stroke: "#0000ff"
         });
+        // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
         printDebugBox(renderer, {
           x: renderer.padding.left,
           y: renderer.calcY(staff1.originalTop),
@@ -62,6 +64,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
         debugPrintGridItem(staff1, "volumeHeightBelow");
       }
     }
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     renderer.moveY(spacing.STEP, -staff1.bottom);
     if (renderer.showDebug) {
       if (renderer.showDebug.indexOf("grid") >= 0) {
@@ -125,22 +128,31 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
     drawVoice(renderer, params.voices[i], bartop, selectables, {
       top: startY,
       zero: renderer.y,
+      // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
       height: params.height * spacing.STEP
     });
     var tabNameHeight = 0;
     if (tabName) {
       // print tab infos on staffBottom
       var r = { rows: [] };
+      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
       r.rows.push({ absmove: bottomLine + 2 });
       var leftMargin = 8;
       r.rows.push({
+        // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
         left: params.startx + leftMargin,
+        // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
         text: tabName.name,
+        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         font: "tablabelfont",
+        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         klass: "text instrument-name",
+        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         anchor: "start"
       });
+      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
       r.rows.push({ move: tabName.textSize.height });
+      // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
       nonMusic(renderer, r);
       tabNameHeight = tabName.textSize.height;
     }
@@ -159,11 +171,12 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
   if (staffSize > 1) {
     topLine = params.staffs[0].topLine;
     bottomLine = params.staffs[staffSize - 1].bottomLine;
+    // @ts-expect-error TS(2554): Expected 7 arguments, but got 6.
     printStem(renderer, params.startx, 0.6, topLine, bottomLine, null);
   }
   renderer.y = startY;
 
-  function debugPrintGridItem(staff, key) {
+  function debugPrintGridItem(staff: any, key: any) {
     var colors = [
       "rgb(207,27,36)",
       "rgb(168,214,80)",
@@ -174,6 +187,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
       "rgb(220,166,142)"
     ];
     if (staff.positionY[key]) {
+      // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
       var height = staff.specialY[key] * spacing.STEP;
       if (
         key === "chordHeightAbove" &&
@@ -207,10 +221,11 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
   }
 }
 
-function printBrace(renderer, absoluteY, brace, index, selectables) {
+function printBrace(renderer: any, absoluteY: any, brace: any, index: any, selectables: any) {
   if (brace) {
     for (var i = 0; i < brace.length; i++) {
       if (brace[i].isStartVoice(index)) {
+        // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
         brace[i].startY = absoluteY - spacing.STEP * 10;
         brace[i].elemset = drawBrace(renderer, brace[i], selectables);
       }
@@ -223,7 +238,7 @@ function printBrace(renderer, absoluteY, brace, index, selectables) {
 // 	renderer.paper.pathToBack({path:"M 0 " + y + " L 0 0", stroke:"none", fill:"none", "stroke-opacity": 0, "fill-opacity": 0, 'class': renderer.controller.classes.generate(className), 'data-vertical': y });
 // }
 
-function boxAllElements(renderer, voices, which) {
+function boxAllElements(renderer: any, voices: any, which: any) {
   for (var i = 0; i < which.length; i++) {
     var children = voices[which[i]].children;
     for (var j = 0; j < children.length; j++) {
@@ -231,7 +246,9 @@ function boxAllElements(renderer, voices, which) {
       var coords = elem.getFixedCoords();
       if (elem.invisible || coords.t === undefined || coords.b === undefined)
         continue;
+      // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
       var height = (coords.t - coords.b) * spacing.STEP;
+      // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
       printDebugBox(renderer, {
         x: coords.x,
         y: renderer.calcY(coords.t),
@@ -249,6 +266,7 @@ function boxAllElements(renderer, voices, which) {
         if (chord) {
           var y = renderer.calcY(relElem.pitch);
           y += relElem.dim.font.size * relElem.getLane();
+          // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
           printDebugBox(renderer, {
             x: chord.left,
             y: y,

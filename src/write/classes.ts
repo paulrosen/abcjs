@@ -1,4 +1,4 @@
-var Classes = function Classes(options) {
+var Classes = function Classes(this: any, options: any) {
   this.shouldAddClasses = options.shouldAddClasses;
   this.reset();
 };
@@ -59,7 +59,7 @@ Classes.prototype.measureTotal = function () {
   return total;
 };
 
-Classes.prototype.getCurrent = function (c) {
+Classes.prototype.getCurrent = function (c: any) {
   return {
     line: this.lineNumber,
     measure: this.measureNumber,
@@ -69,7 +69,7 @@ Classes.prototype.getCurrent = function (c) {
   };
 };
 
-Classes.prototype.generate = function (c) {
+Classes.prototype.generate = function (c: any) {
   if (!this.shouldAddClasses) return "";
   var ret = [];
   if (c && c.length > 0) ret.push(c);
@@ -87,7 +87,9 @@ Classes.prototype.generate = function (c) {
     ret.push("n" + this.noteNumber);
   // add a prefix to all classes that abcjs adds.
   if (ret.length > 0) {
+    // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'any[]'.
     ret = ret.join(" "); // Some strings are compound classes - that is, specify more than one class in a string.
+    // @ts-expect-error TS(2339): Property 'split' does not exist on type 'any[]'.
     ret = ret.split(" ");
     for (var i = 0; i < ret.length; i++) {
       if (ret[i].indexOf("abcjs-") !== 0 && ret[i].length > 0)

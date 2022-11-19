@@ -1,6 +1,7 @@
 var VoiceElement = function VoiceElements() {};
 
-VoiceElement.beginLayout = function (startx, voice) {
+// @ts-expect-error TS(2339): Property 'beginLayout' does not exist on type '() ... Remove this comment to see the full error message
+VoiceElement.beginLayout = function (startx: any, voice: any) {
   voice.i = 0;
   voice.durationindex = 0;
   //this.ii=this.children.length;
@@ -10,16 +11,19 @@ VoiceElement.beginLayout = function (startx, voice) {
   voice.spacingduration = 0; // duration left to be laid out in current iteration (omitting additional spacing due to other aspects, such as bars, dots, sharps and flats)
 };
 
-VoiceElement.layoutEnded = function (voice) {
+// @ts-expect-error TS(2339): Property 'layoutEnded' does not exist on type '() ... Remove this comment to see the full error message
+VoiceElement.layoutEnded = function (voice: any) {
   return voice.i >= voice.children.length;
 };
 
-VoiceElement.getNextX = function (voice) {
+// @ts-expect-error TS(2339): Property 'getNextX' does not exist on type '() => ... Remove this comment to see the full error message
+VoiceElement.getNextX = function (voice: any) {
   return Math.max(voice.minx, voice.nextx);
 };
 
 // number of spacing units expected for next positioning
-VoiceElement.getSpacingUnits = function (voice) {
+// @ts-expect-error TS(2339): Property 'getSpacingUnits' does not exist on type ... Remove this comment to see the full error message
+VoiceElement.getSpacingUnits = function (voice: any) {
   return Math.sqrt(voice.spacingduration * 8);
 };
 
@@ -27,12 +31,13 @@ VoiceElement.getSpacingUnits = function (voice) {
 // x - position to try to layout the element at
 // spacing - base spacing
 // can't call this function more than once per iteration
+// @ts-expect-error TS(2339): Property 'layoutOneItem' does not exist on type '(... Remove this comment to see the full error message
 VoiceElement.layoutOneItem = function (
-  x,
-  spacing,
-  voice,
-  minPadding,
-  firstVoice
+  x: any,
+  spacing: any,
+  voice: any,
+  minPadding: any,
+  firstVoice: any
 ) {
   var child = voice.children[voice.i];
   if (!child) return 0;
@@ -107,6 +112,7 @@ VoiceElement.layoutOneItem = function (
   voice.minx = x + getMinWidth(child); // add necessary layout space
   if (voice.i !== voice.children.length - 1) voice.minx += child.minspacing; // add minimumspacing except on last elem
 
+  // @ts-expect-error TS(2339): Property 'updateNextX' does not exist on type '() ... Remove this comment to see the full error message
   this.updateNextX(x, spacing, voice);
 
   // contribute to staff y position
@@ -116,7 +122,8 @@ VoiceElement.layoutOneItem = function (
   return x; // where we end up having placed the child
 };
 
-VoiceElement.shiftRight = function (dx, voice) {
+// @ts-expect-error TS(2339): Property 'shiftRight' does not exist on type '() =... Remove this comment to see the full error message
+VoiceElement.shiftRight = function (dx: any, voice: any) {
   var child = voice.children[voice.i];
   if (!child) return;
   child.setX(child.x + dx);
@@ -125,11 +132,14 @@ VoiceElement.shiftRight = function (dx, voice) {
 };
 
 // call when spacingduration has been updated
-VoiceElement.updateNextX = function (x, spacing, voice) {
+// @ts-expect-error TS(2339): Property 'updateNextX' does not exist on type '() ... Remove this comment to see the full error message
+VoiceElement.updateNextX = function (x: any, spacing: any, voice: any) {
   voice.nextx = x + spacing * Math.sqrt(voice.spacingduration * 8);
 };
 
-VoiceElement.updateIndices = function (voice) {
+// @ts-expect-error TS(2339): Property 'updateIndices' does not exist on type '(... Remove this comment to see the full error message
+VoiceElement.updateIndices = function (voice: any) {
+  // @ts-expect-error TS(2339): Property 'layoutEnded' does not exist on type '() ... Remove this comment to see the full error message
   if (!this.layoutEnded(voice)) {
     voice.durationindex += voice.children[voice.i].duration;
     if (voice.children[voice.i].type === "bar")
@@ -138,14 +148,14 @@ VoiceElement.updateIndices = function (voice) {
   }
 };
 
-function getExtraWidth(child, minPadding) {
+function getExtraWidth(child: any, minPadding: any) {
   // space needed to the left of the note
   var padding = 0;
   if (child.type === "note" || child.type === "bar") padding = minPadding;
   return -child.extraw + padding;
 }
 
-function getMinWidth(child) {
+function getMinWidth(child: any) {
   // absolute space taken to the right of the note
   return child.w;
 }

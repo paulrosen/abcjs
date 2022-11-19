@@ -1,5 +1,6 @@
 //    abc_midi_create.js: Turn a linear series of events into a midi file.
 
+// @ts-expect-error TS(7034): Variable 'rendererFactory' implicitly has type 'an... Remove this comment to see the full error message
 import rendererFactory from '../synth/abc_midi_renderer';
 
 var create;
@@ -9,9 +10,10 @@ var create;
 
   var baseDuration = 480 * 4; // nice and divisible, equals 1 whole note
 
-  create = function (abcTune, options) {
+  create = function (abcTune: any, options: any) {
     if (options === undefined) options = {};
     var commands = abcTune.setUpAudio(options);
+    // @ts-expect-error TS(7005): Variable 'rendererFactory' implicitly has an 'any'... Remove this comment to see the full error message
     var midi = rendererFactory();
 
     var title = abcTune.metaText ? abcTune.metaText.title : undefined;
@@ -43,13 +45,17 @@ var create;
             // The staccato and legato are indicated by event.gap.
             // event.gap is in seconds but the durations are in whole notes.
             var end = start + event.duration - gapLengthInBeats;
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             if (!notePlacement[start]) notePlacement[start] = [];
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             notePlacement[start].push({
               pitch: event.pitch,
               volume: event.volume,
               cents: event.cents
             });
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             if (!notePlacement[end]) notePlacement[end] = [];
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             notePlacement[end].push({ pitch: event.pitch, volume: 0 });
             break;
           default:
@@ -63,18 +69,23 @@ var create;
     return midi.getData();
   };
 
-  function addNotes(midi, notePlacement, baseDuration) {
+  function addNotes(midi: any, notePlacement: any, baseDuration: any) {
     var times = Object.keys(notePlacement);
+    // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'string'.
     for (var h = 0; h < times.length; h++) times[h] = parseFloat(times[h]);
     times.sort(function (a, b) {
+      // @ts-expect-error TS(2362): The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
       return a - b;
     });
     var lastTime = 0;
     for (var i = 0; i < times.length; i++) {
       var events = notePlacement[times[i]];
+      // @ts-expect-error TS(2365): Operator '>' cannot be applied to types 'string' a... Remove this comment to see the full error message
       if (times[i] > lastTime) {
+        // @ts-expect-error TS(2362): The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
         var distance = (times[i] - lastTime) * baseDuration;
         midi.addRest(distance);
+        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'number'.
         lastTime = times[i];
       }
       for (var j = 0; j < events.length; j++) {

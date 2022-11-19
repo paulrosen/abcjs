@@ -5,17 +5,18 @@ import transpose from './abc_transpose';
 var parseKeyVoice = {};
 
 (function () {
-  var tokenizer;
-  var warn;
-  var multilineVars;
+  var tokenizer: any;
+  var warn: any;
+  var multilineVars: any;
   var tune;
-  var tuneBuilder;
+  var tuneBuilder: any;
+  // @ts-expect-error TS(2339): Property 'initialize' does not exist on type '{}'.
   parseKeyVoice.initialize = function (
-    tokenizer_,
-    warn_,
-    multilineVars_,
-    tune_,
-    tuneBuilder_
+    tokenizer_: any,
+    warn_: any,
+    multilineVars_: any,
+    tune_: any,
+    tuneBuilder_: any
   ) {
     tokenizer = tokenizer_;
     warn = warn_;
@@ -24,7 +25,9 @@ var parseKeyVoice = {};
     tuneBuilder = tuneBuilder_;
   };
 
-  parseKeyVoice.standardKey = function (keyName, root, acc, localTranspose) {
+  // @ts-expect-error TS(2339): Property 'standardKey' does not exist on type '{}'... Remove this comment to see the full error message
+  parseKeyVoice.standardKey = function (keyName: any, root: any, acc: any, localTranspose: any) {
+    // @ts-expect-error TS(2339): Property 'keySignature' does not exist on type '{}... Remove this comment to see the full error message
     return transpose.keySignature(
       multilineVars,
       keyName,
@@ -79,13 +82,16 @@ var parseKeyVoice = {};
     alto_8: { clef: "alto-8", pitch: 6, mid: -6 }
   };
 
-  var calcMiddle = function (clef, oct) {
+  var calcMiddle = function (clef: any, oct: any) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var value = clefLines[clef];
     var mid = value ? value.mid : 0;
     return mid + oct;
   };
 
-  parseKeyVoice.fixClef = function (clef) {
+  // @ts-expect-error TS(2339): Property 'fixClef' does not exist on type '{}'.
+  parseKeyVoice.fixClef = function (clef: any) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var value = clefLines[clef.type];
     if (value) {
       clef.clefPos = value.pitch;
@@ -93,9 +99,12 @@ var parseKeyVoice = {};
     }
   };
 
-  parseKeyVoice.deepCopyKey = function (key) {
+  // @ts-expect-error TS(2339): Property 'deepCopyKey' does not exist on type '{}'... Remove this comment to see the full error message
+  parseKeyVoice.deepCopyKey = function (key: any) {
     var ret = { accidentals: [], root: key.root, acc: key.acc, mode: key.mode };
-    parseCommon.each(key.accidentals, function (k) {
+    // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+    parseCommon.each(key.accidentals, function (k: any) {
+      // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
       ret.accidentals.push(parseCommon.clone(k));
     });
     return ret;
@@ -118,24 +127,30 @@ var parseKeyVoice = {};
     g: 11
   };
 
-  parseKeyVoice.addPosToKey = function (clef, key) {
+  // @ts-expect-error TS(2339): Property 'addPosToKey' does not exist on type '{}'... Remove this comment to see the full error message
+  parseKeyVoice.addPosToKey = function (clef: any, key: any) {
     // Shift the key signature from the treble positions to whatever position is needed for the clef.
     // This may put the key signature unnaturally high or low, so if it does, then shift it.
     var mid = clef.verticalPos;
-    parseCommon.each(key.accidentals, function (acc) {
+    // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+    parseCommon.each(key.accidentals, function (acc: any) {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       var pitch = pitches[acc.note];
       pitch = pitch - mid;
       acc.verticalPos = pitch;
     });
     if (key.impliedNaturals)
-      parseCommon.each(key.impliedNaturals, function (acc) {
+      // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+      parseCommon.each(key.impliedNaturals, function (acc: any) {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         var pitch = pitches[acc.note];
         pitch = pitch - mid;
         acc.verticalPos = pitch;
       });
 
     if (mid < -10) {
-      parseCommon.each(key.accidentals, function (acc) {
+      // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+      parseCommon.each(key.accidentals, function (acc: any) {
         acc.verticalPos -= 7;
         if (
           acc.verticalPos >= 11 ||
@@ -147,7 +162,8 @@ var parseKeyVoice = {};
           acc.verticalPos -= 7;
       });
       if (key.impliedNaturals)
-        parseCommon.each(key.impliedNaturals, function (acc) {
+        // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+        parseCommon.each(key.impliedNaturals, function (acc: any) {
           acc.verticalPos -= 7;
           if (
             acc.verticalPos >= 11 ||
@@ -159,7 +175,8 @@ var parseKeyVoice = {};
             acc.verticalPos -= 7;
         });
     } else if (mid < -4) {
-      parseCommon.each(key.accidentals, function (acc) {
+      // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+      parseCommon.each(key.accidentals, function (acc: any) {
         acc.verticalPos -= 7;
         if (
           mid === -8 &&
@@ -169,7 +186,8 @@ var parseKeyVoice = {};
           acc.verticalPos -= 7;
       });
       if (key.impliedNaturals)
-        parseCommon.each(key.impliedNaturals, function (acc) {
+        // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+        parseCommon.each(key.impliedNaturals, function (acc: any) {
           acc.verticalPos -= 7;
           if (
             mid === -8 &&
@@ -179,26 +197,32 @@ var parseKeyVoice = {};
             acc.verticalPos -= 7;
         });
     } else if (mid >= 7) {
-      parseCommon.each(key.accidentals, function (acc) {
+      // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+      parseCommon.each(key.accidentals, function (acc: any) {
         acc.verticalPos += 7;
       });
       if (key.impliedNaturals)
-        parseCommon.each(key.impliedNaturals, function (acc) {
+        // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+        parseCommon.each(key.impliedNaturals, function (acc: any) {
           acc.verticalPos += 7;
         });
     }
   };
 
-  parseKeyVoice.fixKey = function (clef, key) {
+  // @ts-expect-error TS(2339): Property 'fixKey' does not exist on type '{}'.
+  parseKeyVoice.fixKey = function (clef: any, key: any) {
+    // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
     var fixedKey = parseCommon.clone(key);
+    // @ts-expect-error TS(2339): Property 'addPosToKey' does not exist on type '{}'... Remove this comment to see the full error message
     parseKeyVoice.addPosToKey(clef, fixedKey);
     return fixedKey;
   };
 
-  var parseMiddle = function (str) {
+  var parseMiddle = function (str: any) {
     var i = 0;
     var p = str.charAt(i++);
     if (p === "^" || p === "_") p = str.charAt(i++);
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var mid = pitches[p];
     if (mid === undefined) mid = 6; // If a legal middle note wasn't received, just ignore it.
     for (; i < str.length; i++) {
@@ -209,7 +233,7 @@ var parseKeyVoice = {};
     return { mid: mid - 6, str: str.substring(i) }; // We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
   };
 
-  var normalizeAccidentals = function (accs) {
+  var normalizeAccidentals = function (accs: any) {
     for (var i = 0; i < accs.length; i++) {
       if (accs[i].note === "b") accs[i].note = "B";
       else if (accs[i].note === "a") accs[i].note = "A";
@@ -224,9 +248,10 @@ var parseKeyVoice = {};
     }
   };
 
+  // @ts-expect-error TS(2339): Property 'parseKey' does not exist on type '{}'.
   parseKeyVoice.parseKey = function (
-    str,
-    isInline // (and clef)
+    str: any,
+    isInline: any // (and clef)
   ) {
     // returns:
     //		{ foundClef: true, foundKey: true }
@@ -260,12 +285,15 @@ var parseKeyVoice = {};
     // first the key
     switch (tokens[0].token) {
       case "HP":
+        // @ts-expect-error TS(2339): Property 'addDirective' does not exist on type '{}... Remove this comment to see the full error message
         parseDirective.addDirective("bagpipes");
         multilineVars.key = { root: "HP", accidentals: [], acc: "", mode: "" };
+        // @ts-expect-error TS(2339): Property 'foundKey' does not exist on type '{}'.
         ret.foundKey = true;
         tokens.shift();
         break;
       case "Hp":
+        // @ts-expect-error TS(2339): Property 'addDirective' does not exist on type '{}... Remove this comment to see the full error message
         parseDirective.addDirective("bagpipes");
         multilineVars.key = {
           root: "Hp",
@@ -277,6 +305,7 @@ var parseKeyVoice = {};
           acc: "",
           mode: ""
         };
+        // @ts-expect-error TS(2339): Property 'foundKey' does not exist on type '{}'.
         ret.foundKey = true;
         tokens.shift();
         break;
@@ -288,12 +317,14 @@ var parseKeyVoice = {};
           acc: "",
           mode: ""
         };
+        // @ts-expect-error TS(2339): Property 'foundKey' does not exist on type '{}'.
         ret.foundKey = true;
         tokens.shift();
         break;
       default:
         var retPitch = tokenizer.getKeyPitch(tokens[0].token);
         if (retPitch.len > 0) {
+          // @ts-expect-error TS(2339): Property 'foundKey' does not exist on type '{}'.
           ret.foundKey = true;
           var acc = "";
           var mode = "";
@@ -322,6 +353,7 @@ var parseKeyVoice = {};
             }
             // Be sure that the key specified is in the list: not all keys are physically possible, like Cbmin.
             if (
+              // @ts-expect-error TS(2339): Property 'standardKey' does not exist on type '{}'... Remove this comment to see the full error message
               parseKeyVoice.standardKey(key, retPitch.token, acc, 0) ===
               undefined
             ) {
@@ -330,6 +362,7 @@ var parseKeyVoice = {};
             }
           }
           // We need to do a deep copy because we are going to modify it
+          // @ts-expect-error TS(2339): Property 'deepCopyKey' does not exist on type '{}'... Remove this comment to see the full error message
           var oldKey = parseKeyVoice.deepCopyKey(multilineVars.key);
           //TODO-PER: HACK! To get the local transpose to work, the transposition is done for each line. This caused the global transposition variable to be factored in twice, so, instead of rewriting that right now, I'm just subtracting one of them here.
           var keyCompensate =
@@ -339,7 +372,9 @@ var parseKeyVoice = {};
           //console.log("parse", JSON.stringify(multilineVars), isInline)
           var savedOrigKey;
           if (isInline) savedOrigKey = multilineVars.globalTransposeOrigKeySig;
+          // @ts-expect-error TS(2339): Property 'deepCopyKey' does not exist on type '{}'... Remove this comment to see the full error message
           multilineVars.key = parseKeyVoice.deepCopyKey(
+            // @ts-expect-error TS(2339): Property 'standardKey' does not exist on type '{}'... Remove this comment to see the full error message
             parseKeyVoice.standardKey(key, retPitch.token, acc, keyCompensate)
           );
           if (isInline) multilineVars.globalTransposeOrigKeySig = savedOrigKey;
@@ -384,8 +419,10 @@ var parseKeyVoice = {};
     if (accs.warn) warn(accs.warn, str, 0);
     // If we have extra accidentals, first replace ones that are of the same pitch before adding them to the end.
     if (accs.accs) {
+      // @ts-expect-error TS(2339): Property 'foundKey' does not exist on type '{}'.
       if (!ret.foundKey) {
         // if there are only extra accidentals, make sure this is set.
+        // @ts-expect-error TS(2339): Property 'foundKey' does not exist on type '{}'.
         ret.foundKey = true;
         multilineVars.key = {
           root: "none",
@@ -638,6 +675,7 @@ var parseKeyVoice = {};
             multilineVars.currentVoice.transpose !== undefined
           )
             multilineVars.clef.transpose = multilineVars.currentVoice.transpose;
+          // @ts-expect-error TS(2339): Property 'foundClef' does not exist on type '{}'.
           ret.foundClef = true;
           break;
         default:
@@ -648,7 +686,7 @@ var parseKeyVoice = {};
     return ret;
   };
 
-  var setCurrentVoice = function (id) {
+  var setCurrentVoice = function (id: any) {
     multilineVars.currentVoice = multilineVars.voices[id];
     tuneBuilder.setCurrentVoice(
       multilineVars.currentVoice.staffNum,
@@ -656,7 +694,8 @@ var parseKeyVoice = {};
     );
   };
 
-  parseKeyVoice.parseVoice = function (line, i, e) {
+  // @ts-expect-error TS(2339): Property 'parseVoice' does not exist on type '{}'.
+  parseKeyVoice.parseVoice = function (line: any, i: any, e: any) {
     //First truncate the string to the first non-space character after V: through either the
     //end of the line or a % character. Then remove trailing spaces, too.
     var ret = tokenizer.getMeat(line, i, e);
@@ -684,7 +723,7 @@ var parseKeyVoice = {};
     start += tokenizer.eatWhiteSpace(line, start);
 
     var staffInfo = { startStaff: isNew };
-    var addNextTokenToStaffInfo = function (name) {
+    var addNextTokenToStaffInfo = function (name: any) {
       var attr = tokenizer.getVoiceToken(line, start, end);
       if (attr.warn !== undefined)
         warn(
@@ -700,10 +739,11 @@ var parseKeyVoice = {};
         );
       else if (attr.token.length === 0 && line.charAt(start) !== '"')
         warn("Expected value for " + name + " in voice", line, start);
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       else staffInfo[name] = attr.token;
       start += attr.len;
     };
-    var addNextTokenToVoiceInfo = function (id, name, type) {
+    var addNextTokenToVoiceInfo = function (id: any, name: any, type: any) {
       var attr = tokenizer.getVoiceToken(line, start, end);
       if (attr.warn !== undefined)
         warn(
@@ -725,7 +765,7 @@ var parseKeyVoice = {};
       }
       start += attr.len;
     };
-    var getNextToken = function (name, type) {
+    var getNextToken = function (name: any, type: any) {
       var attr = tokenizer.getVoiceToken(line, start, end);
       if (attr.warn !== undefined)
         warn(
@@ -747,7 +787,7 @@ var parseKeyVoice = {};
       }
       start += attr.len;
     };
-    var addNextNoteTokenToVoiceInfo = function (id, name) {
+    var addNextNoteTokenToVoiceInfo = function (id: any, name: any) {
       var noteToTransposition = {
         _B: 2,
         _E: 9,
@@ -771,6 +811,7 @@ var parseKeyVoice = {};
           start
         );
       else {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         var t = noteToTransposition[attr.token];
         if (!t)
           warn(
@@ -802,12 +843,17 @@ var parseKeyVoice = {};
             //								if (staffInfo.clef[ii] === ',') oct -= 7;
             //								else if (staffInfo.clef[ii] === "'") oct += 7;
             //							}
+            // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startSta... Remove this comment to see the full error message
             if (staffInfo.clef !== undefined) {
+              // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startSta... Remove this comment to see the full error message
               staffInfo.clef = staffInfo.clef.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
+              // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startSta... Remove this comment to see the full error message
               if (staffInfo.clef.indexOf("+16") !== -1) {
                 oct += 14;
+                // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startSta... Remove this comment to see the full error message
                 staffInfo.clef = staffInfo.clef.replace("+16", "");
               }
+              // @ts-expect-error TS(2339): Property 'verticalPos' does not exist on type '{ s... Remove this comment to see the full error message
               staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct);
             }
             break;
@@ -843,7 +889,9 @@ var parseKeyVoice = {};
             //								if (token.token[iii] === ',') oct2 -= 7;
             //								else if (token.token[iii] === "'") oct2 += 7;
             //							}
+            // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startSta... Remove this comment to see the full error message
             staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
+            // @ts-expect-error TS(2339): Property 'verticalPos' does not exist on type '{ s... Remove this comment to see the full error message
             staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
             multilineVars.voices[id].clef = token.token;
             break;
@@ -899,6 +947,7 @@ var parseKeyVoice = {};
           case "middle":
           case "m":
             addNextTokenToStaffInfo("verticalPos");
+            // @ts-expect-error TS(2339): Property 'verticalPos' does not exist on type '{ s... Remove this comment to see the full error message
             staffInfo.verticalPos = parseMiddle(staffInfo.verticalPos).mid;
             break;
           case "gchords":
@@ -1007,17 +1056,27 @@ var parseKeyVoice = {};
     }
     var s = multilineVars.staves[multilineVars.voices[id].staffNum];
     if (!multilineVars.score_is_present) s.numVoices++;
+    // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startSta... Remove this comment to see the full error message
     if (staffInfo.clef)
+      // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startSta... Remove this comment to see the full error message
       s.clef = { type: staffInfo.clef, verticalPos: staffInfo.verticalPos };
+    // @ts-expect-error TS(2339): Property 'spacing' does not exist on type '{ start... Remove this comment to see the full error message
     if (staffInfo.spacing) s.spacing_below_offset = staffInfo.spacing;
+    // @ts-expect-error TS(2339): Property 'verticalPos' does not exist on type '{ s... Remove this comment to see the full error message
     if (staffInfo.verticalPos) s.verticalPos = staffInfo.verticalPos;
 
+    // @ts-expect-error TS(2339): Property 'name' does not exist on type '{ startSta... Remove this comment to see the full error message
     if (staffInfo.name) {
+      // @ts-expect-error TS(2339): Property 'name' does not exist on type '{ startSta... Remove this comment to see the full error message
       if (s.name) s.name.push(staffInfo.name);
+      // @ts-expect-error TS(2339): Property 'name' does not exist on type '{ startSta... Remove this comment to see the full error message
       else s.name = [staffInfo.name];
     }
+    // @ts-expect-error TS(2339): Property 'subname' does not exist on type '{ start... Remove this comment to see the full error message
     if (staffInfo.subname) {
+      // @ts-expect-error TS(2339): Property 'subname' does not exist on type '{ start... Remove this comment to see the full error message
       if (s.subname) s.subname.push(staffInfo.subname);
+      // @ts-expect-error TS(2339): Property 'subname' does not exist on type '{ start... Remove this comment to see the full error message
       else s.subname = [staffInfo.subname];
     }
 

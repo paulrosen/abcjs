@@ -1,6 +1,6 @@
 import printSymbol from './print-symbol';
 
-function drawDynamics(renderer, params, selectables) {
+function drawDynamics(renderer: any, params: any, selectables: any) {
   if (params.pitch === undefined)
     window.console.error("Dynamic Element y-coordinate not set.");
   var scalex = 1;

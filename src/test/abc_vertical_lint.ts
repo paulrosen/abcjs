@@ -4,10 +4,10 @@
 
 /*globals toString */
 
-var verticalLint = function (tunes) {
+var verticalLint = function (tunes: any) {
   "use strict";
 
-  function fixed(digits, zero, num) {
+  function fixed(digits: any, zero: any, num: any) {
     if (num === undefined) return "undefined";
     if (typeof num !== "number") return num;
     var str = num.toFixed(digits);
@@ -16,25 +16,25 @@ var verticalLint = function (tunes) {
       str = str.substr(0, str.length - 1);
     return str;
   }
-  function fixed1(num) {
+  function fixed1(num: any) {
     return fixed(1, ".0", num);
   }
-  function fixed2(num) {
+  function fixed2(num: any) {
     return fixed(2, ".00", num);
   }
-  function fixed4(num) {
+  function fixed4(num: any) {
     return fixed(4, ".0000", num);
   }
-  function formatY(obj) {
+  function formatY(obj: any) {
     return "y= ( " + fixed1(obj.bottom) + " , " + fixed1(obj.top) + " )";
   }
-  function formatX(obj) {
+  function formatX(obj: any) {
     return " x=" + fixed1(obj.x) + " w=" + fixed1(obj.width);
   }
-  function formatArrayStart(tabs, i) {
+  function formatArrayStart(tabs: any, i: any) {
     return tabs + i + ": ";
   }
-  function collectBrace(brace) {
+  function collectBrace(brace: any) {
     var ret;
     if (brace) {
       ret = [];
@@ -44,13 +44,14 @@ var verticalLint = function (tunes) {
           top: fixed1(brace[b1].startY),
           bottom: fixed1(brace[b1].endY)
         };
+        // @ts-expect-error TS(2339): Property 'header' does not exist on type '{ x: any... Remove this comment to see the full error message
         if (brace[b1].header) bracket.header = brace[b1].header;
         ret.push(bracket);
       }
     }
     return ret;
   }
-  function getType(obj) {
+  function getType(obj: any) {
     if (obj.$type.indexOf("staff-extra") >= 0) {
       if (obj.elem.length === 1) {
         switch (obj.elem[0]) {
@@ -122,23 +123,21 @@ var verticalLint = function (tunes) {
       obj.$type.indexOf("note") === 0 ||
       obj.$type.indexOf("rest") === 0
     ) {
-      return (
-        obj.$type +
-        " " +
-        fixed4(obj.duration) +
-        " " +
-        obj.elem
-          .join(" ")
-          .replace(/symbol /g, "")
-          .replace(/\n/g, "\\n")
-      );
+      return obj.$type +
+      " " +
+      fixed4(obj.duration) +
+      " " +
+      obj.elem
+        .join(" ")
+        .replace(/symbol /g, "")
+        .replace(/\n/g, "\\n");
     } else if (obj.$type === "bar") return "Bar";
     else if (obj.$type === "part") return obj.elem[0];
     else if (obj.$type === "tempo") return "Tempo " + obj.elem[0];
     return "unknown";
   }
 
-  function formatStaffs(arr, indent) {
+  function formatStaffs(arr: any, indent: any) {
     var tabs = "";
     for (var i = 0; i < indent; i++) tabs += "\t";
     var str = "\n";
@@ -149,7 +148,7 @@ var verticalLint = function (tunes) {
     return tabs + str;
   }
 
-  function formatVoices(arr, indent) {
+  function formatVoices(arr: any, indent: any) {
     var tabs = "";
     for (var i = 0; i < indent; i++) tabs += "\t";
     var str = "\n";
@@ -164,12 +163,12 @@ var verticalLint = function (tunes) {
     return tabs + str;
   }
 
-  function formatClasses(obj) {
+  function formatClasses(obj: any) {
     if (obj.classes) return " " + obj.classes;
     return "";
   }
 
-  function formatElements(arr, indent) {
+  function formatElements(arr: any, indent: any) {
     var tabs = "";
     for (var i = 0; i < indent; i++) tabs += "\t";
     var str = "\n";
@@ -196,7 +195,7 @@ var verticalLint = function (tunes) {
     return tabs + str;
   }
 
-  function formatOtherChildren(arr, indent) {
+  function formatOtherChildren(arr: any, indent: any) {
     var tabs = "";
     for (var i = 0; i < indent; i++) tabs += "\t";
     var str = tabs + "Other Children:\n";
@@ -213,7 +212,7 @@ var verticalLint = function (tunes) {
     return str + "\n";
   }
 
-  function formatBeams(arr, indent) {
+  function formatBeams(arr: any, indent: any) {
     var tabs = "";
     for (var i = 0; i < indent; i++) tabs += "\t";
     var str = tabs + "Beams:\n";
@@ -229,7 +228,7 @@ var verticalLint = function (tunes) {
     return str + "\n";
   }
 
-  function formatArray(arr, indent) {
+  function formatArray(arr: any, indent: any) {
     var tabs = "";
     for (var i = 0; i < indent; i++) tabs += "\t";
     var str = " [\n";
@@ -242,7 +241,8 @@ var verticalLint = function (tunes) {
     return tabs + str + tabs + "]";
   }
 
-  function formatObject(obj, indent) {
+  // @ts-expect-error TS(7023): 'formatObject' implicitly has return type 'any' be... Remove this comment to see the full error message
+  function formatObject(obj: any, indent: any) {
     var str = [];
     var tabs = "";
     for (var i = 0; i < indent; i++) tabs += "\t";
@@ -269,12 +269,12 @@ var verticalLint = function (tunes) {
     return str.join("\n");
   }
 
-  function addHeader(obj) {
+  function addHeader(obj: any) {
     if (obj.header) return " " + obj.header;
     return "";
   }
 
-  function formatLine(line, lineNum) {
+  function formatLine(line: any, lineNum: any) {
     var str = "";
     str += "Line: " + lineNum + ": (" + fixed1(line.height) + ")\n";
     if (line.brace) {
@@ -302,17 +302,18 @@ var verticalLint = function (tunes) {
     return str;
   }
 
-  function setSpecialY(obj) {
+  function setSpecialY(obj: any) {
     var ret = {};
     for (var key in obj) {
       if (obj.prototype.hasOwnProperty.call(key)) {
+        // @ts-expect-error TS(2538): Type '{}' cannot be used as an index type.
         if (obj[ret]) ret[key] = obj[ret];
       }
     }
     return ret;
   }
 
-  function extractPositioningInfo(staffGroup, lineNum) {
+  function extractPositioningInfo(staffGroup: any, lineNum: any) {
     var ret = {
       height: staffGroup.height,
       minSpace: staffGroup.minspace,
@@ -322,13 +323,18 @@ var verticalLint = function (tunes) {
       staffs: [],
       voices: []
     };
+    // @ts-expect-error TS(2339): Property 'brace' does not exist on type '{ height:... Remove this comment to see the full error message
     ret.brace = collectBrace(staffGroup.brace);
+    // @ts-expect-error TS(2339): Property 'bracket' does not exist on type '{ heigh... Remove this comment to see the full error message
     ret.bracket = collectBrace(staffGroup.bracket);
     for (var i = 0; i < staffGroup.staffs.length; i++) {
       var staff = staffGroup.staffs[i];
       ret.staffs.push({
+        // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
         bottom: fixed1(staff.bottom),
+        // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
         top: fixed1(staff.top),
+        // @ts-expect-error TS(2322): Type '{}' is not assignable to type 'never'.
         specialY: setSpecialY(staff)
       });
     }
@@ -387,7 +393,9 @@ var verticalLint = function (tunes) {
           width: child.w,
           x: child.x
         };
+        // @ts-expect-error TS(2339): Property 'classes' does not exist on type '{ $type... Remove this comment to see the full error message
         if (classes.length > 0) obj2.classes = classes.join(" ");
+        // @ts-expect-error TS(2339): Property 'elem' does not exist on type '{ $type: a... Remove this comment to see the full error message
         obj2.elem = [];
         if (type === "tempo") {
           var tempo = child.children[0].tempo;
@@ -411,26 +419,32 @@ var verticalLint = function (tunes) {
                 ")"
             );
           }
+          // @ts-expect-error TS(2339): Property 'elem' does not exist on type '{ $type: a... Remove this comment to see the full error message
           obj2.elem.push(arr.join(" "));
         } else if (child.children.length) {
           for (var k = 0; k < child.children.length; k++) {
             var str = child.children[k].type;
             if (child.children[k].c) str += " " + child.children[k].c;
+            // @ts-expect-error TS(2339): Property 'elem' does not exist on type '{ $type: a... Remove this comment to see the full error message
             obj2.elem.push(str);
           }
         }
+        // @ts-expect-error TS(2345): Argument of type '{ $type: any; bottom: any; top: ... Remove this comment to see the full error message
         obj.voiceChildren.push(obj2);
       }
       for (j = 0; j < voice.otherchildren.length; j++) {
         var otherChild = voice.otherchildren[j];
         var className = otherChild.constructor.name;
         var ch = { type: className, params: {} };
+        // @ts-expect-error TS(2339): Property 'value' does not exist on type '{}'.
         if (className === "String") ch.params.value = otherChild;
         else {
           for (var key in otherChild) {
             if (otherChild.prototype.hasOwnProperty.call(key)) {
               var value = otherChild[key];
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               if (value === null) ch.params[key] = "null";
+              // @ts-expect-error TS(1313): The body of an 'if' statement cannot be the empty ... Remove this comment to see the full error message
               else if (value === className && key === "type");
               else if (key === "elemset") {
                 var cls = [];
@@ -440,6 +454,7 @@ var verticalLint = function (tunes) {
                     for (var j3 = 0; j3 < c2.length; j3++) cls.push(c2[j3]);
                   }
                 }
+                // @ts-expect-error TS(2339): Property 'classes' does not exist on type '{}'.
                 ch.params.classes = cls.join(" ");
               } else if (typeof value === "object") {
                 var obj3 = value.constructor.name + "[";
@@ -455,41 +470,51 @@ var verticalLint = function (tunes) {
                     break;
                   default:
                     console.log(value.constructor.name);
+                    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                     ch.params[key] = value.constructor.name;
                     break;
                 }
+                // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                 ch.params[key] = obj3 + "]";
               } else if (typeof value === "number")
+                // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                 ch.params[key] = fixed1(value);
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               else ch.params[key] = value;
             }
           }
         }
+        // @ts-expect-error TS(2345): Argument of type '{ type: any; params: {}; }' is n... Remove this comment to see the full error message
         obj.otherChildren.push(ch);
       }
       for (j = 0; j < voice.beams.length; j++) {
         var beam = voice.beams[j];
         var className2 = beam.constructor.name;
         var ch2 = { type: className2, params: {} };
+        // @ts-expect-error TS(2339): Property 'value' does not exist on type '{}'.
         if (className2 === "String") ch2.params.value = beam;
         else {
           for (var key2 in beam) {
             if (beam.prototype.hasOwnProperty.call(key2)) {
               var value2 = beam[key2];
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               if (typeof value2 === "object") ch2.params[key2] = "object";
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               else ch2.params[key2] = value2;
             }
           }
         }
+        // @ts-expect-error TS(2345): Argument of type '{ type: any; params: {}; }' is n... Remove this comment to see the full error message
         obj.beams.push(ch2);
       }
       // TODO: there is also extra[], heads[], elemset[], and right[] to parse.
+      // @ts-expect-error TS(2345): Argument of type '{ bottom: any; top: any; special... Remove this comment to see the full error message
       ret.voices.push(obj);
     }
     return formatLine(ret, lineNum);
   }
 
-  function extractText(label, arr) {
+  function extractText(label: any, arr: any) {
     var items = [];
     items.push(label);
     for (var i = 0; i < arr.length; i++) {

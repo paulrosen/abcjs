@@ -30,7 +30,7 @@
 // Polyfill for CustomEvent for old IE versions
 try {
   if (typeof window.CustomEvent !== "function") {
-    var CustomEvent = function (event, params) {
+    var CustomEvent = function (event: any, params: any) {
       params = params || {
         bubbles: false,
         cancelable: false,
@@ -46,25 +46,26 @@ try {
       return evt;
     };
     CustomEvent.prototype = window.Event.prototype;
+    // @ts-expect-error TS(2322): Type '(event: any, params: any) => CustomEvent<any... Remove this comment to see the full error message
     window.CustomEvent = CustomEvent;
   }
 } catch (e) {
   // if we aren't in a browser, this code will crash, but it is not needed then either.
 }
 
-var EditArea = function (textareaid) {
+var EditArea = function(this: any, textareaid: any) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
 };
 
-EditArea.prototype.addSelectionListener = function (listener) {
-  this.textarea.onmousemove = function (ev) {
+EditArea.prototype.addSelectionListener = function (listener: any) {
+  this.textarea.onmousemove = function (ev: any) {
     if (this.isDragging) listener.fireSelectionChanged();
   };
 };
 
-EditArea.prototype.addChangeListener = function (listener) {
+EditArea.prototype.addChangeListener = function (listener: any) {
   this.changelistener = listener;
   this.textarea.onkeyup = function () {
     listener.fireChanged();
@@ -90,7 +91,7 @@ EditArea.prototype.getSelection = function () {
   };
 };
 
-EditArea.prototype.setSelection = function (start, end) {
+EditArea.prototype.setSelection = function (start: any, end: any) {
   if (this.textarea.setSelectionRange)
     this.textarea.setSelectionRange(start, end);
   else if (this.textarea.createTextRange) {
@@ -108,7 +109,7 @@ EditArea.prototype.getString = function () {
   return this.textarea.value;
 };
 
-EditArea.prototype.setString = function (str) {
+EditArea.prototype.setString = function (str: any) {
   this.textarea.value = str;
   this.initialText = this.getString();
   if (this.changelistener) {

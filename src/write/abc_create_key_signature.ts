@@ -6,9 +6,10 @@ import glyphs from './abc_glyphs';
 import RelativeElement from './abc_relative_element';
 import parseCommon from '../parse/abc_common';
 
-var createKeySignature = function (elem, tuneNumber) {
+var createKeySignature = function(this: any, elem: any, tuneNumber: any) {
   elem.el_type = "keySignature";
   if (!elem.accidentals || elem.accidentals.length === 0) return null;
+  // @ts-expect-error TS(2554): Expected 6 arguments, but got 5.
   var abselem = new AbsoluteElement(
     elem,
     0,
@@ -18,9 +19,10 @@ var createKeySignature = function (elem, tuneNumber) {
   );
   abselem.isKeySig = true;
   var dx = 0;
+  // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
   parseCommon.each(
     elem.accidentals,
-    function (acc) {
+    function (acc: any) {
       var symbol;
       var fudge = 0;
       switch (acc.acc) {
@@ -47,6 +49,7 @@ var createKeySignature = function (elem, tuneNumber) {
           symbol = "accidentals.flat";
       }
       abselem.addRight(
+        // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
         new RelativeElement(
           symbol,
           dx,

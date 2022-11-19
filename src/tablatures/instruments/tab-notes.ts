@@ -2,8 +2,10 @@ import TabNote from './tab-note';
 
 var notes = TabNote.notes;
 
-function TabNotes(fromNote, toNote) {
+function TabNotes(this: any, fromNote: any, toNote: any) {
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.fromN = new TabNote.TabNote(fromNote);
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   this.toN = new TabNote.TabNote(toNote);
 }
 
@@ -23,7 +25,7 @@ TabNotes.prototype.build = function () {
         " string"
     };
   }
-  var buildReturned = [];
+  var buildReturned: any = [];
   var startIndex = notes.indexOf(fromN.name);
   var toIndex = notes.indexOf(toN.name);
   if (startIndex == -1 || toIndex == -1) {

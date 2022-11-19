@@ -1,6 +1,6 @@
 //    abc_ending_element.js: Definition of the EndingElement class.
 
-var EndingElem = function EndingElem(text, anchor1, anchor2) {
+var EndingElem = function EndingElem(this: any, text: any, anchor1: any, anchor2: any) {
   this.type = "EndingElem";
   this.text = text; // text to be displayed top left
   this.anchor1 = anchor1; // must have a .x property or be null (means starts at the "beginning" of the line - after keysig)

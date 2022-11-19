@@ -1,4 +1,4 @@
-var SynthSequence = function () {
+var SynthSequence = function(this: any) {
   var self = this;
   self.tracks = [];
   self.totalDuration = 0;
@@ -12,7 +12,7 @@ var SynthSequence = function () {
     return self.tracks.length - 1;
   };
 
-  self.setInstrument = function (trackNumber, instrumentNumber) {
+  self.setInstrument = function (trackNumber: any, instrumentNumber: any) {
     self.tracks[trackNumber].push({
       channel: 0,
       cmd: "program",
@@ -22,11 +22,11 @@ var SynthSequence = function () {
   };
 
   self.appendNote = function (
-    trackNumber,
-    pitch,
-    durationInMeasures,
-    volume,
-    cents
+    trackNumber: any,
+    pitch: any,
+    durationInMeasures: any,
+    volume: any,
+    cents: any
   ) {
     var note = {
       cmd: "note",
@@ -37,6 +37,7 @@ var SynthSequence = function () {
       start: self.starts[trackNumber],
       volume: volume
     };
+    // @ts-expect-error TS(2339): Property 'cents' does not exist on type '{ cmd: st... Remove this comment to see the full error message
     if (cents) note.cents = cents;
     self.tracks[trackNumber].push(note);
     self.starts[trackNumber] += durationInMeasures;

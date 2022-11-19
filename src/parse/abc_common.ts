@@ -2,66 +2,81 @@
 
 var parseCommon = {};
 
-parseCommon.clone = function (source) {
+// @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
+parseCommon.clone = function (source: any) {
   var destination = {};
   for (var property in source)
     if (source.prototype.hasOwnProperty.call(property))
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       destination[property] = source[property];
   return destination;
 };
 
-parseCommon.cloneArray = function (source) {
+// @ts-expect-error TS(2339): Property 'cloneArray' does not exist on type '{}'.
+parseCommon.cloneArray = function (source: any) {
   var destination = [];
   for (var i = 0; i < source.length; i++) {
+    // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
     destination.push(parseCommon.clone(source[i]));
   }
   return destination;
 };
 
-parseCommon.cloneHashOfHash = function (source) {
+// @ts-expect-error TS(2339): Property 'cloneHashOfHash' does not exist on type ... Remove this comment to see the full error message
+parseCommon.cloneHashOfHash = function (source: any) {
   var destination = {};
   for (var property in source)
     if (source.prototype.hasOwnProperty.call(property))
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       destination[property] = parseCommon.clone(source[property]);
   return destination;
 };
 
-parseCommon.cloneHashOfArrayOfHash = function (source) {
+// @ts-expect-error TS(2339): Property 'cloneHashOfArrayOfHash' does not exist o... Remove this comment to see the full error message
+parseCommon.cloneHashOfArrayOfHash = function (source: any) {
   var destination = {};
   for (var property in source)
     if (source.prototype.hasOwnProperty.call(property))
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       destination[property] = parseCommon.cloneArray(source[property]);
   return destination;
 };
 
-parseCommon.gsub = function (source, pattern, replacement) {
+// @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
+parseCommon.gsub = function (source: any, pattern: any, replacement: any) {
   return source.split(pattern).join(replacement);
 };
 
-parseCommon.strip = function (str) {
+// @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
+parseCommon.strip = function (str: any) {
   return str.replace(/^\s+/, "").replace(/\s+$/, "");
 };
 
-parseCommon.startsWith = function (str, pattern) {
+// @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
+parseCommon.startsWith = function (str: any, pattern: any) {
   return str.indexOf(pattern) === 0;
 };
 
-parseCommon.endsWith = function (str, pattern) {
+// @ts-expect-error TS(2339): Property 'endsWith' does not exist on type '{}'.
+parseCommon.endsWith = function (str: any, pattern: any) {
   var d = str.length - pattern.length;
   return d >= 0 && str.lastIndexOf(pattern) === d;
 };
 
-parseCommon.each = function (arr, iterator, context) {
+// @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+parseCommon.each = function (arr: any, iterator: any, context: any) {
   for (var i = 0, length = arr.length; i < length; i++)
     iterator.apply(context, [arr[i], i]);
 };
 
-parseCommon.last = function (arr) {
+// @ts-expect-error TS(2339): Property 'last' does not exist on type '{}'.
+parseCommon.last = function (arr: any) {
   if (arr.length === 0) return null;
   return arr[arr.length - 1];
 };
 
-parseCommon.compact = function (arr) {
+// @ts-expect-error TS(2339): Property 'compact' does not exist on type '{}'.
+parseCommon.compact = function (arr: any) {
   var output = [];
   for (var i = 0; i < arr.length; i++) {
     if (arr[i]) output.push(arr[i]);
@@ -69,7 +84,8 @@ parseCommon.compact = function (arr) {
   return output;
 };
 
-parseCommon.detect = function (arr, iterator) {
+// @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+parseCommon.detect = function (arr: any, iterator: any) {
   for (var i = 0; i < arr.length; i++) {
     if (iterator(arr[i])) return true;
   }
@@ -81,6 +97,7 @@ parseCommon.detect = function (arr, iterator) {
 try {
   (function (arr) {
     arr.forEach(function (item) {
+      // @ts-expect-error TS(2339): Property 'prototype' does not exist on type 'Eleme... Remove this comment to see the full error message
       if (item.prototype.hasOwnProperty.call("remove")) {
         return;
       }

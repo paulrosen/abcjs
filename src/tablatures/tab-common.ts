@@ -4,14 +4,14 @@
  *
  */
 
-function TabCommon(abcTune, tuneNumber, params) {
+function TabCommon(this: any, abcTune: any, tuneNumber: any, params: any) {
   this.tune = abcTune;
   this.params = params;
   this.tuneNumber = tuneNumber;
   this.inError = false;
 }
 
-TabCommon.prototype.setError = function (error) {
+TabCommon.prototype.setError = function (error: any) {
   var tune = this.tune;
   if (error) {
     this.error = error;

@@ -1,6 +1,6 @@
 //    abc_voice_element.js: Definition of the VoiceElement class.
 
-var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
+var VoiceElement = function VoiceElement(this: any, voicenumber: any, voicetotal: any) {
   this.children = [];
   this.beams = [];
   this.otherchildren = []; // ties, slurs, triplets
@@ -26,7 +26,7 @@ var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
   };
 };
 
-VoiceElement.prototype.addChild = function (absElem) {
+VoiceElement.prototype.addChild = function (absElem: any) {
   // This is always passed an AbsoluteElement
   if (absElem.type === "bar") {
     var firstItem = true;
@@ -46,7 +46,7 @@ VoiceElement.prototype.addChild = function (absElem) {
   this.setRange(absElem);
 };
 
-VoiceElement.prototype.setLimit = function (member, child) {
+VoiceElement.prototype.setLimit = function (member: any, child: any) {
   // Sometimes we get an absolute element in here and sometimes we get some type of relative element.
   // If there is a "specialY" element, then assume it is an absolute element. If that doesn't exist, look for the
   // same members at the top level, because that's where they are in relative elements.
@@ -58,13 +58,13 @@ VoiceElement.prototype.setLimit = function (member, child) {
     this.specialY[member] = Math.max(this.specialY[member], specialY[member]);
 };
 
-VoiceElement.prototype.adjustRange = function (child) {
+VoiceElement.prototype.adjustRange = function (child: any) {
   if (child.bottom !== undefined)
     this.bottom = Math.min(this.bottom, child.bottom);
   if (child.top !== undefined) this.top = Math.max(this.top, child.top);
 };
 
-VoiceElement.prototype.setRange = function (child) {
+VoiceElement.prototype.setRange = function (child: any) {
   this.adjustRange(child);
   this.setLimit("tempoHeightAbove", child);
   this.setLimit("partHeightAbove", child);
@@ -79,16 +79,16 @@ VoiceElement.prototype.setRange = function (child) {
   this.setLimit("dynamicHeightBelow", child);
 };
 
-VoiceElement.prototype.addOther = function (child) {
+VoiceElement.prototype.addOther = function (child: any) {
   this.otherchildren.push(child);
   this.setRange(child);
 };
 
-VoiceElement.prototype.addBeam = function (child) {
+VoiceElement.prototype.addBeam = function (child: any) {
   this.beams.push(child);
 };
 
-VoiceElement.prototype.setWidth = function (width) {
+VoiceElement.prototype.setWidth = function (width: any) {
   this.w = width;
 };
 

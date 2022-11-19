@@ -1,6 +1,6 @@
 //    abc_tie_element.js: Definition of the TieElement class.
 
-var TieElem = function TieElem(options) {
+var TieElem = function TieElem(this: any, options: any) {
   this.type = "TieElem";
   //	console.log("constructor", options.anchor1 ? options.anchor1.pitch : "N/A", options.anchor2 ? options.anchor2.pitch : "N/A", options.isTie, options.isGrace);
   this.anchor1 = options.anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
@@ -13,11 +13,11 @@ var TieElem = function TieElem(options) {
   this.internalNotes = [];
 };
 
-TieElem.prototype.addInternalNote = function (note) {
+TieElem.prototype.addInternalNote = function (note: any) {
   this.internalNotes.push(note);
 };
 
-TieElem.prototype.setEndAnchor = function (anchor2) {
+TieElem.prototype.setEndAnchor = function (anchor2: any) {
   //	console.log("end", this.anchor1 ? this.anchor1.pitch : "N/A", anchor2 ? anchor2.pitch : "N/A", this.isTie, this.isGrace);
   this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
 
@@ -34,11 +34,11 @@ TieElem.prototype.setEndAnchor = function (anchor2) {
 };
 
 // If we encounter a repeat sign, then we don't want to extend either a tie or a slur past it, so these are called to be a limit.
-TieElem.prototype.setStartX = function (startLimitElem) {
+TieElem.prototype.setStartX = function (startLimitElem: any) {
   this.startLimitX = startLimitElem;
 };
 
-TieElem.prototype.setEndX = function (endLimitElem) {
+TieElem.prototype.setEndX = function (endLimitElem: any) {
   this.endLimitX = endLimitElem;
 };
 
@@ -104,7 +104,7 @@ TieElem.prototype.calcSlurDirection = function () {
   }
 };
 
-TieElem.prototype.calcX = function (lineStartX, lineEndX) {
+TieElem.prototype.calcX = function (lineStartX: any, lineEndX: any) {
   if (this.anchor1) {
     this.startX = this.anchor1.x; // The normal case where there is a starting element to attach to.
     if (this.anchor1.scalex < 1)

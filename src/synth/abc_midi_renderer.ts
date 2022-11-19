@@ -6,21 +6,21 @@ var rendererFactory;
 
 (function () {
   "use strict";
-  function setAttributes(elm, attrs) {
+  function setAttributes(elm: any, attrs: any) {
     for (var attr in attrs)
       if (attrs.prototype.hasOwnProperty.call(attr))
         elm.setAttribute(attr, attrs[attr]);
     return elm;
   }
 
-  function Midi() {
+  function Midi(this: any) {
     this.trackstrings = "";
     this.trackcount = 0;
     this.noteOnAndChannel = "%90";
     this.noteOffAndChannel = "%80";
   }
 
-  Midi.prototype.setTempo = function (qpm) {
+  Midi.prototype.setTempo = function (qpm: any) {
     if (this.trackcount === 0) {
       this.startTrack();
       this.track += "%00%FF%51%03" + toHex(Math.round(60000000 / qpm), 6);
@@ -28,7 +28,7 @@ var rendererFactory;
     }
   };
 
-  Midi.prototype.setGlobalInfo = function (qpm, name, key, time) {
+  Midi.prototype.setGlobalInfo = function (qpm: any, name: any, key: any, time: any) {
     if (this.trackcount === 0) {
       this.startTrack();
       var divisions = Math.round(60000000 / qpm);
@@ -67,7 +67,7 @@ var rendererFactory;
     this.trackstrings += this.track;
   };
 
-  Midi.prototype.setText = function (type, text) {
+  Midi.prototype.setText = function (type: any, text: any) {
     // MIDI defines the following types of events:
     //FF 01 len text Text Event
     //FF 02 len text Copyright Notice
@@ -83,12 +83,12 @@ var rendererFactory;
     }
   };
 
-  Midi.prototype.setInstrument = function (number) {
+  Midi.prototype.setInstrument = function (number: any) {
     this.trackInstrument = "%00%C0" + toHex(number, 2);
     this.instrument = number;
   };
 
-  Midi.prototype.setChannel = function (number, pan) {
+  Midi.prototype.setChannel = function (number: any, pan: any) {
     this.channel = number;
     var ccPrefix = "%00%B" + this.channel.toString(16);
     // Reset midi, in case it was set previously.
@@ -106,7 +106,7 @@ var rendererFactory;
   };
 
   var HALF_STEP = 4096; // For the pitch wheel - (i.e. the distance from C to C#)
-  Midi.prototype.startNote = function (pitch, loudness, cents) {
+  Midi.prototype.startNote = function (pitch: any, loudness: any, cents: any) {
     this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
     this.silencelength = 0;
     if (cents) {
@@ -121,7 +121,7 @@ var rendererFactory;
     this.track += "%" + pitch.toString(16) + toHex(loudness, 2); //note
   };
 
-  Midi.prototype.endNote = function (pitch) {
+  Midi.prototype.endNote = function (pitch: any) {
     this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
     this.silencelength = 0;
     if (this.noteWarped[pitch]) {
@@ -135,7 +135,7 @@ var rendererFactory;
     this.track += "%" + pitch.toString(16) + "%00"; //end note
   };
 
-  Midi.prototype.addRest = function (length) {
+  Midi.prototype.addRest = function (length: any) {
     this.silencelength += length;
     if (this.silencelength < 0) this.silencelength = 0;
   };
@@ -150,7 +150,7 @@ var rendererFactory;
     );
   };
 
-  Midi.prototype.embed = function (parent, noplayer) {
+  Midi.prototype.embed = function (parent: any, noplayer: any) {
     var data = this.getData();
 
     var link = setAttributes(document.createElement("a"), {
@@ -173,7 +173,7 @@ var rendererFactory;
     parent.insertBefore(embed, parent.firstChild);
   };
 
-  function encodeString(str, cmdType) {
+  function encodeString(str: any, cmdType: any) {
     // If there are multi-byte chars, we don't know how long the string will be until we create it.
     var nameArray = "";
     for (var i = 0; i < str.length; i++)
@@ -181,7 +181,7 @@ var rendererFactory;
     return "%00%FF" + cmdType + toHex(nameArray.length / 3, 2) + nameArray; // Each byte is represented by three chars "%XX", so divide by 3 to get the length.
   }
 
-  function keySignature(key) {
+  function keySignature(key: any) {
     //00 FF 5902 03 00 - key signature
     if (!key || !key.accidentals) return "";
     var hex = "%00%FF%59%02";
@@ -196,10 +196,11 @@ var rendererFactory;
     return hex + sig + mode;
   }
 
-  function timeSignature(time) {
+  function timeSignature(time: any) {
     //00 FF 58 04 04 02 30 08 - time signature
     var hex = "%00%FF%58%04" + toHex(time.num, 2);
     var dens = { 1: 0, 2: 1, 4: 2, 8: 3, 16: 4, 32: 5 };
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var den = dens[time.den];
     if (!den) return ""; // the denominator is not supported, so just don't include this.
     hex += toHex(den, 2);
@@ -233,7 +234,7 @@ var rendererFactory;
   }
 
   // s is assumed to be of even length
-  function encodeHex(s) {
+  function encodeHex(s: any) {
     var ret = "";
     for (var i = 0; i < s.length; i += 2) {
       ret += "%";
@@ -242,7 +243,7 @@ var rendererFactory;
     return ret;
   }
 
-  function toHex(n, padding) {
+  function toHex(n: any, padding: any) {
     var s = n.toString(16);
     s = s.split(".")[0];
     while (s.length < padding) {
@@ -252,7 +253,7 @@ var rendererFactory;
     return encodeHex(s);
   }
 
-  function to7BitHex(n) {
+  function to7BitHex(n: any) {
     // this takes a number and shifts all digits from the 7th one to the left.
     n = Math.round(n);
     var lower = n % 128;
@@ -260,7 +261,7 @@ var rendererFactory;
     return toHex(higher * 2 + lower, 4);
   }
 
-  function toDurationHex(n) {
+  function toDurationHex(n: any) {
     var res = 0;
     var a = [];
 
@@ -288,6 +289,7 @@ var rendererFactory;
   }
 
   rendererFactory = function () {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     return new Midi();
   };
 })();

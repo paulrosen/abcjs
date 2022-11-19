@@ -28,7 +28,7 @@
 // TODO-PER: This should actually be set in the layout method and passed back as a return value.
 import calcHeight from './calcHeight';
 
-var StaffGroupElement = function (getTextSize) {
+var StaffGroupElement = function(this: any, getTextSize: any) {
   this.getTextSize = getTextSize;
   this.voices = [];
   this.staffs = [];
@@ -36,7 +36,7 @@ var StaffGroupElement = function (getTextSize) {
   this.bracket = undefined;
 };
 
-StaffGroupElement.prototype.setLimit = function (member, voice) {
+StaffGroupElement.prototype.setLimit = function (member: any, voice: any) {
   if (!voice.specialY[member]) return;
   if (!voice.staff.specialY[member])
     voice.staff.specialY[member] = voice.specialY[member];
@@ -48,9 +48,9 @@ StaffGroupElement.prototype.setLimit = function (member, voice) {
 };
 
 StaffGroupElement.prototype.addVoice = function (
-  voice,
-  staffnumber,
-  stafflines
+  voice: any,
+  staffnumber: any,
+  stafflines: any
 ) {
   var voiceNum = this.voices.length;
   this.voices[voiceNum] = voice;
@@ -85,14 +85,14 @@ StaffGroupElement.prototype.setHeight = function () {
   this.height = calcHeight(this);
 };
 
-StaffGroupElement.prototype.setWidth = function (width) {
+StaffGroupElement.prototype.setWidth = function (width: any) {
   this.w = width;
   for (var i = 0; i < this.voices.length; i++) {
     this.voices[i].setWidth(width);
   }
 };
 
-StaffGroupElement.prototype.setStaffLimits = function (voice) {
+StaffGroupElement.prototype.setStaffLimits = function (voice: any) {
   voice.staff.top = Math.max(voice.staff.top, voice.top);
   voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
   this.setLimit("tempoHeightAbove", voice);

@@ -1,7 +1,7 @@
 // For debugging, it is sometimes useful to know where you are vertically.
 import sprintf from './sprintf';
 
-function printHorizontalLine(renderer, width, vertical, comment) {
+function printHorizontalLine(renderer: any, width: any, vertical: any, comment: any) {
   var dy = 0.35;
   var fill = "rgba(0,0,255,.4)";
   var y = renderer.y;
@@ -18,6 +18,7 @@ function printHorizontalLine(renderer, width, vertical, comment) {
   var x1 = 50;
   var x2 = width;
   var pathString = sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
     "M %f %f L %f %f L %f %f L %f %f z",
     x1,
     y - dy,
@@ -36,6 +37,7 @@ function printHorizontalLine(renderer, width, vertical, comment) {
   });
   for (var i = 1; i < width / 100; i++) {
     pathString = sprintf(
+      // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
       "M %f %f L %f %f L %f %f L %f %f z",
       i * 100 - dy,
       y - 5,

@@ -1,10 +1,11 @@
 function Subtitle(
-  spaceAbove,
-  formatting,
-  info,
-  center,
-  paddingLeft,
-  getTextSize
+  this: any,
+  spaceAbove: any,
+  formatting: any,
+  info: any,
+  center: any,
+  paddingLeft: any,
+  getTextSize: any
 ) {
   this.rows = [];
   if (spaceAbove) this.rows.push({ move: spaceAbove });

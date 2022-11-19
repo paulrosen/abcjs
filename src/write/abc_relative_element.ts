@@ -1,6 +1,6 @@
 //    abc_relative_element.js: Definition of the RelativeElement class.
 
-var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
+var RelativeElement = function RelativeElement(this: any, c: any, dx: any, w: any, pitch: any, opt: any) {
   opt = opt || {};
   this.x = 0;
   this.c = c; // character or path or string
@@ -83,12 +83,12 @@ RelativeElement.prototype.getChordDim = function () {
   return { left: left, right: right };
 };
 
-RelativeElement.prototype.invertLane = function (total) {
+RelativeElement.prototype.invertLane = function (total: any) {
   if (this.lane === undefined) this.lane = 0;
   this.lane = total - this.lane - 1;
 };
 
-RelativeElement.prototype.putChordInLane = function (i) {
+RelativeElement.prototype.putChordInLane = function (i: any) {
   this.lane = i;
   // Add some extra space to account for the character's descenders.
   if (this.chordHeightAbove)
@@ -101,7 +101,7 @@ RelativeElement.prototype.getLane = function () {
   return this.lane;
 };
 
-RelativeElement.prototype.setX = function (x) {
+RelativeElement.prototype.setX = function (x: any) {
   this.x = x + this.dx;
 };
 

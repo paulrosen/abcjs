@@ -7,9 +7,10 @@ var animation = {};
 (function () {
   "use strict";
 
-  var timer;
-  var cursor;
-  animation.startAnimation = function (paper, tune, options) {
+  var timer: any;
+  var cursor: any;
+  // @ts-expect-error TS(2339): Property 'startAnimation' does not exist on type '... Remove this comment to see the full error message
+  animation.startAnimation = function (paper: any, tune: any, options: any) {
     //options.bpm
     //options.showCursor
     //options.hideCurrentMeasure
@@ -31,7 +32,7 @@ var animation = {};
       }
     }
 
-    function hideMeasures(elements) {
+    function hideMeasures(elements: any) {
       for (var i = 0; i < elements.length; i++) {
         var element = elements[i];
         if (!element.classList.contains("abcjs-bar"))
@@ -39,8 +40,8 @@ var animation = {};
       }
     }
 
-    var lastMeasure;
-    function disappearMeasuresAfter(selector) {
+    var lastMeasure: any;
+    function disappearMeasuresAfter(selector: any) {
       if (lastMeasure) {
         var elements = paper.querySelectorAll(lastMeasure);
         hideMeasures(elements);
@@ -48,12 +49,12 @@ var animation = {};
       lastMeasure = selector;
     }
 
-    function disappearMeasuresBefore(selector) {
+    function disappearMeasuresBefore(selector: any) {
       var elements = paper.querySelectorAll(selector);
       hideMeasures(elements);
     }
 
-    function measureCallback(selector) {
+    function measureCallback(selector: any) {
       if (options.hideCurrentMeasure) {
         disappearMeasuresBefore(selector);
       } else if (options.hideFinishedMeasures) {
@@ -61,11 +62,11 @@ var animation = {};
       }
     }
 
-    function getLineAndMeasure(element) {
+    function getLineAndMeasure(element: any) {
       return ".abcjs-l" + element.line + ".abcjs-m" + element.measureNumber;
     }
 
-    function setCursor(range) {
+    function setCursor(range: any) {
       if (range) {
         if (range.measureStart) {
           var selector = getLineAndMeasure(range);
@@ -83,6 +84,7 @@ var animation = {};
       }
     }
 
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     timer = new TimingCallbacks(tune, {
       qpm: options.bpm,
       eventCallback: setCursor
@@ -90,13 +92,15 @@ var animation = {};
     timer.start();
   };
 
-  animation.pauseAnimation = function (pause) {
+  // @ts-expect-error TS(2339): Property 'pauseAnimation' does not exist on type '... Remove this comment to see the full error message
+  animation.pauseAnimation = function (pause: any) {
     if (timer) {
       if (pause) timer.pause();
       else timer.start();
     }
   };
 
+  // @ts-expect-error TS(2339): Property 'stopAnimation' does not exist on type '{... Remove this comment to see the full error message
   animation.stopAnimation = function () {
     if (timer) {
       timer.stop();

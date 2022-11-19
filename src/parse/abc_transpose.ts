@@ -41,12 +41,13 @@ var newKeyMinor = [
   "B"
 ];
 
+// @ts-expect-error TS(2339): Property 'keySignature' does not exist on type '{}... Remove this comment to see the full error message
 transpose.keySignature = function (
-  multilineVars,
-  keyName,
-  root,
-  acc,
-  localTranspose
+  multilineVars: any,
+  keyName: any,
+  root: any,
+  acc: any,
+  localTranspose: any
 ) {
   if (multilineVars.clef.type === "perc" || multilineVars.clef.type === "none")
     return { accidentals: keyAccidentals(keyName), root: root, acc: acc };
@@ -73,6 +74,7 @@ transpose.keySignature = function (
     baseKey += keyName[1];
     keyName = keyName.substr(2);
   } else keyName = keyName.substr(1);
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   var index = keyIndex[baseKey] + multilineVars.localTranspose;
   while (index < 0) index += 12;
   if (index > 11) index = index % 12;
@@ -114,7 +116,8 @@ transpose.keySignature = function (
   };
 };
 
-transpose.chordName = function (multilineVars, chord) {
+// @ts-expect-error TS(2339): Property 'chordName' does not exist on type '{}'.
+transpose.chordName = function (multilineVars: any, chord: any) {
   return transposeChordName(
     chord,
     multilineVars.localTranspose,
@@ -125,19 +128,21 @@ transpose.chordName = function (multilineVars, chord) {
 
 var pitchToLetter = ["c", "d", "e", "f", "g", "a", "b"];
 function accidentalChange(
-  origPitch,
-  newPitch,
-  accidental,
-  origKeySig,
-  newKeySig
+  origPitch: any,
+  newPitch: any,
+  accidental: any,
+  origKeySig: any,
+  newKeySig: any
 ) {
   var origPitchLetter = pitchToLetter[(origPitch + 49) % 7]; // Make sure it is a positive pitch before normalizing.
   var origAccidental = 0;
   for (var i = 0; i < origKeySig.length; i++) {
     if (origKeySig[i].note.toLowerCase() === origPitchLetter)
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       origAccidental = accidentals[origKeySig[i].acc];
   }
 
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   var currentAccidental = accidentals[accidental];
   var delta = currentAccidental - origAccidental;
 
@@ -145,6 +150,7 @@ function accidentalChange(
   var newAccidental = 0;
   for (var j = 0; j < newKeySig.accidentals.length; j++) {
     if (newKeySig.accidentals[j].note.toLowerCase() === newPitchLetter)
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       newAccidental = accidentals[newKeySig.accidentals[j].acc];
   }
   var calcAccidental = delta + newAccidental;
@@ -181,7 +187,8 @@ var accidentals3 = {
   2: "^^"
 };
 var count = 0;
-transpose.note = function (multilineVars, el) {
+// @ts-expect-error TS(2339): Property 'note' does not exist on type '{}'.
+transpose.note = function (multilineVars: any, el: any) {
   // the "el" that is passed in has el.name, el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
   // localTranspose is the number of half steps
   // localTransposeVerticalMovement is the vertical distance to move.
@@ -194,9 +201,11 @@ transpose.note = function (multilineVars, el) {
     if (el.name) {
       var actual = el.accidental ? el.name.substring(1) : el.name;
       var acc = el.accidental ? el.name[0] : "";
+      // @ts-expect-error TS(2339): Property 'pitchIndex' does not exist on type '{}'.
       var p = allNotes.pitchIndex(actual);
       el.name =
         acc +
+        // @ts-expect-error TS(2339): Property 'noteName' does not exist on type '{}'.
         allNotes.noteName(p + multilineVars.localTransposeVerticalMovement);
     }
   }
@@ -210,8 +219,10 @@ transpose.note = function (multilineVars, el) {
       multilineVars.targetKey
     );
     el.pitch = ret[0];
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     el.accidental = accidentals2[ret[1]];
     if (el.name) {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       el.name = accidentals3[ret[1]] + el.name.replace(/[_^=]/g, "");
     }
   }

@@ -55,7 +55,7 @@ var flatChordsFree = [
   "B"
 ];
 
-function transposeChordName(chord, steps, preferFlats, freeGCchord) {
+function transposeChordName(chord: any, steps: any, preferFlats: any, freeGCchord: any) {
   if (!steps || steps % 12 === 0)
     // The chords are the same if it is an exact octave change.
     return chord;

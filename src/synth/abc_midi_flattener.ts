@@ -11,35 +11,35 @@ import pitchesToPerc from './pitches-to-perc';
 (function () {
   "use strict";
 
-  var barAccidentals;
-  var accidentals;
-  var transpose;
+  var barAccidentals: any;
+  var accidentals: any;
+  var transpose: any;
   var bagpipes;
   var tracks;
-  var startingTempo;
+  var startingTempo: any;
   var startingMeter;
   var tempoChangeFactor = 1;
   var instrument;
-  var currentInstrument;
+  var currentInstrument: any;
   // var channel;
-  var currentTrack;
+  var currentTrack: any;
   var lastNoteDurationPosition;
   var currentTrackName;
-  var lastEventTime;
+  var lastEventTime: any;
 
   var meter = { num: 4, den: 4 };
-  var chordTrack;
+  var chordTrack: any;
   var chordSourceTrack;
-  var chordTrackFinished;
-  var chordChannel;
+  var chordTrackFinished: any;
+  var chordChannel: any;
   var chordInstrument = 0;
   var drumInstrument = 128;
   var boomVolume = 64;
   var chickVolume = 48;
-  var currentChords;
-  var lastChord;
-  var chordLastBar;
-  var lastBarTime;
+  var currentChords: any;
+  var lastChord: any;
+  var chordLastBar: any;
+  var lastBarTime: any;
   var gChordTacet = false;
   var hasRhythmHead = false;
   var doBeatAccents = true;
@@ -47,23 +47,23 @@ import pitchesToPerc from './pitches-to-perc';
   var stressBeatDown = 95;
   var stressBeatUp = 85;
   var beatFraction = 0.25;
-  var nextVolume;
-  var nextVolumeDelta;
+  var nextVolume: any;
+  var nextVolumeDelta: any;
   var slurCount = 0;
 
-  var drumTrack;
+  var drumTrack: any;
   var drumTrackFinished;
   var drumDefinition = {};
 
   var pickupLength = 0;
-  var percmap;
+  var percmap: any;
 
   // The gaps per beat. The first two are in seconds, the third is in fraction of a duration.
   var normalBreakBetweenNotes = 0; //0.000520833333325*1.5; // for articulation (matches muse score value)
   var slurredBreakBetweenNotes = -0.001; // make the slurred notes actually overlap
   var staccatoBreakBetweenNotes = 0.4; // some people say staccato is half duration, some say 3/4 so this splits it
 
-  flatten = function (voices, options, percmap_) {
+  flatten = function (voices: any, options: any, percmap_: any) {
     if (!options) options = {};
     barAccidentals = [];
     accidentals = [0, 0, 0, 0, 0, 0, 0];
@@ -260,7 +260,7 @@ import pitchesToPerc from './pitches-to-perc';
     };
   };
 
-  function setChannel(channel) {
+  function setChannel(channel: any) {
     for (var i = currentTrack.length - 1; i >= 0; i--) {
       if (currentTrack[i].cmd === "program") {
         currentTrack[i].channel = channel;
@@ -277,15 +277,15 @@ import pitchesToPerc from './pitches-to-perc';
     return isEmpty;
   }
 
-  function timeToRealTime(time) {
+  function timeToRealTime(time: any) {
     return time / 1000000;
   }
 
-  function durationRounded(duration) {
+  function durationRounded(duration: any) {
     return Math.round(duration * tempoChangeFactor * 1000000) / 1000000;
   }
 
-  function preProcess(voices, options) {
+  function preProcess(voices: any, options: any) {
     for (var i = 0; i < voices.length; i++) {
       var voice = voices[i];
       var ties = {};
@@ -314,11 +314,15 @@ import pitchesToPerc from './pitches-to-perc';
               pitch.duration = element.duration;
               if (pitch.startTie) {
                 //console.log(element)
+                // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                 if (ties[pitch.pitch] === undefined)
                   // We might have three notes tied together - if so just add this duration.
+                  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                   ties[pitch.pitch] = { el: j, pitch: k };
                 else {
+                  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                   voice[ties[pitch.pitch].el].pitches[
+                    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                     ties[pitch.pitch].pitch
                   ].duration += pitch.duration;
                   element.pitches[k] = null;
@@ -326,6 +330,7 @@ import pitchesToPerc from './pitches-to-perc';
                 //console.log(">>> START", JSON.stringify(ties));
               } else if (pitch.endTie) {
                 //console.log(element)
+                // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                 var tie = ties[pitch.pitch];
                 //console.log(">>> END", pitch.pitch, tie, JSON.stringify(ties));
                 if (tie) {
@@ -333,6 +338,7 @@ import pitchesToPerc from './pitches-to-perc';
                   delete voice[tie.el].pitches[tie.pitch].startTie;
                   voice[tie.el].pitches[tie.pitch].duration += dur;
                   element.pitches[k] = null;
+                  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
                   delete ties[pitch.pitch];
                 } else {
                   delete pitch.endTie;
@@ -344,7 +350,9 @@ import pitchesToPerc from './pitches-to-perc';
         }
       }
       for (var key in ties) {
+        // @ts-expect-error TS(2339): Property 'prototype' does not exist on type '{}'.
         if (ties.prototype.hasOwnProperty.call(key)) {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           var item = ties[key];
           delete voice[item.el].pitches[item.pitch].startTie;
         }
@@ -355,7 +363,7 @@ import pitchesToPerc from './pitches-to-perc';
     }
   }
 
-  function getBeatFraction(meter) {
+  function getBeatFraction(meter: any) {
     switch (parseInt(meter.den, 10)) {
       case 2:
         return 0.5;
@@ -398,7 +406,7 @@ import pitchesToPerc from './pitches-to-perc';
   // the same as a break.
   var breakSynonyms = ["break", "(break)", "no chord", "n.c.", "tacet"];
 
-  function findChord(elem) {
+  function findChord(elem: any) {
     if (gChordTacet) return "break";
 
     // TODO-PER: Just using the first chord if there are more than one.
@@ -414,12 +422,12 @@ import pitchesToPerc from './pitches-to-perc';
     return null;
   }
 
-  function calcBeat(measureStart, beatLength, currTime) {
+  function calcBeat(measureStart: any, beatLength: any, currTime: any) {
     var distanceFromStart = currTime - measureStart;
     return distanceFromStart / beatLength;
   }
 
-  function processVolume(beat, voiceOff) {
+  function processVolume(beat: any, voiceOff: any) {
     if (voiceOff) return 0;
 
     var volume;
@@ -434,6 +442,7 @@ import pitchesToPerc from './pitches-to-perc';
       var barLength = meter.num / meter.den;
       var barBeat = calcBeat(lastBarTime, getBeatFraction(meter), beat);
       if (barBeat === 0) volume = stressBeat1;
+      // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
       else if (parseInt(barBeat, 10) === barBeat) volume = stressBeatDown;
       else volume = stressBeatUp;
     }
@@ -446,7 +455,7 @@ import pitchesToPerc from './pitches-to-perc';
     return voiceOff ? 0 : volume;
   }
 
-  function processChord(elem) {
+  function processChord(elem: any) {
     var firstChord = false;
     var chord = findChord(elem);
     if (chord) {
@@ -480,31 +489,40 @@ import pitchesToPerc from './pitches-to-perc';
     return firstChord;
   }
 
-  function findNoteModifications(elem, velocity) {
+  function findNoteModifications(elem: any, velocity: any) {
     var ret = {};
     if (elem.decoration) {
       for (var d = 0; d < elem.decoration.length; d++) {
         if (elem.decoration[d] === "staccato")
+          // @ts-expect-error TS(2339): Property 'thisBreakBetweenNotes' does not exist on... Remove this comment to see the full error message
           ret.thisBreakBetweenNotes = "staccato";
         else if (elem.decoration[d] === "tenuto")
+          // @ts-expect-error TS(2339): Property 'thisBreakBetweenNotes' does not exist on... Remove this comment to see the full error message
           ret.thisBreakBetweenNotes = "tenuto";
         else if (elem.decoration[d] === "accent")
+          // @ts-expect-error TS(2339): Property 'velocity' does not exist on type '{}'.
           ret.velocity = Math.min(127, velocity * 1.5);
+        // @ts-expect-error TS(2339): Property 'noteModification' does not exist on type... Remove this comment to see the full error message
         else if (elem.decoration[d] === "trill") ret.noteModification = "trill";
         else if (elem.decoration[d] === "lowermordent")
+          // @ts-expect-error TS(2339): Property 'noteModification' does not exist on type... Remove this comment to see the full error message
           ret.noteModification = "lowermordent";
         else if (elem.decoration[d] === "uppermordent")
+          // @ts-expect-error TS(2339): Property 'noteModification' does not exist on type... Remove this comment to see the full error message
           ret.noteModification = "mordent";
         else if (elem.decoration[d] === "mordent")
+          // @ts-expect-error TS(2339): Property 'noteModification' does not exist on type... Remove this comment to see the full error message
           ret.noteModification = "mordent";
+        // @ts-expect-error TS(2339): Property 'noteModification' does not exist on type... Remove this comment to see the full error message
         else if (elem.decoration[d] === "turn") ret.noteModification = "turn";
+        // @ts-expect-error TS(2339): Property 'noteModification' does not exist on type... Remove this comment to see the full error message
         else if (elem.decoration[d] === "roll") ret.noteModification = "roll";
       }
     }
     return ret;
   }
 
-  function doModifiedNotes(noteModification, p) {
+  function doModifiedNotes(noteModification: any, p: any) {
     var noteTime;
     var numNotes;
     var start = p.start;
@@ -672,7 +690,7 @@ import pitchesToPerc from './pitches-to-perc';
     }
   }
 
-  function writeNote(elem, voiceOff) {
+  function writeNote(elem: any, voiceOff: any) {
     //
     // Create a series of note events to append to the current track.
     // The output event is one of: { pitchStart: pitch_in_abc_units, volume: from_1_to_64 }
@@ -747,8 +765,11 @@ import pitchesToPerc from './pitches-to-perc';
     if (elem.pitches) {
       var thisBreakBetweenNotes = "";
       var ret = findNoteModifications(elem, velocity);
+      // @ts-expect-error TS(2339): Property 'thisBreakBetweenNotes' does not exist on... Remove this comment to see the full error message
       if (ret.thisBreakBetweenNotes)
+        // @ts-expect-error TS(2339): Property 'thisBreakBetweenNotes' does not exist on... Remove this comment to see the full error message
         thisBreakBetweenNotes = ret.thisBreakBetweenNotes;
+      // @ts-expect-error TS(2339): Property 'velocity' does not exist on type '{}'.
       if (ret.velocity) velocity = ret.velocity;
 
       // TODO-PER: Can also make a different sound on style=x and style=harmonic
@@ -758,6 +779,7 @@ import pitchesToPerc from './pitches-to-perc';
         if (lastChord && lastChord.chick) {
           ePitches = [];
           for (var i2 = 0; i2 < lastChord.chick.length; i2++) {
+            // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
             var note2 = parseCommon.clone(elem.pitches[0]);
             note2.actualPitch = lastChord.chick[i2];
             ePitches.push(note2);
@@ -794,21 +816,29 @@ import pitchesToPerc from './pitches-to-perc';
           p.start = p.start + p.duration;
         }
         if (elem.elem) elem.elem.midiPitches.push(p);
+        // @ts-expect-error TS(2339): Property 'noteModification' does not exist on type... Remove this comment to see the full error message
         if (ret.noteModification) {
+          // @ts-expect-error TS(2339): Property 'noteModification' does not exist on type... Remove this comment to see the full error message
           doModifiedNotes(ret.noteModification, p);
         } else {
+          // @ts-expect-error TS(2339): Property 'endType' does not exist on type '{ cmd: ... Remove this comment to see the full error message
           if (slurCount > 0) p.endType = "tenuto";
+          // @ts-expect-error TS(2339): Property 'endType' does not exist on type '{ cmd: ... Remove this comment to see the full error message
           else if (thisBreakBetweenNotes) p.endType = thisBreakBetweenNotes;
 
+          // @ts-expect-error TS(2339): Property 'endType' does not exist on type '{ cmd: ... Remove this comment to see the full error message
           switch (p.endType) {
             case "tenuto":
+              // @ts-expect-error TS(2339): Property 'gap' does not exist on type '{ cmd: stri... Remove this comment to see the full error message
               p.gap = slurredBreakBetweenNotes;
               break;
             case "staccato":
               var d = p.duration * staccatoBreakBetweenNotes;
+              // @ts-expect-error TS(2339): Property 'gap' does not exist on type '{ cmd: stri... Remove this comment to see the full error message
               p.gap = (startingTempo / 60) * d;
               break;
             default:
+              // @ts-expect-error TS(2339): Property 'gap' does not exist on type '{ cmd: stri... Remove this comment to see the full error message
               p.gap = normalBreakBetweenNotes;
               break;
           }
@@ -825,7 +855,7 @@ import pitchesToPerc from './pitches-to-perc';
 
     return setChordTrack;
   }
-  function getRealDuration(elem) {
+  function getRealDuration(elem: any) {
     if (elem.pitches && elem.pitches.length > 0 && elem.pitches[0])
       return elem.pitches[0].duration;
     if (elem.elem) return elem.elem.duration;
@@ -833,7 +863,7 @@ import pitchesToPerc from './pitches-to-perc';
   }
 
   var scale = [0, 2, 4, 5, 7, 9, 11];
-  function adjustPitch(note) {
+  function adjustPitch(note: any) {
     if (note.midipitch !== undefined) return note.midipitch; // The pitch might already be known, for instance if there is a drummap.
     var pitch = note.pitch;
     if (note.accidental) {
@@ -878,7 +908,7 @@ import pitchesToPerc from './pitches-to-perc';
     return actualPitch;
   }
 
-  function setKeySignature(elem) {
+  function setKeySignature(elem: any) {
     var accidentals = [0, 0, 0, 0, 0, 0, 0];
     if (!elem.accidentals) return accidentals;
     for (var i = 0; i < elem.accidentals.length; i++) {
@@ -909,7 +939,7 @@ import pitchesToPerc from './pitches-to-perc';
     return accidentals;
   }
 
-  function processGraceNotes(graces, companionDuration) {
+  function processGraceNotes(graces: any, companionDuration: any) {
     // Grace notes take up half of the note value. So if there are many of them they are all real short.
     var graceDuration = 0;
     var ret = [];
@@ -934,7 +964,7 @@ import pitchesToPerc from './pitches-to-perc';
     return ret;
   }
 
-  function writeGraceNotes(graces, start, velocity, currentInstrument) {
+  function writeGraceNotes(graces: any, start: any, velocity: any, currentInstrument: any) {
     var midiGrace = [];
     velocity = Math.round(velocity);
     for (var g = 0; g < graces.length; g++) {
@@ -961,7 +991,7 @@ import pitchesToPerc from './pitches-to-perc';
   }
 
   var quarterToneFactor = 0.02930223664349;
-  function adjustForMicroTone(description) {
+  function adjustForMicroTone(description: any) {
     // if the pitch is not a whole number then make it a whole number and add a tuning factor
     var pitch = "" + description.pitch;
     if (pitch.indexOf(".75") >= 0) {
@@ -975,11 +1005,11 @@ import pitchesToPerc from './pitches-to-perc';
     return description;
   }
 
-  function extractOctave(pitch) {
+  function extractOctave(pitch: any) {
     return Math.floor(pitch / 7);
   }
 
-  function extractNote(pitch) {
+  function extractNote(pitch: any) {
     pitch = pitch % 7;
     if (pitch < 0) pitch += 7;
     return pitch;
@@ -994,7 +1024,7 @@ import pitchesToPerc from './pitches-to-perc';
     F: 41,
     G: 43
   };
-  function interpretChord(name) {
+  function interpretChord(name: any) {
     // chords have the format:
     // [root][acc][modifier][/][bass][acc]
     // (The chord might be surrounded by parens. Just ignore them.)
@@ -1013,6 +1043,7 @@ import pitchesToPerc from './pitches-to-perc';
       if (name.length === 0) return undefined;
       root = name.substring(0, 1);
     }
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var bass = basses[root];
     if (!bass)
       // If the bass note isn't listed, then this was an unknown root. Only A-G are accepted.
@@ -1045,10 +1076,13 @@ import pitchesToPerc from './pitches-to-perc';
     }
 
     if (arr.length === 2) {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       var explicitBass = basses[arr[1].substring(0, 1)];
       if (explicitBass) {
         var bassAcc = arr[1].substring(1);
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         var bassShift = { "#": 1, "♯": 1, b: -1, "♭": -1 }[bassAcc] || 0;
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         bass = basses[arr[1].substring(0, 1)] + bassShift + chordTranspose;
         bass2 = bass;
       }
@@ -1176,7 +1210,8 @@ import pitchesToPerc from './pitches-to-perc';
     "13(#5)": [0, 4, 8, 10, 14, 21],
     "13#5": [0, 4, 8, 10, 14, 21]
   };
-  function chordNotes(bass, modifier) {
+  function chordNotes(bass: any, modifier: any) {
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var intervals = chordIntervals[modifier];
     if (!intervals) {
       if (
@@ -1196,7 +1231,7 @@ import pitchesToPerc from './pitches-to-perc';
     return notes;
   }
 
-  function writeBoom(boom, beatLength, volume, beat, noteLength) {
+  function writeBoom(boom: any, beatLength: any, volume: any, beat: any, noteLength: any) {
     // undefined means there is a stop time.
     if (boom !== undefined)
       chordTrack.push({
@@ -1210,7 +1245,7 @@ import pitchesToPerc from './pitches-to-perc';
       });
   }
 
-  function writeChick(chick, beatLength, volume, beat, noteLength) {
+  function writeChick(chick: any, beatLength: any, volume: any, beat: any, noteLength: any) {
     for (var c = 0; c < chick.length; c++)
       chordTrack.push({
         cmd: "note",
@@ -1247,15 +1282,18 @@ import pitchesToPerc from './pitches-to-perc';
     ]
   };
 
-  function resolveChords(startTime, endTime) {
+  function resolveChords(startTime: any, endTime: any) {
     var num = meter.num;
     var den = meter.den;
     var beatLength = 1 / den;
     var noteLength = beatLength / 2;
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     var pattern = rhythmPatterns[num + "/" + den];
+    // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
     var thisMeasureLength = parseInt(num, 10) / parseInt(den, 10);
     var portionOfAMeasure =
       thisMeasureLength - (endTime - startTime) / tempoChangeFactor;
+    // @ts-expect-error TS(2322): Type 'boolean' is not assignable to type 'number'.
     if (Math.abs(portionOfAMeasure) < 0.00001) portionOfAMeasure = false;
     if (!pattern || portionOfAMeasure) {
       // If it is an unsupported meter, or this isn't a full bar, just chick on each beat.
@@ -1318,6 +1356,7 @@ import pitchesToPerc from './pitches-to-perc';
     for (var i = 0; i < currentChords.length; i++) {
       var cc = currentChords[i];
       var b = Math.round(cc.beat * mult);
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       beats["" + b] = cc;
     }
 
@@ -1325,11 +1364,13 @@ import pitchesToPerc from './pitches-to-perc';
     // - Likewise, if there is a chord on the fourth beat of 4/4, play a chord on the third beat instead of a bass note.
     for (var m2 = 0; m2 < pattern.length; m2++) {
       var thisChord;
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       if (beats["" + m2]) thisChord = beats["" + m2];
       var lastBoom;
       if (!hasRhythmHead && thisChord) {
         switch (pattern[m2]) {
           case "boom":
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             if (beats["" + (m2 + 1)])
               // If there is not a chord change on the next beat, play a bass note.
               writeChick(
@@ -1351,6 +1392,7 @@ import pitchesToPerc from './pitches-to-perc';
             }
             break;
           case "boom2":
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             if (beats["" + (m2 + 1)])
               writeChick(
                 thisChord.chord.chick,
@@ -1392,6 +1434,7 @@ import pitchesToPerc from './pitches-to-perc';
             );
             break;
           case "":
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             if (beats["" + m2])
               // If there is an explicit chord on this beat, play it.
               writeChick(
@@ -1407,7 +1450,7 @@ import pitchesToPerc from './pitches-to-perc';
     }
   }
 
-  function normalizeDrumDefinition(params) {
+  function normalizeDrumDefinition(params: any) {
     // Be very strict with the drum definition. If anything is not perfect,
     // just turn the drums off.
     // Perhaps all of this logic belongs in the parser instead.
@@ -1464,6 +1507,7 @@ import pitchesToPerc from './pitches-to-perc';
           case "7":
           case "8":
           case "9":
+            // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'number'.
             num = num * 10 + event[k];
             break;
           default:
@@ -1476,26 +1520,33 @@ import pitchesToPerc from './pitches-to-perc';
       } else if (num) len *= num;
       if (event[0] === "d") {
         ret.pattern.push({
+          // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
           len: len * beatLength,
+          // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
           pitch: params.pattern[1 + playCount],
+          // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
           velocity: params.pattern[1 + playCount + totalPlay]
         });
         playCount++;
+      // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
       } else ret.pattern.push({ len: len * beatLength, pitch: null });
     }
     // Now normalize the pattern to cover the correct number of measures. The note lengths passed are relative to each other and need to be scaled to fit a measure.
     var totalTime = 0;
     var measuresPerBeat = meter.num / meter.den;
     for (var ii = 0; ii < ret.pattern.length; ii++)
+      // @ts-expect-error TS(2339): Property 'len' does not exist on type 'never'.
       totalTime += ret.pattern[ii].len;
     var numBars = params.bars ? params.bars : 1;
     var factor = totalTime / numBars / measuresPerBeat;
     for (ii = 0; ii < ret.pattern.length; ii++)
+      // @ts-expect-error TS(2339): Property 'len' does not exist on type 'never'.
       ret.pattern[ii].len = ret.pattern[ii].len / factor;
     return ret;
   }
 
-  function writeDrum(channel) {
+  function writeDrum(channel: any) {
+    // @ts-expect-error TS(2339): Property 'on' does not exist on type '{}'.
     if (drumTrack.length === 0 && !drumDefinition.on) return;
 
     var measureLen = meter.num / meter.den;
@@ -1508,17 +1559,23 @@ import pitchesToPerc from './pitches-to-perc';
       });
     }
 
+    // @ts-expect-error TS(2339): Property 'on' does not exist on type '{}'.
     if (!drumDefinition.on) {
       // this is the case where there has been a drum track, but it was specifically turned off.
       return;
     }
     var start = lastBarTime;
+    // @ts-expect-error TS(2339): Property 'pattern' does not exist on type '{}'.
     for (var i = 0; i < drumDefinition.pattern.length; i++) {
+      // @ts-expect-error TS(2339): Property 'pattern' does not exist on type '{}'.
       var len = durationRounded(drumDefinition.pattern[i].len);
+      // @ts-expect-error TS(2339): Property 'pattern' does not exist on type '{}'.
       if (drumDefinition.pattern[i].pitch) {
         drumTrack.push({
           cmd: "note",
+          // @ts-expect-error TS(2339): Property 'pattern' does not exist on type '{}'.
           pitch: drumDefinition.pattern[i].pitch,
+          // @ts-expect-error TS(2339): Property 'pattern' does not exist on type '{}'.
           volume: drumDefinition.pattern[i].velocity,
           start: start,
           duration: len,
@@ -1530,22 +1587,25 @@ import pitchesToPerc from './pitches-to-perc';
     }
   }
 
-  function findOctaves(tracks, detuneCents) {
+  function findOctaves(tracks: any, detuneCents: any) {
     var timing = {};
     for (var i = 0; i < tracks.length; i++) {
       for (var j = 0; j < tracks[i].length; j++) {
         var note = tracks[i][j];
         if (note.cmd === "note") {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           if (timing[note.start] === undefined) timing[note.start] = [];
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           timing[note.start].push({ track: i, event: j, pitch: note.pitch });
         }
       }
     }
     var keys = Object.keys(timing);
     for (i = 0; i < keys.length; i++) {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       var arr = timing[keys[i]];
       if (arr.length > 1) {
-        arr = arr.sort(function (a, b) {
+        arr = arr.sort(function (a: any, b: any) {
           return a.pitch - b.pitch;
         });
         var topEvent = arr[arr.length - 1];

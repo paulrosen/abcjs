@@ -4,7 +4,7 @@
  * @param {*} lineSpace
  */
 
-function StringTablature(numLines, lineSpace) {
+function StringTablature(this: any, numLines: any, lineSpace: any) {
   this.numLines = numLines;
   this.lineSpace = lineSpace;
   this.verticalSize = this.numLines * this.lineSpace;
@@ -20,7 +20,7 @@ function StringTablature(numLines, lineSpace) {
  * return true if current line should not produce a tab
  * @param {} line
  */
-StringTablature.prototype.bypass = function (line) {
+StringTablature.prototype.bypass = function (line: any) {
   var voices = line.staffGroup.voices;
   if (voices.length > 0) {
     if (voices[0].isPercussion) return true;
@@ -28,7 +28,7 @@ StringTablature.prototype.bypass = function (line) {
   return false;
 };
 
-StringTablature.prototype.setRelative = function (child, relative, first) {
+StringTablature.prototype.setRelative = function (child: any, relative: any, first: any) {
   switch (child.type) {
     case "bar":
       relative.pitch = this.bar.pitch;

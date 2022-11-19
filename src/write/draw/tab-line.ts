@@ -2,7 +2,7 @@ import sprintf from './sprintf';
 import roundNumber from './round-number';
 import printStem from './print-stem';
 
-function TabLine(renderer, klass, dx, name) {
+function TabLine(this: any, renderer: any, klass: any, dx: any, name: any) {
   this.renderer = renderer;
   if (!dx) dx = 0.35; // default
   this.dx = dx;
@@ -14,7 +14,7 @@ function TabLine(renderer, klass, dx, name) {
   if (klass) this.options["class"] = klass;
 }
 
-TabLine.prototype.printVertical = function (y1, y2, x) {
+TabLine.prototype.printVertical = function (y1: any, y2: any, x: any) {
   return printStem(
     this.renderer,
     x,
@@ -26,12 +26,13 @@ TabLine.prototype.printVertical = function (y1, y2, x) {
   );
 };
 
-TabLine.prototype.printHorizontal = function (x1, x2, y) {
+TabLine.prototype.printHorizontal = function (x1: any, x2: any, y: any) {
   x1 = roundNumber(x1);
   x2 = roundNumber(x2);
   var y1 = roundNumber(y - this.dx);
   var y2 = roundNumber(y + this.dx);
   this.options.path = sprintf(
+    // @ts-expect-error TS(2554): Expected 0 arguments, but got 9.
     "M %f %f L %f %f L %f %f L %f %f z",
     x1,
     y1,

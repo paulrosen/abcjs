@@ -5,7 +5,7 @@
  */
 var notes = ["A", "B", "C", "D", "E", "F", "G"];
 
-function TabNote(note) {
+function TabNote(this: any, note: any) {
   var isFlat = false;
   var newNote = note;
   var isSharp = false;
@@ -72,8 +72,9 @@ function TabNote(note) {
   this.isQuoted = hasQuote;
 }
 
-function cloneNote(self) {
+function cloneNote(self: any) {
   var newNote = self.name;
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var newTabNote = new TabNote(newNote);
   newTabNote.hasComma = self.hasComma;
   newTabNote.isLower = self.isLower;
@@ -84,7 +85,7 @@ function cloneNote(self) {
   newTabNote.isKeyFlat = self.isKeyFlat;
   return newTabNote;
 }
-TabNote.prototype.sameNoteAs = function (note) {
+TabNote.prototype.sameNoteAs = function (note: any) {
   if (
     this.name == note.name &&
     this.hasComma == note.hasComma &&
@@ -99,7 +100,7 @@ TabNote.prototype.sameNoteAs = function (note) {
   }
 };
 
-TabNote.prototype.isLowerThan = function (note) {
+TabNote.prototype.isLowerThan = function (note: any) {
   var noteComparator = ["C", "D", "E", "F", "G", "A", "B"];
   if (this.hasComma > note.hasComma) return true;
   if (note.hasComma > this.hasComma) return false;
@@ -117,7 +118,7 @@ TabNote.prototype.isLowerThan = function (note) {
   return false;
 };
 
-TabNote.prototype.checkKeyAccidentals = function (accidentals) {
+TabNote.prototype.checkKeyAccidentals = function (accidentals: any) {
   if (accidentals) {
     var curNote = this.name;
     for (var iii = 0; iii < accidentals.length; iii++) {

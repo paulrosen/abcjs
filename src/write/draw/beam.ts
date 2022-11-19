@@ -1,7 +1,7 @@
 import printPath from './print-path';
 import roundNumber from './round-number';
 
-function drawBeam(renderer, params) {
+function drawBeam(renderer: any, params: any) {
   if (params.beams.length === 0) return;
 
   var pathString = "";
@@ -38,6 +38,7 @@ function drawBeam(renderer, params) {
   var klasses = renderer.controller.classes.generate(
     "beam-elem " + durationClass
   );
+  // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
   var el = printPath(renderer, {
     path: pathString,
     stroke: "none",
@@ -47,7 +48,7 @@ function drawBeam(renderer, params) {
   return [el];
 }
 
-function draw(renderer, startX, startY, endX, endY, dy) {
+function draw(renderer: any, startX: any, startY: any, endX: any, endY: any, dy: any) {
   // the X coordinates are actual coordinates, but the Y coordinates are in pitches.
   startY = roundNumber(renderer.calcY(startY));
   endY = roundNumber(renderer.calcY(endY));
@@ -76,11 +77,11 @@ function draw(renderer, startX, startY, endX, endY, dy) {
   );
 }
 
-function getSlope(renderer, startX, startY, endX, endY) {
+function getSlope(renderer: any, startX: any, startY: any, endX: any, endY: any) {
   return (endY - startY) / (endX - startX);
 }
 
-function getY(startX, startY, slope, currentX) {
+function getY(startX: any, startY: any, slope: any, currentX: any) {
   var x = currentX - startX;
   return startY + x * slope;
 }

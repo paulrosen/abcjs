@@ -1,10 +1,11 @@
 function FreeText(
-  info,
-  vskip,
-  getFontAndAttr,
-  paddingLeft,
-  width,
-  getTextSize
+  this: any,
+  info: any,
+  vskip: any,
+  getFontAndAttr: any,
+  paddingLeft: any,
+  width: any,
+  getTextSize: any
 ) {
   var text = info.text;
   this.rows = [];

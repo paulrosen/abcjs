@@ -1,4 +1,4 @@
-var renderingLint = function (history, abcString) {
+var renderingLint = function (history: any, abcString: any) {
   var output = [];
   for (var i = 0; i < history.length; i++) {
     output.push(lintOne(history[i], abcString));
@@ -6,7 +6,7 @@ var renderingLint = function (history, abcString) {
   return output.join("\n\n");
 };
 
-function lintOne(history, abcString) {
+function lintOne(history: any, abcString: any) {
   var items = [];
   var svgEl = history.svgEl;
   var absEl = history.absEl;
@@ -47,13 +47,13 @@ function lintOne(history, abcString) {
   return items.join("\n");
 }
 
-function createIndent(indent) {
+function createIndent(indent: any) {
   var str = "";
   for (var i = 0; i < indent; i++) str += "\t";
   return str;
 }
 
-function listSvgElement(svgEl, indent) {
+function listSvgElement(svgEl: any, indent: any) {
   var tab = createIndent(indent);
   var tab2 = createIndent(indent + 1);
   var output = [];
@@ -73,7 +73,7 @@ function listSvgElement(svgEl, indent) {
   return tab + output.join("\n" + tab2);
 }
 
-function listGroupChildren(g) {
+function listGroupChildren(g: any) {
   var output = [];
   for (var i = 0; i < g.children.length; i++) {
     var el = g.children[i];
@@ -82,7 +82,7 @@ function listGroupChildren(g) {
   return output.join(" ");
 }
 
-function listAttributes(el, indent) {
+function listAttributes(el: any, indent: any) {
   var tab = createIndent(indent);
   if (el.hasAttributes()) {
     var attrs = el.attributes;
@@ -98,7 +98,7 @@ function listAttributes(el, indent) {
   }
 }
 
-function listClasses(el) {
+function listClasses(el: any) {
   var classes = el.classList;
   var klasses = [];
   for (var i = 0; i < classes.length; i++) klasses.push(classes[i]);
@@ -107,7 +107,7 @@ function listClasses(el) {
   return "." + klasses.join(".");
 }
 
-function listAbsElement(absEl, indent) {
+function listAbsElement(absEl: any, indent: any) {
   var tab = createIndent(indent);
   var tab2 = createIndent(indent + 1);
   var output = ["abs:"];
@@ -175,7 +175,7 @@ function listAbsElement(absEl, indent) {
   return tab + output.join("\n" + tab2);
 }
 
-function listRelativeElement(relativeElement, indent) {
+function listRelativeElement(relativeElement: any, indent: any) {
   var tab2 = createIndent(indent + 1);
   var output = [];
   output.push("relative element: " + relativeElement.type);
@@ -218,7 +218,7 @@ function listRelativeElement(relativeElement, indent) {
   return output.join("\n" + tab2);
 }
 
-function listAbcElement(abcelem, indent) {
+function listAbcElement(abcelem: any, indent: any) {
   var tab = createIndent(indent);
   var output = [];
   var ignored = [];
@@ -275,7 +275,8 @@ function listAbcElement(abcelem, indent) {
   return "\n" + tab + output.join("\n" + tab);
 }
 
-function listArrayOfObjects(key, arr, indent) {
+// @ts-expect-error TS(7023): 'listArrayOfObjects' implicitly has return type 'a... Remove this comment to see the full error message
+function listArrayOfObjects(key: any, arr: any, indent: any) {
   var tab = createIndent(indent);
   var output = [];
   output.push(key + ":");

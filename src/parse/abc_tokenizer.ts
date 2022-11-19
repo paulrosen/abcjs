@@ -6,21 +6,21 @@ import parseCommon from './abc_common';
 // the return is the number of characters consumed, so 0 means that the element wasn't found.
 // also returned is the element found. This may be a different length because spaces may be consumed that aren't part of the string.
 // The return structure for most calls is { len: num_chars_consumed, token: str }
-var Tokenizer = function (lines, multilineVars) {
+var Tokenizer = function(this: any, lines: any, multilineVars: any) {
   this.lineIndex = 0;
   this.lines = lines;
   this.multilineVars = multilineVars;
 
-  this.skipWhiteSpace = function (str) {
+  this.skipWhiteSpace = function (str: any) {
     for (var i = 0; i < str.length; i++) {
       if (!this.isWhiteSpace(str.charAt(i))) return i;
     }
     return str.length; // It must have been all white space
   };
-  var finished = function (str, i) {
+  var finished = function (str: any, i: any) {
     return i >= str.length;
   };
-  this.eatWhiteSpace = function (line, index) {
+  this.eatWhiteSpace = function (line: any, index: any) {
     for (var i = index; i < line.length; i++) {
       if (!this.isWhiteSpace(line.charAt(i))) return i - index;
     }
@@ -28,7 +28,7 @@ var Tokenizer = function (lines, multilineVars) {
   };
 
   // This just gets the basic pitch letter, ignoring leading spaces, and normalizing it to a capital
-  this.getKeyPitch = function (str) {
+  this.getKeyPitch = function (str: any) {
     var i = this.skipWhiteSpace(str);
     if (finished(str, i)) return { len: 0 };
     switch (str.charAt(i)) {
@@ -58,7 +58,7 @@ var Tokenizer = function (lines, multilineVars) {
   };
 
   // This just gets the basic accidental, ignoring leading spaces, and only the ones that appear in a key
-  this.getSharpFlat = function (str) {
+  this.getSharpFlat = function (str: any) {
     if (str === "bass") return { len: 0 };
     switch (str.charAt(0)) {
       case "#":
@@ -69,8 +69,8 @@ var Tokenizer = function (lines, multilineVars) {
     return { len: 0 };
   };
 
-  this.getMode = function (str) {
-    var skipAlpha = function (str, start) {
+  this.getMode = function (str: any) {
+    var skipAlpha = function (str: any, start: any) {
       // This returns the index of the next non-alphabetic char, or the entire length of the string if not found.
       while (
         start < str.length &&
@@ -116,13 +116,14 @@ var Tokenizer = function (lines, multilineVars) {
     return { len: 0 };
   };
 
-  this.getClef = function (str, bExplicitOnly) {
+  this.getClef = function (str: any, bExplicitOnly: any) {
     var strOrig = str;
     var i = this.skipWhiteSpace(str);
     if (finished(str, i)) return { len: 0 };
     // The word 'clef' is optional, but if it appears, a clef MUST appear
     var needsClef = false;
     var strClef = str.substring(i);
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     if (parseCommon.startsWith(strClef, "clef=")) {
       needsClef = true;
       strClef = strClef.substring(5);
@@ -138,35 +139,47 @@ var Tokenizer = function (lines, multilineVars) {
       strClef = strClef.substring(j);
     }
     var name = null;
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     if (parseCommon.startsWith(strClef, "treble")) name = "treble";
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     else if (parseCommon.startsWith(strClef, "bass3")) name = "bass3";
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     else if (parseCommon.startsWith(strClef, "bass")) name = "bass";
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     else if (parseCommon.startsWith(strClef, "tenor")) name = "tenor";
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     else if (parseCommon.startsWith(strClef, "alto2")) name = "alto2";
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     else if (parseCommon.startsWith(strClef, "alto1")) name = "alto1";
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     else if (parseCommon.startsWith(strClef, "alto")) name = "alto";
     else if (
       !bExplicitOnly &&
       needsClef &&
+      // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
       parseCommon.startsWith(strClef, "none")
     )
       name = "none";
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     else if (parseCommon.startsWith(strClef, "perc")) name = "perc";
     else if (
       !bExplicitOnly &&
       needsClef &&
+      // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
       parseCommon.startsWith(strClef, "C")
     )
       name = "tenor";
     else if (
       !bExplicitOnly &&
       needsClef &&
+      // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
       parseCommon.startsWith(strClef, "F")
     )
       name = "bass";
     else if (
       !bExplicitOnly &&
       needsClef &&
+      // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
       parseCommon.startsWith(strClef, "G")
     )
       name = "treble";
@@ -184,7 +197,7 @@ var Tokenizer = function (lines, multilineVars) {
 
   // This returns one of the legal bar lines
   // This is called alot and there is no obvious tokenable items, so this is broken apart.
-  this.getBarLine = function (line, i) {
+  this.getBarLine = function (line: any, i: any) {
     switch (line.charAt(i)) {
       case "]":
         ++i;
@@ -281,7 +294,7 @@ var Tokenizer = function (lines, multilineVars) {
   };
 
   // this returns all the characters in the string that match one of the characters in the legalChars string
-  this.getTokenOf = function (str, legalChars) {
+  this.getTokenOf = function (str: any, legalChars: any) {
     for (var i = 0; i < str.length; i++) {
       if (legalChars.indexOf(str.charAt(i)) < 0)
         return { len: i, token: str.substring(0, i) };
@@ -289,7 +302,7 @@ var Tokenizer = function (lines, multilineVars) {
     return { len: i, token: str };
   };
 
-  this.getToken = function (str, start, end) {
+  this.getToken = function (str: any, start: any, end: any) {
     // This returns the next set of chars that doesn't contain spaces
     var i = start;
     while (i < end && !this.isWhiteSpace(str.charAt(i))) i++;
@@ -297,15 +310,16 @@ var Tokenizer = function (lines, multilineVars) {
   };
 
   // This just sees if the next token is the word passed in, with possible leading spaces
-  this.isMatch = function (str, match) {
+  this.isMatch = function (str: any, match: any) {
     var i = this.skipWhiteSpace(str);
     if (finished(str, i)) return 0;
+    // @ts-expect-error TS(2339): Property 'startsWith' does not exist on type '{}'.
     if (parseCommon.startsWith(str.substring(i), match))
       return i + match.length;
     return 0;
   };
 
-  this.getPitchFromTokens = function (tokens) {
+  this.getPitchFromTokens = function (tokens: any) {
     var ret = {};
     var pitches = {
       A: 5,
@@ -323,17 +337,21 @@ var Tokenizer = function (lines, multilineVars) {
       f: 10,
       g: 11
     };
+    // @ts-expect-error TS(2339): Property 'position' does not exist on type '{}'.
     ret.position = pitches[tokens[0].token];
+    // @ts-expect-error TS(2339): Property 'position' does not exist on type '{}'.
     if (ret.position === undefined)
       return { warn: "Pitch expected. Found: " + tokens[0].token };
     tokens.shift();
     while (tokens.length) {
       switch (tokens[0].token) {
         case ",":
+          // @ts-expect-error TS(2339): Property 'position' does not exist on type '{}'.
           ret.position -= 7;
           tokens.shift();
           break;
         case "'":
+          // @ts-expect-error TS(2339): Property 'position' does not exist on type '{}'.
           ret.position += 7;
           tokens.shift();
           break;
@@ -344,7 +362,7 @@ var Tokenizer = function (lines, multilineVars) {
     return ret;
   };
 
-  this.getKeyAccidentals2 = function (tokens) {
+  this.getKeyAccidentals2 = function (tokens: any) {
     var accs;
     // find and strip off all accidentals in the token list
     while (tokens.length > 0) {
@@ -420,7 +438,7 @@ var Tokenizer = function (lines, multilineVars) {
   };
 
   // This gets an accidental marking for the key signature. It has the accidental then the pitch letter.
-  this.getKeyAccidental = function (str) {
+  this.getKeyAccidental = function (str: any) {
     var accTranslation = {
       "^": "sharp",
       "^^": "dblsharp",
@@ -462,6 +480,7 @@ var Tokenizer = function (lines, multilineVars) {
       case "G":
         return {
           len: i + 1,
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           token: { acc: accTranslation[acc], note: str.charAt(i) }
         };
       case "^":
@@ -488,6 +507,7 @@ var Tokenizer = function (lines, multilineVars) {
           case "G":
             return {
               len: i + 1,
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               token: { acc: accTranslation[acc], note: str.charAt(i) }
             };
           default:
@@ -499,11 +519,11 @@ var Tokenizer = function (lines, multilineVars) {
     }
   };
 
-  this.isWhiteSpace = function (ch) {
+  this.isWhiteSpace = function (ch: any) {
     return ch === " " || ch === "\t" || ch === "\x12";
   };
 
-  this.getMeat = function (line, start, end) {
+  this.getMeat = function (line: any, start: any, end: any) {
     // This removes any comments starting with '%' and trims the ends of the string so that there are no leading or trailing spaces.
     // it returns just the start and end characters that contain the meat.
     var comment = line.indexOf("%", start);
@@ -525,15 +545,15 @@ var Tokenizer = function (lines, multilineVars) {
     return { start: start, end: end };
   };
 
-  var isLetter = function (ch) {
+  var isLetter = function (ch: any) {
     return (ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z");
   };
 
-  var isNumber = function (ch) {
+  var isNumber = function (ch: any) {
     return ch >= "0" && ch <= "9";
   };
 
-  this.tokenize = function (line, start, end, alphaUntilWhiteSpace) {
+  this.tokenize = function (line: any, start: any, end: any, alphaUntilWhiteSpace: any) {
     // this returns all the tokens inside the passed string. A token is a punctuation mark, a string of digits, a string of letters.
     //  Quoted strings are one token.
     //  If there is a minus sign next to a number, then it is included in the number.
@@ -627,7 +647,7 @@ var Tokenizer = function (lines, multilineVars) {
     return tokens;
   };
 
-  this.getVoiceToken = function (line, start, end) {
+  this.getVoiceToken = function (line: any, start: any, end: any) {
     // This finds the next token. A token is delimited by a space or an equal sign. If it starts with a quote, then the portion between the quotes is returned.
     var i = start;
     while (
@@ -885,19 +905,23 @@ var Tokenizer = function (lines, multilineVars) {
     361: "ñ",
     371: "ù"
   };
-  this.translateString = function (str) {
+  this.translateString = function (str: any) {
     var arr = str.split("\\");
     if (arr.length === 1) return str;
-    var out = null;
-    parseCommon.each(arr, function (s) {
+    var out: any = null;
+    // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+    parseCommon.each(arr, function (s: any) {
       if (out === null) out = s;
       else {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         var c = charMap[s.substring(0, 2)];
         if (c !== undefined) out += c + s.substring(2);
         else {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           c = charMap2[s.substring(0, 3)];
           if (c !== undefined) out += c + s.substring(3);
           else {
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             c = charMap1[s.substring(0, 1)];
             if (c !== undefined) out += c + s.substring(1);
             else out += "\\" + s;
@@ -907,7 +931,7 @@ var Tokenizer = function (lines, multilineVars) {
     });
     return out;
   };
-  this.getNumber = function (line, index) {
+  this.getNumber = function (line: any, index: any) {
     var num = 0;
     while (index < line.length) {
       switch (line.charAt(index)) {
@@ -958,7 +982,7 @@ var Tokenizer = function (lines, multilineVars) {
     return { num: num, index: index };
   };
 
-  this.getFraction = function (line, index) {
+  this.getFraction = function (line: any, index: any) {
     var num = 1;
     var den = 1;
     if (line.charAt(index) !== "/") {
@@ -986,21 +1010,25 @@ var Tokenizer = function (lines, multilineVars) {
     return { value: num / den, index: index };
   };
 
-  this.theReverser = function (str) {
+  this.theReverser = function (str: any) {
+    // @ts-expect-error TS(2339): Property 'endsWith' does not exist on type '{}'.
     if (parseCommon.endsWith(str, ", The"))
       return "The " + str.substring(0, str.length - 5);
+    // @ts-expect-error TS(2339): Property 'endsWith' does not exist on type '{}'.
     if (parseCommon.endsWith(str, ", A"))
       return "A " + str.substring(0, str.length - 3);
     return str;
   };
 
-  this.stripComment = function (str) {
+  this.stripComment = function (str: any) {
     var i = str.indexOf("%");
+    // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
     if (i >= 0) return parseCommon.strip(str.substring(0, i));
+    // @ts-expect-error TS(2339): Property 'strip' does not exist on type '{}'.
     return parseCommon.strip(str);
   };
 
-  this.getInt = function (str) {
+  this.getInt = function (str: any) {
     // This parses the beginning of the string for a number and returns { value: num, digits: num }
     // If digits is 0, then the string didn't point to a number.
     var x = parseInt(str);
@@ -1010,7 +1038,7 @@ var Tokenizer = function (lines, multilineVars) {
     return { value: x, digits: i + s.length };
   };
 
-  this.getFloat = function (str) {
+  this.getFloat = function (str: any) {
     // This parses the beginning of the string for a number and returns { value: num, digits: num }
     // If digits is 0, then the string didn't point to a number.
     var x = parseFloat(str);
@@ -1020,7 +1048,7 @@ var Tokenizer = function (lines, multilineVars) {
     return { value: x, digits: i + s.length };
   };
 
-  this.getMeasurement = function (tokens) {
+  this.getMeasurement = function (tokens: any) {
     if (tokens.length === 0) return { used: 0 };
     var used = 1;
     var num = "";
@@ -1057,12 +1085,12 @@ var Tokenizer = function (lines, multilineVars) {
         return { used: used, value: parseFloat(num) };
     }
   };
-  var substInChord = function (str) {
+  var substInChord = function (str: any) {
     str = str.replace(/\\n/g, "\n");
     str = str.replace(/\\"/g, '"');
     return str;
   };
-  this.getBrackettedSubstring = function (line, i, maxErrorChars, _matchChar) {
+  this.getBrackettedSubstring = function (line: any, i: any, maxErrorChars: any, _matchChar: any) {
     // This extracts the sub string by looking at the first character and searching for that
     // character later in the line (or search for the optional _matchChar).
     // For instance, if the first character is a quote it will look for

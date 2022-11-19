@@ -20,7 +20,7 @@ var defaultSoundFontUrl =
 var alternateSoundFontUrl =
   "https://paulrosen.github.io/midi-js-soundfonts/MusyngKite/";
 
-function CreateSynth() {
+function CreateSynth(this: any) {
   var self = this;
   self.audioBufferPossible = undefined;
   self.directSource = []; // type: AudioBufferSourceNode
@@ -31,7 +31,7 @@ function CreateSynth() {
   self.isRunning = false; // whether there is currently a sound buffer running.
 
   // Load and cache all needed sounds
-  self.init = function (options) {
+  self.init = function (options: any) {
     if (!options) options = {};
     registerAudioContext(options.audioContext); // This works no matter what - if there is already an ac it is a nop; if the context is not passed in, then it creates one.
     var startTime = activeAudioContext().currentTime;
@@ -143,22 +143,27 @@ function CreateSynth() {
     self.onEnded = params.onEnded;
 
     var allNotes = {};
-    var cached = [];
-    var errorNotes = [];
+    var cached: any = [];
+    var errorNotes: any = [];
     var currentInstrument = instrumentIndexToName[0];
-    self.flattened.tracks.forEach(function (track) {
-      track.forEach(function (event) {
+    self.flattened.tracks.forEach(function (track: any) {
+      track.forEach(function (event: any) {
         if (event.cmd === "program" && instrumentIndexToName[event.instrument])
           currentInstrument = instrumentIndexToName[event.instrument];
         if (event.pitch !== undefined) {
           var pitchNumber = event.pitch;
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           var noteName = pitchToNoteName[pitchNumber];
           if (noteName) {
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             if (!allNotes[currentInstrument]) allNotes[currentInstrument] = {};
             if (
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               !soundsCache[currentInstrument] ||
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               !soundsCache[currentInstrument][noteName]
             )
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               allNotes[currentInstrument][noteName] = true;
             else {
               var label2 = currentInstrument + ":" + noteName;
@@ -180,14 +185,15 @@ function CreateSynth() {
       );
     startTime = activeAudioContext().currentTime;
 
-    var notes = [];
+    var notes: any = [];
     Object.keys(allNotes).forEach(function (instrument) {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       Object.keys(allNotes[instrument]).forEach(function (note) {
         notes.push({ instrument: instrument, note: note });
       });
     });
     // If there are lots of notes, load them in batches
-    var batches = [];
+    var batches: any = [];
     var CHUNK = 256;
     for (var i = 0; i < notes.length; i += CHUNK) {
       batches.push(notes.slice(i, i + CHUNK));
@@ -205,7 +211,7 @@ function CreateSynth() {
         if (index < batches.length) {
           self
             ._loadBatch(batches[index], self.soundFontUrl, startTime)
-            .then(function (data) {
+            .then(function (data: any) {
               startTime = activeAudioContext().currentTime;
               if (data) {
                 if (data.error)
@@ -224,10 +230,10 @@ function CreateSynth() {
     });
   };
 
-  self._loadBatch = function (batch, soundFontUrl, startTime, delay) {
+  self._loadBatch = function (batch: any, soundFontUrl: any, startTime: any, delay: any) {
     // This is called recursively to see if the sounds have loaded. The "delay" parameter is how long it has been since the original call.
-    var promises = [];
-    batch.forEach(function (item) {
+    var promises: any = [];
+    batch.forEach(function (item: any) {
       promises.push(
         getNote(soundFontUrl, item.instrument, item.note, activeAudioContext())
       );
@@ -244,7 +250,7 @@ function CreateSynth() {
           );
         var loaded = [];
         var cached = [];
-        var pending = [];
+        var pending: any = [];
         var error = [];
         for (var i = 0; i < response.length; i++) {
           var oneResponse = response[i];
@@ -269,10 +275,10 @@ function CreateSynth() {
                 }
                 self
                   ._loadBatch(newBatch, soundFontUrl, startTime, delay)
-                  .then(function (response) {
+                  .then(function (response: any) {
                     resolve(response);
                   })
-                  .catch(function (error) {
+                  .catch(function (error: any) {
                     reject(error);
                   });
               }, delay);
@@ -324,12 +330,12 @@ function CreateSynth() {
       // Create a simple list of all the unique sounds in this music and where they should be placed.
       // There appears to be a limit on how many audio buffers can be created at once so this technique limits the number needed.
       var uniqueSounds = {};
-      noteMapTracks.forEach(function (noteMap, trackNumber) {
+      noteMapTracks.forEach(function (noteMap: any, trackNumber: any) {
         var panDistance =
           panDistances && panDistances.length > trackNumber
             ? panDistances[trackNumber]
             : 0;
-        noteMap.forEach(function (note) {
+        noteMap.forEach(function (note: any) {
           var key =
             note.instrument +
             ":" +
@@ -344,7 +350,9 @@ function CreateSynth() {
             tempoMultiplier +
             ":" +
             (note.cents ? note.cents : 0);
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           if (!uniqueSounds[key]) uniqueSounds[key] = [];
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           uniqueSounds[key].push(note.start);
         });
       });
@@ -361,6 +369,7 @@ function CreateSynth() {
         var parts = k.split(":");
         var cents = parts[6] !== undefined ? parseFloat(parts[6]) : 0;
         parts = {
+          // @ts-expect-error TS(2322): Type '{ instrument: string; pitch: number; volume:... Remove this comment to see the full error message
           instrument: parts[0],
           pitch: parseInt(parts[1], 10),
           volume: parseInt(parts[2], 10),
@@ -374,8 +383,10 @@ function CreateSynth() {
             audioBuffer,
             activeAudioContext().sampleRate,
             parts,
+            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
             uniqueSounds[k],
             self.soundFontVolumeMultiplier,
+            // @ts-expect-error TS(2339): Property 'instrument' does not exist on type 'stri... Remove this comment to see the full error message
             self.programOffsets[parts.instrument],
             fadeTimeSec,
             self.noteEnd / 1000
@@ -393,7 +404,7 @@ function CreateSynth() {
             "ms"
         );
       }
-      function resolveData(me) {
+      function resolveData(me: any) {
         var duration =
           me && me.audioBuffers && me.audioBuffers.length > 0
             ? me.audioBuffers[0].duration
@@ -425,7 +436,7 @@ function CreateSynth() {
     });
   };
 
-  function setPan(numTracks, panParam) {
+  function setPan(numTracks: any, panParam: any) {
     // panParam, if it is set, can be either a number representing the separation between each track,
     // or an array, which is the absolute pan position for each track.
     if (panParam === null || panParam === undefined) return null;
@@ -497,7 +508,7 @@ function CreateSynth() {
     self.start();
   };
 
-  self.seek = function (position, units) {
+  self.seek = function (position: any, units: any) {
     var offset;
     switch (units) {
       case "seconds":
@@ -531,7 +542,7 @@ function CreateSynth() {
   self.stop = function () {
     self.isRunning = false;
     self.pausedTimeSec = undefined;
-    self.directSource.forEach(function (source) {
+    self.directSource.forEach(function (source: any) {
       try {
         source.stop();
       } catch (error) {
@@ -564,15 +575,15 @@ function CreateSynth() {
     return true;
   };
 
-  self._kickOffSound = function (seconds) {
+  self._kickOffSound = function (seconds: any) {
     self.isRunning = true;
     self.directSource = [];
-    self.audioBuffers.forEach(function (audioBuffer, trackNum) {
+    self.audioBuffers.forEach(function (audioBuffer: any, trackNum: any) {
       self.directSource[trackNum] = activeAudioContext().createBufferSource(); // creates a sound source
       self.directSource[trackNum].buffer = audioBuffer; // tell the source which sound to play
       self.directSource[trackNum].connect(activeAudioContext().destination); // connect the source to the context's destination (the speakers)
     });
-    self.directSource.forEach(function (source) {
+    self.directSource.forEach(function (source: any) {
       source.start(0, seconds);
     });
     if (self.onEnded) {

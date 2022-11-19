@@ -1,10 +1,10 @@
 import parseKeyVoice from '../parse/abc_parse_key_voice';
 import parseCommon from '../parse/abc_common';
 
-var TuneBuilder = function (tune) {
+var TuneBuilder = function(this: any, tune: any) {
   var self = this;
 
-  this.setVisualTranspose = function (visualTranspose) {
+  this.setVisualTranspose = function (visualTranspose: any) {
     if (visualTranspose) tune.visualTranspose = visualTranspose;
   };
 
@@ -58,25 +58,35 @@ var TuneBuilder = function (tune) {
                   // delete the overlay events from this array without messing up this loop.
                   inOverlay = false;
                   overlayVoice[k].snip.push({
+                    // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
                     start: snipStart,
+                    // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
                     len: kk - snipStart
                   });
+                  // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
                   overlayVoice[k].voice.push(event); // Also end the overlay with the barline.
                 } else {
                   // This keeps the voices lined up: if the overlay isn't in the first measure then we need a bunch of invisible rests.
                   if (durationThisBar > 0)
                     overlayVoice[k].voice.push({
+                      // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
                       el_type: "note",
+                      // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
                       duration: durationThisBar,
+                      // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
                       rest: { type: "invisible" },
+                      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
                       startChar: event.startChar,
+                      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
                       endChar: event.endChar
                     });
+                  // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
                   overlayVoice[k].voice.push(event);
                 }
                 durationThisBar = 0;
               } else if (event.el_type === "note") {
                 if (inOverlay) {
+                  // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
                   overlayVoice[k].voice.push(event);
                 } else {
                   durationThisBar += event.duration;
@@ -90,6 +100,7 @@ var TuneBuilder = function (tune) {
                 event.el_type === "transpose"
               ) {
                 // These types of events are duplicated on the overlay layer.
+                // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
                 overlayVoice[k].voice.push(event);
               }
             }
@@ -99,7 +110,9 @@ var TuneBuilder = function (tune) {
             ) {
               // there was no closing bar, so we didn't set the snip amount.
               overlayVoice[k].snip.push({
+                // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
                 start: snipStart,
+                // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
                 len: voice.length - snipStart
               });
             }
@@ -107,15 +120,19 @@ var TuneBuilder = function (tune) {
           for (k = 0; k < overlayVoice.length; k++) {
             var ov = overlayVoice[k];
             if (ov.hasOverlay) {
+              // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
               ov.voice.splice(0, 0, { el_type: "stem", direction: "down" });
               staff.voices.push(ov.voice);
               for (var kkk = ov.snip.length - 1; kkk >= 0; kkk--) {
                 var snip = ov.snip[kkk];
+                // @ts-expect-error TS(2339): Property 'start' does not exist on type 'never'.
                 staff.voices[k].splice(snip.start, snip.len);
+                // @ts-expect-error TS(2339): Property 'start' does not exist on type 'never'.
                 staff.voices[k].splice(snip.start + 1, 0, {
                   el_type: "stem",
                   direction: "auto"
                 });
+                // @ts-expect-error TS(2339): Property 'start' does not exist on type 'never'.
                 var indexOfLastBar = findLastBar(staff.voices[k], snip.start);
                 staff.voices[k].splice(indexOfLastBar, 0, {
                   el_type: "stem",
@@ -128,6 +145,7 @@ var TuneBuilder = function (tune) {
                 kkk < staff.voices[staff.voices.length - 1].length;
                 kkk++
               ) {
+                // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
                 staff.voices[staff.voices.length - 1][kkk] = parseCommon.clone(
                   staff.voices[staff.voices.length - 1][kkk]
                 );
@@ -145,11 +163,11 @@ var TuneBuilder = function (tune) {
     return madeChanges;
   };
 
-  function findLastBar(voice, start) {
+  function findLastBar(voice: any, start: any) {
     for (var i = start - 1; i > 0 && voice[i].el_type !== "bar"; i--) {}
     return i;
   }
-  function fixTitles(lines) {
+  function fixTitles(lines: any) {
     // We might have name and subname defined. We now know what line everything is on, so we can determine which to use.
     var firstMusicLine = true;
     for (var i = 0; i < lines.length; i++) {
@@ -176,7 +194,7 @@ var TuneBuilder = function (tune) {
     }
   }
 
-  this.cleanUp = function (barsperstaff, staffnonote, currSlur) {
+  this.cleanUp = function (barsperstaff: any, staffnonote: any, currSlur: any) {
     this.closeLine(); // Close the last line.
     delete tune.runningFonts;
 
@@ -216,8 +234,11 @@ var TuneBuilder = function (tune) {
       }
     }
     if (anyDeleted) {
+      // @ts-expect-error TS(2339): Property 'compact' does not exist on type '{}'.
       tune.lines = parseCommon.compact(tune.lines);
-      parseCommon.each(tune.lines, function (line) {
+      // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+      parseCommon.each(tune.lines, function (line: any) {
+        // @ts-expect-error TS(2339): Property 'compact' does not exist on type '{}'.
         if (line.staff) line.staff = parseCommon.compact(line.staff);
       });
     }
@@ -249,7 +270,9 @@ var TuneBuilder = function (tune) {
         }
       }
       if (anyDeleted) {
-        parseCommon.each(tune.lines, function (line) {
+        // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+        parseCommon.each(tune.lines, function (line: any) {
+          // @ts-expect-error TS(2339): Property 'compact' does not exist on type '{}'.
           if (line.staff) line.staff = parseCommon.compact(line.staff);
         });
       }
@@ -270,13 +293,13 @@ var TuneBuilder = function (tune) {
       // keep resolving overlays as long as any are found.
     }
 
-    function cleanUpSlursInLine(line, staffNum, voiceNum) {
+    function cleanUpSlursInLine(line: any, staffNum: any, voiceNum: any) {
       if (!currSlur[staffNum]) currSlur[staffNum] = [];
       if (!currSlur[staffNum][voiceNum]) currSlur[staffNum][voiceNum] = [];
       var x;
       //			var lyr = null;	// TODO-PER: debugging.
 
-      var addEndSlur = function (obj, num, chordPos) {
+      var addEndSlur = function (obj: any, num: any, chordPos: any) {
         if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
           // There isn't an exact match for note position, but we'll take any other open slur.
           for (x = 0; x < currSlur[staffNum][voiceNum].length; x++) {
@@ -287,7 +310,8 @@ var TuneBuilder = function (tune) {
           }
           if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
             var offNum = chordPos * 100 + 1;
-            parseCommon.each(obj.endSlur, function (x) {
+            // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+            parseCommon.each(obj.endSlur, function (x: any) {
               if (offNum === x) --offNum;
             });
             currSlur[staffNum][voiceNum][chordPos] = [offNum];
@@ -304,7 +328,7 @@ var TuneBuilder = function (tune) {
         return slurNum;
       };
 
-      var addStartSlur = function (obj, num, chordPos, usedNums) {
+      var addStartSlur = function (obj: any, num: any, chordPos: any, usedNums: any) {
         obj.startSlur = [];
         if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
           currSlur[staffNum][voiceNum][chordPos] = [];
@@ -312,25 +336,30 @@ var TuneBuilder = function (tune) {
         var nextNum = chordPos * 100 + 1;
         for (var i = 0; i < num; i++) {
           if (usedNums) {
-            parseCommon.each(usedNums, function (x) {
+            // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+            parseCommon.each(usedNums, function (x: any) {
               if (nextNum === x) ++nextNum;
             });
-            parseCommon.each(usedNums, function (x) {
+            // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+            parseCommon.each(usedNums, function (x: any) {
               if (nextNum === x) ++nextNum;
             });
-            parseCommon.each(usedNums, function (x) {
+            // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+            parseCommon.each(usedNums, function (x: any) {
               if (nextNum === x) ++nextNum;
             });
           }
+          // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
           parseCommon.each(
             currSlur[staffNum][voiceNum][chordPos],
-            function (x) {
+            function (x: any) {
               if (nextNum === x) ++nextNum;
             }
           );
+          // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
           parseCommon.each(
             currSlur[staffNum][voiceNum][chordPos],
-            function (x) {
+            function (x: any) {
               if (nextNum === x) ++nextNum;
             }
           );
@@ -363,6 +392,7 @@ var TuneBuilder = function (tune) {
               }
               if (el.gracenotes[g].startSlur) {
                 x = el.gracenotes[g].startSlur;
+                // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
                 addStartSlur(el.gracenotes[g], x, 20);
               }
             }
@@ -374,6 +404,7 @@ var TuneBuilder = function (tune) {
           }
           if (el.startSlur) {
             x = el.startSlur;
+            // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
             addStartSlur(el, x, 0);
           }
           if (el.pitches) {
@@ -424,11 +455,12 @@ var TuneBuilder = function (tune) {
     }
 
     // TODO-PER: This could be done faster as we go instead of as the last step.
-    function fixClefPlacement(el) {
+    function fixClefPlacement(el: any) {
+      // @ts-expect-error TS(2339): Property 'fixClef' does not exist on type '{}'.
       parseKeyVoice.fixClef(el);
     }
 
-    function wrapMusicLines(lines, barsperstaff) {
+    function wrapMusicLines(lines: any, barsperstaff: any) {
       for (i = 0; i < lines.length; i++) {
         if (lines[i].staff !== undefined) {
           for (s = 0; s < lines[i].staff.length; s++) {
@@ -446,6 +478,7 @@ var TuneBuilder = function (tune) {
                       var nextLine = getNextMusicLine(lines, i);
                       if (!nextLine) {
                         var cp = JSON.parse(JSON.stringify(lines[i]));
+                        // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
                         lines.push(parseCommon.clone(cp));
                         nextLine = lines[lines.length - 1];
                         for (var ss = 0; ss < nextLine.staff.length; ss++) {
@@ -480,7 +513,7 @@ var TuneBuilder = function (tune) {
       return false;
     }
 
-    function getNextMusicLine(lines, currentLine) {
+    function getNextMusicLine(lines: any, currentLine: any) {
       currentLine++;
       while (lines.length > currentLine) {
         if (lines[currentLine].staff) return lines[currentLine];
@@ -556,7 +589,7 @@ var TuneBuilder = function (tune) {
     return null;
   };
 
-  this.addTieToLastNote = function (dottedTie) {
+  this.addTieToLastNote = function (dottedTie: any) {
     // TODO-PER: if this is a chord, which note?
     var el = this.getLastNote();
     if (el && el.pitches && el.pitches.length > 0) {
@@ -567,7 +600,7 @@ var TuneBuilder = function (tune) {
     return false;
   };
 
-  this.getDuration = function (el) {
+  this.getDuration = function (el: any) {
     if (el.duration) return el.duration;
     //if (el.pitches && el.pitches.length > 0) return el.pitches[0].duration;
     return 0;
@@ -582,9 +615,9 @@ var TuneBuilder = function (tune) {
     delete tune.potentialEndBeam;
   };
 
-  this.appendElement = function (type, startChar, endChar, hashParams) {
+  this.appendElement = function (type: any, startChar: any, endChar: any, hashParams: any) {
     var This = tune;
-    var pushNote = function (hp) {
+    var pushNote = function (hp: any) {
       var currStaff = This.lines[This.lineNum].staff[This.staffNum];
       if (!currStaff) {
         // TODO-PER: This prevents a crash, but it drops the element. Need to figure out how to start a new line, or delay adding this.
@@ -592,13 +625,15 @@ var TuneBuilder = function (tune) {
       }
       if (hp.pitches !== undefined) {
         var mid = currStaff.workingClef.verticalPos;
-        parseCommon.each(hp.pitches, function (p) {
+        // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+        parseCommon.each(hp.pitches, function (p: any) {
           p.verticalPos = p.pitch - mid;
         });
       }
       if (hp.gracenotes !== undefined) {
         var mid2 = currStaff.workingClef.verticalPos;
-        parseCommon.each(hp.gracenotes, function (p) {
+        // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+        parseCommon.each(hp.gracenotes, function (p: any) {
           p.verticalPos = p.pitch - mid2;
         });
       }
@@ -677,10 +712,10 @@ var TuneBuilder = function (tune) {
   };
 
   this.appendStartingElement = function (
-    type,
-    startChar,
-    endChar,
-    hashParams2
+    type: any,
+    startChar: any,
+    endChar: any,
+    hashParams2: any
   ) {
     // If we're in the middle of beaming, then end the beam.
     this.closeLine();
@@ -694,6 +729,7 @@ var TuneBuilder = function (tune) {
     }
 
     // Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
+    // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
     var hashParams = parseCommon.clone(hashParams2);
 
     if (tune.lines[tune.lineNum] && tune.lines[tune.lineNum].staff) {
@@ -701,16 +737,20 @@ var TuneBuilder = function (tune) {
       // If tune is the first item in tune staff, then we might have to initialize the staff, first.
       if (tune.lines[tune.lineNum].staff.length <= tune.staffNum) {
         tune.lines[tune.lineNum].staff[tune.staffNum] = {};
+        // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
         tune.lines[tune.lineNum].staff[tune.staffNum].clef = parseCommon.clone(
           tune.lines[tune.lineNum].staff[0].clef
         );
+        // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
         tune.lines[tune.lineNum].staff[tune.staffNum].key = parseCommon.clone(
           tune.lines[tune.lineNum].staff[0].key
         );
         if (tune.lines[tune.lineNum].staff[0].meter)
           tune.lines[tune.lineNum].staff[tune.staffNum].meter =
+            // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
             parseCommon.clone(tune.lines[tune.lineNum].staff[0].meter);
         tune.lines[tune.lineNum].staff[tune.staffNum].workingClef =
+          // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
           parseCommon.clone(tune.lines[tune.lineNum].staff[0].workingClef);
         tune.lines[tune.lineNum].staff[tune.staffNum].voices = [[]];
       }
@@ -753,7 +793,7 @@ var TuneBuilder = function (tune) {
     }
   };
 
-  this.pushLine = function (hash) {
+  this.pushLine = function (hash: any) {
     if (tune.vskipPending) {
       hash.vskip = tune.vskipPending;
       delete tune.vskipPending;
@@ -761,21 +801,21 @@ var TuneBuilder = function (tune) {
     tune.lines.push(hash);
   };
 
-  this.addSubtitle = function (str, info) {
+  this.addSubtitle = function (str: any, info: any) {
     this.pushLine({
       subtitle: { text: str, startChar: info.startChar, endChar: info.endChar }
     });
   };
 
-  this.addSpacing = function (num) {
+  this.addSpacing = function (num: any) {
     tune.vskipPending = num;
   };
 
-  this.addNewPage = function (num) {
+  this.addNewPage = function (num: any) {
     this.pushLine({ newpage: num });
   };
 
-  this.addSeparator = function (spaceAbove, spaceBelow, lineLength, info) {
+  this.addSeparator = function (spaceAbove: any, spaceBelow: any, lineLength: any, info: any) {
     this.pushLine({
       separator: {
         spaceAbove: Math.round(spaceAbove),
@@ -787,17 +827,17 @@ var TuneBuilder = function (tune) {
     });
   };
 
-  this.addText = function (str, info) {
+  this.addText = function (str: any, info: any) {
     this.pushLine({
       text: { text: str, startChar: info.startChar, endChar: info.endChar }
     });
   };
 
-  this.addCentered = function (str) {
+  this.addCentered = function (str: any) {
     this.pushLine({ text: [{ text: str, center: true }] });
   };
 
-  this.containsNotes = function (voice) {
+  this.containsNotes = function (voice: any) {
     for (var i = 0; i < voice.length; i++) {
       if (voice[i].el_type === "note" || voice[i].el_type === "bar")
         return true;
@@ -805,7 +845,7 @@ var TuneBuilder = function (tune) {
     return false;
   };
 
-  this.containsNotesStrict = function (voice) {
+  this.containsNotesStrict = function (voice: any) {
     for (var i = 0; i < voice.length; i++) {
       if (
         voice[i].el_type === "note" &&
@@ -823,16 +863,16 @@ var TuneBuilder = function (tune) {
   //		}
   //		return false;
   //	},
-  this.changeVoiceScale = function (scale) {
+  this.changeVoiceScale = function (scale: any) {
     self.appendElement("scale", null, null, { size: scale });
   };
 
-  this.startNewLine = function (params) {
+  this.startNewLine = function (params: any) {
     // If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.
     // If it does exist and has music, then increment the line number. If the new element doesn't exist, create it.
     var This = tune;
     this.closeLine(); // Close the previous line.
-    var createVoice = function (params) {
+    var createVoice = function (params: any) {
       var thisStaff = This.lines[This.lineNum].staff[This.staffNum];
       thisStaff.voices[This.voiceNum] = [];
       if (!thisStaff.title) thisStaff.title = [];
@@ -860,7 +900,7 @@ var TuneBuilder = function (tune) {
       if (params.scale)
         self.appendElement("scale", null, null, { size: params.scale });
     };
-    var createStaff = function (params) {
+    var createStaff = function (params: any) {
       if (params.key && params.key.impliedNaturals) {
         params.key.accidentals = params.key.accidentals.concat(
           params.key.impliedNaturals
@@ -913,7 +953,7 @@ var TuneBuilder = function (tune) {
         delete This.vskipPending;
       }
     };
-    var createLine = function (params) {
+    var createLine = function (params: any) {
       This.lines[This.lineNum] = { staff: [] };
       createStaff(params);
     };
@@ -944,12 +984,12 @@ var TuneBuilder = function (tune) {
     }
   };
 
-  this.setRunningFont = function (type, font) {
+  this.setRunningFont = function (type: any, font: any) {
     // This is called at tune start to set the current default fonts so we know whether to record a change.
     tune.runningFonts[type] = font;
   };
 
-  this.setLineFont = function (type, font) {
+  this.setLineFont = function (type: any, font: any) {
     // If we haven't encountered the font type yet then we are using the default font so it doesn't
     // need to be noted. If we have encountered it, then only record it if it is different from the last time.
     if (tune.runningFonts[type]) {
@@ -966,7 +1006,7 @@ var TuneBuilder = function (tune) {
     tune.runningFonts[type] = font;
   };
 
-  this.setBarNumberImmediate = function (barNumber) {
+  this.setBarNumberImmediate = function (barNumber: any) {
     // If tune is called right at the beginning of a line, then correct the measure number that is already written.
     // If tune is called at the beginning of a measure, then correct the measure number that was just created.
     // If tune is called in the middle of a measure, then subtract one from it, because it will be incremented before applied.
@@ -990,7 +1030,7 @@ var TuneBuilder = function (tune) {
     return false;
   };
 
-  this.isFirstLine = function (index) {
+  this.isFirstLine = function (index: any) {
     for (var i = index - 1; i >= 0; i--) {
       if (tune.lines[i].staff !== undefined) return false;
     }
@@ -1007,7 +1047,7 @@ var TuneBuilder = function (tune) {
     else return null;
   };
 
-  this.setCurrentVoice = function (staffNum, voiceNum) {
+  this.setCurrentVoice = function (staffNum: any, voiceNum: any) {
     tune.staffNum = staffNum;
     tune.voiceNum = voiceNum;
     for (var i = 0; i < tune.lines.length; i++) {
@@ -1025,7 +1065,7 @@ var TuneBuilder = function (tune) {
     tune.lineNum = i;
   };
 
-  this.addMetaText = function (key, value, info) {
+  this.addMetaText = function (key: any, value: any, info: any) {
     if (tune.metaText[key] === undefined) {
       tune.metaText[key] = value;
       tune.metaTextInfo[key] = info;
@@ -1035,7 +1075,7 @@ var TuneBuilder = function (tune) {
     }
   };
 
-  this.addMetaTextArray = function (key, value, info) {
+  this.addMetaTextArray = function (key: any, value: any, info: any) {
     if (tune.metaText[key] === undefined) {
       tune.metaText[key] = [value];
       tune.metaTextInfo[key] = info;
@@ -1044,7 +1084,7 @@ var TuneBuilder = function (tune) {
       tune.metaTextInfo[key].endChar = info.endChar;
     }
   };
-  this.addMetaTextObj = function (key, value, info) {
+  this.addMetaTextObj = function (key: any, value: any, info: any) {
     tune.metaText[key] = value;
     tune.metaTextInfo[key] = info;
   };

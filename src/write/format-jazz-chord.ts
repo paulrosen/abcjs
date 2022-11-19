@@ -1,4 +1,4 @@
-function formatJazzChord(chordString) {
+function formatJazzChord(chordString: any) {
   // This puts markers in the pieces of the chord that are read by the svg creator.
   // After the main part of the chord (the letter, a sharp or flat, and "m") a marker is added. Before a slash a marker is added.
   var lines = chordString.split("\n");

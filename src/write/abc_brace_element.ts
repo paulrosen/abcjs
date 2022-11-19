@@ -1,11 +1,11 @@
 //    abc_brace_element.js: Definition of the BraceElement class.
 
-var BraceElem = function BraceElem(voice, type) {
+var BraceElem = function BraceElem(this: any, voice: any, type: any) {
   this.startVoice = voice;
   this.type = type;
 };
 
-BraceElem.prototype.setBottomStaff = function (voice) {
+BraceElem.prototype.setBottomStaff = function (voice: any) {
   this.endVoice = voice;
   // If only the start brace has a name then the name belongs to the brace instead of the staff.
   if (this.startVoice.header && !this.endVoice.header) {
@@ -14,7 +14,7 @@ BraceElem.prototype.setBottomStaff = function (voice) {
   }
 };
 
-BraceElem.prototype.continuing = function (voice) {
+BraceElem.prototype.continuing = function (voice: any) {
   // If the final staff isn't present, then use the last one we saw.
   this.lastContinuedVoice = voice;
 };
@@ -23,7 +23,7 @@ BraceElem.prototype.getWidth = function () {
   return 10; // TODO-PER: right now the drawing function doesn't vary the width at all. If it does in the future then this will change.
 };
 
-BraceElem.prototype.isStartVoice = function (voice) {
+BraceElem.prototype.isStartVoice = function (voice: any) {
   if (
     this.startVoice &&
     this.startVoice.staff &&

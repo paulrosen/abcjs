@@ -1,6 +1,6 @@
 //    abc_crescendo_element.js: Definition of the CrescendoElem class.
 
-var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
+var CrescendoElem = function CrescendoElem(this: any, anchor1: any, anchor2: any, dir: any, positioning: any) {
   this.type = "CrescendoElem";
   this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
   this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)

@@ -59,11 +59,13 @@ const allPitches = [
   "b'''"
 ];
 
-allNotes.pitchIndex = function (noteName) {
+// @ts-expect-error TS(2339): Property 'pitchIndex' does not exist on type '{}'.
+allNotes.pitchIndex = function (noteName: any) {
   return allPitches.indexOf(noteName);
 };
 
-allNotes.noteName = function (pitchIndex) {
+// @ts-expect-error TS(2339): Property 'noteName' does not exist on type '{}'.
+allNotes.noteName = function (pitchIndex: any) {
   return allPitches[pitchIndex];
 };
 

@@ -1,7 +1,7 @@
 import drawSeparator from './separator';
 import renderText from './text';
 
-function nonMusic(renderer, obj, selectables) {
+function nonMusic(renderer: any, obj: any, selectables: any) {
   for (var i = 0; i < obj.rows.length; i++) {
     var row = obj.rows[i];
     if (row.absmove) {
@@ -10,6 +10,7 @@ function nonMusic(renderer, obj, selectables) {
       renderer.moveY(row.move);
     } else if (row.text) {
       var x = row.left ? row.left : 0;
+      // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
       var el = renderText(renderer, {
         x: x,
         y: renderer.y,

@@ -10,7 +10,9 @@ var resizeDivs = {};
 function resizeOuter() {
   var width = window.innerWidth;
   for (var id in resizeDivs) {
+    // @ts-expect-error TS(2339): Property 'prototype' does not exist on type '{}'.
     if (resizeDivs.prototype.hasOwnProperty.call(id)) {
+      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       var outer = resizeDivs[id];
       var ofs = outer.offsetLeft;
       width -= ofs * 2;
@@ -26,7 +28,7 @@ try {
   // if we aren't in a browser, this code will crash, but it is not needed then either.
 }
 
-function renderOne(div, tune, params, tuneNumber, lineOffset) {
+function renderOne(div: any, tune: any, params: any, tuneNumber: any, lineOffset: any) {
   if (params.viewportHorizontal) {
     // Create an inner div that holds the music, so that the passed in div will be the viewport.
     div.innerHTML = '<div class="abcjs-inner"></div>';
@@ -34,6 +36,7 @@ function renderOne(div, tune, params, tuneNumber, lineOffset) {
       div.style.overflowX = "auto";
       div.style.overflowY = "hidden";
     } else div.style.overflow = "hidden";
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     resizeDivs[div.id] = div; // We use a hash on the element's id so that multiple calls won't keep adding to the list.
     div = div.children[0]; // The music should be rendered in the inner div.
   } else if (params.viewportVertical) {
@@ -43,6 +46,7 @@ function renderOne(div, tune, params, tuneNumber, lineOffset) {
     div.style.overflowY = "auto";
     div = div.children[0]; // The music should be rendered in the inner div.
   } else div.innerHTML = "";
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var engraver_controller = new EngraverController(div, params);
   engraver_controller.engraveABC(tune, tuneNumber, lineOffset);
   tune.engraver = engraver_controller;
@@ -71,11 +75,11 @@ function renderOne(div, tune, params, tuneNumber, lineOffset) {
 //              (If this element is not present, then rendering starts at zero.)
 //          width: 800 by default. The width in pixels of the output paper
 var renderAbc = function (
-  output,
-  abc,
-  parserParams,
-  engraverParams,
-  renderParams
+  output: any,
+  abc: any,
+  parserParams: any,
+  engraverParams: any,
+  renderParams: any
 ) {
   // Note: all parameters have been condensed into the first ones. It doesn't hurt anything to allow the old format, so just copy them here.
   var params = {};
@@ -83,10 +87,13 @@ var renderAbc = function (
   if (parserParams) {
     for (key in parserParams) {
       if (parserParams.prototype.hasOwnProperty.call(key)) {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         params[key] = parserParams[key];
       }
     }
+    // @ts-expect-error TS(2339): Property 'warnings_id' does not exist on type '{}'... Remove this comment to see the full error message
     if (params.warnings_id && params.tablature) {
+      // @ts-expect-error TS(2339): Property 'tablature' does not exist on type '{}'.
       params.tablature.warning_id = params.warnings_id;
     }
   }
@@ -96,7 +103,9 @@ var renderAbc = function (
         // There is a conflict with the name of the parameter "listener". If it is in the second parameter, then it is for click.
         if (key === "listener") {
           if (engraverParams[key].highlight)
+            // @ts-expect-error TS(2339): Property 'clickListener' does not exist on type '{... Remove this comment to see the full error message
             params.clickListener = engraverParams[key].highlight;
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         } else params[key] = engraverParams[key];
       }
     }
@@ -104,12 +113,13 @@ var renderAbc = function (
   if (renderParams) {
     for (key in renderParams) {
       if (renderParams.prototype.hasOwnProperty.call(key)) {
+        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
         params[key] = renderParams[key];
       }
     }
   }
 
-  function callback(div, tune, tuneNumber, abcString) {
+  function callback(div: any, tune: any, tuneNumber: any, abcString: any) {
     var removeDiv = false;
     if (div === "*") {
       removeDiv = true;
@@ -117,7 +127,9 @@ var renderAbc = function (
       div.setAttribute("style", "visibility: hidden;");
       document.body.appendChild(div);
     }
+    // @ts-expect-error TS(2339): Property 'afterParsing' does not exist on type '{}... Remove this comment to see the full error message
     if (params.afterParsing) params.afterParsing(tune, tuneNumber, abcString);
+    // @ts-expect-error TS(2339): Property 'wrap' does not exist on type '{}'.
     if (!removeDiv && params.wrap && params.staffwidth) {
       tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
       return tune;
@@ -127,15 +139,19 @@ var renderAbc = function (
     return null;
   }
 
+  // @ts-expect-error TS(2339): Property 'renderEngine' does not exist on type '{}... Remove this comment to see the full error message
   return tunebook.renderEngine(callback, output, abc, params);
 };
 
-function doLineWrapping(div, tune, tuneNumber, abcString, params) {
+function doLineWrapping(div: any, tune: any, tuneNumber: any, abcString: any, params: any) {
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var engraver_controller = new EngraverController(div, params);
   var widths = engraver_controller.getMeasureWidths(tune);
 
   var ret = wrap.calcLineWraps(tune, widths, params);
+  // @ts-expect-error TS(2339): Property 'reParse' does not exist on type '{ revis... Remove this comment to see the full error message
   if (ret.reParse) {
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var abcParser = new Parse();
     abcParser.parse(abcString, ret.revisedParams);
     tune = abcParser.getTune();
@@ -143,6 +159,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     if (warnings) tune.warnings = warnings;
   }
   renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
+  // @ts-expect-error TS(2339): Property 'explanation' does not exist on type '{ r... Remove this comment to see the full error message
   tune.explanation = ret.explanation;
   return tune;
 }

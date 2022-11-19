@@ -1,4 +1,4 @@
-function setPaperSize(renderer, maxwidth, scale, responsive) {
+function setPaperSize(renderer: any, maxwidth: any, scale: any, responsive: any) {
   var w = (maxwidth + renderer.padding.right) * scale;
   var h = (renderer.y + renderer.padding.bottom) * scale;
   if (renderer.isPrint) h = Math.max(h, 1056); // 11in x 72pt/in x 1.33px/pt
@@ -37,9 +37,12 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
   if (responsive === "resize") {
     renderer.paper.setResponsiveWidth(w, h);
   } else {
+    // @ts-expect-error TS(2339): Property 'width' does not exist on type '{ overflo... Remove this comment to see the full error message
     parentStyles.width = "";
+    // @ts-expect-error TS(2339): Property 'height' does not exist on type '{ overfl... Remove this comment to see the full error message
     parentStyles.height = h + "px";
     if (scale < 1) {
+      // @ts-expect-error TS(2339): Property 'width' does not exist on type '{ overflo... Remove this comment to see the full error message
       parentStyles.width = w + "px";
       renderer.paper.setSize(w / scale, h / scale);
     } else renderer.paper.setSize(w, h);

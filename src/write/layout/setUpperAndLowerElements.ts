@@ -1,6 +1,6 @@
 import spacing from '../abc_spacing';
 
-var setUpperAndLowerElements = function (renderer, staffGroup) {
+var setUpperAndLowerElements = function (renderer: any, staffGroup: any) {
   // Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
   // Also, get the overall height of all the staves in this group.
   var lastStaffBottom;
@@ -28,6 +28,7 @@ var setUpperAndLowerElements = function (renderer, staffGroup) {
       staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
     }
 
+    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
     incTop(staff, positionY, "lyricHeightAbove");
     incTop(
       staff,
@@ -49,13 +50,18 @@ var setUpperAndLowerElements = function (renderer, staffGroup) {
       positionY.dynamicHeightAbove = staff.top;
       positionY.volumeHeightAbove = staff.top;
     } else {
+      // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
       incTop(staff, positionY, "dynamicHeightAbove");
+      // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
       incTop(staff, positionY, "volumeHeightAbove");
     }
+    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
     incTop(staff, positionY, "partHeightAbove");
+    // @ts-expect-error TS(2554): Expected 4 arguments, but got 3.
     incTop(staff, positionY, "tempoHeightAbove");
 
     if (staff.specialY.lyricHeightBelow) {
+      // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
       staff.specialY.lyricHeightBelow += renderer.spacing.vocal / spacing.STEP;
       positionY.lyricHeightBelow = staff.bottom;
       staff.bottom -= staff.specialY.lyricHeightBelow + margin;
@@ -96,6 +102,7 @@ var setUpperAndLowerElements = function (renderer, staffGroup) {
       var thisStaffTop = staff.top - 10;
       var forcedSpacingBetween = lastStaffBottom + thisStaffTop;
       var minSpacingInPitches =
+        // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
         renderer.spacing.systemStaffSeparation / spacing.STEP;
       var addedSpace = minSpacingInPitches - forcedSpacingBetween;
       if (addedSpace > 0) staff.top += addedSpace;
@@ -110,7 +117,7 @@ var setUpperAndLowerElements = function (renderer, staffGroup) {
 };
 
 var margin = 1;
-function incTop(staff, positionY, item, count) {
+function incTop(staff: any, positionY: any, item: any, count: any) {
   if (staff.specialY[item]) {
     var height = staff.specialY[item];
     if (count) height *= count;
@@ -119,7 +126,7 @@ function incTop(staff, positionY, item, count) {
   }
 }
 
-function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
+function setUpperAndLowerVoiceElements(positionY: any, voice: any, spacing: any) {
   var i;
   var abselem;
   for (i = 0; i < voice.children.length; i++) {
@@ -146,7 +153,7 @@ function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 // else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
 // hash with the vertical placement (in pitch units) for each type.
 // TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
-function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
+function setUpperAndLowerAbsoluteElements(specialYResolved: any, element: any, spacing: any) {
   // specialYResolved contains the actual pitch for each of the classes of elements.
   for (var i = 0; i < element.children.length; i++) {
     var child = element.children[i];
@@ -176,21 +183,21 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
   }
 }
 
-function setUpperAndLowerCrescendoElements(positionY, element) {
+function setUpperAndLowerCrescendoElements(positionY: any, element: any) {
   if (element.dynamicHeightAbove) element.pitch = positionY.dynamicHeightAbove;
   else element.pitch = positionY.dynamicHeightBelow;
 }
 
-function setUpperAndLowerDynamicElements(positionY, element) {
+function setUpperAndLowerDynamicElements(positionY: any, element: any) {
   if (element.volumeHeightAbove) element.pitch = positionY.volumeHeightAbove;
   else element.pitch = positionY.volumeHeightBelow;
 }
 
-function setUpperAndLowerEndingElements(positionY, element) {
+function setUpperAndLowerEndingElements(positionY: any, element: any) {
   element.pitch = positionY.endingHeightAbove - 2;
 }
 
-function setUpperAndLowerTempoElement(positionY, element) {
+function setUpperAndLowerTempoElement(positionY: any, element: any) {
   element.pitch = positionY.tempoHeightAbove;
   element.top = positionY.tempoHeightAbove;
   element.bottom = positionY.tempoHeightAbove;
@@ -208,7 +215,7 @@ function setUpperAndLowerTempoElement(positionY, element) {
   }
 }
 
-function setUpperAndLowerRelativeElements(positionY, element, renderSpacing) {
+function setUpperAndLowerRelativeElements(positionY: any, element: any, renderSpacing: any) {
   switch (element.type) {
     case "part":
       element.top = positionY.partHeightAbove + element.height;
@@ -230,9 +237,12 @@ function setUpperAndLowerRelativeElements(positionY, element, renderSpacing) {
         element.bottom = positionY.lyricHeightAbove;
       } else {
         element.top =
+          // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
           positionY.lyricHeightBelow + renderSpacing.vocal / spacing.STEP;
         element.bottom =
+          // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
           positionY.lyricHeightBelow + renderSpacing.vocal / spacing.STEP;
+        // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
         element.pitch -= renderSpacing.vocal / spacing.STEP;
       }
       break;

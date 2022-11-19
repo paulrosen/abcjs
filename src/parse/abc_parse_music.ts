@@ -2,20 +2,21 @@ import parseCommon from './abc_common';
 import parseKeyVoice from './abc_parse_key_voice';
 import transpose from './abc_transpose';
 
-var tokenizer;
-var warn;
-var multilineVars;
-var tune;
-var tuneBuilder;
-var header;
+var tokenizer: any;
+var warn: any;
+var multilineVars: any;
+var tune: any;
+var tuneBuilder: any;
+var header: any;
 
-var MusicParser = function (
-  _tokenizer,
-  _warn,
-  _multilineVars,
-  _tune,
-  _tuneBuilder,
-  _header
+var MusicParser = function(
+  this: any,
+  _tokenizer: any,
+  _warn: any,
+  _multilineVars: any,
+  _tune: any,
+  _tuneBuilder: any,
+  _header: any
 ) {
   tokenizer = _tokenizer;
   warn = _warn;
@@ -85,7 +86,7 @@ var MusicParser = function (
 // back-tick, space, tab: space
 var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{"; // use this to prescreen so we don't have to look for a decoration at every note.
 
-var isInTie = function (multilineVars, overlayLevel, el) {
+var isInTie = function (multilineVars: any, overlayLevel: any, el: any) {
   if (multilineVars.inTie[overlayLevel] === undefined) return false;
   // If this is single voice music then the voice index isn't set, so we use the first voice.
   var voiceIndex = multilineVars.currentVoice
@@ -98,7 +99,7 @@ var isInTie = function (multilineVars, overlayLevel, el) {
 };
 
 var el = {};
-MusicParser.prototype.parseMusic = function (line) {
+MusicParser.prototype.parseMusic = function (line: any) {
   header.resolveTempo();
   //multilineVars.havent_set_length = false;	// To late to set this now.
   multilineVars.is_in_header = false; // We should have gotten a key header by now, but just in case, this is definitely out of the header.
@@ -185,24 +186,31 @@ MusicParser.prototype.parseMusic = function (line) {
         if (ret[0] > 0) {
           // There could be more than one chord here if they have different positions.
           // If two chords have the same position, then connect them with newline.
+          // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{}'.
           if (!el.chord) el.chord = [];
           var chordName = tokenizer.translateString(ret[1]);
           chordName = chordName.replace(/;/g, "\n");
           var addedChord = false;
+          // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{}'.
           for (var ci = 0; ci < el.chord.length; ci++) {
+            // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{}'.
             if (el.chord[ci].position === ret[2]) {
               addedChord = true;
+              // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{}'.
               el.chord[ci].name += "\n" + chordName;
             }
           }
           if (addedChord === false) {
             if (ret[2] === null && ret[3])
+              // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{}'.
               el.chord.push({ name: chordName, rel_position: ret[3] });
+            // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{}'.
             else el.chord.push({ name: chordName, position: ret[2] });
           }
 
           i += ret[0];
           var ii = tokenizer.skipWhiteSpace(line.substring(i));
+          // @ts-expect-error TS(2339): Property 'force_end_beam_last' does not exist on t... Remove this comment to see the full error message
           if (ii > 0) el.force_end_beam_last = true;
           i += ii;
         } else {
@@ -214,11 +222,16 @@ MusicParser.prototype.parseMusic = function (line) {
               if (i + 1 < line.length) this.startNewLine(); // There was a ! in the middle of the line. Start a new line if there is anything after it.
             } else if (ret[1].length > 0) {
               if (ret[1].indexOf("style=") === 0) {
+                // @ts-expect-error TS(2339): Property 'style' does not exist on type '{}'.
                 el.style = ret[1].substr(6);
               } else {
+                // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{}'.
                 if (el.decoration === undefined) el.decoration = [];
+                // @ts-expect-error TS(2339): Property 'beambr' does not exist on type '{}'.
                 if (ret[1] === "beambr1") el.beambr = 1;
+                // @ts-expect-error TS(2339): Property 'beambr' does not exist on type '{}'.
                 else if (ret[1] === "beambr2") el.beambr = 2;
+                // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{}'.
                 else el.decoration.push(ret[1]);
               }
             }
@@ -227,6 +240,7 @@ MusicParser.prototype.parseMusic = function (line) {
             ret = letter_to_grace(line, i);
             // TODO-PER: Be sure there aren't already grace notes defined. That is an error.
             if (ret[0] > 0) {
+              // @ts-expect-error TS(2339): Property 'gracenotes' does not exist on type '{}'.
               el.gracenotes = ret[1];
               i += ret[0];
             } else break;
@@ -238,9 +252,12 @@ MusicParser.prototype.parseMusic = function (line) {
       if (ret[0] > 0) {
         // This is definitely a bar
         overlayLevel = 0;
+        // @ts-expect-error TS(2339): Property 'gracenotes' does not exist on type '{}'.
         if (el.gracenotes !== undefined) {
           // Attach the grace note to an invisible note
+          // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
           el.rest = { type: "spacer" };
+          // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
           el.duration = 0.125; // TODO-PER: I don't think the duration of this matters much, but figure out if it does.
           multilineVars.addFormattingOptions(el, tune.formatting, "note");
           tuneBuilder.appendElement(
@@ -256,11 +273,14 @@ MusicParser.prototype.parseMusic = function (line) {
         if (bar.type.length === 0) warn("Unknown bar type", line, i);
         else {
           if (multilineVars.inEnding && bar.type !== "bar_thin") {
+            // @ts-expect-error TS(2339): Property 'endEnding' does not exist on type '{ typ... Remove this comment to see the full error message
             bar.endEnding = true;
             multilineVars.inEnding = false;
           }
           if (ret[2]) {
+            // @ts-expect-error TS(2339): Property 'startEnding' does not exist on type '{ t... Remove this comment to see the full error message
             bar.startEnding = ret[2];
+            // @ts-expect-error TS(2339): Property 'endEnding' does not exist on type '{ typ... Remove this comment to see the full error message
             if (multilineVars.inEnding) bar.endEnding = true;
             multilineVars.inEnding = true;
             if (ret[1] === "bar_right_repeat") {
@@ -271,16 +291,22 @@ MusicParser.prototype.parseMusic = function (line) {
               multilineVars.duplicateStartEndingHoldOvers();
             }
           }
+          // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{}'.
           if (el.decoration !== undefined) bar.decoration = el.decoration;
+          // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{}'.
           if (el.chord !== undefined) bar.chord = el.chord;
+          // @ts-expect-error TS(2339): Property 'startEnding' does not exist on type '{ t... Remove this comment to see the full error message
           if (bar.startEnding && multilineVars.barFirstEndingNum === undefined)
             multilineVars.barFirstEndingNum = multilineVars.currBarNumber;
           else if (
+            // @ts-expect-error TS(2339): Property 'startEnding' does not exist on type '{ t... Remove this comment to see the full error message
             bar.startEnding &&
+            // @ts-expect-error TS(2339): Property 'endEnding' does not exist on type '{ typ... Remove this comment to see the full error message
             bar.endEnding &&
             multilineVars.barFirstEndingNum
           )
             multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
+          // @ts-expect-error TS(2339): Property 'endEnding' does not exist on type '{ typ... Remove this comment to see the full error message
           else if (bar.endEnding) multilineVars.barFirstEndingNum = undefined;
           if (bar.type !== "bar_invisible" && multilineVars.measureNotEmpty) {
             var isFirstVoice =
@@ -293,6 +319,7 @@ MusicParser.prototype.parseMusic = function (line) {
                 multilineVars.barNumbers &&
                 multilineVars.currBarNumber % multilineVars.barNumbers === 0
               )
+                // @ts-expect-error TS(2339): Property 'barNumber' does not exist on type '{ typ... Remove this comment to see the full error message
                 bar.barNumber = multilineVars.currBarNumber;
             }
           }
@@ -325,19 +352,28 @@ MusicParser.prototype.parseMusic = function (line) {
         //
         // Look for as many open slurs and triplets as there are. (Note: only the first triplet is valid.)
         ret = letter_to_open_slurs_and_triplets(line, i);
+        // @ts-expect-error TS(2339): Property 'consumed' does not exist on type '{}'.
         if (ret.consumed > 0) {
+          // @ts-expect-error TS(2339): Property 'startSlur' does not exist on type '{}'.
           if (ret.startSlur !== undefined) el.startSlur = ret.startSlur;
+          // @ts-expect-error TS(2339): Property 'dottedSlur' does not exist on type '{}'.
           if (ret.dottedSlur) el.dottedSlur = true;
+          // @ts-expect-error TS(2339): Property 'triplet' does not exist on type '{}'.
           if (ret.triplet !== undefined) {
             if (tripletNotesLeft > 0) warn("Can't nest triplets", line, i);
             else {
+              // @ts-expect-error TS(2339): Property 'startTriplet' does not exist on type '{}... Remove this comment to see the full error message
               el.startTriplet = ret.triplet;
+              // @ts-expect-error TS(2339): Property 'tripletMultiplier' does not exist on typ... Remove this comment to see the full error message
               el.tripletMultiplier = ret.tripletQ / ret.triplet;
+              // @ts-expect-error TS(2339): Property 'tripletR' does not exist on type '{}'.
               el.tripletR = ret.num_notes;
               tripletNotesLeft =
+                // @ts-expect-error TS(2339): Property 'num_notes' does not exist on type '{}'.
                 ret.num_notes === undefined ? ret.triplet : ret.num_notes;
             }
           }
+          // @ts-expect-error TS(2339): Property 'consumed' does not exist on type '{}'.
           i += ret.consumed;
         }
 
@@ -360,32 +396,43 @@ MusicParser.prototype.parseMusic = function (line) {
               if (accent[0] > 0) {
                 // If we found a decoration above, it modifies the entire chord. "style" is handled below.
                 if (accent[1].indexOf("style=") !== 0) {
+                  // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{}'.
                   if (el.decoration === undefined) el.decoration = [];
+                  // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{}'.
                   el.decoration.push(accent[1]);
                 }
               }
               if (chordNote.end_beam) {
+                // @ts-expect-error TS(2339): Property 'end_beam' does not exist on type '{}'.
                 el.end_beam = true;
                 delete chordNote.end_beam;
               }
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               if (el.pitches === undefined) {
+                // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
                 el.duration = chordNote.duration;
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches = [chordNote];
               } // Just ignore the note lengths of all but the first note. The standard isn't clear here, but this seems less confusing.
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               else el.pitches.push(chordNote);
               delete chordNote.duration;
               if (accent[0] > 0) {
                 // If we found a style above, it modifies the individual pitch, not the entire chord.
                 if (accent[1].indexOf("style=") === 0) {
+                  // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                   el.pitches[el.pitches.length - 1].style = accent[1].substr(6);
                 }
               }
 
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               if (multilineVars.inTieChord[el.pitches.length]) {
                 chordNote.endTie = true;
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 multilineVars.inTieChord[el.pitches.length] = undefined;
               }
               if (chordNote.startTie)
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 multilineVars.inTieChord[el.pitches.length] = true;
 
               i = chordNote.endChar;
@@ -400,12 +447,14 @@ MusicParser.prototype.parseMusic = function (line) {
                 i++;
 
                 if (multilineVars.next_note_duration !== 0) {
+                  // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
                   el.duration = el.duration * multilineVars.next_note_duration;
                   multilineVars.next_note_duration = 0;
                 }
 
                 if (isInTie(multilineVars, overlayLevel, el)) {
-                  parseCommon.each(el.pitches, function (pitch) {
+                  // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+                  parseCommon.each(el.pitches, function (pitch: any) {
                     pitch.endTie = true;
                   });
                   setIsInTie(multilineVars, overlayLevel, false);
@@ -413,10 +462,12 @@ MusicParser.prototype.parseMusic = function (line) {
 
                 if (
                   tripletNotesLeft > 0 &&
+                  // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
                   !(el.rest && el.rest.type === "spacer")
                 ) {
                   tripletNotesLeft--;
                   if (tripletNotesLeft === 0) {
+                    // @ts-expect-error TS(2339): Property 'endTriplet' does not exist on type '{}'.
                     el.endTriplet = true;
                   }
                 }
@@ -429,11 +480,14 @@ MusicParser.prototype.parseMusic = function (line) {
                       addEndBeam(el);
                       break;
                     case ")":
+                      // @ts-expect-error TS(2339): Property 'endSlur' does not exist on type '{}'.
                       if (el.endSlur === undefined) el.endSlur = 1;
+                      // @ts-expect-error TS(2339): Property 'endSlur' does not exist on type '{}'.
                       else el.endSlur++;
                       break;
                     case "-":
-                      parseCommon.each(el.pitches, function (pitch) {
+                      // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+                      parseCommon.each(el.pitches, function (pitch: any) {
                         pitch.startTie = {};
                       });
                       setIsInTie(multilineVars, overlayLevel, true);
@@ -441,9 +495,13 @@ MusicParser.prototype.parseMusic = function (line) {
                     case ">":
                     case "<":
                       var br2 = getBrokenRhythm(line, i);
+                      // @ts-expect-error TS(2531): Object is possibly 'null'.
                       i += br2[0] - 1; // index gets incremented below, so we'll let that happen
+                      // @ts-expect-error TS(2531): Object is possibly 'null'.
                       multilineVars.next_note_duration = br2[2];
+                      // @ts-expect-error TS(2531): Object is possibly 'null'.
                       if (chordDuration) chordDuration = chordDuration * br2[1];
+                      // @ts-expect-error TS(2531): Object is possibly 'null'.
                       else chordDuration = br2[1];
                       break;
                     case "1":
@@ -480,8 +538,10 @@ MusicParser.prototype.parseMusic = function (line) {
                 }
               } else warn("Expected ']' to end the chords", line, i);
 
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               if (el.pitches !== undefined) {
                 if (chordDuration !== null) {
+                  // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
                   el.duration = el.duration * chordDuration;
                   if (rememberEndBeam) addEndBeam(el);
                 }
@@ -503,53 +563,85 @@ MusicParser.prototype.parseMusic = function (line) {
           // Single pitch
           var el2 = {};
           var core = getCoreNote(line, i, el2, true);
+          // @ts-expect-error TS(2339): Property 'endTie' does not exist on type '{}'.
           if (el2.endTie !== undefined)
             setIsInTie(multilineVars, overlayLevel, true);
           if (core !== null) {
             if (core.pitch !== undefined) {
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               el.pitches = [{}];
               // TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
               if (core.accidental !== undefined)
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches[0].accidental = core.accidental;
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               el.pitches[0].pitch = core.pitch;
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               el.pitches[0].name = core.name;
               if (core.midipitch || core.midipitch === 0)
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches[0].midipitch = core.midipitch;
               if (core.endSlur !== undefined)
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches[0].endSlur = core.endSlur;
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               if (core.endTie !== undefined) el.pitches[0].endTie = core.endTie;
               if (core.startSlur !== undefined)
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches[0].startSlur = core.startSlur;
+              // @ts-expect-error TS(2339): Property 'startSlur' does not exist on type '{}'.
               if (el.startSlur !== undefined)
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches[0].startSlur = el.startSlur;
+              // @ts-expect-error TS(2339): Property 'dottedSlur' does not exist on type '{}'.
               if (el.dottedSlur !== undefined) el.pitches[0].dottedSlur = true;
               if (core.startTie !== undefined)
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches[0].startTie = core.startTie;
+              // @ts-expect-error TS(2339): Property 'startTie' does not exist on type '{}'.
               if (el.startTie !== undefined)
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches[0].startTie = el.startTie;
             } else {
+              // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
               el.rest = core.rest;
+              // @ts-expect-error TS(2339): Property 'endSlur' does not exist on type '{}'.
               if (core.endSlur !== undefined) el.endSlur = core.endSlur;
+              // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
               if (core.endTie !== undefined) el.rest.endTie = core.endTie;
+              // @ts-expect-error TS(2339): Property 'startSlur' does not exist on type '{}'.
               if (core.startSlur !== undefined) el.startSlur = core.startSlur;
+              // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
               if (core.startTie !== undefined) el.rest.startTie = core.startTie;
+              // @ts-expect-error TS(2339): Property 'startTie' does not exist on type '{}'.
               if (el.startTie !== undefined) el.rest.startTie = el.startTie;
             }
 
+            // @ts-expect-error TS(2339): Property 'chord' does not exist on type '{}'.
             if (core.chord !== undefined) el.chord = core.chord;
+            // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
             if (core.duration !== undefined) el.duration = core.duration;
+            // @ts-expect-error TS(2339): Property 'decoration' does not exist on type '{}'.
             if (core.decoration !== undefined) el.decoration = core.decoration;
+            // @ts-expect-error TS(2339): Property 'graceNotes' does not exist on type '{}'.
             if (core.graceNotes !== undefined) el.graceNotes = core.graceNotes;
+            // @ts-expect-error TS(2339): Property 'startSlur' does not exist on type '{}'.
             delete el.startSlur;
+            // @ts-expect-error TS(2339): Property 'dottedSlur' does not exist on type '{}'.
             delete el.dottedSlur;
             if (isInTie(multilineVars, overlayLevel, el)) {
+              // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
               if (el.pitches !== undefined) {
+                // @ts-expect-error TS(2339): Property 'pitches' does not exist on type '{}'.
                 el.pitches[0].endTie = true;
+              // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
               } else if (el.rest.type !== "spacer") {
+                // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
                 el.rest.endTie = true;
               }
               setIsInTie(multilineVars, overlayLevel, false);
             }
+            // @ts-expect-error TS(2339): Property 'startTie' does not exist on type '{}'.
             if (core.startTie || el.startTie)
               setIsInTie(multilineVars, overlayLevel, true);
             i = core.endChar;
@@ -560,6 +652,7 @@ MusicParser.prototype.parseMusic = function (line) {
             ) {
               tripletNotesLeft--;
               if (tripletNotesLeft === 0) {
+                // @ts-expect-error TS(2339): Property 'endTriplet' does not exist on type '{}'.
                 el.endTriplet = true;
               }
             }
@@ -569,13 +662,18 @@ MusicParser.prototype.parseMusic = function (line) {
             // If there is a whole rest, then it should be the duration of the measure, not it's own duration. We need to special case it.
             // If the time signature length is greater than 4/4, though, then a whole rest has no special treatment.
             if (
+              // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
               el.rest &&
+              // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
               el.rest.type === "rest" &&
+              // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
               el.duration === 1 &&
               durationOfMeasure(multilineVars) <= 1
             ) {
+              // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
               el.rest.type = "whole";
 
+              // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
               el.duration = durationOfMeasure(multilineVars);
             }
 
@@ -591,10 +689,14 @@ MusicParser.prototype.parseMusic = function (line) {
               0.029296875, 0.0302734375, 0.03076171875
             ];
             if (
+              // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
               el.duration < 1 &&
+              // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
               durations.indexOf(el.duration) === -1 &&
+              // @ts-expect-error TS(2339): Property 'duration' does not exist on type '{}'.
               el.duration !== 0
             ) {
+              // @ts-expect-error TS(2339): Property 'rest' does not exist on type '{}'.
               if (!el.rest || el.rest.type !== "spacer")
                 warn(
                   "Duration not representable: " + line.substring(startI, i),
@@ -630,7 +732,7 @@ MusicParser.prototype.parseMusic = function (line) {
   }
 };
 
-var setIsInTie = function (multilineVars, overlayLevel, value) {
+var setIsInTie = function (multilineVars: any, overlayLevel: any, value: any) {
   // If this is single voice music then the voice index isn't set, so we use the first voice.
   var voiceIndex = multilineVars.currentVoice
     ? multilineVars.currentVoice.index
@@ -640,7 +742,7 @@ var setIsInTie = function (multilineVars, overlayLevel, value) {
   multilineVars.inTie[overlayLevel][voiceIndex] = value;
 };
 
-var letter_to_chord = function (line, i) {
+var letter_to_chord = function (line: any, i: any) {
   if (line.charAt(i) === '"') {
     var chord = tokenizer.getBrackettedSubstring(line, i, 5);
     if (!chord[2])
@@ -721,6 +823,7 @@ var letter_to_chord = function (line, i) {
         );
       }
       chord[2] = "default";
+      // @ts-expect-error TS(2339): Property 'chordName' does not exist on type '{}'.
       chord[1] = transpose.chordName(multilineVars, chord[1]);
     }
     return chord;
@@ -728,7 +831,7 @@ var letter_to_chord = function (line, i) {
   return [0, ""];
 };
 
-var letter_to_grace = function (line, i) {
+var letter_to_grace = function (line: any, i: any) {
   // Grace notes are an array of: startslur, note, endslur, space; where note is accidental, pitch, duration
   if (line.charAt(i) === "{") {
     // fetch the gracenotes string and consume that into the array
@@ -791,7 +894,7 @@ var letter_to_grace = function (line, i) {
   return [0];
 };
 
-function letter_to_overlay(line, i) {
+function letter_to_overlay(line: any, i: any) {
   if (line.charAt(i) === "&") {
     var start = i;
     while (line.charAt(i) && line.charAt(i) !== ":" && line.charAt(i) !== "|")
@@ -801,7 +904,7 @@ function letter_to_overlay(line, i) {
   return [0];
 }
 
-function durationOfMeasure(multilineVars) {
+function durationOfMeasure(multilineVars: any) {
   // TODO-PER: This could be more complicated if one of the unusual measures is used.
   var meter = multilineVars.origMeter;
   if (!meter || meter.type !== "specified") return 1;
@@ -911,7 +1014,7 @@ var accentDynamicPseudonyms = [
   [">)", "diminuendo)"]
 ];
 
-var letter_to_accent = function (line, i) {
+var letter_to_accent = function (line: any, i: any) {
   var macro = multilineVars.macros[line.charAt(i)];
 
   if (macro !== undefined) {
@@ -923,20 +1026,23 @@ var letter_to_accent = function (line, i) {
     )
       macro = macro.substring(0, macro.length - 1);
     if (
-      parseCommon.detect(legalAccents, function (acc) {
+      // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+      parseCommon.detect(legalAccents, function (acc: any) {
         return macro === acc;
       })
     )
       return [1, macro];
     else if (
-      parseCommon.detect(volumeDecorations, function (acc) {
+      // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+      parseCommon.detect(volumeDecorations, function (acc: any) {
         return macro === acc;
       })
     ) {
       if (multilineVars.volumePosition === "hidden") macro = "";
       return [1, macro];
     } else if (
-      parseCommon.detect(dynamicDecorations, function (acc) {
+      // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+      parseCommon.detect(dynamicDecorations, function (acc: any) {
         if (multilineVars.dynamicPosition === "hidden") macro = "";
         return macro === acc;
       })
@@ -944,7 +1050,8 @@ var letter_to_accent = function (line, i) {
       return [1, macro];
     } else {
       if (
-        !parseCommon.detect(multilineVars.ignoredDecorations, function (dec) {
+        // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+        !parseCommon.detect(multilineVars.ignoredDecorations, function (dec: any) {
           return macro === dec;
         })
       )
@@ -974,13 +1081,15 @@ var letter_to_accent = function (line, i) {
       )
         ret[1] = ret[1].substring(1); // TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
       if (
-        parseCommon.detect(legalAccents, function (acc) {
+        // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+        parseCommon.detect(legalAccents, function (acc: any) {
           return ret[1] === acc;
         })
       )
         return ret;
       if (
-        parseCommon.detect(volumeDecorations, function (acc) {
+        // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+        parseCommon.detect(volumeDecorations, function (acc: any) {
           return ret[1] === acc;
         })
       ) {
@@ -988,7 +1097,8 @@ var letter_to_accent = function (line, i) {
         return ret;
       }
       if (
-        parseCommon.detect(dynamicDecorations, function (acc) {
+        // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+        parseCommon.detect(dynamicDecorations, function (acc: any) {
           return ret[1] === acc;
         })
       ) {
@@ -997,7 +1107,8 @@ var letter_to_accent = function (line, i) {
       }
 
       if (
-        parseCommon.detect(accentPseudonyms, function (acc) {
+        // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+        parseCommon.detect(accentPseudonyms, function (acc: any) {
           if (ret[1] === acc[0]) {
             ret[1] = acc[1];
             return true;
@@ -1007,7 +1118,8 @@ var letter_to_accent = function (line, i) {
         return ret;
 
       if (
-        parseCommon.detect(accentDynamicPseudonyms, function (acc) {
+        // @ts-expect-error TS(2339): Property 'detect' does not exist on type '{}'.
+        parseCommon.detect(accentDynamicPseudonyms, function (acc: any) {
           if (ret[1] === acc[0]) {
             ret[1] = acc[1];
             return true;
@@ -1049,7 +1161,7 @@ var letter_to_accent = function (line, i) {
   return [0, 0];
 };
 
-var letter_to_spacer = function (line, i) {
+var letter_to_spacer = function (line: any, i: any) {
   var start = i;
   while (tokenizer.isWhiteSpace(line.charAt(i))) i++;
   return [i - start];
@@ -1059,7 +1171,7 @@ var letter_to_spacer = function (line, i) {
 // the number of the repeat
 // and the number of characters used up
 // if 0 is returned, then the next element was not a bar line
-var letter_to_bar = function (line, curr_pos) {
+var letter_to_bar = function (line: any, curr_pos: any) {
   var ret = tokenizer.getBarLine(line, curr_pos);
   if (ret.len === 0) return [0, ""];
   if (ret.warn) {
@@ -1107,12 +1219,13 @@ var tripletQ = {
   9: 2 // TODO-PER: not handling 6/8 rhythm yet
 };
 
-var letter_to_open_slurs_and_triplets = function (line, i) {
+var letter_to_open_slurs_and_triplets = function (line: any, i: any) {
   // consume spaces, and look for all the open parens. If there is a number after the open paren,
   // that is a triplet. Otherwise that is a slur. Collect all the slurs and the first triplet.
   var ret = {};
   var start = i;
   if (line[i] === "." && line[i + 1] === "(") {
+    // @ts-expect-error TS(2339): Property 'dottedSlur' does not exist on type '{}'.
     ret.dottedSlur = true;
     i++;
   }
@@ -1123,10 +1236,14 @@ var letter_to_open_slurs_and_triplets = function (line, i) {
         line.charAt(i + 1) >= "2" &&
         line.charAt(i + 1) <= "9"
       ) {
+        // @ts-expect-error TS(2339): Property 'triplet' does not exist on type '{}'.
         if (ret.triplet !== undefined) warn("Can't nest triplets", line, i);
         else {
+          // @ts-expect-error TS(2339): Property 'triplet' does not exist on type '{}'.
           ret.triplet = line.charAt(i + 1) - "0";
+          // @ts-expect-error TS(2339): Property 'tripletQ' does not exist on type '{}'.
           ret.tripletQ = tripletQ[ret.triplet];
+          // @ts-expect-error TS(2339): Property 'num_notes' does not exist on type '{}'.
           ret.num_notes = ret.triplet;
           if (i + 2 < line.length && line.charAt(i + 2) === ":") {
             // We are expecting "(p:q:r" or "(p:q" or "(p::r"
@@ -1148,6 +1265,7 @@ var letter_to_open_slurs_and_triplets = function (line, i) {
                 line.charAt(i + 4) >= "1" &&
                 line.charAt(i + 4) <= "9"
               ) {
+                // @ts-expect-error TS(2339): Property 'num_notes' does not exist on type '{}'.
                 ret.num_notes = line.charAt(i + 4) - "0";
                 i += 3;
               } else
@@ -1161,6 +1279,7 @@ var letter_to_open_slurs_and_triplets = function (line, i) {
               line.charAt(i + 3) >= "1" &&
               line.charAt(i + 3) <= "9"
             ) {
+              // @ts-expect-error TS(2339): Property 'tripletQ' does not exist on type '{}'.
               ret.tripletQ = line.charAt(i + 3) - "0";
               if (i + 4 < line.length && line.charAt(i + 4) === ":") {
                 if (
@@ -1168,6 +1287,7 @@ var letter_to_open_slurs_and_triplets = function (line, i) {
                   line.charAt(i + 5) >= "1" &&
                   line.charAt(i + 5) <= "9"
                 ) {
+                  // @ts-expect-error TS(2339): Property 'num_notes' does not exist on type '{}'.
                   ret.num_notes = line.charAt(i + 5) - "0";
                   i += 4;
                 }
@@ -1184,12 +1304,15 @@ var letter_to_open_slurs_and_triplets = function (line, i) {
         }
         i++;
       } else {
+        // @ts-expect-error TS(2339): Property 'startSlur' does not exist on type '{}'.
         if (ret.startSlur === undefined) ret.startSlur = 1;
+        // @ts-expect-error TS(2339): Property 'startSlur' does not exist on type '{}'.
         else ret.startSlur++;
       }
     }
     i++;
   }
+  // @ts-expect-error TS(2339): Property 'consumed' does not exist on type '{}'.
   ret.consumed = i - start;
   return ret;
 };
@@ -1197,55 +1320,72 @@ var letter_to_open_slurs_and_triplets = function (line, i) {
 MusicParser.prototype.startNewLine = function () {
   var params = { startChar: -1, endChar: -1 };
   if (multilineVars.partForNextLine.title)
+    // @ts-expect-error TS(2339): Property 'part' does not exist on type '{ startCha... Remove this comment to see the full error message
     params.part = multilineVars.partForNextLine;
+  // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startCha... Remove this comment to see the full error message
   params.clef =
     multilineVars.currentVoice &&
     multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined
+      // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
       ? parseCommon.clone(
           multilineVars.staves[multilineVars.currentVoice.staffNum].clef
         )
+      // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
       : parseCommon.clone(multilineVars.clef);
   var scoreTranspose = multilineVars.currentVoice
     ? multilineVars.currentVoice.scoreTranspose
     : 0;
+  // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
   params.key = parseKeyVoice.standardKey(
     multilineVars.key.root + multilineVars.key.acc + multilineVars.key.mode,
     multilineVars.key.root,
     multilineVars.key.acc,
     scoreTranspose
   );
+  // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
   params.key.mode = multilineVars.key.mode;
   if (multilineVars.key.impliedNaturals)
+    // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
     params.key.impliedNaturals = multilineVars.key.impliedNaturals;
   if (multilineVars.key.explicitAccidentals) {
     for (var i = 0; i < multilineVars.key.explicitAccidentals.length; i++) {
       var found = false;
+      // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
       for (var j = 0; j < params.key.accidentals.length; j++) {
         if (
+          // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
           params.key.accidentals[j].note ===
           multilineVars.key.explicitAccidentals[i].note
         ) {
           // If the note is already in the list, override it with the new value
+          // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
           params.key.accidentals[j].acc =
             multilineVars.key.explicitAccidentals[i].acc;
           found = true;
         }
       }
       if (!found)
+        // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
         params.key.accidentals.push(multilineVars.key.explicitAccidentals[i]);
     }
   }
+  // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
   multilineVars.targetKey = params.key;
+  // @ts-expect-error TS(2339): Property 'key' does not exist on type '{ startChar... Remove this comment to see the full error message
   if (params.key.explicitAccidentals) delete params.key.explicitAccidentals;
+  // @ts-expect-error TS(2339): Property 'addPosToKey' does not exist on type '{}'... Remove this comment to see the full error message
   parseKeyVoice.addPosToKey(params.clef, params.key);
   if (multilineVars.meter !== null) {
     if (multilineVars.currentVoice) {
-      parseCommon.each(multilineVars.staves, function (st) {
+      // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+      parseCommon.each(multilineVars.staves, function (st: any) {
         st.meter = multilineVars.meter;
       });
+      // @ts-expect-error TS(2339): Property 'meter' does not exist on type '{ startCh... Remove this comment to see the full error message
       params.meter =
         multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
       multilineVars.staves[multilineVars.currentVoice.staffNum].meter = null;
+    // @ts-expect-error TS(2339): Property 'meter' does not exist on type '{ startCh... Remove this comment to see the full error message
     } else params.meter = multilineVars.meter;
     multilineVars.meter = null;
   } else if (
@@ -1253,35 +1393,52 @@ MusicParser.prototype.startNewLine = function () {
     multilineVars.staves[multilineVars.currentVoice.staffNum].meter
   ) {
     // Make sure that each voice gets the meter marking.
+    // @ts-expect-error TS(2339): Property 'meter' does not exist on type '{ startCh... Remove this comment to see the full error message
     params.meter =
       multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
     multilineVars.staves[multilineVars.currentVoice.staffNum].meter = null;
   }
   if (multilineVars.currentVoice && multilineVars.currentVoice.name)
+    // @ts-expect-error TS(2339): Property 'name' does not exist on type '{ startCha... Remove this comment to see the full error message
     params.name = multilineVars.currentVoice.name;
+  // @ts-expect-error TS(2339): Property 'vocalfont' does not exist on type '{ sta... Remove this comment to see the full error message
   if (multilineVars.vocalfont) params.vocalfont = multilineVars.vocalfont;
+  // @ts-expect-error TS(2339): Property 'tripletfont' does not exist on type '{ s... Remove this comment to see the full error message
   if (multilineVars.tripletfont) params.tripletfont = multilineVars.tripletfont;
+  // @ts-expect-error TS(2339): Property 'gchordfont' does not exist on type '{ st... Remove this comment to see the full error message
   if (multilineVars.gchordfont) params.gchordfont = multilineVars.gchordfont;
+  // @ts-expect-error TS(2339): Property 'style' does not exist on type '{ startCh... Remove this comment to see the full error message
   if (multilineVars.style) params.style = multilineVars.style;
   if (multilineVars.currentVoice) {
     var staff = multilineVars.staves[multilineVars.currentVoice.staffNum];
+    // @ts-expect-error TS(2339): Property 'brace' does not exist on type '{ startCh... Remove this comment to see the full error message
     if (staff.brace) params.brace = staff.brace;
+    // @ts-expect-error TS(2339): Property 'bracket' does not exist on type '{ start... Remove this comment to see the full error message
     if (staff.bracket) params.bracket = staff.bracket;
+    // @ts-expect-error TS(2339): Property 'connectBarLines' does not exist on type ... Remove this comment to see the full error message
     if (staff.connectBarLines) params.connectBarLines = staff.connectBarLines;
+    // @ts-expect-error TS(2339): Property 'name' does not exist on type '{ startCha... Remove this comment to see the full error message
     if (staff.name) params.name = staff.name[multilineVars.currentVoice.index];
     if (staff.subname)
+      // @ts-expect-error TS(2339): Property 'subname' does not exist on type '{ start... Remove this comment to see the full error message
       params.subname = staff.subname[multilineVars.currentVoice.index];
     if (multilineVars.currentVoice.stem)
+      // @ts-expect-error TS(2339): Property 'stem' does not exist on type '{ startCha... Remove this comment to see the full error message
       params.stem = multilineVars.currentVoice.stem;
     if (multilineVars.currentVoice.stafflines)
+      // @ts-expect-error TS(2339): Property 'stafflines' does not exist on type '{ st... Remove this comment to see the full error message
       params.stafflines = multilineVars.currentVoice.stafflines;
     if (multilineVars.currentVoice.staffscale)
+      // @ts-expect-error TS(2339): Property 'staffscale' does not exist on type '{ st... Remove this comment to see the full error message
       params.staffscale = multilineVars.currentVoice.staffscale;
     if (multilineVars.currentVoice.scale)
+      // @ts-expect-error TS(2339): Property 'scale' does not exist on type '{ startCh... Remove this comment to see the full error message
       params.scale = multilineVars.currentVoice.scale;
     if (multilineVars.currentVoice.style)
+      // @ts-expect-error TS(2339): Property 'style' does not exist on type '{ startCh... Remove this comment to see the full error message
       params.style = multilineVars.currentVoice.style;
     if (multilineVars.currentVoice.transpose)
+      // @ts-expect-error TS(2339): Property 'clef' does not exist on type '{ startCha... Remove this comment to see the full error message
       params.clef.transpose = multilineVars.currentVoice.transpose;
   }
   var isFirstVoice =
@@ -1293,6 +1450,7 @@ MusicParser.prototype.startNewLine = function () {
     isFirstVoice &&
     multilineVars.currBarNumber !== 1
   )
+    // @ts-expect-error TS(2339): Property 'barNumber' does not exist on type '{ sta... Remove this comment to see the full error message
     params.barNumber = multilineVars.currBarNumber;
   tuneBuilder.startNewLine(params);
   if (multilineVars.key.impliedNaturals)
@@ -1310,7 +1468,7 @@ MusicParser.prototype.startNewLine = function () {
 };
 
 // TODO-PER: make this a method in el.
-var addEndBeam = function (el) {
+var addEndBeam = function (el: any) {
   if (el.duration !== undefined && el.duration < 0.25) el.end_beam = true;
   return el;
 };
@@ -1347,9 +1505,9 @@ var accMap = {
   quarterflat: "_/",
   quartersharp: "^/"
 };
-var getCoreNote = function (line, index, el, canHaveBrokenRhythm) {
+var getCoreNote = function (line: any, index: any, el: any, canHaveBrokenRhythm: any) {
   //var el = { startChar: index };
-  var isComplete = function (state) {
+  var isComplete = function (state: any) {
     return (
       state === "octave" ||
       state === "duration" ||
@@ -1435,9 +1593,12 @@ var getCoreNote = function (line, index, el, canHaveBrokenRhythm) {
           state === "flat2" ||
           state === "pitch"
         ) {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           el.pitch = pitches[line.charAt(index)];
           el.name = line.charAt(index);
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           if (el.accidental) el.name = accMap[el.accidental] + el.name;
+          // @ts-expect-error TS(2339): Property 'note' does not exist on type '{}'.
           transpose.note(multilineVars, el);
           state = "octave";
           // At this point we have a valid note. The rest is optional. Set the duration in case we don't get one below
@@ -1455,6 +1616,7 @@ var getCoreNote = function (line, index, el, canHaveBrokenRhythm) {
           ) {
             var key = line.charAt(index);
             if (el.accidental) {
+              // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               key = accMap[el.accidental] + key;
             }
             if (
@@ -1493,6 +1655,7 @@ var getCoreNote = function (line, index, el, canHaveBrokenRhythm) {
       case "z":
       case "Z":
         if (state === "startSlur") {
+          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           el.rest = { type: rests[line.charAt(index)] };
           // There shouldn't be some of the properties that notes have. If some sneak in due to bad syntax in the abc file,
           // just nix them here.
@@ -1627,8 +1790,11 @@ var getCoreNote = function (line, index, el, canHaveBrokenRhythm) {
         if (isComplete(state)) {
           if (canHaveBrokenRhythm) {
             var br2 = getBrokenRhythm(line, index);
+            // @ts-expect-error TS(2531): Object is possibly 'null'.
             index += br2[0] - 1; // index gets incremented below, so we'll let that happen
+            // @ts-expect-error TS(2531): Object is possibly 'null'.
             multilineVars.next_note_duration = br2[2];
+            // @ts-expect-error TS(2531): Object is possibly 'null'.
             el.duration = br2[1] * el.duration;
             state = "end_slur";
           } else {
@@ -1655,7 +1821,7 @@ var getCoreNote = function (line, index, el, canHaveBrokenRhythm) {
   return null;
 };
 
-var getBrokenRhythm = function (line, index) {
+var getBrokenRhythm = function (line: any, index: any) {
   switch (line.charAt(index)) {
     case ">":
       if (

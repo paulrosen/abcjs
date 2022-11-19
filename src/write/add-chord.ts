@@ -3,13 +3,13 @@ import spacing from './abc_spacing';
 import formatJazzChord from './format-jazz-chord';
 
 var addChord = function (
-  getTextSize,
-  abselem,
-  elem,
-  roomTaken,
-  roomTakenRight,
-  noteheadWidth,
-  jazzchords
+  getTextSize: any,
+  abselem: any,
+  elem: any,
+  roomTaken: any,
+  roomTakenRight: any,
+  noteheadWidth: any,
+  jazzchords: any
 ) {
   for (var i = 0; i < elem.chord.length; i++) {
     var pos = elem.chord[i].position;
@@ -39,6 +39,7 @@ var addChord = function (
       var attr = getTextSize.attr(font, klass);
       var dim = getTextSize.calc(chord, font, klass);
       var chordWidth = dim.width;
+      // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
       var chordHeight = dim.height / spacing.STEP;
       switch (pos) {
         case "left":
@@ -46,6 +47,7 @@ var addChord = function (
           x = -roomTaken; // TODO-PER: This is just a guess from trial and error
           y = elem.averagepitch;
           abselem.addExtra(
+            // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
             new RelativeElement(chord, x, chordWidth + 4, y, {
               type: "text",
               height: chordHeight,
@@ -59,6 +61,7 @@ var addChord = function (
           x = roomTakenRight; // TODO-PER: This is just a guess from trial and error
           y = elem.averagepitch;
           abselem.addRight(
+            // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
             new RelativeElement(chord, x, chordWidth + 4, y, {
               type: "text",
               height: chordHeight,
@@ -70,6 +73,7 @@ var addChord = function (
         case "below":
           // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
           abselem.addRight(
+            // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
             new RelativeElement(chord, 0, 0, undefined, {
               type: "text",
               position: "below",
@@ -82,6 +86,7 @@ var addChord = function (
         case "above":
           // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
           abselem.addRight(
+            // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
             new RelativeElement(chord, 0, 0, undefined, {
               type: "text",
               position: "above",
@@ -93,12 +98,15 @@ var addChord = function (
           break;
         default:
           if (rel_position) {
+            // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
             var relPositionY = rel_position.y + 3 * spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
             abselem.addRight(
+              // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
               new RelativeElement(
                 chord,
                 x + rel_position.x,
                 0,
+                // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
                 elem.minpitch + relPositionY / spacing.STEP,
                 {
                   position: "relative",
@@ -116,6 +124,7 @@ var addChord = function (
 
             if (pos2 !== "hidden") {
               abselem.addCentered(
+                // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
                 new RelativeElement(
                   chord,
                   noteheadWidth / 2,

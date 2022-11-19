@@ -1,6 +1,6 @@
 import roundNumber from './round-number';
 
-function renderText(renderer, params, alreadyInGroup) {
+function renderText(renderer: any, params: any, alreadyInGroup: any) {
   var y = params.y;
   if (params.lane) {
     var laneMargin = params.dim.font.size * 0.25;

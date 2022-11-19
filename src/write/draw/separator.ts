@@ -1,4 +1,4 @@
-function drawSeparator(renderer, width) {
+function drawSeparator(renderer: any, width: any) {
   var fill = "rgba(0,0,0,255)";
   var stroke = "rgba(0,0,0,0)";
   var y = Math.round(renderer.y);

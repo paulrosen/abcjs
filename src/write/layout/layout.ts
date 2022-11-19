@@ -3,7 +3,7 @@ import setUpperAndLowerElements from './setUpperAndLowerElements';
 import layoutStaffGroup from './staffGroup';
 import getLeftEdgeOfStaff from './get-left-edge-of-staff';
 
-var layout = function (renderer, abctune, width, space) {
+var layout = function (renderer: any, abctune: any, width: any, space: any) {
   var i;
   var abcLine;
   // Adjust the x-coordinates to their absolute positions
@@ -46,13 +46,13 @@ var layout = function (renderer, abctune, width, space) {
 };
 // Do the x-axis positioning for a single line (a group of related staffs)
 var setXSpacing = function (
-  renderer,
-  width,
-  space,
-  staffGroup,
-  formatting,
-  isLastLine,
-  debug
+  renderer: any,
+  width: any,
+  space: any,
+  staffGroup: any,
+  formatting: any,
+  isLastLine: any,
+  debug: any
 ) {
   var leftEdge = getLeftEdgeOfStaff(
     renderer,
@@ -83,14 +83,14 @@ var setXSpacing = function (
 };
 
 function calcHorizontalSpacing(
-  isLastLine,
-  stretchLast,
-  targetWidth,
-  lineWidth,
-  spacing,
-  spacingUnits,
-  minSpace,
-  padding
+  isLastLine: any,
+  stretchLast: any,
+  targetWidth: any,
+  lineWidth: any,
+  spacing: any,
+  spacingUnits: any,
+  minSpace: any,
+  padding: any
 ) {
   if (isLastLine) {
     if (stretchLast === undefined) {
@@ -115,7 +115,7 @@ function calcHorizontalSpacing(
   return null;
 }
 
-function centerWholeRests(voices) {
+function centerWholeRests(voices: any) {
   // whole rests are a special case: if they are by themselves in a measure, then they should be centered.
   // (If they are not by themselves, that is probably a user error, but we'll just center it between the two items to either side of it.)
   for (var i = 0; i < voices.length; i++) {

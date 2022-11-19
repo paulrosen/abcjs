@@ -1,4 +1,4 @@
-function roundNumber(x) {
+function roundNumber(x: any) {
   return parseFloat(x.toFixed(2));
 }
 

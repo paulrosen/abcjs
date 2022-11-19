@@ -4,7 +4,7 @@
 
 var svgNS = "http://www.w3.org/2000/svg";
 
-function Svg(wrapper) {
+function Svg(this: any, wrapper: any) {
   this.svg = createSvg();
   this.currentGroup = [];
   wrapper.appendChild(this.svg);
@@ -23,14 +23,14 @@ Svg.prototype.clear = function () {
   }
 };
 
-Svg.prototype.setTitle = function (title) {
+Svg.prototype.setTitle = function (title: any) {
   var titleEl = document.createElement("title");
   var titleNode = document.createTextNode(title);
   titleEl.appendChild(titleNode);
   this.svg.insertBefore(titleEl, this.svg.firstChild);
 };
 
-Svg.prototype.setResponsiveWidth = function (w, h) {
+Svg.prototype.setResponsiveWidth = function (w: any, h: any) {
   // this technique is from: http://thenewcode.com/744/Make-SVG-Responsive, thx to https://github.com/iantresman
   this.svg.setAttribute("viewBox", "0 0 " + w + " " + h);
   this.svg.setAttribute("preserveAspectRatio", "xMinYMin meet");
@@ -58,16 +58,16 @@ Svg.prototype.setResponsiveWidth = function (w, h) {
   }
 };
 
-Svg.prototype.setSize = function (w, h) {
+Svg.prototype.setSize = function (w: any, h: any) {
   this.svg.setAttribute("width", w);
   this.svg.setAttribute("height", h);
 };
 
-Svg.prototype.setAttribute = function (attr, value) {
+Svg.prototype.setAttribute = function (attr: any, value: any) {
   this.svg.setAttribute(attr, value);
 };
 
-Svg.prototype.setScale = function (scale) {
+Svg.prototype.setScale = function (scale: any) {
   if (scale !== 1) {
     this.svg.style.transform = "scale(" + scale + "," + scale + ")";
     this.svg.style["-ms-transform"] = "scale(" + scale + "," + scale + ")";
@@ -84,14 +84,14 @@ Svg.prototype.setScale = function (scale) {
   }
 };
 
-Svg.prototype.insertStyles = function (styles) {
+Svg.prototype.insertStyles = function (styles: any) {
   var el = document.createElementNS(svgNS, "style");
   el.textContent = styles;
   this.svg.insertBefore(el, this.svg.firstChild); // prepend is not available on older browsers.
   //	this.svg.prepend(el);
 };
 
-Svg.prototype.setParentStyles = function (attr) {
+Svg.prototype.setParentStyles = function (attr: any) {
   // This is needed to get the size right when there is scaling involved.
   for (var key in attr) {
     if (attr.prototype.hasOwnProperty.call(key)) {
@@ -101,12 +101,13 @@ Svg.prototype.setParentStyles = function (attr) {
   // This is the last thing that gets called, so delete the temporary SVG if one was created
   if (this.dummySvg) {
     var body = document.querySelector("body");
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     body.removeChild(this.dummySvg);
     this.dummySvg = null;
   }
 };
 
-function constructHLine(x1, y1, x2) {
+function constructHLine(x1: any, y1: any, x2: any) {
   var len = x2 - x1;
   return (
     "M " +
@@ -131,7 +132,7 @@ function constructHLine(x1, y1, x2) {
   );
 }
 
-function constructVLine(x1, y1, y2) {
+function constructVLine(x1: any, y1: any, y2: any) {
   var len = y2 - y1;
   return (
     "M " +
@@ -156,7 +157,7 @@ function constructVLine(x1, y1, y2) {
   );
 }
 
-Svg.prototype.rect = function (attr) {
+Svg.prototype.rect = function (attr: any) {
   // This uses path instead of rect so that it can be hollow and the color changes with "fill" instead of "stroke".
   var lines = [];
   var x1 = attr.x;
@@ -175,7 +176,7 @@ Svg.prototype.rect = function (attr) {
   });
 };
 
-Svg.prototype.dottedLine = function (attr) {
+Svg.prototype.dottedLine = function (attr: any) {
   var el = document.createElementNS(svgNS, "line");
   el.setAttribute("x1", attr.x1);
   el.setAttribute("x2", attr.x2);
@@ -186,7 +187,7 @@ Svg.prototype.dottedLine = function (attr) {
   this.svg.insertBefore(el, this.svg.firstChild);
 };
 
-Svg.prototype.rectBeneath = function (attr) {
+Svg.prototype.rectBeneath = function (attr: any) {
   var el = document.createElementNS(svgNS, "rect");
   el.setAttribute("x", attr.x);
   el.setAttribute("width", attr.width);
@@ -201,7 +202,7 @@ Svg.prototype.rectBeneath = function (attr) {
   this.svg.insertBefore(el, this.svg.firstChild);
 };
 
-Svg.prototype.text = function (text, attr, target) {
+Svg.prototype.text = function (text: any, attr: any, target: any) {
   var el = document.createElementNS(svgNS, "text");
   el.setAttribute("stroke", "none");
   for (var key in attr) {
@@ -240,7 +241,7 @@ Svg.prototype.text = function (text, attr, target) {
   return el;
 };
 
-Svg.prototype.guessWidth = function (text, attr) {
+Svg.prototype.guessWidth = function (text: any, attr: any) {
   var svg = this.createDummySvg();
   var el = this.text(text, attr, svg);
   var size;
@@ -272,6 +273,7 @@ Svg.prototype.createDummySvg = function () {
     ];
     this.dummySvg.setAttribute("style", styles.join(""));
     var body = document.querySelector("body");
+    // @ts-expect-error TS(2531): Object is possibly 'null'.
     body.appendChild(this.dummySvg);
   }
 
@@ -280,13 +282,14 @@ Svg.prototype.createDummySvg = function () {
 
 var sizeCache = {};
 
-Svg.prototype.getTextSize = function (text, attr, el) {
+Svg.prototype.getTextSize = function (text: any, attr: any, el: any) {
   if (typeof text === "number") text = "" + text;
   if (!text || text.match(/^\s+$/)) return { width: 0, height: 0 };
   var key;
   if (text.length < 20) {
     // The short text tends to be repetitive and getBBox is really slow, so lets cache.
     key = text + JSON.stringify(attr);
+    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     if (sizeCache[key]) return sizeCache[key];
   }
   var removeLater = !el;
@@ -303,11 +306,12 @@ Svg.prototype.getTextSize = function (text, attr, el) {
     if (this.currentGroup.length > 0) this.currentGroup[0].removeChild(el);
     else this.svg.removeChild(el);
   }
+  // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
   if (key) sizeCache[key] = size;
   return size;
 };
 
-Svg.prototype.openGroup = function (options) {
+Svg.prototype.openGroup = function (options: any) {
   options = options ? options : {};
   var el = document.createElementNS(svgNS, "g");
   if (options.klass) el.setAttribute("class", options.klass);
@@ -331,7 +335,7 @@ Svg.prototype.closeGroup = function () {
   return g;
 };
 
-Svg.prototype.path = function (attr) {
+Svg.prototype.path = function (attr: any) {
   var el = document.createElementNS(svgNS, "path");
   for (var key in attr) {
     if (attr.prototype.hasOwnProperty.call(key)) {
@@ -344,7 +348,7 @@ Svg.prototype.path = function (attr) {
   return el;
 };
 
-Svg.prototype.pathToBack = function (attr) {
+Svg.prototype.pathToBack = function (attr: any) {
   var el = document.createElementNS(svgNS, "path");
   for (var key in attr) {
     if (attr.prototype.hasOwnProperty.call(key)) {
@@ -357,18 +361,18 @@ Svg.prototype.pathToBack = function (attr) {
   return el;
 };
 
-Svg.prototype.append = function (el) {
+Svg.prototype.append = function (el: any) {
   if (this.currentGroup.length > 0) this.currentGroup[0].appendChild(el);
   else this.svg.appendChild(el);
 };
 
-Svg.prototype.prepend = function (el) {
+Svg.prototype.prepend = function (el: any) {
   // The entire group is prepended, so don't prepend the individual elements.
   if (this.currentGroup.length > 0) this.currentGroup[0].appendChild(el);
   else this.svg.insertBefore(el, this.svg.firstChild);
 };
 
-Svg.prototype.setAttributeOnElement = function (el, attr) {
+Svg.prototype.setAttributeOnElement = function (el: any, attr: any) {
   for (var key in attr) {
     if (attr.prototype.hasOwnProperty.call(key)) {
       el.setAttributeNS(null, key, attr[key]);
@@ -376,7 +380,7 @@ Svg.prototype.setAttributeOnElement = function (el, attr) {
   }
 };
 
-Svg.prototype.moveElementToChild = function (parent, child) {
+Svg.prototype.moveElementToChild = function (parent: any, child: any) {
   parent.appendChild(child);
 };
 

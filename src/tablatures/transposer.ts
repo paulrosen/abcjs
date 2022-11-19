@@ -5,7 +5,7 @@
  */
 import TabNote from './instruments/tab-note';
 
-function buildAccEquiv(acc, note) {
+function buildAccEquiv(acc: any, note: any) {
   var equiv = note.getAccidentalEquiv();
   if (acc.note.toUpperCase() == equiv.name.toUpperCase()) {
     equiv.isSharp = false;
@@ -15,7 +15,7 @@ function buildAccEquiv(acc, note) {
   return note;
 }
 
-function adjustNoteToKey(acc, note) {
+function adjustNoteToKey(acc: any, note: any) {
   if (acc.acc == "sharp") {
     if (note.isFlat) {
       return buildAccEquiv(acc, note);
@@ -46,7 +46,7 @@ function adjustNoteToKey(acc, note) {
   return note;
 }
 
-function replaceNote(self, newNote, start, end) {
+function replaceNote(self: any, newNote: any, start: any, end: any) {
   if (self.lastEnd) {
     while (start > self.lastEnd) {
       self.updatedSrc.push(self.abcSrc[self.lastEnd]);
@@ -65,7 +65,7 @@ function replaceNote(self, newNote, start, end) {
   self.lastEnd = end;
 }
 
-function checkKeys(self, note) {
+function checkKeys(self: any, note: any) {
   var accs = self.transposedKey;
   for (var ii = 0; ii < accs.length; ii++) {
     note = adjustNoteToKey(accs[ii], note);
@@ -73,8 +73,9 @@ function checkKeys(self, note) {
   return note;
 }
 
-Transposer.prototype.transposeNote = function (note) {
+Transposer.prototype.transposeNote = function (note: any) {
   var returned = note;
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var curNote = new TabNote.TabNote(returned.name);
   if (this.transposeBy > 0) {
     for (var ii = 0; ii < this.transposeBy; ii++) {
@@ -89,13 +90,14 @@ Transposer.prototype.transposeNote = function (note) {
   return returned;
 };
 
-Transposer.prototype.upgradeSource = function (note, startChar, endChar) {
+Transposer.prototype.upgradeSource = function (note: any, startChar: any, endChar: any) {
+  // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
   var n = new TabNote.TabNote(note.name);
   var newNote = n.emit();
   replaceNote(this, newNote, startChar, endChar - 1);
 };
 
-function Transposer(transposedKey, transposeBy) {
+function Transposer(this: any, transposedKey: any, transposeBy: any) {
   this.transposeBy = transposeBy;
   this.transposedKey = transposedKey;
   this.lastEnd = this.kEnd + 1;

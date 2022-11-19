@@ -1,6 +1,6 @@
 //    abc_dynamic_decoration.js: Definition of the DynamicDecoration class.
 
-var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
+var DynamicDecoration = function DynamicDecoration(this: any, anchor: any, dec: any, position: any) {
   this.type = "DynamicDecoration";
   this.anchor = anchor;
   this.dec = dec;

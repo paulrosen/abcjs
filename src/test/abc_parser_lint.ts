@@ -52,7 +52,7 @@ import parseCommon from '../parse/abc_common';
 
 import JSONSchema from './jsonschema-b4';
 
-var ParserLint = function () {
+var ParserLint = function(this: any) {
   "use strict";
   var decorationList = {
     type: "array",
@@ -154,16 +154,19 @@ var ParserLint = function () {
     suppressBpm: { type: "boolean", Enum: [true], optional: true }
   };
 
-  var appendPositioning = function (properties) {
+  var appendPositioning = function (properties: any) {
+    // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
     var ret = parseCommon.clone(properties);
     ret.startChar = { type: "number" }; //, output: 'hidden' };
     ret.endChar = { type: "number" }; //, output: 'hidden' };
     return ret;
   };
 
-  var prependPositioning = function (properties) {
+  var prependPositioning = function (properties: any) {
     var ret = {};
+    // @ts-expect-error TS(2339): Property 'startChar' does not exist on type '{}'.
     ret.startChar = { type: "number" }; //, output: 'hidden' };
+    // @ts-expect-error TS(2339): Property 'endChar' does not exist on type '{}'.
     ret.endChar = { type: "number" }; //, output: 'hidden' };
     return Object.assign(ret, properties);
   };
@@ -1290,12 +1293,14 @@ var ParserLint = function () {
     }
   };
 
-  var addProhibits = function (obj, arr) {
+  var addProhibits = function (obj: any, arr: any) {
+    // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
     var ret = parseCommon.clone(obj);
     ret.prohibits = arr;
     return ret;
   };
 
+  // @ts-expect-error TS(7022): 'lineProperties' implicitly has type 'any' because... Remove this comment to see the full error message
   var lineProperties = {
     type: "array",
     description:
@@ -1707,20 +1712,23 @@ var ParserLint = function () {
     }
   };
 
-  this.lint = function (tune, warnings) {
+  this.lint = function (tune: any, warnings: any) {
     var ret = JSONSchema.validate(tune, musicSchema);
     var err = "";
-    parseCommon.each(ret.errors, function (e) {
+    // @ts-expect-error TS(2339): Property 'each' does not exist on type '{}'.
+    parseCommon.each(ret.errors, function (e: any) {
       err += e.property + ": " + e.message + "\n";
     });
     var out = ret.output.join("\n");
 
     var warn = warnings === undefined ? "No errors" : warnings.join("\n");
+    // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
     warn = parseCommon.gsub(
       warn,
       '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">',
       "$$$$"
     );
+    // @ts-expect-error TS(2339): Property 'gsub' does not exist on type '{}'.
     warn = parseCommon.gsub(warn, "</span>", "$$$$");
     return (
       "Error:------\n" +

@@ -2,7 +2,7 @@ import RelativeElement from '../abc_relative_element';
 import spacing from '../abc_spacing';
 import getBarYAt from './getBarYAt';
 
-var layoutBeam = function (beam) {
+var layoutBeam = function (beam: any) {
   if (beam.elems.length === 0 || beam.allrests) return;
 
   var dy = calcDy(beam.stemsUp, beam.isgrace); // This is the width of the beam line.
@@ -62,7 +62,7 @@ var layoutBeam = function (beam) {
   createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote);
 };
 
-var getDurlog = function (duration) {
+var getDurlog = function (duration: any) {
   // TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
   // but there's definitely a case where it isn't. [Probably something to do with triplets.]
   if (duration === undefined) {
@@ -75,7 +75,7 @@ var getDurlog = function (duration) {
 //
 // private functions
 //
-function minStem(element, stemsUp, referencePitch, minStemHeight) {
+function minStem(element: any, stemsUp: any, referencePitch: any, minStemHeight: any) {
   if (!element.children) return minStemHeight;
   for (var i = 0; i < element.children.length; i++) {
     var elem = element.children[i];
@@ -87,7 +87,7 @@ function minStem(element, stemsUp, referencePitch, minStemHeight) {
   return minStemHeight;
 }
 
-function calcSlant(leftAveragePitch, rightAveragePitch, numStems, isFlat) {
+function calcSlant(leftAveragePitch: any, rightAveragePitch: any, numStems: any, isFlat: any) {
   if (isFlat) return 0;
   var slant = leftAveragePitch - rightAveragePitch;
   var maxSlant = numStems / 2;
@@ -97,13 +97,14 @@ function calcSlant(leftAveragePitch, rightAveragePitch, numStems, isFlat) {
   return slant;
 }
 
-function calcDy(asc, isGrace) {
+function calcDy(asc: any, isGrace: any) {
+  // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
   var dy = asc ? spacing.STEP : -spacing.STEP;
   if (isGrace) dy = dy * 0.4;
   return dy;
 }
 
-function calcXPos(asc, firstElement, lastElement) {
+function calcXPos(asc: any, firstElement: any, lastElement: any) {
   var starthead = firstElement.heads[asc ? 0 : firstElement.heads.length - 1];
   var endhead = lastElement.heads[asc ? 0 : lastElement.heads.length - 1];
   var startX = starthead.x;
@@ -114,16 +115,16 @@ function calcXPos(asc, firstElement, lastElement) {
 }
 
 function calcYPos(
-  average,
-  numElements,
-  stemHeight,
-  asc,
-  firstAveragePitch,
-  lastAveragePitch,
-  isFlat,
-  minPitch,
-  maxPitch,
-  isGrace
+  average: any,
+  numElements: any,
+  stemHeight: any,
+  asc: any,
+  firstAveragePitch: any,
+  lastAveragePitch: any,
+  isFlat: any,
+  minPitch: any,
+  maxPitch: any,
+  isGrace: any
 ) {
   var barpos = stemHeight - 2; // (isGrace)? 5:7;
   var barminpos = stemHeight - 2;
@@ -156,7 +157,7 @@ function calcYPos(
   return [startY, endY];
 }
 
-function createStems(elems, asc, beam, dy, mainNote) {
+function createStems(elems: any, asc: any, beam: any, dy: any, mainNote: any) {
   for (var i = 0; i < elems.length; i++) {
     var elem = elems[i];
     if (elem.abcelem.rest) continue;
@@ -171,6 +172,7 @@ function createStems(elems, asc, beam, dy, mainNote) {
     var x = furthestHead.x + dx; // this is now the actual x location in pixels.
     var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
     var lineWidth = asc ? -0.6 : 0.6;
+    // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
     if (!asc) bary -= dy / 2 / spacing.STEP; // TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
     if (isGrace) dx += elem.heads[0].dx;
     // TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
@@ -178,6 +180,7 @@ function createStems(elems, asc, beam, dy, mainNote) {
       if (asc) pitch += 1;
       else pitch -= 1;
     }
+    // @ts-expect-error TS(7009): 'new' expression, whose target lacks a construct s... Remove this comment to see the full error message
     var stem = new RelativeElement(null, dx, 0, pitch, {
       type: "stem",
       pitch2: bary,
@@ -188,9 +191,9 @@ function createStems(elems, asc, beam, dy, mainNote) {
   }
 }
 
-function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
+function createAdditionalBeams(elems: any, asc: any, beam: any, isGrace: any, dy: any) {
   var beams = [];
-  var auxBeams = []; // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
+  var auxBeams: any = []; // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
   for (var i = 0; i < elems.length; i++) {
     var elem = elems[i];
     if (elem.abcelem.rest) continue;
@@ -262,6 +265,7 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
             split[split.length - 1] -= elem.w;
           }
           split.push(b.endX);
+          // @ts-expect-error TS(2339): Property 'split' does not exist on type '{ startX:... Remove this comment to see the full error message
           b.split = auxBeams[j].split;
         }
         beams.push(b);

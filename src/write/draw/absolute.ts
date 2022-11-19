@@ -4,7 +4,7 @@ import spacing from '../abc_spacing';
 import setClass from '../set-class';
 import elementGroup from './group-elements';
 
-function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
+function drawAbsolute(renderer: any, params: any, bartop: any, selectables: any, staffPos: any) {
   if (params.invisible) return;
   var isTempo =
     params.children.length > 0 && params.children[0].type === "TempoElement";
@@ -63,6 +63,7 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
     for (var jj = 0; jj < params.heads.length; jj++) {
       params.notePositions.push({
         x: params.heads[jj].x + params.heads[jj].w / 2,
+        // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
         y: staffPos.zero - params.heads[jj].pitch * spacing.STEP
       });
     }

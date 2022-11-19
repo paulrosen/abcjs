@@ -2,7 +2,7 @@ import sprintf from './sprintf';
 import printPath from './print-path';
 import roundNumber from './round-number';
 
-function drawGlissando(renderer, params, selectables) {
+function drawGlissando(renderer: any, params: any, selectables: any) {
   if (
     !params.anchor1 ||
     !params.anchor2 ||
@@ -34,22 +34,22 @@ function drawGlissando(renderer, params, selectables) {
   return [el];
 }
 
-function lineLength(leftX, leftY, rightX, rightY) {
+function lineLength(leftX: any, leftY: any, rightX: any, rightY: any) {
   // The length from notehead center to notehead center.
   var w = rightX - leftX;
   var h = rightY - leftY;
   return Math.sqrt(w * w + h * h);
 }
 
-function slope(leftX, leftY, rightX, rightY) {
+function slope(leftX: any, leftY: any, rightX: any, rightY: any) {
   return (rightY - leftY) / (rightX - leftX);
 }
 
-function getY(y, slope, xOfs) {
+function getY(y: any, slope: any, xOfs: any) {
   return roundNumber(y + xOfs * slope);
 }
 
-function numSquigglies(length) {
+function numSquigglies(length: any) {
   var endLen = 5; // The width of the end - that is, the non repeating part
   return Math.max(2, Math.floor((length - endLen * 2) / 6));
 }
@@ -70,7 +70,7 @@ var bottom = [
   [-3, -4]
 ];
 
-function segment(arr, slope) {
+function segment(arr: any, slope: any) {
   var ret = "";
   for (var i = 0; i < arr.length; i++) {
     ret += "l" + arr[i][0] + " " + getY(arr[i][1], slope, arr[i][0]);
@@ -78,7 +78,8 @@ function segment(arr, slope) {
   return ret;
 }
 
-var drawSquiggly = function (renderer, x, y, num, slope) {
+var drawSquiggly = function (renderer: any, x: any, y: any, num: any, slope: any) {
+  // @ts-expect-error TS(2554): Expected 0 arguments, but got 3.
   var p = sprintf("M %f %f", x, y);
   p += segment(leftStart, slope);
   var i;
@@ -88,6 +89,7 @@ var drawSquiggly = function (renderer, x, y, num, slope) {
   p += segment(right, slope);
   for (i = 0; i < num; i++) p += segment(bottom, slope);
   p += segment(leftEnd, slope) + "z";
+  // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
   return printPath(renderer, {
     path: p,
     highlight: "stroke",

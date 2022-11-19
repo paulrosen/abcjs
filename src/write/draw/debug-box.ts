@@ -1,4 +1,4 @@
-function printDebugBox(renderer, attr, comment) {
+function printDebugBox(renderer: any, attr: any, comment: any) {
   var box = renderer.paper.rectBeneath(attr);
   if (comment)
     renderer.paper.text(comment, {

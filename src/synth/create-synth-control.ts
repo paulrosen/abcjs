@@ -8,7 +8,7 @@ import pauseImage from './images/pause.svg.js';
 import loadingImage from './images/loading.svg.js';
 import resetImage from './images/reset.svg.js';
 
-function CreateSynthControl(parent, options) {
+function CreateSynthControl(this: any, parent: any, options: any) {
   var self = this;
   // parent is either an element or a selector.
   if (typeof parent === "string") {
@@ -23,6 +23,7 @@ function CreateSynthControl(parent, options) {
 
   self.parent = parent;
   self.options = {};
+  // @ts-expect-error TS(2339): Property 'clone' does not exist on type '{}'.
   if (options) self.options = parseCommon.clone(options);
 
   // This can be called in the following cases:
@@ -38,17 +39,17 @@ function CreateSynthControl(parent, options) {
   buildDom(self.parent, self.options);
   attachListeners(self);
 
-  self.disable = function (isDisabled) {
+  self.disable = function (isDisabled: any) {
     var el = self.parent.querySelector(".abcjs-inline-audio");
     if (isDisabled) el.classList.add("abcjs-disabled");
     else el.classList.remove("abcjs-disabled");
   };
-  self.setWarp = function (tempo, warp) {
+  self.setWarp = function (tempo: any, warp: any) {
     var el = self.parent.querySelector(".abcjs-midi-tempo");
     el.value = Math.round(warp);
     self.setTempo(tempo);
   };
-  self.setTempo = function (tempo) {
+  self.setTempo = function (tempo: any) {
     var el = self.parent.querySelector(".abcjs-midi-current-tempo");
     if (el) el.innerHTML = Math.round(tempo);
   };
@@ -59,20 +60,20 @@ function CreateSynthControl(parent, options) {
       button.classList.remove("abcjs-pushed");
     }
   };
-  self.pushPlay = function (push) {
+  self.pushPlay = function (push: any) {
     var startButton = self.parent.querySelector(".abcjs-midi-start");
     if (!startButton) return;
     if (push) startButton.classList.add("abcjs-pushed");
     else startButton.classList.remove("abcjs-pushed");
   };
-  self.pushLoop = function (push) {
+  self.pushLoop = function (push: any) {
     var loopButton = self.parent.querySelector(".abcjs-midi-loop");
     if (!loopButton) return;
     if (push) loopButton.classList.add("abcjs-pushed");
     else loopButton.classList.remove("abcjs-pushed");
   };
 
-  self.setProgress = function (percent, totalTime) {
+  self.setProgress = function (percent: any, totalTime: any) {
     var progressBackground = self.parent.querySelector(
       ".abcjs-midi-progress-background"
     );
@@ -105,7 +106,7 @@ function CreateSynthControl(parent, options) {
   }
 }
 
-function buildDom(parent, options) {
+function buildDom(parent: any, options: any) {
   var hasLoop = !!options.loopHandler;
   var hasRestart = !!options.restartHandler;
   var hasPlay = !!options.playHandler || !!options.playPromiseHandler;
@@ -194,9 +195,10 @@ function buildDom(parent, options) {
   parent.innerHTML = html;
 }
 
-function acResumerMiddleWare(next, ev, playBtn, afterResume, isPromise) {
+function acResumerMiddleWare(next: any, ev: any, playBtn: any, afterResume: any, isPromise: any) {
   var needsInit = true;
   if (!activeAudioContext()) {
+    // @ts-expect-error TS(2554): Expected 1 arguments, but got 0.
     registerAudioContext();
   } else {
     needsInit = activeAudioContext().state === "suspended";
@@ -216,7 +218,7 @@ function acResumerMiddleWare(next, ev, playBtn, afterResume, isPromise) {
       .resume()
       .then(function () {
         if (afterResume) {
-          afterResume().then(function (response) {
+          afterResume().then(function (response: any) {
             doNext(next, ev, playBtn, isPromise);
           });
         } else {
@@ -228,7 +230,7 @@ function acResumerMiddleWare(next, ev, playBtn, afterResume, isPromise) {
   }
 }
 
-function doNext(next, ev, playBtn, isPromise) {
+function doNext(next: any, ev: any, playBtn: any, isPromise: any) {
   if (isPromise) {
     next(ev).then(function () {
       if (playBtn) playBtn.classList.remove("abcjs-loading");
@@ -239,7 +241,7 @@ function doNext(next, ev, playBtn, isPromise) {
   }
 }
 
-function attachListeners(self) {
+function attachListeners(self: any) {
   var hasLoop = !!self.options.loopHandler;
   var hasRestart = !!self.options.restartHandler;
   var hasPlay = !!self.options.playHandler || !!self.options.playPromiseHandler;
@@ -250,7 +252,8 @@ function attachListeners(self) {
   if (hasLoop)
     self.parent
       .querySelector(".abcjs-midi-loop")
-      .addEventListener("click", function (ev) {
+      .addEventListener("click", function (ev: any) {
+        // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
         acResumerMiddleWare(
           self.options.loopHandler,
           ev,
@@ -261,7 +264,8 @@ function attachListeners(self) {
   if (hasRestart)
     self.parent
       .querySelector(".abcjs-midi-reset")
-      .addEventListener("click", function (ev) {
+      .addEventListener("click", function (ev: any) {
+        // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
         acResumerMiddleWare(
           self.options.restartHandler,
           ev,
@@ -270,7 +274,7 @@ function attachListeners(self) {
         );
       });
   if (hasPlay)
-    playBtn.addEventListener("click", function (ev) {
+    playBtn.addEventListener("click", function (ev: any) {
       acResumerMiddleWare(
         self.options.playPromiseHandler || self.options.playHandler,
         ev,
@@ -282,7 +286,8 @@ function attachListeners(self) {
   if (hasProgress)
     self.parent
       .querySelector(".abcjs-midi-progress-background")
-      .addEventListener("click", function (ev) {
+      .addEventListener("click", function (ev: any) {
+        // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
         acResumerMiddleWare(
           self.options.progressHandler,
           ev,
@@ -293,7 +298,8 @@ function attachListeners(self) {
   if (hasWarp)
     self.parent
       .querySelector(".abcjs-midi-tempo")
-      .addEventListener("change", function (ev) {
+      .addEventListener("change", function (ev: any) {
+        // @ts-expect-error TS(2554): Expected 5 arguments, but got 4.
         acResumerMiddleWare(
           self.options.warpHandler,
           ev,
