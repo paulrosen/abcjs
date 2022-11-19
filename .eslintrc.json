@@ -6,10 +6,14 @@
   },
   "extends": "eslint:recommended",
   "overrides": [],
-  "parserOptions": {
+  "plugins": {
+    "prettier"
+  },
+  "parser": "@typescript-eslint/parser""parserOptions": {
     "ecmaVersion": "latest"
   },
   "rules": {
+    "prettier/prettier": 2,
     "comma-dangle": "warn",
     "no-cond-assign": "warn",
     "no-console": "warn",
