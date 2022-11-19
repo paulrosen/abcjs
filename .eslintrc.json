@@ -6,10 +6,11 @@
   },
   "extends": "eslint:recommended",
   "overrides": [],
-  "plugins": {
+  "plugins": [
     "prettier"
-  },
-  "parser": "@typescript-eslint/parser""parserOptions": {
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
     "ecmaVersion": "latest"
   },
   "rules": {
