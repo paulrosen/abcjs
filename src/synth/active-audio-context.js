@@ -1,4 +1,4 @@
-var registerAudioContext = require("./register-audio-context.js");
+import registerAudioContext from './register-audio-context.js';
 
 function activeAudioContext() {
   if (!window.abcjsAudioContext) registerAudioContext();

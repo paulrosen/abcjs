@@ -5,8 +5,9 @@
  * where plugin represents a plugin instance
  *
  */
-var ViolinTablature = require("../tablatures/instruments/violin/tab-violin");
-var GuitarTablature = require("../tablatures/instruments/guitar/tab-guitar");
+import ViolinTablature from '../tablatures/instruments/violin/tab-violin';
+
+import GuitarTablature from '../tablatures/instruments/guitar/tab-guitar';
 
 /* extend the table below when adding a new instrument plugin */
 

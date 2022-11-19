@@ -1,10 +1,9 @@
-var tunebook = require("./abc_tunebook");
-var Tune = require("../data/abc_tune");
-
-var EngraverController = require("../write/abc_engraver_controller");
-var Parse = require("../parse/abc_parse");
-var wrap = require("../parse/wrap_lines");
-var parseCommon = require("../parse/abc_common");
+import tunebook from './abc_tunebook';
+import Tune from '../data/abc_tune';
+import EngraverController from '../write/abc_engraver_controller';
+import Parse from '../parse/abc_parse';
+import wrap from '../parse/wrap_lines';
+import parseCommon from '../parse/abc_common';
 // var tablatures = require('./abc_tablatures');
 
 var resizeDivs = {};

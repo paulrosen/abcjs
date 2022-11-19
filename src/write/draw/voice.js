@@ -1,12 +1,12 @@
-var drawGlissando = require("./glissando");
-var drawCrescendo = require("./crescendo");
-var drawDynamics = require("./dynamics");
-var drawTriplet = require("./triplet");
-var drawEnding = require("./ending");
-var drawTie = require("./tie");
-var drawBeam = require("./beam");
-var renderText = require("./text");
-var drawAbsolute = require("./absolute");
+import drawGlissando from './glissando';
+import drawCrescendo from './crescendo';
+import drawDynamics from './dynamics';
+import drawTriplet from './triplet';
+import drawEnding from './ending';
+import drawTie from './tie';
+import drawBeam from './beam';
+import renderText from './text';
+import drawAbsolute from './absolute';
 
 function drawVoice(renderer, params, bartop, selectables, staffPos) {
   var width = params.w - 1;

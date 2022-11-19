@@ -1,26 +1,26 @@
 // abc_abstract_engraver.js: Creates a data structure suitable for printing a line of abc
 
-var AbsoluteElement = require("./abc_absolute_element");
-var BeamElem = require("./abc_beam_element");
-var BraceElem = require("./abc_brace_element");
-var createClef = require("./abc_create_clef");
-var createKeySignature = require("./abc_create_key_signature");
-var createNoteHead = require("./abc_create_note_head");
-var createTimeSignature = require("./abc_create_time_signature");
-var Decoration = require("./abc_decoration");
-var EndingElem = require("./abc_ending_element");
-var glyphs = require("./abc_glyphs");
-var RelativeElement = require("./abc_relative_element");
-var spacing = require("./abc_spacing");
-var StaffGroupElement = require("./abc_staff_group_element");
-var TempoElement = require("./abc_tempo_element");
-var TieElem = require("./abc_tie_element");
-var TripletElem = require("./abc_triplet_element");
-var VoiceElement = require("./abc_voice_element");
-var addChord = require("./add-chord");
-var pitchesToPerc = require("../synth/pitches-to-perc");
+import AbsoluteElement from './abc_absolute_element';
 
-var parseCommon = require("../parse/abc_common");
+import BeamElem from './abc_beam_element';
+import BraceElem from './abc_brace_element';
+import createClef from './abc_create_clef';
+import createKeySignature from './abc_create_key_signature';
+import createNoteHead from './abc_create_note_head';
+import createTimeSignature from './abc_create_time_signature';
+import Decoration from './abc_decoration';
+import EndingElem from './abc_ending_element';
+import glyphs from './abc_glyphs';
+import RelativeElement from './abc_relative_element';
+import spacing from './abc_spacing';
+import StaffGroupElement from './abc_staff_group_element';
+import TempoElement from './abc_tempo_element';
+import TieElem from './abc_tie_element';
+import TripletElem from './abc_triplet_element';
+import VoiceElement from './abc_voice_element';
+import addChord from './add-chord';
+import pitchesToPerc from '../synth/pitches-to-perc';
+import parseCommon from '../parse/abc_common';
 
 var getDuration = function (elem) {
   var d = 0;

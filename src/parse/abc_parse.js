@@ -1,14 +1,14 @@
 //    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
 
-var parseCommon = require("./abc_common");
-var parseDirective = require("./abc_parse_directive");
-var ParseHeader = require("./abc_parse_header");
-var ParseMusic = require("./abc_parse_music");
-var Tokenizer = require("./abc_tokenizer");
-var wrap = require("./wrap_lines");
+import parseCommon from './abc_common';
 
-var Tune = require("../data/abc_tune");
-var TuneBuilder = require("../parse/tune-builder");
+import parseDirective from './abc_parse_directive';
+import ParseHeader from './abc_parse_header';
+import ParseMusic from './abc_parse_music';
+import Tokenizer from './abc_tokenizer';
+import wrap from './wrap_lines';
+import Tune from '../data/abc_tune';
+import TuneBuilder from '../parse/tune-builder';
 
 var Parse = function () {
   "use strict";

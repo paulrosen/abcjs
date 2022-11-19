@@ -1,6 +1,7 @@
 //    abc_midi_renderer.js: Create the actual format for the midi.
 
-var centsToFactor = require("./cents-to-factor");
+import centsToFactor from './cents-to-factor';
+
 var rendererFactory;
 
 (function () {

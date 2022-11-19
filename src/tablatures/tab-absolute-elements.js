@@ -1,9 +1,10 @@
 /**
  * Tablature Absolute elements factory
  */
-var AbsoluteElement = require("../write/abc_absolute_element");
-var RelativeElement = require("../write/abc_relative_element");
-var Transposer = require("./transposer");
+import AbsoluteElement from '../write/abc_absolute_element';
+
+import RelativeElement from '../write/abc_relative_element';
+import Transposer from './transposer';
 
 function isObject(a) {
   return a != null && a.constructor === Object;

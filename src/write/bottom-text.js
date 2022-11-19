@@ -1,4 +1,4 @@
-const addTextIf = require("./add-text-if");
+import addTextIf from './add-text-if';
 
 function BottomText(
   metaText,

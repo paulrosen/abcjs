@@ -2,7 +2,7 @@
 
 //This file takes as input the output structure of the writing routine and lists the vertical position of all the elements.
 
-var pitchToNoteName = require("../synth/pitch-to-note-name");
+import pitchToNoteName from '../synth/pitch-to-note-name';
 
 var midiLint = function (tune) {
   "use strict";

@@ -21,11 +21,11 @@ THE SOFTWARE.
 
  **This text is from: http://opensource.org/licenses/MIT**
 !**/
-var version = require("./version");
-var animation = require("./src/api/abc_animation");
-var tuneBook = require("./src/api/abc_tunebook");
-var sequence = require("./src/synth/abc_midi_sequencer");
-var strTranspose = require("./src/str/output");
+import version from "./version";
+import animation from "./src/api/abc_animation";
+import tuneBook from "./src/api/abc_tunebook";
+import sequence from "./src/synth/abc_midi_sequencer";
+import strTranspose from "./src/str/output";
 
 var abcjs = {};
 
@@ -39,24 +39,26 @@ Object.keys(tuneBook).forEach(function (key) {
   abcjs[key] = tuneBook[key];
 });
 
-abcjs.renderAbc = require("./src/api/abc_tunebook_svg");
-abcjs.TimingCallbacks = require("./src/api/abc_timing_callbacks");
+import renderAbc from "./src/api/abc_tunebook_svg";
+abcjs.renderAbc = renderAbc;
+import TimingCallbacks from "./src/api/abc_timing_callbacks";
+abcjs.TimingCallbacks = TimingCallbacks;
 
-var glyphs = require("./src/write/abc_glyphs");
-abcjs.setGlyph = glyphs.setSymbol;
+import { setSymbol } from "./src/write/abc_glyphs";
+abcjs.setGlyph = setSymbol;
 abcjs.strTranspose = strTranspose;
 
-var CreateSynth = require("./src/synth/create-synth");
-var instrumentIndexToName = require("./src/synth/instrument-index-to-name");
-var pitchToNoteName = require("./src/synth/pitch-to-note-name");
-var SynthSequence = require("./src/synth/synth-sequence");
-var CreateSynthControl = require("./src/synth/create-synth-control");
-var registerAudioContext = require("./src/synth/register-audio-context");
-var activeAudioContext = require("./src/synth/active-audio-context");
-var supportsAudio = require("./src/synth/supports-audio");
-var playEvent = require("./src/synth/play-event");
-var SynthController = require("./src/synth/synth-controller");
-var getMidiFile = require("./src/synth/get-midi-file");
+import CreateSynth from "./src/synth/create-synth";
+import instrumentIndexToName from "./src/synth/instrument-index-to-name";
+import pitchToNoteName from "./src/synth/pitch-to-note-name";
+import SynthSequence from "./src/synth/synth-sequence";
+import CreateSynthControl from "./src/synth/create-synth-control";
+import registerAudioContext from "./src/synth/register-audio-context";
+import activeAudioContext from "./src/synth/active-audio-context";
+import supportsAudio from "./src/synth/supports-audio";
+import playEvent from "./src/synth/play-event";
+import SynthController from "./src/synth/synth-controller";
+import getMidiFile from "./src/synth/get-midi-file";
 
 abcjs.synth = {
   CreateSynth: CreateSynth,
@@ -73,7 +75,9 @@ abcjs.synth = {
   sequence: sequence,
 };
 
-abcjs["Editor"] = require("./src/edit/abc_editor");
-abcjs["EditArea"] = require("./src/edit/abc_editarea");
+import Editor from "./src/edit/abc_editor";
+abcjs["Editor"] = Editor;
+import EditArea from "./src/edit/abc_editarea";
+abcjs["EditArea"] = EditArea;
 
-module.exports = abcjs;
+export default abcjs;

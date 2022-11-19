@@ -21,18 +21,18 @@ THE SOFTWARE.
 
  **This text is from: http://opensource.org/licenses/MIT**
 !**/
-var abcjs = require("./index");
-var version = require("./version");
-var Parse = require("./src/parse/abc_parse");
-var EngraverController = require("./src/write/abc_engraver_controller");
+import abcjs, { signature } from "./index";
+import version from "./version";
+import Parse from "./src/parse/abc_parse";
+import EngraverController from "./src/write/abc_engraver_controller";
 
-abcjs.signature = "abcjs-test v" + version;
+signature = "abcjs-test v" + version;
 
-var parserLint = require("./src/test/abc_parser_lint");
-var verticalLint = require("./src/test/abc_vertical_lint");
-var midiLint = require("./src/test/abc_midi_lint");
-var midiSequencerLint = require("./src/test/abc_midi_sequencer_lint");
-var renderingLint = require("./src/test/rendering-lint");
+import parserLint from "./src/test/abc_parser_lint";
+import verticalLint from "./src/test/abc_vertical_lint";
+import midiLint from "./src/test/abc_midi_lint";
+import midiSequencerLint from "./src/test/abc_midi_sequencer_lint";
+import renderingLint from "./src/test/rendering-lint";
 abcjs["test"] = {
   Parse: Parse,
   EngraverController: EngraverController,
@@ -43,4 +43,4 @@ abcjs["test"] = {
   renderingLint: renderingLint,
 };
 
-module.exports = abcjs;
+export default abcjs;

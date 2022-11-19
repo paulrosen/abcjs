@@ -1,10 +1,11 @@
 //    abc_tune.js: a computer usable internal structure representing one tune.
 
-var parseCommon = require("../parse/abc_common");
-var spacing = require("../write/abc_spacing");
-var sequence = require("../synth/abc_midi_sequencer");
-var flatten = require("../synth/abc_midi_flattener");
-var delineTune = require("./deline-tune");
+import parseCommon from '../parse/abc_common';
+
+import spacing from '../write/abc_spacing';
+import sequence from '../synth/abc_midi_sequencer';
+import flatten from '../synth/abc_midi_flattener';
+import delineTune from './deline-tune';
 
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.

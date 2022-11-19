@@ -1,4 +1,4 @@
-var activeAudioContext = require("./active-audio-context");
+import activeAudioContext from './active-audio-context';
 
 //
 // Support for audio depends on three things: support for Promise, support for AudioContext, and support for AudioContext.resume.

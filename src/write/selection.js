@@ -1,4 +1,4 @@
-var spacing = require("./abc_spacing");
+import spacing from './abc_spacing';
 
 function setupSelection(engraver, svgs) {
   engraver.rangeHighlight = rangeHighlight;

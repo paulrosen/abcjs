@@ -2,21 +2,22 @@
 
 /*global Math */
 
-var spacing = require("./abc_spacing");
-var AbstractEngraver = require("./abc_abstract_engraver");
-var Renderer = require("./abc_renderer");
-var FreeText = require("./free-text");
-var Separator = require("./separator");
-var Subtitle = require("./subtitle");
-var TopText = require("./top-text");
-var BottomText = require("./bottom-text");
-var setupSelection = require("./selection");
-var layout = require("./layout/layout");
-var Classes = require("./classes");
-var GetFontAndAttr = require("./get-font-and-attr");
-var GetTextSize = require("./get-text-size");
-var draw = require("./draw/draw");
-var tablatures = require("../api/abc_tablatures");
+import spacing from './abc_spacing';
+
+import AbstractEngraver from './abc_abstract_engraver';
+import Renderer from './abc_renderer';
+import FreeText from './free-text';
+import Separator from './separator';
+import Subtitle from './subtitle';
+import TopText from './top-text';
+import BottomText from './bottom-text';
+import setupSelection from './selection';
+import layout from './layout/layout';
+import Classes from './classes';
+import GetFontAndAttr from './get-font-and-attr';
+import GetTextSize from './get-text-size';
+import draw from './draw/draw';
+import tablatures from '../api/abc_tablatures';
 
 /**
  * @class

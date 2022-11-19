@@ -1,8 +1,9 @@
 //    abc_transpose.js: Handles the automatic transposition of key signatures, chord symbols, and notes.
 
-var allNotes = require("./all-notes");
-var transposeChordName = require("../parse/transpose-chord");
-var keyAccidentals = require("../const/key-accidentals");
+import allNotes from './all-notes';
+
+import transposeChordName from '../parse/transpose-chord';
+import keyAccidentals from '../const/key-accidentals';
 var transpose = {};
 
 var keyIndex = {

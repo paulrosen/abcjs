@@ -1,5 +1,5 @@
-var drawRelativeElement = require("./relative");
-var renderText = require("./text");
+import drawRelativeElement from './relative';
+import renderText from './text';
 
 function drawTempo(renderer, params) {
   var x = params.x;

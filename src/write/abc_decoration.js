@@ -1,11 +1,12 @@
 // abc_decoration.js: Creates a data structure suitable for printing a line of abc
 
-var DynamicDecoration = require("./abc_dynamic_decoration");
-var CrescendoElem = require("./abc_crescendo_element");
-var GlissandoElem = require("./abc_glissando_element");
-var glyphs = require("./abc_glyphs");
-var RelativeElement = require("./abc_relative_element");
-var TieElem = require("./abc_tie_element");
+import DynamicDecoration from './abc_dynamic_decoration';
+
+import CrescendoElem from './abc_crescendo_element';
+import GlissandoElem from './abc_glissando_element';
+import glyphs from './abc_glyphs';
+import RelativeElement from './abc_relative_element';
+import TieElem from './abc_tie_element';
 
 var Decoration = function Decoration() {
   this.startDiminuendoX = undefined;

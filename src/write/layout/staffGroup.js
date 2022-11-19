@@ -1,4 +1,4 @@
-var layoutVoiceElements = require("./VoiceElements");
+import layoutVoiceElements from './VoiceElements';
 
 function checkLastBarX(voices) {
   var maxX = 0;

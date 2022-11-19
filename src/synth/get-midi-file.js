@@ -1,5 +1,5 @@
-var tunebook = require("../api/abc_tunebook");
-var midiCreate = require("../midi/abc_midi_create");
+import tunebook from '../api/abc_tunebook';
+import midiCreate from '../midi/abc_midi_create';
 
 var getMidiFile = function (source, options) {
   var params = {};

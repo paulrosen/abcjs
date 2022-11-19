@@ -1,8 +1,9 @@
 //    abc_absolute_element.js: Definition of the AbsoluteElement class.
 
-var setClass = require("./set-class");
-var highlight = require("./highlight");
-var unhighlight = require("./unhighlight");
+import setClass from './set-class';
+
+import highlight from './highlight';
+import unhighlight from './unhighlight';
 
 // Everything that is placed in the SVG is first created as an absolute element. This is one unit of graphic information.
 // That is, it embodies a concept: a clef, a time signature, a bar line,etc. or most complexly:

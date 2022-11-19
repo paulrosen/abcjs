@@ -48,8 +48,9 @@
 // Expanded:
 // MIDI is now { cmd, param }
 
-var parseCommon = require("../parse/abc_common");
-var JSONSchema = require("./jsonschema-b4");
+import parseCommon from '../parse/abc_common';
+
+import JSONSchema from './jsonschema-b4';
 
 var ParserLint = function () {
   "use strict";

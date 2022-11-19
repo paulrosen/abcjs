@@ -1,4 +1,4 @@
-var spacing = require("./abc_spacing");
+import spacing from './abc_spacing';
 
 /**
  * Glyphs and some methods to adjust for their x and y baseline

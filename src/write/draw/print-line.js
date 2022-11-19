@@ -1,5 +1,5 @@
-var sprintf = require("./sprintf");
-var roundNumber = require("./round-number");
+import sprintf from './sprintf';
+import roundNumber from './round-number';
 
 function printLine(renderer, x1, x2, y, klass, name, dy) {
   if (!dy) dy = 0.35;

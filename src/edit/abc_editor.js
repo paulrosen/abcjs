@@ -44,11 +44,12 @@
 // - pause(bool)
 //		Stops the automatic rendering when the user is typing.
 //
-var parseCommon = require("../parse/abc_common");
-var SynthController = require("../synth/synth-controller");
-var supportsAudio = require("../synth/supports-audio");
-var renderAbc = require("../api/abc_tunebook_svg");
-var EditArea = require("./abc_editarea");
+import parseCommon from '../parse/abc_common';
+
+import SynthController from '../synth/synth-controller';
+import supportsAudio from '../synth/supports-audio';
+import renderAbc from '../api/abc_tunebook_svg';
+import EditArea from './abc_editarea';
 
 function gatherAbcParams(params) {
   // There used to be a bunch of ways parameters can be passed in. This just simplifies it.

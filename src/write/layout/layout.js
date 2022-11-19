@@ -1,7 +1,7 @@
-var layoutVoice = require("./voice");
-var setUpperAndLowerElements = require("./setUpperAndLowerElements");
-var layoutStaffGroup = require("./staffGroup");
-var getLeftEdgeOfStaff = require("./get-left-edge-of-staff");
+import layoutVoice from './voice';
+import setUpperAndLowerElements from './setUpperAndLowerElements';
+import layoutStaffGroup from './staffGroup';
+import getLeftEdgeOfStaff from './get-left-edge-of-staff';
 
 var layout = function (renderer, abctune, width, space) {
   var i;

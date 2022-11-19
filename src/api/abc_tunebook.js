@@ -1,8 +1,9 @@
 //    abc_tunebook.js: splits a string representing ABC Music Notation into individual tunes.
 
-var Parse = require("../parse/abc_parse");
-var bookParser = require("../parse/abc_parse_book");
-var tablatures = require("./abc_tablatures");
+import Parse from '../parse/abc_parse';
+
+import bookParser from '../parse/abc_parse_book';
+import tablatures from './abc_tablatures';
 
 var tunebook = {};
 

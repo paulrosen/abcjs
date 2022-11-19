@@ -1,9 +1,8 @@
-const pkg = require("./package.json");
-const TerserPlugin = require("terser-webpack-plugin");
-const WebpackBundleAnalyzer =
-  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+import { version } from "./package.json";
+import TerserPlugin from "terser-webpack-plugin";
+import { BundleAnalyzerPlugin as WebpackBundleAnalyzer } from "webpack-bundle-analyzer";
 
-module.exports = (env = {}, argv) => {
+export default (env = {}, argv) => {
   const defaults = (argv, type) => {
     const config = {
       target: ["web", "es5"],
@@ -69,7 +68,7 @@ module.exports = (env = {}, argv) => {
 };
 
 function makeBanner(type) {
-  let banner = `abcjs_${type} v${pkg.version} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`;
+  let banner = `abcjs_${type} v${version} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`;
   return (
     banner + `/*! For license information please see abcjs_${type}.LICENSE`
   );

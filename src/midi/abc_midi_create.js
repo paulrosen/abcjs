@@ -1,6 +1,6 @@
 //    abc_midi_create.js: Turn a linear series of events into a midi file.
 
-var rendererFactory = require("../synth/abc_midi_renderer");
+import rendererFactory from '../synth/abc_midi_renderer';
 
 var create;
 

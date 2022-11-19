@@ -1,6 +1,6 @@
-var RelativeElement = require("./abc_relative_element");
-var spacing = require("./abc_spacing");
-const formatJazzChord = require("./format-jazz-chord");
+import RelativeElement from './abc_relative_element';
+import spacing from './abc_spacing';
+import formatJazzChord from './format-jazz-chord';
 
 var addChord = function (
   getTextSize,

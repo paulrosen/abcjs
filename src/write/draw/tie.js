@@ -1,5 +1,5 @@
-var sprintf = require("./sprintf");
-var roundNumber = require("./round-number");
+import sprintf from './sprintf';
+import roundNumber from './round-number';
 
 function drawTie(renderer, params, linestartx, lineendx, selectables) {
   layout(params, linestartx, lineendx);

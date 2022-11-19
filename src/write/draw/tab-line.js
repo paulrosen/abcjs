@@ -1,6 +1,6 @@
-var sprintf = require("./sprintf");
-var roundNumber = require("./round-number");
-var printStem = require("./print-stem");
+import sprintf from './sprintf';
+import roundNumber from './round-number';
+import printStem from './print-stem';
 
 function TabLine(renderer, klass, dx, name) {
   this.renderer = renderer;

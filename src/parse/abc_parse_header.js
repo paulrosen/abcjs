@@ -1,8 +1,9 @@
 //    abc_parse_header.js: parses a the header fields from a string representing ABC Music Notation into a usable internal structure.
 
-var parseCommon = require("./abc_common");
-var parseDirective = require("./abc_parse_directive");
-var parseKeyVoice = require("./abc_parse_key_voice");
+import parseCommon from './abc_common';
+
+import parseDirective from './abc_parse_directive';
+import parseKeyVoice from './abc_parse_key_voice';
 
 var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
   this.reset = function (tokenizer, warn, multilineVars, tune) {

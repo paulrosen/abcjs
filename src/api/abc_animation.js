@@ -1,6 +1,6 @@
 //    abc_animation.js: handles animating the music in real time.
 
-var TimingCallbacks = require("./abc_timing_callbacks");
+import TimingCallbacks from './abc_timing_callbacks';
 
 var animation = {};
 

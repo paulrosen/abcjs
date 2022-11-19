@@ -1,4 +1,4 @@
-var { relativeMajor } = require("./relative-major");
+import { relativeMajor } from './relative-major';
 
 var key1sharp = { acc: "sharp", note: "f" };
 var key2sharp = { acc: "sharp", note: "c" };

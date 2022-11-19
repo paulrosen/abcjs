@@ -1,4 +1,4 @@
-var getBarYAt = require("./getBarYAt");
+import getBarYAt from './getBarYAt';
 
 function layoutTriplet(element) {
   // TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)

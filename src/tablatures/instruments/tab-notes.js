@@ -1,4 +1,4 @@
-var TabNote = require("./tab-note");
+import TabNote from './tab-note';
 
 var notes = TabNote.notes;
 

@@ -1,6 +1,6 @@
-var soundsCache = require("./sounds-cache");
-var pitchToNoteName = require("./pitch-to-note-name");
-var centsToFactor = require("./cents-to-factor");
+import soundsCache from './sounds-cache';
+import pitchToNoteName from './pitch-to-note-name';
+import centsToFactor from './cents-to-factor';
 
 function placeNote(
   outputAudioBuffer,

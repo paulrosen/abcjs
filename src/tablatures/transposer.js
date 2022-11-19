@@ -3,7 +3,7 @@
  * generic transposer
  *
  */
-var TabNote = require("./instruments/tab-note");
+import TabNote from './instruments/tab-note';
 
 function buildAccEquiv(acc, note) {
   var equiv = note.getAccidentalEquiv();

@@ -1,10 +1,10 @@
-var spacing = require("../abc_spacing");
-var drawBrace = require("./brace");
-var drawVoice = require("./voice");
-var printStaff = require("./staff");
-var printDebugBox = require("./debug-box");
-var printStem = require("./print-stem");
-var nonMusic = require("./non-music");
+import spacing from '../abc_spacing';
+import drawBrace from './brace';
+import drawVoice from './voice';
+import printStaff from './staff';
+import printDebugBox from './debug-box';
+import printStem from './print-stem';
+import nonMusic from './non-music';
 
 function drawStaffGroup(renderer, params, selectables, lineNumber) {
   // We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.

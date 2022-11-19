@@ -1,6 +1,6 @@
-var sprintf = require("./sprintf");
-var spacing = require("../abc_spacing");
-var renderText = require("./text");
+import sprintf from './sprintf';
+import spacing from '../abc_spacing';
+import renderText from './text';
 
 function drawBrace(renderer, params, selectables) {
   // The absoluteY number is the spot where the note on the first ledger line is drawn (i.e. middle C if treble clef)

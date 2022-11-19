@@ -1,6 +1,6 @@
 //    abc_tokenizer.js: tokenizes an ABC Music Notation string to support abc_parse.
 
-var parseCommon = require("./abc_common");
+import parseCommon from './abc_common';
 
 // this is a series of functions that get a particular element out of the passed stream.
 // the return is the number of characters consumed, so 0 means that the element wasn't found.

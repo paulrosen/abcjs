@@ -1,7 +1,7 @@
-var CreateSynthControl = require("./create-synth-control");
-var CreateSynth = require("./create-synth");
-var TimingCallbacks = require("../api/abc_timing_callbacks");
-var activeAudioContext = require("./active-audio-context");
+import CreateSynthControl from './create-synth-control';
+import CreateSynth from './create-synth';
+import TimingCallbacks from '../api/abc_timing_callbacks';
+import activeAudioContext from './active-audio-context';
 
 function SynthController() {
   var self = this;

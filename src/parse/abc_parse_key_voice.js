@@ -1,6 +1,6 @@
-var parseCommon = require("./abc_common");
-var parseDirective = require("./abc_parse_directive");
-var transpose = require("./abc_transpose");
+import parseCommon from './abc_common';
+import parseDirective from './abc_parse_directive';
+import transpose from './abc_transpose';
 
 var parseKeyVoice = {};
 

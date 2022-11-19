@@ -2,7 +2,7 @@
 // url = the base url for the soundfont
 // instrument = the instrument name (e.g. "acoustic_grand_piano")
 // name = the pitch name (e.g. "A3")
-var soundsCache = require("./sounds-cache");
+import soundsCache from './sounds-cache';
 
 var getNote = function (url, instrument, name, audioContext) {
   if (!soundsCache[instrument]) soundsCache[instrument] = {};

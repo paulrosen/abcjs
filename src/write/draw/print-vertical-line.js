@@ -1,4 +1,4 @@
-var sprintf = require("./sprintf");
+import sprintf from './sprintf';
 
 function printVerticalLine(renderer, x, y1, y2) {
   var dy = 0.35;

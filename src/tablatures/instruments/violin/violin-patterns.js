@@ -1,4 +1,4 @@
-var StringPatterns = require("../string-patterns");
+import StringPatterns from '../string-patterns';
 
 function ViolinPatterns(plugin) {
   this.tuning = plugin._super.params.tuning;

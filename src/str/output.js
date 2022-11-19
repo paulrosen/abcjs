@@ -1,10 +1,6 @@
-var keyAccidentals = require("../const/key-accidentals");
-var {
-  relativeMajor,
-  transposeKey,
-  relativeMode
-} = require("../const/relative-major");
-var transposeChordName = require("../parse/transpose-chord");
+import keyAccidentals from '../const/key-accidentals';
+import { relativeMajor, transposeKey, relativeMode } from '../const/relative-major';
+import transposeChordName from '../parse/transpose-chord';
 
 var strTranspose;
 

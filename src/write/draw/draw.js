@@ -1,8 +1,8 @@
-var drawStaffGroup = require("./staff-group");
-var setPaperSize = require("./set-paper-size");
-var nonMusic = require("./non-music");
-var spacing = require("../abc_spacing");
-var Selectables = require("./selectables");
+import drawStaffGroup from './staff-group';
+import setPaperSize from './set-paper-size';
+import nonMusic from './non-music';
+import spacing from '../abc_spacing';
+import Selectables from './selectables';
 
 function draw(
   renderer,

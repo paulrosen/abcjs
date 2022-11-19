@@ -1,6 +1,6 @@
-var parseCommon = require("./abc_common");
-var parseKeyVoice = require("./abc_parse_key_voice");
-var transpose = require("./abc_transpose");
+import parseCommon from './abc_common';
+import parseKeyVoice from './abc_parse_key_voice';
+import transpose from './abc_transpose';
 
 var tokenizer;
 var warn;

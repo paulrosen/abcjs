@@ -1,4 +1,4 @@
-var StringPatterns = require("../string-patterns");
+import StringPatterns from '../string-patterns';
 
 function GuitarPatterns(plugin) {
   this.tuning = plugin._super.params.tuning;

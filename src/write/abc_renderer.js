@@ -2,8 +2,9 @@
 
 /*global Math */
 
-var spacing = require("./abc_spacing");
-var Svg = require("./svg");
+import spacing from './abc_spacing';
+
+import Svg from './svg';
 
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)

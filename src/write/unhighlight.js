@@ -1,4 +1,4 @@
-var setClass = require("./set-class");
+import setClass from './set-class';
 
 var unhighlight = function (klass, color) {
   if (klass === undefined) klass = "abcjs-note_selected";

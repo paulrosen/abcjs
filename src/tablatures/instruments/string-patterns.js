@@ -1,5 +1,5 @@
-var TabNote = require("./tab-note");
-var TabNotes = require("./tab-notes");
+import TabNote from './tab-note';
+import TabNotes from './tab-notes';
 
 function buildCapo(self) {
   var capoTuning = null;

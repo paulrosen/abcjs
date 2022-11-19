@@ -1,6 +1,6 @@
-var sprintf = require("./sprintf");
-var printPath = require("./print-path");
-var roundNumber = require("./round-number");
+import sprintf from './sprintf';
+import printPath from './print-path';
+import roundNumber from './round-number';
 
 function drawCrescendo(renderer, params, selectables) {
   if (params.pitch === undefined)

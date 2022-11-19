@@ -1,8 +1,8 @@
-var StringTablature = require("../string-tablature");
-var TabCommon = require("../../tab-common");
-var TabRenderer = require("../../tab-renderer");
-var ViolinPatterns = require("./violin-patterns");
-var setViolinFonts = require("./violin-fonts");
+import StringTablature from '../string-tablature';
+import TabCommon from '../../tab-common';
+import TabRenderer from '../../tab-renderer';
+import ViolinPatterns from './violin-patterns';
+import setViolinFonts from './violin-fonts';
 
 /**
  * upon init mainly store provided instances for later usage

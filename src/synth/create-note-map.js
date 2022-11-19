@@ -1,6 +1,6 @@
 // Convert the input structure to a more useful structure where each item has a length of its own.
 
-var instrumentIndexToName = require("./instrument-index-to-name");
+import instrumentIndexToName from './instrument-index-to-name';
 
 var createNoteMap = function (sequence) {
   var map = [];

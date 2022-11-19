@@ -1,5 +1,5 @@
-var glyphs = require("./abc_glyphs");
-var RelativeElement = require("./abc_relative_element");
+import glyphs from './abc_glyphs';
+import RelativeElement from './abc_relative_element';
 
 var createNoteHead = function (abselem, c, pitchelem, options) {
   if (!options) options = {};

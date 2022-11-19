@@ -1,11 +1,12 @@
 /*
 Emit tab for Guitar staff
 */
-var StringTablature = require("../string-tablature");
-var TabCommon = require("../../tab-common");
-var TabRenderer = require("../../tab-renderer");
-var GuitarPatterns = require("./guitar-patterns");
-var setGuitarFonts = require("./guitar-fonts");
+import StringTablature from '../string-tablature';
+
+import TabCommon from '../../tab-common';
+import TabRenderer from '../../tab-renderer';
+import GuitarPatterns from './guitar-patterns';
+import setGuitarFonts from './guitar-fonts';
 
 /**
  * upon init mainly store provided instances for later usage
