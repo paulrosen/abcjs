@@ -1,3 +1,3 @@
 var soundsCache = {};
 
-module.exports = soundsCache;
+export default soundsCache;

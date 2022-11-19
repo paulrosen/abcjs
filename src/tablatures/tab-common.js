@@ -24,4 +24,4 @@ TabCommon.prototype.setError = function (error) {
   }
 };
 
-module.exports = TabCommon;
+export default TabCommon;

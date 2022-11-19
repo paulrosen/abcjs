@@ -181,4 +181,4 @@ function TopText(
   }
 }
 
-module.exports = TopText;
+export default TopText;

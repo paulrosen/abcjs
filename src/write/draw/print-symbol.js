@@ -98,4 +98,4 @@ function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
   return width;
 }
 
-module.exports = printSymbol;
+export default printSymbol;

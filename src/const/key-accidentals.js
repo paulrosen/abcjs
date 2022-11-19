@@ -59,4 +59,4 @@ function keyAccidentals(key) {
   return JSON.parse(JSON.stringify(newKey));
 }
 
-module.exports = keyAccidentals;
+export default keyAccidentals;

@@ -53,4 +53,4 @@ function nonMusic(renderer, obj, selectables) {
   }
 }
 
-module.exports = nonMusic;
+export default nonMusic;

@@ -45,4 +45,4 @@ TabLine.prototype.printHorizontal = function (x1, x2, y) {
   return this.renderer.paper.pathToBack(this.options);
 };
 
-module.exports = TabLine;
+export default TabLine;

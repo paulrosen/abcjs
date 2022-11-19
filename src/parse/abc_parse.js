@@ -654,4 +654,4 @@ var Parse = function () {
   };
 };
 
-module.exports = Parse;
+export default Parse;

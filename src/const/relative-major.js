@@ -165,7 +165,7 @@ function transposeKey(key, steps) {
   return key;
 }
 
-module.exports = {
+export default {
   relativeMajor: relativeMajor,
   relativeMode: relativeMode,
   transposeKey: transposeKey

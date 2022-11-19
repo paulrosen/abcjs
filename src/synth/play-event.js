@@ -56,4 +56,4 @@ function doPlay(sequence, millisecondsPerMeasure) {
     });
 }
 
-module.exports = playEvent;
+export default playEvent;

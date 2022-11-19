@@ -58,4 +58,4 @@ var bookParser = function (book) {
   };
 };
 
-module.exports = bookParser;
+export default bookParser;

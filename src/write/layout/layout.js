@@ -136,4 +136,4 @@ function centerWholeRests(voices) {
   }
 }
 
-module.exports = layout;
+export default layout;

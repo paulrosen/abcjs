@@ -73,4 +73,4 @@ function renderText(renderer, params, alreadyInGroup) {
   return elem;
 }
 
-module.exports = renderText;
+export default renderText;

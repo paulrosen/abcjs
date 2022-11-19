@@ -433,4 +433,4 @@ Decoration.prototype.createDecoration = function (
   leftDecoration(decoration, abselem, roomtaken);
 };
 
-module.exports = Decoration;
+export default Decoration;

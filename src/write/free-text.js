@@ -78,4 +78,4 @@ function FreeText(
   }
 }
 
-module.exports = FreeText;
+export default FreeText;

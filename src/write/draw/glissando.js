@@ -97,4 +97,4 @@ var drawSquiggly = function (renderer, x, y, num, slope) {
   });
 };
 
-module.exports = drawGlissando;
+export default drawGlissando;

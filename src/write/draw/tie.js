@@ -154,4 +154,4 @@ var drawArc = function (
   return ret;
 };
 
-module.exports = drawTie;
+export default drawTie;

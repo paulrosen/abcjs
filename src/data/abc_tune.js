@@ -712,4 +712,4 @@ var Tune = function () {
   };
 };
 
-module.exports = Tune;
+export default Tune;

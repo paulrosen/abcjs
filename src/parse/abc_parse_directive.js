@@ -1840,4 +1840,4 @@ var parseDirective = {};
   }
 })();
 
-module.exports = parseDirective;
+export default parseDirective;

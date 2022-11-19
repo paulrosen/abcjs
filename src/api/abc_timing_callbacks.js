@@ -370,4 +370,4 @@ function getLineEndTimings(timings, anticipation) {
   return callbackTimes;
 }
 
-module.exports = TimingCallbacks;
+export default TimingCallbacks;

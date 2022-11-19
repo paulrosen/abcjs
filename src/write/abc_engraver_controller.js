@@ -404,4 +404,4 @@ EngraverController.prototype.addSelectListener = function (clickListener) {
   this.listeners[this.listeners.length] = clickListener;
 };
 
-module.exports = EngraverController;
+export default EngraverController;

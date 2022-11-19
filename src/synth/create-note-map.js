@@ -50,4 +50,4 @@ var createNoteMap = function (sequence) {
   return map;
 };
 
-module.exports = createNoteMap;
+export default createNoteMap;

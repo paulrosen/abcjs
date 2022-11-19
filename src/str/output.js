@@ -600,4 +600,4 @@ var strTranspose;
   }
 })();
 
-module.exports = strTranspose;
+export default strTranspose;

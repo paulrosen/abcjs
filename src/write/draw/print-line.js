@@ -27,4 +27,4 @@ function printLine(renderer, x1, x2, y, klass, name, dy) {
   return ret;
 }
 
-module.exports = printLine;
+export default printLine;

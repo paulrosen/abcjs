@@ -120,4 +120,4 @@ EditArea.prototype.getElem = function () {
   return this.textarea;
 };
 
-module.exports = EditArea;
+export default EditArea;

@@ -25,4 +25,4 @@ function supportsAudio() {
   if (aac) return aac.resume !== undefined;
 }
 
-module.exports = supportsAudio;
+export default supportsAudio;

@@ -150,4 +150,4 @@ function getMinWidth(child) {
   return child.w;
 }
 
-module.exports = VoiceElement;
+export default VoiceElement;

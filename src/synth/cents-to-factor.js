@@ -7,4 +7,4 @@ function centsToFactor(cents) {
   return Math.pow(2, cents / 1200);
 }
 
-module.exports = centsToFactor;
+export default centsToFactor;

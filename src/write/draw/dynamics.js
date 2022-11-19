@@ -25,4 +25,4 @@ function drawDynamics(renderer, params, selectables) {
   return [el];
 }
 
-module.exports = drawDynamics;
+export default drawDynamics;

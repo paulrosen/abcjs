@@ -147,4 +147,4 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
   return tune;
 }
 
-module.exports = renderAbc;
+export default renderAbc;

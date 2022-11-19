@@ -138,4 +138,4 @@ var addChord = function (
   return { roomTaken: roomTaken, roomTakenRight: roomTakenRight };
 };
 
-module.exports = addChord;
+export default addChord;

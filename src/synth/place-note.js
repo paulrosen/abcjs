@@ -116,4 +116,4 @@ var copyToChannel = function (toBuffer, fromBuffer, start) {
   }
 };
 
-module.exports = placeNote;
+export default placeNote;

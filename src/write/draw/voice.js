@@ -144,4 +144,4 @@ function isNonSpacerRest(elem) {
   return false;
 }
 
-module.exports = drawVoice;
+export default drawVoice;

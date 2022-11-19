@@ -105,4 +105,4 @@ TempoElement.prototype.createNote = function (
   return absElem;
 };
 
-module.exports = TempoElement;
+export default TempoElement;

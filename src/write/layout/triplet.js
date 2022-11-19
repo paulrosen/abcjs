@@ -87,4 +87,4 @@ function xAtMidpoint(startX, endX) {
   return startX + (endX - startX) / 2;
 }
 
-module.exports = layoutTriplet;
+export default layoutTriplet;

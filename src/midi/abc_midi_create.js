@@ -89,4 +89,4 @@ var create;
   }
 })();
 
-module.exports = create;
+export default create;

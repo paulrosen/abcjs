@@ -209,4 +209,4 @@ function cloneLine(line) {
   return output;
 }
 
-module.exports = delineTune;
+export default delineTune;

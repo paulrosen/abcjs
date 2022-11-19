@@ -187,4 +187,4 @@ var draw = function (
 
   return ret;
 };
-module.exports = drawBrace;
+export default drawBrace;

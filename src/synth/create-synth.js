@@ -583,4 +583,4 @@ function CreateSynth() {
   };
 }
 
-module.exports = CreateSynth;
+export default CreateSynth;

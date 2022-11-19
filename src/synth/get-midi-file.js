@@ -73,4 +73,4 @@ var generateMidiDownloadLink = function (tune, midiParams, midi, index) {
   return html + "</div>";
 };
 
-module.exports = getMidiFile;
+export default getMidiFile;

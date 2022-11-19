@@ -8,4 +8,4 @@ spacing.TOPNOTE = 15;
 spacing.STAVEHEIGHT = 100;
 spacing.INDENT = 50;
 
-module.exports = spacing;
+export default spacing;

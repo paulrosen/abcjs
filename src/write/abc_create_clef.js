@@ -135,4 +135,4 @@ function clefOffsets(clef) {
   }
 }
 
-module.exports = createClef;
+export default createClef;

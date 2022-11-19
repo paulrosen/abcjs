@@ -88,4 +88,4 @@ function drawTempo(renderer, params) {
   //return [tempoGroup];
 }
 
-module.exports = drawTempo;
+export default drawTempo;

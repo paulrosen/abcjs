@@ -25,4 +25,4 @@ function Subtitle(
   this.rows.push({ move: size.height });
 }
 
-module.exports = Subtitle;
+export default Subtitle;

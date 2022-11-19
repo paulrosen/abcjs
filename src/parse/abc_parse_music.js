@@ -1685,4 +1685,4 @@ var getBrokenRhythm = function (line, index) {
   return null;
 };
 
-module.exports = MusicParser;
+export default MusicParser;

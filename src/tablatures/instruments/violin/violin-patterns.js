@@ -19,4 +19,4 @@ ViolinPatterns.prototype.stringToPitch = function (stringNumber) {
   return converter.stringToPitch(stringNumber);
 };
 
-module.exports = ViolinPatterns;
+export default ViolinPatterns;

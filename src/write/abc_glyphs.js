@@ -4034,4 +4034,4 @@ var Glyphs = {
   }
 };
 
-module.exports = Glyphs; // we need the glyphs for layout information
+export default Glyphs; // we need the glyphs for layout information

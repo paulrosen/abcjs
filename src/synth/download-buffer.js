@@ -60,4 +60,4 @@ function bufferToWave(audioBuffers) {
   }
 }
 
-module.exports = downloadBuffer;
+export default downloadBuffer;

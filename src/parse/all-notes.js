@@ -67,4 +67,4 @@ allNotes.noteName = function (pitchIndex) {
   return allPitches[pitchIndex];
 };
 
-module.exports = allNotes;
+export default allNotes;

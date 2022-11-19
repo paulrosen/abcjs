@@ -60,4 +60,4 @@ GetTextSize.prototype.baselineToCenter = function (
   return height * 0.5 + (total - index - 2) * fontHeight;
 };
 
-module.exports = GetTextSize;
+export default GetTextSize;

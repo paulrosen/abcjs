@@ -6,4 +6,4 @@ var unhighlight = function (klass, color) {
   setClass(this.elemset, "", klass, color);
 };
 
-module.exports = unhighlight;
+export default unhighlight;

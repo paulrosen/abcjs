@@ -65,4 +65,4 @@ Selectables.prototype.wrapSvgEl = function (abcelem, el) {
   this.add(absEl, el, false);
 };
 
-module.exports = Selectables;
+export default Selectables;

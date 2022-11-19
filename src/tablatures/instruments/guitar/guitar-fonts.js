@@ -14,4 +14,4 @@ function setGuitarFonts(tune) {
   // tune.formatting.tabgracefont = { face: "\"Times New Roman\"", size: 7, weight: "normal", style: "normal", decoration: "none" };
 }
 
-module.exports = setGuitarFonts;
+export default setGuitarFonts;

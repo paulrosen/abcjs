@@ -28,4 +28,4 @@ TripletElem.prototype.setCloseAnchor = function (anchor2) {
     this.endingHeightAbove = 4;
 };
 
-module.exports = TripletElem;
+export default TripletElem;

@@ -368,4 +368,4 @@ TabAbsoluteElements.prototype.build = function (
   }
 };
 
-module.exports = TabAbsoluteElements;
+export default TabAbsoluteElements;

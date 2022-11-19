@@ -45,4 +45,4 @@ var SynthSequence = function () {
   };
 };
 
-module.exports = SynthSequence;
+export default SynthSequence;

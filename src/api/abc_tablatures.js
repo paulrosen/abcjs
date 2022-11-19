@@ -140,4 +140,4 @@ var abcTablatures = {
   }
 };
 
-module.exports = abcTablatures;
+export default abcTablatures;

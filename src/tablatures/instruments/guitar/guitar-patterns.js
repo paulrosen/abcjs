@@ -19,4 +19,4 @@ GuitarPatterns.prototype.stringToPitch = function (stringNumber) {
   return converter.stringToPitch(stringNumber);
 };
 
-module.exports = GuitarPatterns;
+export default GuitarPatterns;

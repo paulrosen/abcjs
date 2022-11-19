@@ -1733,4 +1733,4 @@ var ParserLint = function () {
   };
 };
 
-module.exports = ParserLint;
+export default ParserLint;

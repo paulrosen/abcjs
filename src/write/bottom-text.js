@@ -172,4 +172,4 @@ BottomText.prototype.footer = function (
   );
 };
 
-module.exports = BottomText;
+export default BottomText;

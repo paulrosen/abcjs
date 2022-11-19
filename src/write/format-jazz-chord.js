@@ -17,4 +17,4 @@ function formatJazzChord(chordString) {
   return lines.join("\n");
 }
 
-module.exports = formatJazzChord;
+export default formatJazzChord;

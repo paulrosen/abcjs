@@ -4,4 +4,4 @@ var GlissandoElem = function GlissandoElem(anchor1, anchor2) {
   this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
 };
 
-module.exports = GlissandoElem;
+export default GlissandoElem;

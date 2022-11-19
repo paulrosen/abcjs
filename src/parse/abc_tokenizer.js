@@ -1105,4 +1105,4 @@ Tokenizer.prototype.nextLine = function () {
   return null;
 };
 
-module.exports = Tokenizer;
+export default Tokenizer;

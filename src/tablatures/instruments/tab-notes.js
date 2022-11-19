@@ -40,4 +40,4 @@ TabNotes.prototype.build = function () {
   return buildReturned;
 };
 
-module.exports = TabNotes;
+export default TabNotes;

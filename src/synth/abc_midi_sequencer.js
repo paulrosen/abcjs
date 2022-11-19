@@ -790,4 +790,4 @@ import parseCommon from '../parse/abc_common';
   }
 })();
 
-module.exports = sequence;
+export default sequence;

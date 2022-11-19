@@ -69,4 +69,4 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
   }
 }
 
-module.exports = drawAbsolute;
+export default drawAbsolute;

@@ -32,4 +32,4 @@ function printStem(renderer, x, dx, y1, y2, klass, name) {
   return renderer.paper.pathToBack(attr);
 }
 
-module.exports = printStem;
+export default printStem;

@@ -1520,4 +1520,4 @@ AbstractEngraver.prototype.createBarLine = function (
   return abselem;
 };
 
-module.exports = AbstractEngraver;
+export default AbstractEngraver;

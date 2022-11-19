@@ -50,4 +50,4 @@ var getNote = function (url, instrument, name, audioContext) {
   return instrumentCache[name];
 };
 
-module.exports = getNote;
+export default getNote;

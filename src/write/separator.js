@@ -5,4 +5,4 @@ function Separator(spaceAbove, lineLength, spaceBelow) {
   if (spaceBelow) this.rows.push({ move: spaceBelow });
 }
 
-module.exports = Separator;
+export default Separator;

@@ -188,4 +188,4 @@ Renderer.prototype.absolutemoveY = function (y) {
   this.y = y;
 };
 
-module.exports = Renderer;
+export default Renderer;

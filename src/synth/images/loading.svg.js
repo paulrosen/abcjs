@@ -4,4 +4,4 @@ var svg = `
 </svg>
 `;
 
-module.exports = svg;
+export default svg;

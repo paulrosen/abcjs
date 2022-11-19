@@ -517,4 +517,4 @@ var verticalLint = function (tunes) {
   return positioning;
 };
 
-module.exports = verticalLint;
+export default verticalLint;

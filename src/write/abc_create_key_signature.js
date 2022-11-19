@@ -66,4 +66,4 @@ var createKeySignature = function (elem, tuneNumber) {
   return abselem;
 };
 
-module.exports = createKeySignature;
+export default createKeySignature;

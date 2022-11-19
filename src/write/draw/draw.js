@@ -91,4 +91,4 @@ function addStaffPadding(
     renderer.moveY(staffSeparation - separationInPixels);
 }
 
-module.exports = draw;
+export default draw;

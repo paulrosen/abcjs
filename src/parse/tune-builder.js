@@ -1050,4 +1050,4 @@ var TuneBuilder = function (tune) {
   };
 };
 
-module.exports = TuneBuilder;
+export default TuneBuilder;

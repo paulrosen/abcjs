@@ -48,4 +48,4 @@ function setPaperSize(renderer, maxwidth, scale, responsive) {
   renderer.paper.setParentStyles(parentStyles);
 }
 
-module.exports = setPaperSize;
+export default setPaperSize;

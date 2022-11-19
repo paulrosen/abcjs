@@ -146,4 +146,4 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
   };
 };
 
-module.exports = createNoteHead;
+export default createNoteHead;

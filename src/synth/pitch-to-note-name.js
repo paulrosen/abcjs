@@ -102,4 +102,4 @@ var pitchToNoteName = {
   121: "Db9"
 };
 
-module.exports = pitchToNoteName;
+export default pitchToNoteName;

@@ -247,4 +247,4 @@ function scaleExistingElem(paper, elem, scaleX, scaleY, x, y) {
   });
 }
 
-module.exports = drawRelativeElement;
+export default drawRelativeElement;

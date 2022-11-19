@@ -526,4 +526,4 @@ function removeGlobalClass(svg, klass) {
   }
 }
 
-module.exports = setupSelection;
+export default setupSelection;

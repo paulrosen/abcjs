@@ -272,4 +272,4 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
   return beams;
 }
 
-module.exports = layoutBeam;
+export default layoutBeam;

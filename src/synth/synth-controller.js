@@ -337,4 +337,4 @@ function SynthController() {
   };
 }
 
-module.exports = SynthController;
+export default SynthController;

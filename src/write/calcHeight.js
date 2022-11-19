@@ -13,4 +13,4 @@ var calcHeight = function (staffGroup) {
   return height;
 };
 
-module.exports = calcHeight;
+export default calcHeight;

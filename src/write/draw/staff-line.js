@@ -5,4 +5,4 @@ function printStaffLine(renderer, x1, x2, pitch, klass, name, dy) {
   return printLine(renderer, x1, x2, y, klass, name, dy);
 }
 
-module.exports = printStaffLine;
+export default printStaffLine;

@@ -98,4 +98,4 @@ Classes.prototype.generate = function (c) {
   return ret.join(" ");
 };
 
-module.exports = Classes;
+export default Classes;

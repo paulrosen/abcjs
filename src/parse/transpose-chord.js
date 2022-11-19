@@ -119,4 +119,4 @@ function transposeChordName(chord, steps, preferFlats, freeGCchord) {
   return chord;
 }
 
-module.exports = transposeChordName;
+export default transposeChordName;

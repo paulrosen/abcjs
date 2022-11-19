@@ -245,4 +245,4 @@ AbsoluteElement.prototype.unhighlight = function (klass, color) {
   unhighlight.bind(this)(klass, color);
 };
 
-module.exports = AbsoluteElement;
+export default AbsoluteElement;

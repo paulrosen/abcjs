@@ -140,4 +140,4 @@ var createTimeSignature = function (elem, tuneNumber) {
   return abselem;
 };
 
-module.exports = createTimeSignature;
+export default createTimeSignature;

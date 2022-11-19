@@ -131,4 +131,4 @@ function yAtNote(element, beam) {
   return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
 }
 
-module.exports = layoutVoice;
+export default layoutVoice;

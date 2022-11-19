@@ -175,4 +175,4 @@ function isSameStaff(voice1, voice2) {
   return voice1.staff.voices[0] === voice2.staff.voices[0];
 }
 
-module.exports = layoutStaffGroup;
+export default layoutStaffGroup;

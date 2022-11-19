@@ -41,4 +41,4 @@ var AbcViolinTab = function () {
   return { name: "ViolinTab", tablature: Plugin };
 };
 
-module.exports = AbcViolinTab;
+export default AbcViolinTab;

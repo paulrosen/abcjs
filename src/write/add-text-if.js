@@ -30,4 +30,4 @@ function addTextIf(rows, params, getTextSize) {
   }
 }
 
-module.exports = addTextIf;
+export default addTextIf;

@@ -85,4 +85,4 @@ function getY(startX, startY, slope, currentX) {
   return startY + x * slope;
 }
 
-module.exports = drawBeam;
+export default drawBeam;

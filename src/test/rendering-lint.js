@@ -296,4 +296,4 @@ function listArrayOfObjects(key, arr, indent) {
   return output.join("\n" + tab);
 }
 
-module.exports = renderingLint;
+export default renderingLint;

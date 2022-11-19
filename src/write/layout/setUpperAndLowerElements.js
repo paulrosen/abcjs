@@ -251,4 +251,4 @@ function setUpperAndLowerRelativeElements(positionY, element, renderSpacing) {
     );
 }
 
-module.exports = setUpperAndLowerElements;
+export default setUpperAndLowerElements;

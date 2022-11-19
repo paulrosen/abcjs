@@ -302,4 +302,4 @@ function attachListeners(self) {
         );
       });
 }
-module.exports = CreateSynthControl;
+export default CreateSynthControl;

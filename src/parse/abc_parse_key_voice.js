@@ -1025,4 +1025,4 @@ var parseKeyVoice = {};
   };
 })();
 
-module.exports = parseKeyVoice;
+export default parseKeyVoice;

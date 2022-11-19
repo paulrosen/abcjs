@@ -240,4 +240,4 @@ TabRenderer.prototype.doLayout = function () {
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };
 
-module.exports = TabRenderer;
+export default TabRenderer;

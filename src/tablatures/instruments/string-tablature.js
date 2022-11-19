@@ -51,4 +51,4 @@ StringTablature.prototype.setRelative = function (child, relative, first) {
   return first;
 };
 
-module.exports = StringTablature;
+export default StringTablature;

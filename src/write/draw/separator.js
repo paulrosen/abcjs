@@ -35,4 +35,4 @@ function drawSeparator(renderer, width) {
   });
 }
 
-module.exports = drawSeparator;
+export default drawSeparator;

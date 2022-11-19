@@ -733,4 +733,4 @@ var ParseHeader = function (tokenizer, warn, multilineVars, tune, tuneBuilder) {
   };
 };
 
-module.exports = ParseHeader;
+export default ParseHeader;

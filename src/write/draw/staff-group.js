@@ -264,4 +264,4 @@ function boxAllElements(renderer, voices, which) {
   }
 }
 
-module.exports = drawStaffGroup;
+export default drawStaffGroup;

@@ -60,4 +60,4 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
   return [g];
 }
 
-module.exports = drawEnding;
+export default drawEnding;

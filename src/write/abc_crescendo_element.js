@@ -10,4 +10,4 @@ var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
   this.pitch = undefined; // This will be set later
 };
 
-module.exports = CrescendoElem;
+export default CrescendoElem;

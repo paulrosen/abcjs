@@ -64,4 +64,4 @@ function printHorizontalLine(renderer, width, vertical, comment) {
     });
 }
 
-module.exports = printHorizontalLine;
+export default printHorizontalLine;

@@ -440,4 +440,4 @@ Editor.prototype.pauseMidi = function (shouldPause) {
   if (!shouldPause) this.redrawMidi();
 };
 
-module.exports = Editor;
+export default Editor;

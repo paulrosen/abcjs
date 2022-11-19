@@ -94,4 +94,4 @@ var sprintf = function () {
   return o.join("");
 };
 
-module.exports = sprintf;
+export default sprintf;

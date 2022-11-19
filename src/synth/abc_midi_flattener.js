@@ -1564,4 +1564,4 @@ import pitchesToPerc from './pitches-to-perc';
   }
 })();
 
-module.exports = flatten;
+export default flatten;

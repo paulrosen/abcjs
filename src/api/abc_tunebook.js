@@ -268,4 +268,4 @@ var tunebook = {};
   };
 })();
 
-module.exports = tunebook;
+export default tunebook;

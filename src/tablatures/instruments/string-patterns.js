@@ -272,4 +272,4 @@ function StringPatterns(plugin) {
   this.secondPos = buildSecond(this);
 }
 
-module.exports = StringPatterns;
+export default StringPatterns;

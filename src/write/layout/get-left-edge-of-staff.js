@@ -53,4 +53,4 @@ function setLocation(x, element) {
   element.x = x;
 }
 
-module.exports = getLeftEdgeOfStaff;
+export default getLeftEdgeOfStaff;

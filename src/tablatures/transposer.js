@@ -101,4 +101,4 @@ function Transposer(transposedKey, transposeBy) {
   this.lastEnd = this.kEnd + 1;
 }
 
-module.exports = Transposer;
+export default Transposer;

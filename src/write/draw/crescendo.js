@@ -69,4 +69,4 @@ var drawLine = function (renderer, y1, y2, y3, y4, left, right) {
   });
 };
 
-module.exports = drawCrescendo;
+export default drawCrescendo;

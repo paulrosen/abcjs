@@ -32,4 +32,4 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
   return [firstYLine, lastYLine];
 }
 
-module.exports = printStaff;
+export default printStaff;

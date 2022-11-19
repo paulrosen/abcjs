@@ -46,4 +46,4 @@ var AbcGuitarTab = function () {
   return { name: "GuitarTab", tablature: Plugin };
 };
 
-module.exports = AbcGuitarTab;
+export default AbcGuitarTab;
