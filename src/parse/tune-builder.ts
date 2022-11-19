@@ -1,7 +1,7 @@
-import parseKeyVoice from '../parse/abc_parse_key_voice';
-import parseCommon from '../parse/abc_common';
+import parseKeyVoice from "../parse/abc_parse_key_voice";
+import parseCommon from "../parse/abc_common";
 
-var TuneBuilder = function(this: any, tune: any) {
+var TuneBuilder = function (this: any, tune: any) {
   var self = this;
 
   this.setVisualTranspose = function (visualTranspose: any) {
@@ -16,7 +16,11 @@ var TuneBuilder = function(this: any, tune: any) {
       if (line.staff) {
         for (var j = 0; j < line.staff.length; j++) {
           var staff = line.staff[j];
-          var overlayVoice = [];
+          var overlayVoice: {
+            hasOverlay: boolean;
+            voice: $TSFixMe[];
+            snip: $TSFixMe[];
+          }[] = [];
           for (var k = 0; k < staff.voices.length; k++) {
             var voice = staff.voices[k];
             overlayVoice.push({ hasOverlay: false, voice: [], snip: [] });
@@ -48,8 +52,8 @@ var TuneBuilder = function(this: any, tune: any) {
                         duration: durationsPerLines[ii],
                         rest: { type: "invisible" },
                         startChar: event.startChar,
-                        endChar: event.endChar
-                      }
+                        endChar: event.endChar,
+                      },
                     ]);
                   }
                 }
@@ -58,35 +62,25 @@ var TuneBuilder = function(this: any, tune: any) {
                   // delete the overlay events from this array without messing up this loop.
                   inOverlay = false;
                   overlayVoice[k].snip.push({
-                    // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
                     start: snipStart,
-                    // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
-                    len: kk - snipStart
+                    len: kk - snipStart,
                   });
-                  // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
                   overlayVoice[k].voice.push(event); // Also end the overlay with the barline.
                 } else {
                   // This keeps the voices lined up: if the overlay isn't in the first measure then we need a bunch of invisible rests.
                   if (durationThisBar > 0)
                     overlayVoice[k].voice.push({
-                      // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
                       el_type: "note",
-                      // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
                       duration: durationThisBar,
-                      // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
                       rest: { type: "invisible" },
-                      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
                       startChar: event.startChar,
-                      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
-                      endChar: event.endChar
+                      endChar: event.endChar,
                     });
-                  // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
                   overlayVoice[k].voice.push(event);
                 }
                 durationThisBar = 0;
               } else if (event.el_type === "note") {
                 if (inOverlay) {
-                  // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
                   overlayVoice[k].voice.push(event);
                 } else {
                   durationThisBar += event.duration;
@@ -100,7 +94,6 @@ var TuneBuilder = function(this: any, tune: any) {
                 event.el_type === "transpose"
               ) {
                 // These types of events are duplicated on the overlay layer.
-                // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
                 overlayVoice[k].voice.push(event);
               }
             }
@@ -110,33 +103,31 @@ var TuneBuilder = function(this: any, tune: any) {
             ) {
               // there was no closing bar, so we didn't set the snip amount.
               overlayVoice[k].snip.push({
-                // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
                 start: snipStart,
-                // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
-                len: voice.length - snipStart
+                len: voice.length - snipStart,
               });
             }
           }
           for (k = 0; k < overlayVoice.length; k++) {
-            var ov = overlayVoice[k];
+            var ov: {
+              hasOverlay: boolean;
+              voice: $TSFixMe[];
+              snip: $TSFixMe[];
+            } = overlayVoice[k];
             if (ov.hasOverlay) {
-              // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
               ov.voice.splice(0, 0, { el_type: "stem", direction: "down" });
               staff.voices.push(ov.voice);
               for (var kkk = ov.snip.length - 1; kkk >= 0; kkk--) {
                 var snip = ov.snip[kkk];
-                // @ts-expect-error TS(2339): Property 'start' does not exist on type 'never'.
                 staff.voices[k].splice(snip.start, snip.len);
-                // @ts-expect-error TS(2339): Property 'start' does not exist on type 'never'.
                 staff.voices[k].splice(snip.start + 1, 0, {
                   el_type: "stem",
-                  direction: "auto"
+                  direction: "auto",
                 });
-                // @ts-expect-error TS(2339): Property 'start' does not exist on type 'never'.
                 var indexOfLastBar = findLastBar(staff.voices[k], snip.start);
                 staff.voices[k].splice(indexOfLastBar, 0, {
                   el_type: "stem",
-                  direction: "up"
+                  direction: "up",
                 });
               }
               // remove ending marks from the overlay voice so they are not repeated
@@ -220,8 +211,8 @@ var TuneBuilder = function(this: any, tune: any) {
           } else {
             for (v = 0; v < tune.lines[i].staff[s].voices.length; v++) {
               if (tune.lines[i].staff[s].voices[v] === undefined)
-                tune.lines[i].staff[s].voices[v] =
-                  []; // TODO-PER: There was a part missing in the abc music. How should we recover?
+                tune.lines[i].staff[s].voices[v] = [];
+              // TODO-PER: There was a part missing in the abc music. How should we recover?
               else if (this.containsNotes(tune.lines[i].staff[s].voices[v]))
                 hasAny = true;
             }
@@ -328,7 +319,12 @@ var TuneBuilder = function(this: any, tune: any) {
         return slurNum;
       };
 
-      var addStartSlur = function (obj: any, num: any, chordPos: any, usedNums: any) {
+      var addStartSlur = function (
+        obj: any,
+        num: any,
+        chordPos: any,
+        usedNums: any
+      ) {
         obj.startSlur = [];
         if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
           currSlur[staffNum][voiceNum][chordPos] = [];
@@ -615,7 +611,12 @@ var TuneBuilder = function(this: any, tune: any) {
     delete tune.potentialEndBeam;
   };
 
-  this.appendElement = function (type: any, startChar: any, endChar: any, hashParams: any) {
+  this.appendElement = function (
+    type: any,
+    startChar: any,
+    endChar: any,
+    hashParams: any
+  ) {
     var This = tune;
     var pushNote = function (hp: any) {
       var currStaff = This.lines[This.lineNum].staff[This.staffNum];
@@ -803,7 +804,7 @@ var TuneBuilder = function(this: any, tune: any) {
 
   this.addSubtitle = function (str: any, info: any) {
     this.pushLine({
-      subtitle: { text: str, startChar: info.startChar, endChar: info.endChar }
+      subtitle: { text: str, startChar: info.startChar, endChar: info.endChar },
     });
   };
 
@@ -815,21 +816,26 @@ var TuneBuilder = function(this: any, tune: any) {
     this.pushLine({ newpage: num });
   };
 
-  this.addSeparator = function (spaceAbove: any, spaceBelow: any, lineLength: any, info: any) {
+  this.addSeparator = function (
+    spaceAbove: any,
+    spaceBelow: any,
+    lineLength: any,
+    info: any
+  ) {
     this.pushLine({
       separator: {
         spaceAbove: Math.round(spaceAbove),
         spaceBelow: Math.round(spaceBelow),
         lineLength: Math.round(lineLength),
         startChar: info.startChar,
-        endChar: info.endChar
-      }
+        endChar: info.endChar,
+      },
     });
   };
 
   this.addText = function (str: any, info: any) {
     this.pushLine({
-      text: { text: str, startChar: info.startChar, endChar: info.endChar }
+      text: { text: str, startChar: info.startChar, endChar: info.endChar },
     });
   };
 
@@ -878,7 +884,7 @@ var TuneBuilder = function(this: any, tune: any) {
       if (!thisStaff.title) thisStaff.title = [];
       thisStaff.title[This.voiceNum] = {
         name: params.name,
-        subname: params.subname
+        subname: params.subname,
       };
       if (params.style)
         self.appendElement("style", null, null, { head: params.style });
@@ -912,7 +918,7 @@ var TuneBuilder = function(this: any, tune: any) {
         voices: [],
         clef: params.clef,
         key: params.key,
-        workingClef: params.clef
+        workingClef: params.clef,
       };
       if (params.stafflines !== undefined) {
         This.lines[This.lineNum].staff[This.staffNum].clef.stafflines =
@@ -944,7 +950,7 @@ var TuneBuilder = function(this: any, tune: any) {
       // Some stuff just happens for the first voice
       if (params.part)
         self.appendElement("part", params.part.startChar, params.part.endChar, {
-          title: params.part.title
+          title: params.part.title,
         });
       if (params.meter !== undefined)
         This.lines[This.lineNum].staff[This.staffNum].meter = params.meter;
@@ -976,7 +982,7 @@ var TuneBuilder = function(this: any, tune: any) {
       // We don't need a new line but we might need to update parts of it.
       if (params.part)
         self.appendElement("part", params.part.startChar, params.part.endChar, {
-          title: params.part.title
+          title: params.part.title,
         });
     } else {
       tune.lineNum++;

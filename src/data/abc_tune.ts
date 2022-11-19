@@ -1,20 +1,20 @@
 //    abc_tune.js: a computer usable internal structure representing one tune.
 
-import parseCommon from '../parse/abc_common';
+import parseCommon from "../parse/abc_common";
 
-import spacing from '../write/abc_spacing';
+import spacing from "../write/abc_spacing";
 // @ts-expect-error TS(7034): Variable 'sequence' implicitly has type 'any' in s... Remove this comment to see the full error message
-import sequence from '../synth/abc_midi_sequencer';
+import sequence from "../synth/abc_midi_sequencer";
 // @ts-expect-error TS(7034): Variable 'flatten' implicitly has type 'any' in so... Remove this comment to see the full error message
-import flatten from '../synth/abc_midi_flattener';
-import delineTune from './deline-tune';
+import flatten from "../synth/abc_midi_flattener";
+import delineTune from "./deline-tune";
 
 /**
  * This is the data for a single ABC tune. It is created and populated by the window.ABCJS.parse.Parse class.
  * Also known as the ABCJS Abstract Syntax Tree
  * @alternateClassName ABCJS.Tune
  */
-var Tune = function(this: any) {
+var Tune = function (this: any) {
   this.reset = function () {
     this.version = "1.1.0";
     this.media = "screen";
@@ -44,7 +44,7 @@ var Tune = function(this: any) {
       "origin",
       "composer",
       "author",
-      "partOrder"
+      "partOrder",
     ];
     copy(this, src, "metaText", attrs);
     copy(this, src, "metaTextInfo", attrs);
@@ -62,7 +62,7 @@ var Tune = function(this: any) {
       "abc-copyright",
       "abc-creator",
       "abc-edited-by",
-      "footer"
+      "footer",
     ];
     copy(this, src, "metaText", attrs);
     copy(this, src, "metaTextInfo", attrs);
@@ -341,7 +341,7 @@ var Tune = function(this: any) {
               startChar: null,
               endChar: null,
               startCharArray: [],
-              endCharArray: []
+              endCharArray: [],
             };
           }
           eventHash["event" + voiceTimeMilliseconds].measureStart = true;
@@ -366,9 +366,9 @@ var Tune = function(this: any) {
             startCharArray: [element.abcelem.startChar],
             endCharArray: [element.abcelem.endChar],
             midiPitches: element.abcelem.midiPitches
-              // @ts-expect-error TS(2339): Property 'cloneArray' does not exist on type '{}'.
-              ? parseCommon.cloneArray(element.abcelem.midiPitches)
-              : []
+              ? // @ts-expect-error TS(2339): Property 'cloneArray' does not exist on type '{}'.
+                parseCommon.cloneArray(element.abcelem.midiPitches)
+              : [],
           };
           if (element.abcelem.midiGraceNotePitches)
             eventHash["event" + voiceTimeMilliseconds].midiGraceNotePitches =
@@ -437,13 +437,13 @@ var Tune = function(this: any) {
     return {
       isTiedState: isTiedState,
       duration: realDuration / timeDivider,
-      nextIsBar: nextIsBar || element.type === "bar"
+      nextIsBar: nextIsBar || element.type === "bar",
     };
   };
 
   this.makeVoicesArray = function () {
     // First make a new array that is arranged by voice so that the repeats that span different lines are handled correctly.
-    var voicesArr = [];
+    var voicesArr: $TSFixMe[][] = [];
     var measureNumber = [];
     var tempos = {};
     for (var line = 0; line < this.engraver.staffgroups.length; line++) {
@@ -470,16 +470,11 @@ var Tune = function(this: any) {
               // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
               tempos[measureNumber[v]] = this.getBpm(elements[elem].abcelem);
             voicesArr[v].push({
-              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
               top: top,
-              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
               height: height,
-              // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
               line: group.line,
-              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
               measureNumber: measureNumber[v],
-              // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
-              elem: elements[elem]
+              elem: elements[elem],
             });
             if (elements[elem].type === "bar" && noteFound)
               // Count the measures by counting the bar lines, but skip a bar line that appears at the left of the music, before any notes.
@@ -497,7 +492,12 @@ var Tune = function(this: any) {
     return voicesArr;
   };
 
-  this.setupEvents = function (startingDelay: any, timeDivider: any, startingBpm: any, warp: any) {
+  this.setupEvents = function (
+    startingDelay: any,
+    timeDivider: any,
+    startingBpm: any,
+    warp: any
+  ) {
     if (!warp) warp = 1;
     var timingEvents = [];
 

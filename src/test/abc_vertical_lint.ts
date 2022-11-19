@@ -42,7 +42,7 @@ var verticalLint = function (tunes: any) {
         var bracket = {
           x: brace[b1].x,
           top: fixed1(brace[b1].startY),
-          bottom: fixed1(brace[b1].endY)
+          bottom: fixed1(brace[b1].endY),
         };
         // @ts-expect-error TS(2339): Property 'header' does not exist on type '{ x: any... Remove this comment to see the full error message
         if (brace[b1].header) bracket.header = brace[b1].header;
@@ -123,14 +123,16 @@ var verticalLint = function (tunes: any) {
       obj.$type.indexOf("note") === 0 ||
       obj.$type.indexOf("rest") === 0
     ) {
-      return obj.$type +
-      " " +
-      fixed4(obj.duration) +
-      " " +
-      obj.elem
-        .join(" ")
-        .replace(/symbol /g, "")
-        .replace(/\n/g, "\\n");
+      return (
+        obj.$type +
+        " " +
+        fixed4(obj.duration) +
+        " " +
+        obj.elem
+          .join(" ")
+          .replace(/symbol /g, "")
+          .replace(/\n/g, "\\n")
+      );
     } else if (obj.$type === "bar") return "Bar";
     else if (obj.$type === "part") return obj.elem[0];
     else if (obj.$type === "tempo") return "Tempo " + obj.elem[0];
@@ -314,28 +316,23 @@ var verticalLint = function (tunes: any) {
   }
 
   function extractPositioningInfo(staffGroup: any, lineNum: any) {
-    var ret = {
+    var ret: { [key: string]: $TSFixMe } = {
       height: staffGroup.height,
       minSpace: staffGroup.minspace,
       spacingUnits: staffGroup.spacingunits,
       width: staffGroup.w,
       startX: staffGroup.startX,
       staffs: [],
-      voices: []
+      voices: [],
     };
-    // @ts-expect-error TS(2339): Property 'brace' does not exist on type '{ height:... Remove this comment to see the full error message
     ret.brace = collectBrace(staffGroup.brace);
-    // @ts-expect-error TS(2339): Property 'bracket' does not exist on type '{ heigh... Remove this comment to see the full error message
     ret.bracket = collectBrace(staffGroup.bracket);
     for (var i = 0; i < staffGroup.staffs.length; i++) {
       var staff = staffGroup.staffs[i];
       ret.staffs.push({
-        // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
         bottom: fixed1(staff.bottom),
-        // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
         top: fixed1(staff.top),
-        // @ts-expect-error TS(2322): Type '{}' is not assignable to type 'never'.
-        specialY: setSpecialY(staff)
+        specialY: setSpecialY(staff),
       });
     }
     for (i = 0; i < staffGroup.voices.length; i++) {
@@ -348,7 +345,7 @@ var verticalLint = function (tunes: any) {
         startX: voice.startX,
         voiceChildren: [],
         otherChildren: [],
-        beams: []
+        beams: [],
       };
       for (var j = 0; j < voice.children.length; j++) {
         var child = voice.children[j];
@@ -391,7 +388,7 @@ var verticalLint = function (tunes: any) {
           minSpacing: child.minspacing,
           duration: child.duration,
           width: child.w,
-          x: child.x
+          x: child.x,
         };
         // @ts-expect-error TS(2339): Property 'classes' does not exist on type '{ $type... Remove this comment to see the full error message
         if (classes.length > 0) obj2.classes = classes.join(" ");
@@ -508,7 +505,6 @@ var verticalLint = function (tunes: any) {
         obj.beams.push(ch2);
       }
       // TODO: there is also extra[], heads[], elemset[], and right[] to parse.
-      // @ts-expect-error TS(2345): Argument of type '{ bottom: any; top: any; special... Remove this comment to see the full error message
       ret.voices.push(obj);
     }
     return formatLine(ret, lineNum);

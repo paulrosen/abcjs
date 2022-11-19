@@ -64,7 +64,7 @@ function addLineBreaks(lines: any, linesBreakElements: any, barNumbers: any) {
           action.voice
         ].unshift({
           el_type: "stem",
-          direction: lastStem[action.staff * 10 + action.voice].direction
+          direction: lastStem[action.staff * 10 + action.voice].direction,
         });
       var currVoice =
         outputLines[action.line].staff[action.staff].voices[action.voice];
@@ -76,7 +76,7 @@ function addLineBreaks(lines: any, linesBreakElements: any, barNumbers: any) {
             mode: currVoice[kk].mode,
             accidentals: currVoice[kk].accidentals.filter(function (acc: any) {
               return acc.acc !== "natural";
-            })
+            }),
           };
           break;
         }
@@ -84,7 +84,7 @@ function addLineBreaks(lines: any, linesBreakElements: any, barNumbers: any) {
       for (kk = currVoice.length - 1; kk >= 0; kk--) {
         if (currVoice[kk].el_type === "stem") {
           lastStem[action.staff * 10 + action.voice] = {
-            direction: currVoice[kk].direction
+            direction: currVoice[kk].direction,
           };
           break;
         }
@@ -150,7 +150,7 @@ function findLineBreaks(lines: any, lineBreakArray: any) {
                   staff: j,
                   voice: k,
                   start: start,
-                  end: e
+                  end: e,
                 });
                 start = e + 1;
                 outputLine++;
@@ -166,7 +166,7 @@ function findLineBreaks(lines: any, lineBreakArray: any) {
             staff: j,
             voice: k,
             start: start,
-            end: voice.length
+            end: voice.length,
           });
           outputLine++;
           lineCounter = Math.max(lineCounter, outputLine);
@@ -253,7 +253,7 @@ function oneTry(
           highestVariance: Math.max(highestVariance, lastVariance),
           currLine: currLine + 1,
           lineBreaks: newBreaks,
-          startIndex: i + 1
+          startIndex: i + 1,
         });
       } else if (thisVariance > lastVariance && i < measureWidths.length - 1) {
         // Also attempt one extra measure on this line.
@@ -269,7 +269,7 @@ function oneTry(
           highestVariance: Math.max(highestVariance, thisVariance),
           currLine: currLine,
           lineBreaks: newBreaks,
-          startIndex: i + 1
+          startIndex: i + 1,
         });
       }
     }
@@ -287,7 +287,12 @@ function oneTry(
   lineWidths.push(lineAccumulator);
 }
 
-function optimizeLineWidths(widths: any, lineBreakPoint: any, lineBreaks: any, explanation: any) {
+function optimizeLineWidths(
+  widths: any,
+  lineBreakPoint: any,
+  lineBreaks: any,
+  explanation: any
+) {
   //	figure out how many lines
   var numLines = Math.ceil(widths.total / lineBreakPoint); // + 1 TODO-PER: this used to be plus one - not sure why
 
@@ -311,7 +316,7 @@ function optimizeLineWidths(widths: any, lineBreakPoint: any, lineBreaks: any, e
     highestVariance: 0,
     currLine: 0,
     lineBreaks: [], // These are the zero-based last measure on each line
-    startIndex: 0
+    startIndex: 0,
   });
   var index = 0;
   while (index < otherTries.length) {
@@ -352,7 +357,7 @@ function optimizeLineWidths(widths: any, lineBreakPoint: any, lineBreaks: any, e
       variances: otherTry.variances,
       // @ts-expect-error TS(2339): Property 'aveVariance' does not exist on type '{ a... Remove this comment to see the full error message
       aveVariance: otherTry.aveVariance,
-      widths: widths.measureWidths
+      widths: widths.measureWidths,
     });
   }
   var smallest = 9999999;
@@ -369,7 +374,7 @@ function optimizeLineWidths(widths: any, lineBreakPoint: any, lineBreaks: any, e
   return {
     failed: false,
     lineBreaks: otherTries[smallestIndex].lineBreaks,
-    variance: otherTries[smallestIndex].highestVariance
+    variance: otherTries[smallestIndex].highestVariance,
   };
 }
 
@@ -401,7 +406,7 @@ function fixedMeasureLineBreaks(
 function getRevisedTuneParams(lineBreaks: any, staffWidth: any, params: any) {
   var revisedParams = {
     lineBreaks: lineBreaks,
-    staffwidth: staffWidth
+    staffwidth: staffWidth,
   };
   for (var key in params) {
     if (
@@ -429,7 +434,7 @@ function calcLineWraps(tune: any, widths: any, params: any) {
     return {
       reParse: false,
       explanation: "Staff width is narrower than the margin",
-      revisedParams: params
+      revisedParams: params,
     };
   }
   var scale = params.scale ? Math.max(params.scale, 0.1) : 1;
@@ -458,13 +463,13 @@ function calcLineWraps(tune: any, widths: any, params: any) {
     // @ts-expect-error TS(2532): Object is possibly 'undefined'.
     var minLineSize = usableWidth / maxSpacing / scale;
     var allowableVariance = usableWidth / minSpacingLimit / scale;
-    var explanation = {
+    var explanation: { [key: string]: $TSFixMe } = {
       widths: section,
       lineBreakPoint: lineBreakPoint,
       minLineSize: minLineSize,
       attempts: [],
       staffWidth: params.staffwidth,
-      minWidth: Math.round(allowableVariance)
+      minWidth: Math.round(allowableVariance),
     };
 
     // If there is a preferred number of measures per line, test that first. If none of the lines is too long, then we're finished.
@@ -476,16 +481,11 @@ function calcLineWraps(tune: any, widths: any, params: any) {
         preferredMeasuresPerLine
       );
       explanation.attempts.push({
-        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         type: "Fixed Measures Per Line",
-        // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
         preferredMeasuresPerLine: preferredMeasuresPerLine,
-        // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
         lineBreaks: f.lineBreaks,
-        // @ts-expect-error TS(2322): Type 'boolean' is not assignable to type 'never'.
         failed: f.failed,
-        // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
-        totals: f.totals
+        totals: f.totals,
       });
       if (!f.failed) lineBreaks = f.lineBreaks;
     }
@@ -495,12 +495,9 @@ function calcLineWraps(tune: any, widths: any, params: any) {
     if (!lineBreaks) {
       var ff = freeFormLineBreaks(section.measureWidths, lineBreakPoint);
       explanation.attempts.push({
-        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         type: "Free Form",
-        // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
         lineBreaks: ff.lineBreaks,
-        // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
-        totals: ff.totals
+        totals: ff.totals,
       });
       lineBreaks = ff.lineBreaks;
 
@@ -516,16 +513,13 @@ function calcLineWraps(tune: any, widths: any, params: any) {
           explanation
         );
         explanation.attempts.push({
-          // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
           type: "Optimize",
           // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
           failed: ff.failed,
           // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
           reason: ff.reason,
-          // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
           lineBreaks: ff.lineBreaks,
-          // @ts-expect-error TS(2322): Type 'number[]' is not assignable to type 'never'.
-          totals: ff.totals
+          totals: ff.totals,
         });
         // @ts-expect-error TS(2339): Property 'failed' does not exist on type '{ lineBr... Remove this comment to see the full error message
         if (!ff.failed) lineBreaks = ff.lineBreaks;

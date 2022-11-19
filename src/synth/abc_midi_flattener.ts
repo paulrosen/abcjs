@@ -5,8 +5,8 @@
 // It also extracts guitar chords to a separate voice and resolves their rhythm.
 
 var flatten;
-import parseCommon from '../parse/abc_common';
-import pitchesToPerc from './pitches-to-perc';
+import parseCommon from "../parse/abc_common";
+import pitchesToPerc from "./pitches-to-perc";
 
 (function () {
   "use strict";
@@ -136,7 +136,7 @@ import pitchesToPerc from './pitches-to-perc';
             currentTrackName = {
               cmd: "text",
               type: "name",
-              text: element.trackName
+              text: element.trackName,
             };
             break;
           case "note":
@@ -198,7 +198,7 @@ import pitchesToPerc from './pitches-to-perc';
                 currentTrack.push({
                   cmd: "program",
                   channel: 0,
-                  instrument: element.program
+                  instrument: element.program,
                 });
             }
             break;
@@ -256,7 +256,7 @@ import pitchesToPerc from './pitches-to-perc';
       tempo: startingTempo,
       instrument: instrument,
       tracks: tracks,
-      totalDuration: lastEventTime
+      totalDuration: lastEventTime,
     };
   };
 
@@ -469,7 +469,7 @@ import pitchesToPerc from './pitches-to-perc';
           chordTrack.push({
             cmd: "program",
             channel: chordChannel,
-            instrument: chordInstrument
+            instrument: chordInstrument,
           });
         }
 
@@ -482,7 +482,7 @@ import pitchesToPerc from './pitches-to-perc';
         currentChords.push({
           chord: lastChord,
           beat: barBeat,
-          start: timeToRealTime(elem.time)
+          start: timeToRealTime(elem.time),
         });
       }
     }
@@ -542,7 +542,7 @@ import pitchesToPerc from './pitches-to-perc';
             duration: shortestNote,
             gap: 0,
             instrument: currentInstrument,
-            style: "decoration"
+            style: "decoration",
           });
           note = note === 1 ? 0 : 1;
           runningDuration -= shortestNote;
@@ -558,7 +558,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: shortestNote,
           gap: 0,
           instrument: currentInstrument,
-          style: "decoration"
+          style: "decoration",
         });
         runningDuration -= shortestNote;
         start += shortestNote;
@@ -570,7 +570,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: shortestNote,
           gap: 0,
           instrument: currentInstrument,
-          style: "decoration"
+          style: "decoration",
         });
         runningDuration -= shortestNote;
         start += shortestNote;
@@ -581,7 +581,7 @@ import pitchesToPerc from './pitches-to-perc';
           start: start,
           duration: runningDuration,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
         });
         break;
       case "lowermordent":
@@ -593,7 +593,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: shortestNote,
           gap: 0,
           instrument: currentInstrument,
-          style: "decoration"
+          style: "decoration",
         });
         runningDuration -= shortestNote;
         start += shortestNote;
@@ -605,7 +605,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: shortestNote,
           gap: 0,
           instrument: currentInstrument,
-          style: "decoration"
+          style: "decoration",
         });
         runningDuration -= shortestNote;
         start += shortestNote;
@@ -616,7 +616,7 @@ import pitchesToPerc from './pitches-to-perc';
           start: start,
           duration: runningDuration,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
         });
         break;
       case "turn":
@@ -629,7 +629,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: shortestNote,
           gap: 0,
           instrument: currentInstrument,
-          style: "decoration"
+          style: "decoration",
         });
         currentTrack.push({
           cmd: "note",
@@ -639,7 +639,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: shortestNote,
           gap: 0,
           instrument: currentInstrument,
-          style: "decoration"
+          style: "decoration",
         });
         currentTrack.push({
           cmd: "note",
@@ -649,7 +649,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: shortestNote,
           gap: 0,
           instrument: currentInstrument,
-          style: "decoration"
+          style: "decoration",
         });
         currentTrack.push({
           cmd: "note",
@@ -659,7 +659,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: shortestNote,
           gap: 0,
           instrument: currentInstrument,
-          style: "decoration"
+          style: "decoration",
         });
         currentTrack.push({
           cmd: "note",
@@ -668,7 +668,7 @@ import pitchesToPerc from './pitches-to-perc';
           start: start + shortestNote * 4,
           duration: shortestNote,
           gap: 0,
-          instrument: currentInstrument
+          instrument: currentInstrument,
         });
         break;
       case "roll":
@@ -681,7 +681,7 @@ import pitchesToPerc from './pitches-to-perc';
             duration: shortestNote,
             gap: 0,
             instrument: currentInstrument,
-            style: "decoration"
+            style: "decoration",
           });
           runningDuration -= shortestNote * 2;
           start += shortestNote * 2;
@@ -741,11 +741,11 @@ import pitchesToPerc from './pitches-to-perc';
           if (elem.elem.currentTrackMilliseconds !== ms) {
             elem.elem.currentTrackMilliseconds = [
               elem.elem.currentTrackMilliseconds,
-              ms
+              ms,
             ];
             elem.elem.currentTrackWholeNotes = [
               elem.elem.currentTrackWholeNotes,
-              rt
+              rt,
             ];
           }
         } else {
@@ -808,7 +808,7 @@ import pitchesToPerc from './pitches-to-perc';
           duration: durationRounded(note.duration),
           instrument: currentInstrument,
           startChar: elem.elem.startChar,
-          endChar: elem.elem.endChar
+          endChar: elem.elem.endChar,
         };
         p = adjustForMicroTone(p);
         if (elem.gracenotes) {
@@ -964,7 +964,12 @@ import pitchesToPerc from './pitches-to-perc';
     return ret;
   }
 
-  function writeGraceNotes(graces: any, start: any, velocity: any, currentInstrument: any) {
+  function writeGraceNotes(
+    graces: any,
+    start: any,
+    velocity: any,
+    currentInstrument: any
+  ) {
     var midiGrace = [];
     velocity = Math.round(velocity);
     for (var g = 0; g < graces.length; g++) {
@@ -977,13 +982,13 @@ import pitchesToPerc from './pitches-to-perc';
         duration: gp.duration,
         gap: 0,
         instrument: currentInstrument,
-        style: "grace"
+        style: "grace",
       });
       midiGrace.push({
         pitch: gp.pitch,
         durationInMeasures: gp.duration,
         volume: velocity,
-        instrument: currentInstrument
+        instrument: currentInstrument,
       });
       start += gp.duration;
     }
@@ -1022,7 +1027,7 @@ import pitchesToPerc from './pitches-to-perc';
     D: 38,
     E: 40,
     F: 41,
-    G: 43
+    G: 43,
   };
   function interpretChord(name: any) {
     // chords have the format:
@@ -1208,7 +1213,7 @@ import pitchesToPerc from './pitches-to-perc';
     "maj7#5#11": [0, 4, 8, 11, 18],
     "9(#5)": [0, 4, 8, 10, 14],
     "13(#5)": [0, 4, 8, 10, 14, 21],
-    "13#5": [0, 4, 8, 10, 14, 21]
+    "13#5": [0, 4, 8, 10, 14, 21],
   };
   function chordNotes(bass: any, modifier: any) {
     // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
@@ -1231,7 +1236,13 @@ import pitchesToPerc from './pitches-to-perc';
     return notes;
   }
 
-  function writeBoom(boom: any, beatLength: any, volume: any, beat: any, noteLength: any) {
+  function writeBoom(
+    boom: any,
+    beatLength: any,
+    volume: any,
+    beat: any,
+    noteLength: any
+  ) {
     // undefined means there is a stop time.
     if (boom !== undefined)
       chordTrack.push({
@@ -1241,11 +1252,17 @@ import pitchesToPerc from './pitches-to-perc';
         start: lastBarTime + beat * durationRounded(beatLength),
         duration: durationRounded(noteLength),
         gap: 0,
-        instrument: chordInstrument
+        instrument: chordInstrument,
       });
   }
 
-  function writeChick(chick: any, beatLength: any, volume: any, beat: any, noteLength: any) {
+  function writeChick(
+    chick: any,
+    beatLength: any,
+    volume: any,
+    beat: any,
+    noteLength: any
+  ) {
     for (var c = 0; c < chick.length; c++)
       chordTrack.push({
         cmd: "note",
@@ -1254,7 +1271,7 @@ import pitchesToPerc from './pitches-to-perc';
         start: lastBarTime + beat * durationRounded(beatLength),
         duration: durationRounded(noteLength),
         gap: 0,
-        instrument: chordInstrument
+        instrument: chordInstrument,
       });
   }
 
@@ -1278,8 +1295,8 @@ import pitchesToPerc from './pitches-to-perc';
       "chick",
       "boom2",
       "",
-      "chick"
-    ]
+      "chick",
+    ],
   };
 
   function resolveChords(startTime: any, endTime: any) {
@@ -1483,7 +1500,11 @@ import pitchesToPerc from './pitches-to-perc';
     // There should be two more params for each event: the volume and the pitch.
     if (params.pattern.length !== totalPlay * 2 + 1) return { on: false };
 
-    var ret = { on: true, bars: params.bars, pattern: [] };
+    var ret: { [key: string]: $TSFixMe } = {
+      on: true,
+      bars: params.bars,
+      pattern: [],
+    };
     var beatLength = getBeatFraction(meter);
     var playCount = 0;
     for (var j = 0; j < events.length; j++) {
@@ -1520,27 +1541,21 @@ import pitchesToPerc from './pitches-to-perc';
       } else if (num) len *= num;
       if (event[0] === "d") {
         ret.pattern.push({
-          // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
           len: len * beatLength,
-          // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
           pitch: params.pattern[1 + playCount],
-          // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
-          velocity: params.pattern[1 + playCount + totalPlay]
+          velocity: params.pattern[1 + playCount + totalPlay],
         });
         playCount++;
-      // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
       } else ret.pattern.push({ len: len * beatLength, pitch: null });
     }
     // Now normalize the pattern to cover the correct number of measures. The note lengths passed are relative to each other and need to be scaled to fit a measure.
     var totalTime = 0;
     var measuresPerBeat = meter.num / meter.den;
     for (var ii = 0; ii < ret.pattern.length; ii++)
-      // @ts-expect-error TS(2339): Property 'len' does not exist on type 'never'.
       totalTime += ret.pattern[ii].len;
     var numBars = params.bars ? params.bars : 1;
     var factor = totalTime / numBars / measuresPerBeat;
     for (ii = 0; ii < ret.pattern.length; ii++)
-      // @ts-expect-error TS(2339): Property 'len' does not exist on type 'never'.
       ret.pattern[ii].len = ret.pattern[ii].len / factor;
     return ret;
   }
@@ -1555,7 +1570,7 @@ import pitchesToPerc from './pitches-to-perc';
       drumTrack.push({
         cmd: "program",
         channel: channel,
-        instrument: drumInstrument
+        instrument: drumInstrument,
       });
     }
 
@@ -1580,7 +1595,7 @@ import pitchesToPerc from './pitches-to-perc';
           start: start,
           duration: len,
           gap: 0,
-          instrument: drumInstrument
+          instrument: drumInstrument,
         });
       }
       start += len;

@@ -1,12 +1,17 @@
-import spacing from '../abc_spacing';
-import drawBrace from './brace';
-import drawVoice from './voice';
-import printStaff from './staff';
-import printDebugBox from './debug-box';
-import printStem from './print-stem';
-import nonMusic from './non-music';
+import spacing from "../abc_spacing";
+import drawBrace from "./brace";
+import drawVoice from "./voice";
+import printStaff from "./staff";
+import printDebugBox from "./debug-box";
+import printStem from "./print-stem";
+import nonMusic from "./non-music";
 
-function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber: any) {
+function drawStaffGroup(
+  renderer: any,
+  params: any,
+  selectables: any,
+  lineNumber: any
+) {
   // We enter this method with renderer.y pointing to the topmost coordinate that we're allowed to draw.
   // All of the children that will be drawn have a relative "pitch" set, where zero is the first ledger line below the staff.
   // renderer.y will be offset at the beginning of each staff by the amount required to make the relative pitch work.
@@ -35,7 +40,7 @@ function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber
           x2: renderer.padding.left + renderer.controller.width,
           y1: startY,
           y2: startY,
-          stroke: "#0000ff"
+          stroke: "#0000ff",
         });
         // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
         printDebugBox(renderer, {
@@ -48,7 +53,7 @@ function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber
           fill: renderer.foregroundColor,
           stroke: renderer.foregroundColor,
           "fill-opacity": 0.1,
-          "stroke-opacity": 0.1
+          "stroke-opacity": 0.1,
         });
         colorIndex = 0;
         debugPrintGridItem(staff1, "chordHeightAbove");
@@ -73,7 +78,7 @@ function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber
           x2: renderer.padding.left + renderer.controller.width,
           y1: renderer.y,
           y2: renderer.y,
-          stroke: "#0000aa"
+          stroke: "#0000aa",
         });
       }
     }
@@ -129,28 +134,21 @@ function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber
       top: startY,
       zero: renderer.y,
       // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
-      height: params.height * spacing.STEP
+      height: params.height * spacing.STEP,
     });
     var tabNameHeight = 0;
     if (tabName) {
       // print tab infos on staffBottom
-      var r = { rows: [] };
-      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
+      var r: { [key: string]: $TSFixMe; rows: Array<$TSFixMe> } = { rows: [] };
       r.rows.push({ absmove: bottomLine + 2 });
       var leftMargin = 8;
       r.rows.push({
-        // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
         left: params.startx + leftMargin,
-        // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
         text: tabName.name,
-        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         font: "tablabelfont",
-        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
         klass: "text instrument-name",
-        // @ts-expect-error TS(2322): Type 'string' is not assignable to type 'never'.
-        anchor: "start"
+        anchor: "start",
       });
-      // @ts-expect-error TS(2322): Type 'any' is not assignable to type 'never'.
       r.rows.push({ move: tabName.textSize.height });
       // @ts-expect-error TS(2554): Expected 3 arguments, but got 2.
       nonMusic(renderer, r);
@@ -184,7 +182,7 @@ function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber
       "rgb(191,119,218)",
       "rgb(195,30,151)",
       "rgb(31,170,177)",
-      "rgb(220,166,142)"
+      "rgb(220,166,142)",
     ];
     if (staff.positionY[key]) {
       // @ts-expect-error TS(2339): Property 'STEP' does not exist on type '{}'.
@@ -211,7 +209,7 @@ function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber
           fill: colors[colorIndex],
           stroke: colors[colorIndex],
           "fill-opacity": 0.4,
-          "stroke-opacity": 0.4
+          "stroke-opacity": 0.4,
         },
         key.substr(0, 4)
       );
@@ -221,7 +219,13 @@ function drawStaffGroup(renderer: any, params: any, selectables: any, lineNumber
   }
 }
 
-function printBrace(renderer: any, absoluteY: any, brace: any, index: any, selectables: any) {
+function printBrace(
+  renderer: any,
+  absoluteY: any,
+  brace: any,
+  index: any,
+  selectables: any
+) {
   if (brace) {
     for (var i = 0; i < brace.length; i++) {
       if (brace[i].isStartVoice(index)) {
@@ -257,7 +261,7 @@ function boxAllElements(renderer: any, voices: any, which: any) {
         fill: "#88e888",
         "fill-opacity": 0.4,
         stroke: "#4aa93d",
-        "stroke-opacity": 0.8
+        "stroke-opacity": 0.8,
       });
 
       for (var k = 0; k < elem.children.length; k++) {
@@ -274,7 +278,7 @@ function boxAllElements(renderer: any, voices: any, which: any) {
             height: relElem.dim.font.size,
             fill: "none",
             stroke: "#4aa93d",
-            "stroke-opacity": 0.8
+            "stroke-opacity": 0.8,
           });
         }
       }
