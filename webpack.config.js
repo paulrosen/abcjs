@@ -1,4 +1,4 @@
-import { version } from "./package.json";
+//import { version } from "./package.json" assert { type: "json" };
 import TerserPlugin from "terser-webpack-plugin";
 import { BundleAnalyzerPlugin as WebpackBundleAnalyzer } from "webpack-bundle-analyzer";
 
@@ -20,10 +20,13 @@ export default (env = {}, argv) => {
             : `abcjs-${type}-min.js`,
       },
       devtool: argv.mode === "development" ? "source-map" : false,
+      resolve: {
+          extensions: ['.ts', '.js', '.json']
+      },
       module: {
         rules: [
           {
-            test: /\.js$/,
+            test: /\.ts$/,
             exclude: /node_modules/,
             use: "babel-loader",
           },
@@ -48,6 +51,7 @@ export default (env = {}, argv) => {
         new WebpackBundleAnalyzer({
           analyzerMode: "static",
         }),
+        ,
       ];
     }
     return config;
@@ -56,19 +60,19 @@ export default (env = {}, argv) => {
   return [
     {
       name: "basic",
-      entry: `./index.js`,
+      entry: `./index.ts`,
       ...defaults(argv, "basic"),
     },
     {
       name: "plugin",
-      entry: `./plugin.js`,
+      entry: `./plugin.ts`,
       ...defaults(argv, "plugin"),
     },
   ];
 };
 
 function makeBanner(type) {
-  let banner = `abcjs_${type} v${version} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`;
+  let banner = `abcjs_${type} v${"2"} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`;
   return (
     banner + `/*! For license information please see abcjs_${type}.LICENSE`
   );
