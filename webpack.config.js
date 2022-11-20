@@ -1,4 +1,9 @@
-//import { version } from "./package.json" assert { type: "json" };
+import { createRequire } from "module"; // Bring in the ability to create the 'require' method
+const require = createRequire(import.meta.url); // construct the require method
+const { version } = require("./package.json") // use the require method
+
+
+
 import TerserPlugin from "terser-webpack-plugin";
 import { BundleAnalyzerPlugin as WebpackBundleAnalyzer } from "webpack-bundle-analyzer";
 
@@ -72,7 +77,7 @@ export default (env = {}, argv) => {
 };
 
 function makeBanner(type) {
-  let banner = `abcjs_${type} v${"2"} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`;
+  let banner = `abcjs_${type} v${version} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`;
   return (
     banner + `/*! For license information please see abcjs_${type}.LICENSE`
   );
