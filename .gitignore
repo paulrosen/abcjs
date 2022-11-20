@@ -7,4 +7,3 @@ docs/.vuepress/.cache/*
 docs/.vuepress/.temp/*
 docs/.vuepress/.dist/*
 dist/report.html
-.eslintrc.json

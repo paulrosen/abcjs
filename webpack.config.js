@@ -1,70 +1,84 @@
-const pkg = require("./package.json");
-const TerserPlugin = require('terser-webpack-plugin');
-const WebpackBundleAnalyzer = require("webpack-bundle-analyzer")
-  .BundleAnalyzerPlugin;
+import { createRequire } from "module"; // Bring in the ability to create the 'require' method
+const require = createRequire(import.meta.url); // construct the require method
+const { version } = require("./package.json") // use the require method
 
-module.exports = (env = {} , argv) => {
+
+
+import TerserPlugin from "terser-webpack-plugin";
+import { BundleAnalyzerPlugin as WebpackBundleAnalyzer } from "webpack-bundle-analyzer";
+
+export default (env = {}, argv) => {
   const defaults = (argv, type) => {
     const config = {
-      target: ['web', 'es5'],
+      target: ["web", "es5"],
       output: {
         library: {
-          amd: 'abcjs',
-          root: 'ABCJS',
-          commonjs: 'abcjs'
+          amd: "abcjs",
+          root: "ABCJS",
+          commonjs: "abcjs",
         },
-        libraryTarget: 'umd',
-        globalObject: 'this',
-        filename: argv.mode === 'development' ? `abcjs-${type}.js` : `abcjs-${type}-min.js`,
+        libraryTarget: "umd",
+        globalObject: "this",
+        filename:
+          argv.mode === "development"
+            ? `abcjs-${type}.js`
+            : `abcjs-${type}-min.js`,
       },
-      devtool: argv.mode === 'development' ? 'source-map' : false,
+      devtool: argv.mode === "development" ? "source-map" : false,
+      resolve: {
+          extensions: ['.ts', '.js', '.json']
+      },
       module: {
         rules: [
           {
-            test: /\.js$/,
+            test: /\.ts$/,
             exclude: /node_modules/,
-            use: "babel-loader"
-          }
+            use: "babel-loader",
+          },
         ],
       },
-      mode: 'production',
-      optimization:{
+      mode: "production",
+      optimization: {
         minimizer: [
           new TerserPlugin({
             extractComments: {
-              filename: '[file].LICENSE',
+              filename: "[file].LICENSE",
               condition: /^\*\**!/i,
-              banner: makeBanner(type)
+              banner: makeBanner(type),
             },
           }),
         ],
-      }
-    }
+      },
+    };
 
     if (env.analyze) {
       config.plugins = [
         new WebpackBundleAnalyzer({
-          analyzerMode: "static"
-        })
-      ]
+          analyzerMode: "static",
+        }),
+        ,
+      ];
     }
-    return config
-  }
+    return config;
+  };
 
   return [
     {
-      name: 'basic',
-      entry: `./index.js`,
-      ...defaults(argv, 'basic')
-    }, {
-      name: 'plugin',
-      entry: `./plugin.js`,
-      ...defaults(argv, 'plugin')
-    }
-  ]
+      name: "basic",
+      entry: `./index.ts`,
+      ...defaults(argv, "basic"),
+    },
+    {
+      name: "plugin",
+      entry: `./plugin.ts`,
+      ...defaults(argv, "plugin"),
+    },
+  ];
 };
 
 function makeBanner(type) {
-  let banner = `abcjs_${type} v${pkg.version} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`
-  return banner + `/*! For license information please see abcjs_${type}.LICENSE`;
+  let banner = `abcjs_${type} v${version} Copyright © 2009-2022 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`;
+  return (
+    banner + `/*! For license information please see abcjs_${type}.LICENSE`
+  );
 }

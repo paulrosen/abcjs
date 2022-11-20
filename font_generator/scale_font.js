@@ -187,7 +187,7 @@ window.scale_font = function(font, size, raphael, output) {
 	var scale = size / font.face["units-per-em"];
 	var res = [];
 	for (var glyph in glyphnames) {
-		if (glyphnames.hasOwnProperty(glyph)) {
+		if (glyphnames.prototype.hasOwnProperty.call(glyph)) {
 			var symb;
 			try {
 				symb = raphael.path(font.glyphs[glyph].d).attr({fill: "#000", stroke: "none"});
@@ -243,7 +243,7 @@ window.showFont = function(outputId, fontFace) {
 	var x = 0;
 	var y = 50;
 	for (var glyph in font.glyphs) {
-		if (font.glyphs.hasOwnProperty(glyph)) {
+		if (font.glyphs.prototype.hasOwnProperty.call(glyph)) {
 			try {
 				var symb = paper.path(font.glyphs[glyph].d).attr({fill: "#000", stroke: "none"});
 				symb.scale(scale, scale, x + 50, y);

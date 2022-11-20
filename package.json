@@ -1,6 +1,7 @@
 {
   "name": "abcjs",
   "version": "6.1.7",
+  "type": "module",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -14,7 +15,8 @@
     "test": "concurrently \"http-server\" \"npx opener http://localhost:8080/tests/all.html\"",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "build:analyze": "npm run build:basic -- --env analyze"
+    "build:analyze": "npm run build:basic -- --env analyze",
+    "lint": "eslint **/*.ts"
   },
   "repository": {
     "type": "git",
@@ -46,13 +48,23 @@
   "devDependencies": {
     "@babel/core": "7.20.2",
     "@babel/preset-env": "7.20.2",
+    "@babel/preset-typescript": "^7.18.6",
     "@tarp/require": "1.4.3",
+    "@typescript-eslint/parser": "^5.43.0",
+    "5to6-codemod": "^1.8.0",
     "babel-loader": "9.1.0",
     "chai": "4.3.7",
     "concurrently": "7.5.0",
+    "eslint": "^8.28.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "http-server": "14.1.1",
     "mocha": "10.1.0",
     "opener": "1.5.2",
+    "prettier": "2.7.1",
+    "ts-migrate": "^0.1.35",
+    "typescript": "^4.9.3",
     "vuepress": "2.0.0-beta.26",
     "vuex": "4.1.0",
     "webpack-bundle-analyzer": "4.7.0",

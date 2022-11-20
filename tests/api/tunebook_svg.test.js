@@ -1,6 +1,6 @@
-var assert = require('chai').assert
-var render = require('../../src/api/abc_tunebook_svg')
-var tunebook = require('../../src/api/abc_tunebook')
+import { assert } from 'chai';
+import render from '../../src/api/abc_tunebook_svg';
+import tunebook from '../../src/api/abc_tunebook';
 
 // mock renderEngine Call
 tunebook.renderEngine = function (...args) {
