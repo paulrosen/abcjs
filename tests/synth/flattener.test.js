@@ -1955,6 +1955,30 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcPercMapHighC = 'X:1\n' +
+		"%%percmap ^c' high-tom  x\n" +
+		"%%percmap c' high-tom  x\n" +
+		"%%percmap b high-tom  x\n" +
+		'%%percmap C high-tom  x\n' +
+		'Q:1/4=50\n' +
+		'K:C perc\n' +
+		"b c' C ^c' C \n";
+
+	var expectedPercMapHighC = {
+		"tempo":50,"instrument":128,"totalDuration":0.625,"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":128},
+				{"cmd":"note","pitch":50,"volume":85,"start":0,"duration":0.125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":50,"volume":85,"start":0.125,"duration":0.125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":50,"volume":85,"start":0.25,"duration":0.125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":50,"volume":85,"start":0.375,"duration":0.125,"instrument":128,"gap":0},
+				{"cmd":"note","pitch":50,"volume":85,"start":0.5,"duration":0.125,"instrument":128,"gap":0}
+			]
+		]
+	}
+
+	//////////////////////////////////////////////////////////
+
 	var abcLongTie = 'X:1\n' +
 'L:1/4\n' +
 'Q:80\n' +
@@ -2740,6 +2764,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-perc-map", function() {
 		doFlattenTest(abcPercMap, expectedPercMap);
+	})
+
+	it("flatten-perc-map-high-c", function() {
+		doFlattenTest(abcPercMapHighC, expectedPercMapHighC);
 	})
 
 	it("flatten-long-tie", function() {

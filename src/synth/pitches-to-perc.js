@@ -55,6 +55,18 @@ var pitchMap = {
 	n13: "=b",
 	s13: "^b",
 	x13: "b",
+	f14: "_c'",
+	n14: "=c'",
+	s14: "^c'",
+	x14: "c'",
+	f15: "_d'",
+	n15: "=d'",
+	s15: "^d'",
+	x15: "d'",
+	f16: "_e'",
+	n16: "=e'",
+	s16: "^e'",
+	x16: "e'",
 }
 
 function pitchesToPerc(pitchObj) {
