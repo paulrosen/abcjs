@@ -32,6 +32,14 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 	}
 	var g = elementGroup.endGroup(klass, params.type);
 	if (g) {
+		// TODO-PER-HACK! This corrects the classes because the tablature is not being created at the right time.
+		if (params.cloned) {
+			params.cloned.overrideClasses = g.className.baseVal
+		}
+		if (params.overrideClasses) {
+			var type = g.classList && g.classList.length > 0 ? g.classList[0] + ' ' : ''
+			g.setAttribute("class", type + params.overrideClasses)
+		}
 		if (isTempo) {
 			params.startChar = params.abcelem.startChar;
 			params.endChar = params.abcelem.endChar;

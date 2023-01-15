@@ -79,6 +79,10 @@ Classes.prototype.generate = function (c) {
 		return "";
 	var ret = [];
 	if (c && c.length > 0) ret.push(c);
+	if (c === "tab-number") // TODO-PER-HACK! straighten out the tablature
+		return ret.join(' ')
+	if (c === "text instrument-name")
+		return "abcjs-text abcjs-instrument-name"	
 	if (this.lineNumber !== null) ret.push("l"+this.lineNumber);
 	if (this.measureNumber !== null) ret.push("m"+this.measureNumber);
 	if (this.measureNumber !== null) ret.push("mm"+this.measureTotal()); // measureNumber is null between measures so this is still the test for measureTotal

@@ -27,6 +27,8 @@ function cloneAbsolute(absSrc) {
     if (returned.abcelem.el_type === "note")
       returned.abcelem.el_type = 'tabNumber';
   }
+  // TODO-PER: This fixes the classes because the element isn't created at the right time.
+  absSrc.cloned = returned
   return returned;
 }
 

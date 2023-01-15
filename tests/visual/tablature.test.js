@@ -362,6 +362,14 @@ describe("Tablature", function () {
 		}
 	];
 
+	var badTuningParams = [
+		{
+			instrument: 'guitar',
+			label : 'Guitar (%T)',
+			tuning: ['D', 'A', 'D', 'G', 'A', 'd'],
+		}
+	];
+
 	var violinParams = [
 		{
 			instrument: 'violin',
@@ -638,6 +646,11 @@ describe("Tablature", function () {
 		]
 	]
 
+	// TODO-PER: Eventually the tablature should support strings being tuned out of order (like a uke or banjo)
+	var badTuning = "X:1\n" +
+		"K:C\n" +
+		"D, A, D G B e"
+
 	var staffPlacement = "X:1\n" +
 		"%%score (1 | 2)\n" +
 		"L:1/4\n" +
@@ -829,6 +842,11 @@ describe("Tablature", function () {
 		chai.assert.equal(parseInt(x,10), 33, "Not enough left margin for instrument name")
 	})
 
+	it("bad-tuning", function () {
+		var visualObj = doRender(badTuning, badTuningParams)
+		chai.assert.equal(visualObj[0].warnings, "Invalid string Instrument tuning : D string lower than A string")
+	});
+
 	it("subtitle", function() {
 		// Just see it not crash
 		var visualObj = doRender(subTitle, violinParams)
@@ -879,7 +897,12 @@ function doRender(abc, tabParams, params) {
 		}
 	}
 	var visualObj = abcjs.renderAbc("paper", abc, options );
-  return visualObj;
+	if (visualObj[0].warnings) {
+		var el = document.querySelector("#warnings")
+		if (el)
+			el.innerHTML = visualObj[0].warnings.join(",")
+	}
+	return visualObj;
 }
 
 function getTabStaff(staffs, number) {
