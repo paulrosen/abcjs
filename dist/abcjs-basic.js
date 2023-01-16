@@ -1628,6 +1628,7 @@ var Tune = function Tune() {
         var height = bottom - top;
         var voices = group.voices;
         for (var v = 0; v < voices.length; v++) {
+          if (voices[v].staff && voices[v].staff.isTabStaff) continue;
           var noteFound = false;
           if (!voicesArr[v]) voicesArr[v] = [];
           if (measureNumber[v] === undefined) measureNumber[v] = 0;
@@ -2787,6 +2788,7 @@ var Parse = function Parse() {
         type: 'treble',
         verticalPos: 0
       };
+      this.octave = 0;
       this.next_note_duration = 0;
       this.start_new_line = true;
       this.is_in_header = true;
@@ -5949,6 +5951,28 @@ var parseKeyVoice = {};
           multilineVars.clef.staffscale = tokens[0].floatt;
           tokens.shift();
           break;
+        case "octave":
+          tokens.shift();
+          if (tokens.length === 0) {
+            warn("Expected = after octave", str, 0);
+            return ret;
+          }
+          token = tokens.shift();
+          if (token.token !== "=") {
+            warn("Expected = after octave", str, token.start);
+            break;
+          }
+          if (tokens.length === 0) {
+            warn("Expected parameter after octave=", str, 0);
+            return ret;
+          }
+          if (tokens[0].type !== 'number') {
+            warn("Expected number after octave", str, tokens[0].start);
+            break;
+          }
+          multilineVars.octave = tokens[0].intt;
+          tokens.shift();
+          break;
         case "style":
           tokens.shift();
           if (tokens.length === 0) {
@@ -6250,7 +6274,6 @@ var parseKeyVoice = {};
             addNextTokenToVoiceInfo(id, 'staffscale', 'number');
             break;
           case 'octave':
-            // TODO-PER: This is accepted, but not implemented, yet.
             addNextTokenToVoiceInfo(id, 'octave', 'number');
             break;
           case 'volume':
@@ -7352,6 +7375,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
       case 'g':
         if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
           el.pitch = pitches[line.charAt(index)];
+          el.pitch += 7 * (multilineVars.currentVoice && multilineVars.currentVoice.octave !== undefined ? multilineVars.currentVoice.octave : multilineVars.octave);
           el.name = line.charAt(index);
           if (el.accidental) el.name = accMap[el.accidental] + el.name;
           transpose.note(multilineVars, el);
@@ -14589,7 +14613,19 @@ var pitchMap = {
   f13: "_b",
   n13: "=b",
   s13: "^b",
-  x13: "b"
+  x13: "b",
+  f14: "_c'",
+  n14: "=c'",
+  s14: "^c'",
+  x14: "c'",
+  f15: "_d'",
+  n15: "=d'",
+  s15: "^d'",
+  x15: "d'",
+  f16: "_e'",
+  n16: "=e'",
+  s16: "^e'",
+  x16: "e'"
 };
 function pitchesToPerc(pitchObj) {
   var pitch = (pitchObj.accidental ? pitchObj.accidental[0] : 'x') + pitchObj.verticalPos;
@@ -15330,7 +15366,7 @@ function handleChordNotes(self, notes) {
 }
 function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
   var strings = self.strings;
-  note.checkKeyAccidentals(self.accidentals);
+  note.checkKeyAccidentals(self.accidentals, self.measureAccidentals);
   if (secondPosition) {
     strings = secondPosition;
   }
@@ -15357,6 +15393,15 @@ function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
   return null;
 }
 function toNumber(self, note) {
+  if (note.isAltered || note.natural) {
+    var acc;
+    if (note.isFlat) {
+      if (note.isDouble) acc = "__";else acc = "_";
+    } else if (note.isSharp) {
+      if (note.isDouble) acc = "^^";else acc = "^";
+    } else if (note.natural) acc = "=";
+    self.measureAccidentals[note.name.toUpperCase()] = acc;
+  }
   var num = null;
   var str = 0;
   var lowestString = self.strings[self.strings.length - 1];
@@ -15475,6 +15520,7 @@ function StringPatterns(plugin) {
     // override default
     this.highestNote = highestNote;
   }
+  this.measureAccidentals = {};
   this.capo = 0;
   if (capo) {
     this.capo = capo;
@@ -15668,7 +15714,27 @@ TabNote.prototype.isLowerThan = function (note) {
   if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName)) return true;
   return false;
 };
-TabNote.prototype.checkKeyAccidentals = function (accidentals) {
+TabNote.prototype.checkKeyAccidentals = function (accidentals, measureAccidentals) {
+  if (this.isAltered || this.natural) return;
+  if (measureAccidentals[this.name.toUpperCase()]) {
+    switch (measureAccidentals[this.name.toUpperCase()]) {
+      case "__":
+        this.acc = -2;
+        return;
+      case "_":
+        this.acc = -1;
+        return;
+      case "=":
+        this.acc = 0;
+        return;
+      case "^":
+        this.acc = 1;
+        return;
+      case "^^":
+        this.acc = 2;
+        return;
+    }
+  }
   if (accidentals) {
     var curNote = this.name;
     for (var iii = 0; iii < accidentals.length; iii++) {
@@ -16008,6 +16074,8 @@ function cloneAbsolute(absSrc) {
     cloneObject(returned.abcelem, absSrc.abcelem);
     if (returned.abcelem.el_type === "note") returned.abcelem.el_type = 'tabNumber';
   }
+  // TODO-PER: This fixes the classes because the element isn't created at the right time.
+  absSrc.cloned = returned;
   return returned;
 }
 function cloneAbsoluteAndRelatives(absSrc, plugin) {
@@ -16199,6 +16267,7 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
         }
         break;
       case 'bar':
+        plugin.semantics.strings.measureAccidentals = {};
         var lastBar = false;
         if (ii === source.children.length - 1) {
           // used for final line bar drawing
@@ -16552,6 +16621,7 @@ TabRenderer.prototype.doLayout = function () {
   for (var ii = 0; ii < nbVoices; ii++) {
     var tabVoice = new VoiceElement(0, 0);
     var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+    nameHeight = Math.max(nameHeight, 1); // If there is no label for the tab line, then there needs to be a little padding
     staffGroup.staffs[this.staffIndex].top += nameHeight;
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
@@ -21118,6 +21188,10 @@ Classes.prototype.generate = function (c) {
   if (!this.shouldAddClasses) return "";
   var ret = [];
   if (c && c.length > 0) ret.push(c);
+  if (c === "tab-number")
+    // TODO-PER-HACK! straighten out the tablature
+    return ret.join(' ');
+  if (c === "text instrument-name") return "abcjs-text abcjs-instrument-name";
   if (this.lineNumber !== null) ret.push("l" + this.lineNumber);
   if (this.measureNumber !== null) ret.push("m" + this.measureNumber);
   if (this.measureNumber !== null) ret.push("mm" + this.measureTotal()); // measureNumber is null between measures so this is still the test for measureTotal
@@ -21178,6 +21252,14 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
   }
   var g = elementGroup.endGroup(klass, params.type);
   if (g) {
+    // TODO-PER-HACK! This corrects the classes because the tablature is not being created at the right time.
+    if (params.cloned) {
+      params.cloned.overrideClasses = g.className.baseVal;
+    }
+    if (params.overrideClasses) {
+      var type = g.classList && g.classList.length > 0 ? g.classList[0] + ' ' : '';
+      g.setAttribute("class", type + params.overrideClasses);
+    }
     if (isTempo) {
       params.startChar = params.abcelem.startChar;
       params.endChar = params.abcelem.endChar;
@@ -25448,7 +25530,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.7';
+var version = '6.1.8';
 module.exports = version;
 
 /***/ })

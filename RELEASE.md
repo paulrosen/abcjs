@@ -1,3 +1,27 @@
+# Version 6.1.8
+
+## Features
+
+* Implement 'octave' modifier for K: and V: fields.
+
+## Bugs
+
+* Handle accidentals in a measure in tablature.
+
+* Fix accidental handling in tablature when there is a key signature.
+
+* Add a little padding when tablature doesn't have a label.
+
+* Fix the css styles applied to tablature.
+
+* Allow percmap to use higher octave pitches.
+
+* Fix cursor movement when playing synth and tablature is visible.
+
+## Documentation
+
+* Add example of getting lyrics out of a tune.
+
 # Version 6.1.7
 
 ## Bugs
