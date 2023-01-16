@@ -399,6 +399,8 @@ var Tune = function() {
 
 				var voices = group.voices;
 				for (var v = 0; v < voices.length; v++) {
+					if (voices[v].staff && voices[v].staff.isTabStaff)
+						continue;
 					var noteFound = false;
 					if (!voicesArr[v])
 						voicesArr[v] = [];
