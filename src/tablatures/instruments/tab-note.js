@@ -116,6 +116,8 @@ TabNote.prototype.isLowerThan = function (note) {
 };
 
 TabNote.prototype.checkKeyAccidentals = function(accidentals) {
+  if (this.isAltered || this.natural)
+    return
   if (accidentals) {
     var curNote = this.name;
     for (var iii = 0; iii < accidentals.length; iii++) {
