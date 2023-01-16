@@ -103,7 +103,7 @@ function handleChordNotes(self, notes) {
 
 function noteToNumber(self, note, stringNumber, secondPosition , firstSize) {
   var strings = self.strings;
-  note.checkKeyAccidentals(self.accidentals) ;
+  note.checkKeyAccidentals(self.accidentals, self.measureAccidentals) ;
   if (secondPosition) {
     strings = secondPosition;
   }
@@ -131,6 +131,22 @@ function noteToNumber(self, note, stringNumber, secondPosition , firstSize) {
 }
 
 function toNumber(self, note) {
+  if (note.isAltered || note.natural) {
+    var acc;
+    if (note.isFlat) {
+      if (note.isDouble)
+        acc = "__"
+      else
+        acc = "_"  
+    } else if (note.isSharp) {
+      if (note.isDouble)
+        acc = "^^"
+      else
+        acc = "^"  
+    } else if (note.natural)
+      acc = "="
+    self.measureAccidentals[note.name.toUpperCase()] = acc  
+  }
   var num = null;
   var str = 0;
   var lowestString = self.strings[self.strings.length - 1];
@@ -254,6 +270,7 @@ function StringPatterns(plugin) {
     // override default
     this.highestNote = highestNote;
   }
+  this.measureAccidentals = {}
   this.capo = 0;
   if (capo) {
     this.capo = capo;

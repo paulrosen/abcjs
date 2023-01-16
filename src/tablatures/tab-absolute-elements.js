@@ -228,6 +228,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         }
         break;
       case 'bar':
+        plugin.semantics.strings.measureAccidentals = {}
         var lastBar = false;
         if (ii === source.children.length-1) {
           // used for final line bar drawing

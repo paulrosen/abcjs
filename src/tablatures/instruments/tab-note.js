@@ -115,9 +115,18 @@ TabNote.prototype.isLowerThan = function (note) {
   return false;
 };
 
-TabNote.prototype.checkKeyAccidentals = function(accidentals) {
+TabNote.prototype.checkKeyAccidentals = function(accidentals, measureAccidentals) {
   if (this.isAltered || this.natural)
     return
+  if (measureAccidentals[this.name.toUpperCase()]) {
+    switch (measureAccidentals[this.name.toUpperCase()]) {
+      case "__": this.acc = -2; return;
+      case "_": this.acc = -1; return;
+      case "=": this.acc = 0; return;
+      case "^": this.acc = 1; return;
+      case "^^": this.acc = 2; return;
+    }
+  }  
   if (accidentals) {
     var curNote = this.name;
     for (var iii = 0; iii < accidentals.length; iii++) {

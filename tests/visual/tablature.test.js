@@ -674,8 +674,46 @@ describe("Tablature", function () {
 		5,
 		6
 	]
+
+	var accidentals2 = "X: 1\n" +
+	"M: 4/4\n" +
+	"L: 1/4\n" +
+	"K: G\n" +
+	"A2^A_A|F_F^F=F|F^E^^EE|G_GG=G|[K: Eb]A2=A2|\n"
+
+	var accidentals2Output = [
+		[
+			{"el_type":"note","startChar":24,"endChar":26,"notes":[{"num":0,"str":1,"pitch":"A"}]},
+			{"el_type":"note","startChar":26,"endChar":28,"notes":[{"num":1,"str":1,"pitch":"^A"}]},
+			{"el_type":"note","startChar":28,"endChar":30,"notes":[{"num":6,"str":2,"pitch":"_A"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":31,"startChar":30},
+			{"el_type":"note","startChar":31,"endChar":32,"notes":[{"num":4,"str":2,"pitch":"^F"}]},
+			{"el_type":"note","startChar":32,"endChar":34,"notes":[{"num":2,"str":2,"pitch":"_F"}]},
+			{"el_type":"note","startChar":34,"endChar":36,"notes":[{"num":4,"str":2,"pitch":"^F"}]},
+			{"el_type":"note","startChar":36,"endChar":38,"notes":[{"num":3,"str":2,"pitch":"=F"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":39,"startChar":38},
+			{"el_type":"note","startChar":39,"endChar":40,"notes":[{"num":4,"str":2,"pitch":"^F"}]},
+			{"el_type":"note","startChar":40,"endChar":42,"notes":[{"num":3,"str":2,"pitch":"^E"}]},
+			{"el_type":"note","startChar":42,"endChar":45,"notes":[{"num":4,"str":2,"pitch":"^^E"}]},
+			{"el_type":"note","startChar":45,"endChar":46,"notes":[{"num":4,"str":2,"pitch":"E"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":47,"startChar":46},
+			{"el_type":"note","startChar":47,"endChar":48,"notes":[{"num":5,"str":2,"pitch":"G"}]},
+			{"el_type":"note","startChar":48,"endChar":50,"notes":[{"num":4,"str":2,"pitch":"_G"}]},
+			{"el_type":"note","startChar":50,"endChar":51,"notes":[{"num":4,"str":2,"pitch":"G"}]},
+			{"el_type":"note","startChar":51,"endChar":53,"notes":[{"num":5,"str":2,"pitch":"=G"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":54,"startChar":53},
+			{"el_type":"note","startChar":61,"endChar":63,"notes":[{"num":6,"str":2,"pitch":"_A"}]},
+			{"el_type":"note","startChar":63,"endChar":66,"notes":[{"num":0,"str":1,"pitch":"=A"}]},
+			{"el_type":"bar","type":"bar_thin","endChar":67,"startChar":66},
+		]
+	]
+
 	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
+	});
+
+	it("accidentals2", function () {
+		doStaffTest(accidentals2, accidentals2Output, violinParams);
 	});
 
 	it("out of range", function () {
