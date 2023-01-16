@@ -1128,6 +1128,7 @@ var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 			case 'g':
 				if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
 					el.pitch = pitches[line.charAt(index)];
+					el.pitch += 7 * (multilineVars.currentVoice && multilineVars.currentVoice.octave !== undefined ? multilineVars.currentVoice.octave : multilineVars.octave);
 					el.name = line.charAt(index);
 					if (el.accidental)
 						el.name = accMap[el.accidental] + el.name;
