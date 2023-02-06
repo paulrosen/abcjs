@@ -60,7 +60,7 @@ Sets an alternate location for the soundfont.
 tuneObjectArray = ABCJS.renderMidi(output, tunebookString, params)
 ```
 
-Completely creates midi for the tunebook. Note: this is deprecated in favor of [Synth Documentation](synth.md).
+Completely creates midi for the tunebook. Note: this is deprecated in favor of [Synth Documentation](../docs/audio/synthesized-sound.md).
 
 
 ### startPlaying

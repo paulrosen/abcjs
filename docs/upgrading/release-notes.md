@@ -20,7 +20,7 @@ Please try this out and report any issues that you have.
 
 ## **Special note for Version 5.8.0:**
 
-A new method for creating synth sound is included as a **beta** release in this release. See [Synth Documentation](synth.md) for details in how to use it. That means that the current method of creating sound using midi.js will be deprecated at some point in the future. It will be supported in its current form as long as possible. The new synth is much smaller and faster and appears less buggy. It does not work on IE 11 or older browsers, however, so it might not yet be appropriate for your site.
+A new method for creating synth sound is included as a **beta** release in this release. See [Synth Documentation](../docs/audio/synthesized-sound.md) for details in how to use it. That means that the current method of creating sound using midi.js will be deprecated at some point in the future. It will be supported in its current form as long as possible. The new synth is much smaller and faster and appears less buggy. It does not work on IE 11 or older browsers, however, so it might not yet be appropriate for your site.
 
 ## Special notes for Version 5.0.0:
 
