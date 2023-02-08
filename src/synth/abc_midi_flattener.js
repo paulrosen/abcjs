@@ -54,6 +54,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 	var drumTrack;
 	var drumTrackFinished;
 	var drumDefinition = {};
+	var drumBars;
 
 	var pickupLength = 0;
 	var percmap;
@@ -107,6 +108,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 		drumTrack = [];
 		drumTrackFinished = false;
 		drumDefinition = {};
+		drumBars = 1;
 
 		if (voices.length > 0 && voices[0].length > 0)
 			pickupLength = voices[0][0].pickupLength;
@@ -145,6 +147,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 							startingMeter = element;
 						meter = element;
 						beatFraction = getBeatFraction(meter);
+						alignDrumToMeter();
 						break;
 					case "tempo":
 						if (!startingTempo)
@@ -189,6 +192,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 						break;
 					case "drum":
 						drumDefinition = normalizeDrumDefinition(element.params);
+						alignDrumToMeter();
 						break;
 					case "gchord":
 						if (!options.chordsOff)
@@ -1208,16 +1212,24 @@ var pitchesToPerc = require('./pitches-to-perc');
 			} else
 				ret.pattern.push({ len: len * beatLength, pitch: null});
 		}
+		drumBars = params.bars ? params.bars : 1;
+		return ret;
+	}
+
+	function alignDrumToMeter() {
+		if (!drumDefinition ||!drumDefinition.pattern) {
+			return;
+		}
+		var ret = drumDefinition;
 		// Now normalize the pattern to cover the correct number of measures. The note lengths passed are relative to each other and need to be scaled to fit a measure.
 		var totalTime = 0;
 		var measuresPerBeat = meter.num/meter.den;
 		for (var ii = 0; ii < ret.pattern.length; ii++)
 			totalTime += ret.pattern[ii].len;
-		var numBars = params.bars ? params.bars : 1;
-		var factor = totalTime /  numBars / measuresPerBeat;
+		var factor = totalTime /  drumBars / measuresPerBeat;
 		for (ii = 0; ii < ret.pattern.length; ii++)
 			ret.pattern[ii].len = ret.pattern[ii].len / factor;
-		return ret;
+		drumDefinition = ret;
 	}
 
 	function writeDrum(channel) {
