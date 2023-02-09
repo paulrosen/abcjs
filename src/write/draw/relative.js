@@ -46,7 +46,7 @@ function drawRelativeElement(renderer, params, bartop) {
 			break;
 		case "decoration":
 			// The +6 is to compensate for the placement of text in svg: to be on the same row as symbols, the y-coord needs to compensate for the center line.
-			params.graphelem = renderText(renderer, { x: params.x, y: y+6, text: params.c, type: 'annotationfont', klass: renderer.controller.classes.generate("annotation"), anchor: "middle", centerVertically: true, dim: params.dim}, false);
+			params.graphelem = renderText(renderer, { x: params.x, y: y+6, text: params.c, type: 'annotationfont', klass: renderer.controller.classes.generate("annotation"), anchor: params.anchor, centerVertically: true, dim: params.dim}, false);
 			break;
 		case "text":
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'annotationfont', klass: renderer.controller.classes.generate("annotation"), anchor: "start", centerVertically: params.centerVertically, dim: params.dim, lane: params.getLane(), name: "annotation"}, false);

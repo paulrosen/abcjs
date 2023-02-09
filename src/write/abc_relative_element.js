@@ -13,6 +13,7 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 	this.pitch2 = opt.pitch2;
 	this.linewidth = opt.linewidth;
 	this.klass = opt.klass;
+	this.anchor = opt.anchor ? opt.anchor : 'middle'
 	this.top = pitch;
 	if (this.pitch2 !== undefined && this.pitch2 > this.top) this.top = this.pitch2;
 	this.bottom = pitch;

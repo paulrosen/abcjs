@@ -68,7 +68,8 @@ declare module 'abcjs' {
 		"p" | "pp" | "f" | "ff" | "mf" | "mp" | "ppp" | "pppp" |  "fff" | "ffff" | "sfz" | "repeatbar" | "repeatbar2" | "slide" |
 		"upbow" | "downbow" | "staccato" | "trem1" | "trem2" | "trem3" | "trem4" |
 		"/" | "//" | "///" | "////" | "turnx" | "invertedturn" | "invertedturnx" | "arpeggio" | "trill(" | "trill)" | "xstem" |
-		"mark" | "marcato" | "umarcato"
+		"mark" | "marcato" | "umarcato" |
+		"D.C.alcoda" | "D.C.alfine" | "D.S.alcoda" | "D.S.alfine" | "editorial" | "courtesy"
 
 	//
 	// Basic types

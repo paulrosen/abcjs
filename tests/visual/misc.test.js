@@ -48,12 +48,40 @@ describe("Miscellaneous", function () {
 		{x: 698, y: 319, w: 29, h: 28},
 	]
 
+	var abcDirectives = "X:1\n" +
+	"L:1/4\n" +
+	"!D.C.alcoda!CCCC|!D.C.alfine!DDDD|!D.S.alcoda!EEEE|!D.S.alfine!FFFF|!D.C.!G!5!GGG|\n"
+
+	var expectedDirectives = [
+		{ c: 'D.C. al coda', anchor: 'left'},
+		{ c: 'D.C. al fine', anchor: 'left'},
+		{ c: 'D.S. al coda', anchor: 'left'},
+		{ c: 'D.S. al fine', anchor: 'left'},
+		{ c: 'D.C.', anchor: 'middle'},
+		{ c: '5', anchor: 'middle'},
+	]
+	
 	it("jazz chords", function () {
 		extractChords(abcJazzChords, expectedJazzChords);
 	})
 
 	it("glissando", function () {
 		draw(abcGlissando, expectedGlissando);
+	})
+
+	it("directives", function () {
+		var visualObj = abcjs.renderAbc("paper", abcDirectives);
+		var voice = visualObj[0].lines[0].staff[0].voices[0]
+		var results = []
+		for (var i = 0; i < voice.length; i++) {
+			var elem = voice[i].abselem.children;
+			for (var j = 0; j < elem.length; j++) {
+				var rel = elem[j]
+				if (rel.type === 'decoration')
+					results.push({ c: elem[j].c, anchor: elem[j].anchor })
+			}
+		}
+		chai.assert.deepEqual(results, expectedDirectives)
 	})
 })
 

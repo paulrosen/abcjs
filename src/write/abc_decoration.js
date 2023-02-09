@@ -143,12 +143,12 @@ var Decoration = function Decoration() {
 			}
 			return y;
 		}
-		function textDecoration(text, placement) {
+		function textDecoration(text, placement, anchor) {
 			var y = getPlacement(placement);
 			var textFudge = 2;
 			var textHeight = 5;
 			// TODO-PER: Get the height of the current font and use that for the thickness.
-			abselem.addFixedX(new RelativeElement(text, width/2, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3}));
+			abselem.addFixedX(new RelativeElement(text, width/2, 0, y+textFudge, {type:"decoration", klass: 'ornament', thickness: 3, anchor: anchor}));
 
 			incrementPlacement(placement, textHeight);
 		}
@@ -205,11 +205,27 @@ var Decoration = function Decoration() {
 				case "5":
 				case "D.C.":
 				case "D.S.":
-					textDecoration(decoration[i], positioning);
+					textDecoration(decoration[i], positioning, 'middle');
+					hasOne = true;
+					break;
+				case "D.C.alcoda":
+					textDecoration("D.C. al coda", positioning, 'left');
+					hasOne = true;
+					break;
+				case "D.C.alfine":
+					textDecoration("D.C. al fine", positioning, 'left');
+					hasOne = true;
+					break;
+				case "D.S.alcoda":
+					textDecoration("D.S. al coda", positioning, 'left');
+					hasOne = true;
+					break;
+				case "D.S.alfine":
+					textDecoration("D.S. al fine", positioning, 'left');
 					hasOne = true;
 					break;
 				case "fine":
-					textDecoration("FINE", positioning);
+					textDecoration("FINE", positioning, 'middle');
 					hasOne = true;
 					break;
 				case "+":
