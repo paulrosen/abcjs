@@ -61,17 +61,21 @@ If you use, `{ add_classes: true }`, then the following classes are attached to 
 
 Paste in any ABC you want here and see how that affects the classes below:
 
-<example-tune-book :callbacks="callbacks" :tune-id="32"></example-tune-book>
+<example-tune-book v-if="abcjsReady" :callbacks="callbacks" :tune-id="32"></example-tune-book>
 
 <script>
+	import { waitForAbcjs } from '../../../wait-for-abcjs';
 	export default {
-		mounted() {
+		async mounted() {
+            await waitForAbcjs()
+            this.abcjsReady = true;
 			setTimeout(() => {
 				this.callbacks = [this.$refs.foundClasses];
 			}, 500);
 		},
 		data() {
 			return {
+				abcjsReady: false,
 				callbacks: [],
 			};
 		},

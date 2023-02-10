@@ -89,18 +89,6 @@ C/A,/ C/C/E C/zz2|
 w:Rock-y did-nt like that
 `' ></show-and-render-abc>
 
-### marcato:
-
-A new decoration is supported:
-
-```
-!marcato!
-```
-<render-abc :abc='`X:1
-K:C
-!marcato!f|
-`' ></render-abc>
-
 ### Chord Break:
 
 If you want to skip a chord, then use one of the following as the chord:

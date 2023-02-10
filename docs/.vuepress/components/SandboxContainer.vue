@@ -26,9 +26,9 @@
 
 <script>
 import {mapGetters, mapMutations} from "vuex";
-import SandboxInput from "./SandboxInput";
-import SandboxOutput from "./SandboxOutput";
-import SandboxCode from "./SandboxCode";
+import SandboxInput from "./SandboxInput.vue";
+import SandboxOutput from "./SandboxOutput.vue";
+import SandboxCode from "./SandboxCode.vue";
 export default {
 	name: "sandbox-container",
 	components: {SandboxCode, SandboxOutput, SandboxInput},

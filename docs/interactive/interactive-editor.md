@@ -63,10 +63,6 @@ This is the object that is passed into the editor in the `synth` property. If th
 
 ## Example
 
-::: tip TODO
-This page is currently being enhanced. Check back soon!
-:::
-
 ```html
 <textarea id="abc"></textarea>
 <div id="warnings"></div>

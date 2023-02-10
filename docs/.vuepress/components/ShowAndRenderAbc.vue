@@ -6,8 +6,8 @@
 </template>
 
 <script>
-	import { nextTick } from 'vue';
-	import RenderAbc from "./RenderAbc";
+	import { waitForAbcjs } from '../wait-for-abcjs';
+	import RenderAbc from "./RenderAbc.vue";
 	export default {
 		name: "show-and-render-abc",
 		components: {RenderAbc},
@@ -28,12 +28,10 @@
 				defaultOptions: { paddingleft: 0, paddingright: 0, responsive: "resize" },
 			};
 		},
-		mounted() {
-			nextTick(() => {
-				const abcjs = require('../../../index');
-				const el = this.$refs.paper;
-				this.visualObj = abcjs.renderAbc(el, this.abc, this.defaultOptions);
-			});
+		async mounted() {
+			await waitForAbcjs()
+			const el = this.$refs.paper;
+			this.visualObj = ABCJS.renderAbc(el, this.abc, this.defaultOptions);
 		},
 		methods: {
 			getObj() {

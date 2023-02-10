@@ -50,5 +50,6 @@ When loading the library directly, you will find the library at `window.ABCJS`.
 ```
 
 ```javascript
-abcjs.renderAbc("paper", "X:1\nK:D\nDDAA|BBA2|\n");
+abcjs.renderAbc("paper", "X:1\nK:D\nDD AA|BBA2|\n");
 ```
+<render-abc :abc="`X:1\nK:D\nDD AA|BBA2|\n`"></render-abc>

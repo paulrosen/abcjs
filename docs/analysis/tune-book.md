@@ -48,17 +48,21 @@ var measureArray = abcjs.extractMeasures(tunebookString);
 
 Paste in any ABC you want here and see how that affects the analysis above:
 
-<example-tune-book :callbacks="callbacks"></example-tune-book>
+<example-tune-book v-if="abcjsReady" :callbacks="callbacks"></example-tune-book>
 
 <script>
+	import { waitForAbcjs } from '../../../wait-for-abcjs';
 	export default {
-		mounted() {
+		async mounted() {
+            await waitForAbcjs()
+            this.abcjsReady = true;
 			setTimeout(() => {
 				this.callbacks = [this.$refs.numTunes, this.$refs.tuneById, this.$refs.tuneByTitle];
 			}, 500);
 		},
 		data() {
 			return {
+				abcjsReady: false,
 				callbacks: [],
 			};
 		},

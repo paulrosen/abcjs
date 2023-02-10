@@ -19,6 +19,8 @@ var el = document.getElementById("target");
 renderAbc(el, abcString);
 ```
 
+<render-abc :abc="`X:1\nT:Example\nK:Bb\nBcde|\n`"></render-abc>
+
 ::: tip Tip
 Note that in javascript, a new line is expressed with the characters "\n". Also, some common characters that are used in ABC (that is, `<`, `>`, and `&`) have special meanings in html. They need to be escaped. 
 :::

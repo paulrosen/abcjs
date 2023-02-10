@@ -10,7 +10,6 @@
 </template>
 
 <script>
-	import { nextTick } from 'vue';
 	export default {
 		name: "num-tunes",
 		data() {
@@ -19,14 +18,9 @@
 				abcjs: null,
 			};
 		},
-		mounted() {
-			nextTick(() => {
-				this.abcjs = require('../../../index');
-			});
-		},
 		methods: {
 			redraw(tunebookString) {
-				this.answer = this.abcjs.numberOfTunes(tunebookString);
+				this.answer = window.abcjs.numberOfTunes(tunebookString);
 			}
 		}
 	}

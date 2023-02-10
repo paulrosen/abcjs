@@ -23,7 +23,7 @@ To run, type:
 ```bash
 ./docker-start.sh
 ```
-That will get you a linux command like to run npm.
+That will create a linux virtual machine and give you a command line to run npm.
 
 ## Building locally
 
@@ -50,13 +50,7 @@ To build the same code as minimized for distribution:
 npm run build:basic-min
 ```
 
-And include the file `disst/abcjs-basic-min.js`.
-
-If you want to keep the version numbering on the files (so that different versions are easy to keep straight), after building either `build:basic` or `build:basic-min` run the script:
-
-```bash
-npm run build:copy-output
-```
+And include the file `dist/abcjs-basic-min.js`.
 
 
 ## Greasemonkey
@@ -80,13 +74,13 @@ Most of the tests are run from `all.html`, but the audio tests need to run in re
 
 The rest of the `.html` files are subsets of the tests that are just for convenience if you are working on a particular section.
 
-::: tip Branch
-It is not enough to just open the file so that the address bar in the browser shows the `file://` protocol. That will not run the javascript.
-:::
+::: tip Notice
+It is not enough to just open the file so that the address bar in the browser shows the `file://` protocol. That will not run the javascript. It must be run in the context of a server.
 
 To start a localhost server in WebStorm, open the file and notice the floating browser icons in the upper right corner. Click on one of them to open the test runner in that browser.
 
 To start a localhost server in VSCode, one way to do that is to install the extension "Live Server" and click "Go Live".
+:::
 
 ### Testing Intermediate Stages
 
@@ -104,43 +98,43 @@ These objects are at various stages though the process of handling the ABC. The 
 The method of unit testing is to run all of the test files through the various linters and save the output. Then, after making changes to the code, run the test files through again and compare the output to the original output to understand the effect of the changes.
 
 Here's an example of how to call the linting functions:
+```
+import abcjs from 'abcjs/test';
+doTest(abcString) {
+	const tuneBook = new abcjs.TuneBook(abcString);
+	const abcParser = new abcjs.parse.Parse();
+	const parserLint = new abcjs.test.ParserLint();
+	const div = document.getElementById("comparison-engraving");
+	const engraverController = new abcjs.write.EngraverController(div,
+			{add_classes: true, staffwidth: 800, staffheight: 400});
 
-	import abcjs from 'abcjs/test';
-	doTest(abcString) {
-		const tuneBook = new abcjs.TuneBook(abcString);
-		const abcParser = new abcjs.parse.Parse();
-		const parserLint = new abcjs.test.ParserLint();
-		const div = document.getElementById("comparison-engraving");
-		const engraverController = new abcjs.write.EngraverController(div,
-		     {add_classes: true, staffwidth: 800, staffheight: 400});
+	tuneBook.tunes.forEach((item) => {
+		abcParser.parse(item.abc);
+		const tune = abcParser.getTune();
+		const warnings = abcParser.getWarnings();
+		const lint1 = parserLint.lint(tune, warnings);
 
-		tuneBook.tunes.forEach((item) => {
-			abcParser.parse(item.abc);
-			const tune = abcParser.getTune();
-			const warnings = abcParser.getWarnings();
-			const lint1 = parserLint.lint(tune, warnings);
+		engraverController.engraveABC(tune);
+		const output = abcjs.test.verticalLint([tune]);
+		const lint2 = output.join("\n");
 
-			engraverController.engraveABC(tune);
-			const output = abcjs.test.verticalLint([tune]);
-			const lint2 = output.join("\n");
+		const sequence = abcjs.midi.sequence(tune);
+		const lint3 = abcjs.test.midiSequencerLint(sequence);
 
-			const sequence = abcjs.midi.sequence(tune);
-			const lint3 = abcjs.test.midiSequencerLint(sequence);
+		const midi = abcjs.midi.flatten(sequence);
+		const lint4 = abcjs.test.midiLint(midi);
 
-			const midi = abcjs.midi.flatten(sequence);
-			const lint4 = abcjs.test.midiLint(midi);
-
-			console.log("PARSER OUTPUT");
-			console.log(lint1);
-			console.log("ENGRAVER OUTPUT");
-			console.log(lint2);
-			console.log("MIDI SEQUENCE OUTPUT");
-			console.log(lint3);
-			console.log("MIDI OUTPUT");
-			console.log(lint4);
-		});
-	}
-
+		console.log("PARSER OUTPUT");
+		console.log(lint1);
+		console.log("ENGRAVER OUTPUT");
+		console.log(lint2);
+		console.log("MIDI SEQUENCE OUTPUT");
+		console.log(lint3);
+		console.log("MIDI OUTPUT");
+		console.log(lint4);
+	});
+}
+```
 ## Font Info
 
 The glyphs in `src/write/abc_glyphs.js` are generated using the files in the `font_generator` folder.

@@ -82,9 +82,9 @@
 
 <script>
 import {mapGetters} from "vuex";
-import FieldSet from "./FieldSet";
-import CheckBox from "./CheckBox";
-import RadioGroup from "./RadioGroup";
+import FieldSet from "./FieldSet.vue";
+import CheckBox from "./CheckBox.vue";
+import RadioGroup from "./RadioGroup.vue";
 export default {
 	name: "sandbox-input",
 	components: {RadioGroup, CheckBox, FieldSet},

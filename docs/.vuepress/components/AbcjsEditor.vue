@@ -7,7 +7,7 @@
 </template>
 
 <script>
-	import { nextTick } from 'vue';
+import { waitForAbcjs } from '../wait-for-abcjs';
 
 	export default {
 		name: "abcjs-editor",
@@ -17,7 +17,6 @@
 			},
 			abc() {
 				this.$refs.textarea.value = this.abc;
-				const abcjs = require('../../../index');
 				const abc_editor = new abcjs.Editor("abc", {
 					canvas_id: "paper",
 					warnings_id: "warnings",
@@ -37,17 +36,15 @@
 				required: false
 			},
 		},
-		mounted() {
-			nextTick(() => {
-				this.$refs.textarea.value = this.abc;
-				const abcjs = require('../../../index');
-				const abc_editor = new abcjs.Editor("abc", {
-					canvas_id: "paper",
-					warnings_id: "warnings",
-					onchange: this.onchange,
-					abcjsParams: { add_classes: true, responsive: "resize" },
-					indicate_changed: true,
-				});
+		async mounted() {
+			await waitForAbcjs()
+			this.$refs.textarea.value = this.abc;
+			const abc_editor = new abcjs.Editor("abc", {
+				canvas_id: "paper",
+				warnings_id: "warnings",
+				onchange: this.onchange,
+				abcjsParams: { add_classes: true, responsive: "resize" },
+				indicate_changed: true,
 			});
 		},
 		methods: {

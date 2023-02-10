@@ -9,7 +9,6 @@
 <script>
 import {mapGetters} from 'vuex'
 import { nextTick } from "vue"
-const abcjs = require('../../../index');
 
 export default {
 	name: "sandbox-output",

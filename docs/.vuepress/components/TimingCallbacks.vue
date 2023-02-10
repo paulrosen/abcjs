@@ -65,26 +65,25 @@
 				beatSubdivisions: 4,
 			}
 		},
-		mounted() {
-			nextTick(() => {
-				this.abcjs = require('../../../index');
-				this.redraw();
-			});
-		},
+		// mounted() {
+		// 	nextTick(() => {
+		// 		this.redraw();
+		// 	});
+		// },
 		methods: {
-			redraw() {
-				console.log("redraw")
-			},
+			// redraw() {
+			// 	console.log("redraw")
+			// },
 			startTiming() {
 				const abc = document.getElementById("abc").value;
-				this.visualObj = this.abcjs.renderAbc("*", abc)[0];
+				this.visualObj = window.abcjs.renderAbc("*", abc)[0];
 				console.log("startTiming",{
 					qpm: this.qpm,
 					extraMeasuresAtBeginning: this.extraMeasuresAtBeginning,
 					lineEndAnticipation: this.lineEndAnticipation,
 					beatSubdivisions: this.beatSubdivisions,
 				})
-				this.timer = new this.abcjs.TimingCallbacks(this.visualObj, {
+				this.timer = new window.abcjs.TimingCallbacks(this.visualObj, {
 					qpm: this.qpm,
 					extraMeasuresAtBeginning: this.extraMeasuresAtBeginning,
 					lineEndAnticipation: this.lineEndAnticipation,
@@ -98,16 +97,20 @@
 				this.outputStream = "";
 			},
 			stopTiming() {
+				if (!this.timer) return;
 				this.timer.stop();
 			},
 			pauseTiming() {
+				if (!this.timer) return;
 				this.timer.pause();
 			},
 			resetTiming() {
+				if (!this.timer) return;
 				this.timer.reset();
 				this.outputStream = "";
 			},
 			setProgress() {
+				if (!this.timer) return;
 				this.timer.setProgress(10);
 				this.outputStream = "";
 			},
@@ -117,10 +120,12 @@
 				</div>`;
 			},
 			eventCallback(ev) {
-				delete ev.elements;
-				this.outputStream += `<div class="event-callback"><div class="header">EVENT CALLBACK</div>
-<div class="data">${JSON.stringify(ev, null, "\t")}</div>
-				</div>`;
+				if (ev) {
+					delete ev.elements;
+					this.outputStream += `<div class="event-callback"><div class="header">EVENT CALLBACK</div>
+	<div class="data">${JSON.stringify(ev, null, "\t")}</div>
+					</div>`;
+				}
 			},
 			lineEndCallback( info, event, details) {
 				this.outputStream += `<div class="line-end-callback"><div class="header">LINE END CALLBACK</div>

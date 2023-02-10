@@ -16,7 +16,6 @@
 </template>
 
 <script>
-import { nextTick } from 'vue';
 	export default {
 		name: "tune-book-info",
 		props: {
@@ -40,14 +39,9 @@ import { nextTick } from 'vue';
 				tunebook: null,
 			};
 		},
-		mounted() {
-			nextTick(() => {
-				this.abcjs = require('../../../index');
-			});
-		},
 		methods: {
 			redraw(tunebookString) {
-				this.tunebook = new this.abcjs.TuneBook(tunebookString);
+				this.tunebook = new window.abcjs.TuneBook(tunebookString);
 				if (this.type === "title") {
 					this.tuneNames = this.tunebook.tunes.map(tune => {
 						return tune.title;

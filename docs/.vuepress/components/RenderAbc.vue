@@ -5,7 +5,7 @@
 </template>
 
 <script>
-	import { nextTick } from 'vue';
+	import { waitForAbcjs } from '../wait-for-abcjs';
 	export default {
 		name: "render-abc",
 		props: {
@@ -25,12 +25,10 @@
 				defaultOptions: { paddingleft: 0, paddingright: 0, responsive: "resize" },
 			};
 		},
-		mounted() {
-			nextTick(() => {
-				const abcjs = require('../../../index');
-				const el = this.$refs.paper;
-				this.visualObj = abcjs.renderAbc(el, this.abc, this.defaultOptions, this.options);
-			});
+		async mounted() {
+			await waitForAbcjs()
+			const el = this.$refs.paper;
+			this.visualObj = abcjs.renderAbc(el, this.abc, this.defaultOptions, this.options);
 		},
 		methods: {
 			getObj() {

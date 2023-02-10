@@ -42,7 +42,6 @@
 		},
 		data() {
 			return {
-				abcjs: null,
 				classNames: [],
 				checkedClasses: [],
 				selector: "",
@@ -50,7 +49,6 @@
 		},
 		mounted() {
 			nextTick(() => {
-				this.abcjs = require('../../../index');
 				this.redraw();
 			});
 		},

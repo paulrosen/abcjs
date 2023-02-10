@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import FieldSet from "./FieldSet";
+import FieldSet from "./FieldSet.vue";
 export default {
 	name: "radio-group",
 	components: {FieldSet},

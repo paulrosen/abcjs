@@ -164,19 +164,23 @@ If the underlying music changes on the fly, this replaces the current object wit
 
 Paste in any ABC you want here then click "start" to see what is returned by the timing callbacks:
 
-<example-tune-book :callbacks="callbacks" :tune-id="32"></example-tune-book>
+<example-tune-book v-if="abcjsReady" :callbacks="callbacks" :tune-id="32"></example-tune-book>
 
 <timing-callbacks ref="timingCallbacks" target="#abc"></timing-callbacks>
 
 <script>
+	import { waitForAbcjs } from '../../../wait-for-abcjs';
 	export default {
-		mounted() {
+		async mounted() {
+            await waitForAbcjs()
+            this.abcjsReady = true;
 			setTimeout(() => {
 				this.callbacks = [this.$refs.timingCallbacks];
 			}, 500);
 		},
 		data() {
 			return {
+                abcjsReady: false,
 				callbacks: [],
 			};
 		},

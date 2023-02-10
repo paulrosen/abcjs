@@ -5,8 +5,7 @@
 </template>
 
 <script>
-	import { nextTick } from 'vue';
-	import AbcjsEditor from "./AbcjsEditor";
+import AbcjsEditor from "./AbcjsEditor.vue";
 
 	export default {
 		name: "example-tune-book",
@@ -24,20 +23,15 @@
 		computed: {
 			abc() {
 				let str;
-				if (!this.abcjs)
-					return "";
+				if (!window.abcjs)
+				 	return "";
 
 				if (this.tuneId === undefined)
 					return this.allTunes;
 
-				const book = new this.abcjs.TuneBook(this.allTunes);
+				const book = new window.abcjs.TuneBook(this.allTunes);
 				return book.getTuneById(''+this.tuneId).abc;
 			},
-		},
-		mounted() {
-			nextTick(() => {
-				this.abcjs = require('../../../index');
-			});
 		},
 		data() {
 			const abc = `%%gchordfont "itim-music,Itim" 20
