@@ -91,6 +91,12 @@ Format the chord symbols in a way that is sometimes found in fake books. The roo
 
 For example, for the chord "F#m7b5/C#", `F#` is regular size, `m7b5` is smaller and a superscript, and `/C#` is smaller and a subscript.
 
+## germanAlphabet
+
+Default: false
+
+Display chords using German music alphabet. (`H` for English `B` and `B` for English `Bb`.) Several European countries have this music alphabet.
+
 ## lineBreaks
 Default: undefined
 

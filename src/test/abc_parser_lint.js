@@ -462,6 +462,7 @@ var ParserLint = function() {
 			infospace: { type: "number", optional: true },
 //					landscape: { type: "boolean", optional: true },
 			jazzchords: { type: "boolean", optional: true },
+			germanAlphabet: { type: "boolean", optional: true },
 			leftmargin: { type: "number", optional: true },
 			linesep: { type: "number", optional: true },
 			lineskipfac: { type: "number", optional: true },
