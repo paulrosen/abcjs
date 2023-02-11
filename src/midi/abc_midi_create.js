@@ -36,8 +36,14 @@ var create;
 						var pan = 0;
 						if (options.pan && options.pan.length > i)
 							pan = options.pan[i];
-						midi.setChannel(event.channel, pan);
-						midi.setInstrument(event.instrument);
+						if (event.instrument === 128) {
+							// If we're using the percussion voice, change to Channel 10
+							midi.setChannel(9, pan);
+							midi.setInstrument(0);
+						} else {
+							midi.setChannel(event.channel, pan);
+							midi.setInstrument(event.instrument);
+						}
 						break;
 					case 'note':
 						var gapLengthInBeats = event.gap * beatsPerSecond;
