@@ -6,7 +6,7 @@ var parseCommon = require("../parse/abc_common");
 (function() {
 	"use strict";
 
-	var measureLength;
+	var measureLength = 1; // This should be set by the meter, but just in case that is missing, we'll take a guess.
 	// The abc is provided to us line by line. It might have repeats in it. We want to re arrange the elements to
 	// be an array of voices with all the repeats embedded, and no lines. Then it is trivial to go through the events
 	// one at a time and turn it into midi.
