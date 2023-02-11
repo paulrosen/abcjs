@@ -830,6 +830,8 @@ declare module 'abcjs' {
 		gracenotes?: Array<{duration: number; name:string; pitch: number; verticalPosition: number;}>
 		lyric?: Array<{syllable: string; divider: ' ' | '-' | '_';}>
 		noStem?: boolean
+		midiPitches?: MidiPitches;
+		midiGraceNotePitches?: MidiGracePitches;
 		pitches?: Array<{
 			pitch: number;
 			name: string;
