@@ -158,19 +158,54 @@ declare module 'abcjs' {
 
 	export type MidiParam = Array<string|number>;
 
-	export type MidiGracePitches = Array<{instrument: string; pitch: number; volume: number; cents?: number}>;
+	export type MidiGracePitches = Array<{instrument: number; pitch: number; volume: number; cents?: number; durationInMeasures: number}>;
 
 	export interface MidiPitch {
-		instrument: string;
+		instrument: number;
 		pitch: number;
 		duration: number;
 		volume: number;
-		cents?: number
+		cents?: number;
+		start: number;
+		gap: number;
 	}
 
 	export type MidiPitches = Array<MidiPitch>;
 
-	export type AbsoluteElement = any; // TODO
+	export interface AbsoluteElement {
+		abcelem : AbcElem;
+		bottom : number;
+		children : Array<RelativeElement>
+		duration : number;
+		durationClass : number;
+		elemset : Array<SVGElement>
+		extra : Array<RelativeElement>
+		extraw : number;
+		fixed : {w: number, t: number, b: number}
+		heads : Array<RelativeElement>
+		invisible : boolean;
+		minspacing : number;
+		notePositions : Array<{x:number; y:number;}>
+		right : Array<RelativeElement>
+		specialY : Array<{
+			chordHeightAbove : number;
+			chordHeightBelow : number;
+			dynamicHeightAbove : number;
+			dynamicHeightBelow : number;
+			endingHeightAbove : number;
+			lyricHeightAbove : number;
+			lyricHeightBelow : number;
+			partHeightAbove : number;
+			tempoHeightAbove : number;
+			volumeHeightAbove : number;
+			volumeHeightBelow : number;
+		}>
+		top : number;
+		tuneNumber : number;
+		type : "symbol" | "tempo" | "part" | "rest" | "note" | "bar" | "staff-extra clef" | "staff-extra key-signature" | "staff-extra time-signature";
+		w : number;
+		x : number;
+	}
 
 	export type AbstractEngraver = any;
 
@@ -341,7 +376,7 @@ declare module 'abcjs' {
 		millisecondsPerMeasure: number;
 		type: NoteTimingEventType;
 
-		elements?: Array<HTMLElement>;
+		elements?: Array<Array<HTMLElement>>;
 		endChar?: number;
 		endCharArray?: Array<number>;
 		endX?: number;
@@ -350,6 +385,7 @@ declare module 'abcjs' {
 		line?: number;
 		measureNumber?: number;
 		midiPitches?: MidiPitches;
+		midiGraceNotePitches?: MidiGracePitches;
 		startChar?: number;
 		startCharArray?: Array<number>;
 		top?: number;
@@ -782,21 +818,30 @@ declare module 'abcjs' {
 	}
 
 	export interface AbcElem {
-		el_type: string //TODO enumerate these
-		abselem: any;
+		el_type: string; //TODO enumerate these
+		abselem: AbsoluteElement;
 		beambr?: number;
-		chord?: Array<any>
-		decoration: Array<any>
+		chord?: Array<{name: string; position: ChordPlacement}>
+		decoration: Array<string> //TODO enumerate these
 		duration: number
 		endBeam?: boolean
 		endSlur?: number
 		endTriplet?: true
-		gracenotes?: Array<any>
-		lyric?: Array<any>
+		gracenotes?: Array<{duration: number; name:string; pitch: number; verticalPosition: number;}>
+		lyric?: Array<{syllable: string; divider: ' ' | '-' | '_';}>
 		noStem?: boolean
-		pitches?: Array<any>
+		pitches?: Array<{
+			pitch: number;
+			name: string;
+			startSlur?: Array<{label: number}>;
+			endSlur?: Array<number>;
+			startTie?: {};
+			endTie?: boolean;
+			verticalPos: number;
+			highestVert: number;
+		}>
 		positioning?: any
-		rest?: any
+		rest?: {"type": "rest"}
 		startBeam?: boolean
 		startTriplet?: number
 		tripletMultiplier?: number
@@ -1087,8 +1132,8 @@ declare module 'abcjs' {
 
 	export interface SynthObjectController {
 		disable(isDisabled: boolean): void
-		setTune(visualObj: TuneObject, userAction: boolean, audioParams?: any): Promise<SynthInitResponse>
-		load(selector: string, cursorControl?: any, visualOptions?: SynthVisualOptions): void
+		setTune(visualObj: TuneObject, userAction: boolean, audioParams?: SynthOptions): Promise<SynthInitResponse>
+		load(selector: string, cursorControl?: CursorControl | null, visualOptions?: SynthVisualOptions): void
 		play(): void
 		pause(): void
 		toggleLoop(): void
