@@ -15,9 +15,9 @@ function setupSelection(engraver, svgs) {
 		}
 	}
 	for (var i = 0; i < svgs.length; i++) {
-		svgs[i].addEventListener('touchstart', mouseDown.bind(engraver));
-		svgs[i].addEventListener('touchmove', mouseMove.bind(engraver));
-		svgs[i].addEventListener('touchend', mouseUp.bind(engraver));
+		svgs[i].addEventListener('touchstart', mouseDown.bind(engraver), {passive: true});
+		svgs[i].addEventListener('touchmove', mouseMove.bind(engraver), {passive: true});
+		svgs[i].addEventListener('touchend', mouseUp.bind(engraver), {passive: true});
 		svgs[i].addEventListener('mousedown', mouseDown.bind(engraver));
 		svgs[i].addEventListener('mousemove', mouseMove.bind(engraver));
 		svgs[i].addEventListener('mouseup', mouseUp.bind(engraver));
