@@ -1,3 +1,27 @@
+# Version 6.1.9
+
+## Features
+
+* Add decorations for !D.C.alcoda!, !D.C.alfine!, !D.S.alcoda! and !D.S.alfine!
+
+## Bugs
+
+* keep transposing from crashing when K:none.
+
+* mark the touch events as passive to prevent jank.
+
+* fix crash when the M: line is missing and drum intro is used.
+
+* fix midi output when using percussion voice.
+
+## Documentation
+
+* Improved the typescript types somewhat.
+
+* Upgrade VuePress.
+
+* Fix link for new synth in the docs.
+
 # Version 6.1.8
 
 ## Features

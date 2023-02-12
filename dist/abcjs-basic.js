@@ -2543,8 +2543,14 @@ var create;
           case 'program':
             var pan = 0;
             if (options.pan && options.pan.length > i) pan = options.pan[i];
-            midi.setChannel(event.channel, pan);
-            midi.setInstrument(event.instrument);
+            if (event.instrument === 128) {
+              // If we're using the percussion voice, change to Channel 10
+              midi.setChannel(9, pan);
+              midi.setInstrument(0);
+            } else {
+              midi.setChannel(event.channel, pan);
+              midi.setInstrument(event.instrument);
+            }
             break;
           case 'note':
             var gapLengthInBeats = event.gap * beatsPerSecond;
@@ -6978,7 +6984,7 @@ function durationOfMeasure(multilineVars) {
   if (!meter.value || meter.value.length === 0) return 1;
   return parseInt(meter.value[0].num, 10) / parseInt(meter.value[0].den, 10);
 }
-var legalAccents = ["trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge", "open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase", "segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2", "slide", "marcato", "upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4", "turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato", "style=normal", "style=harmonic", "style=rhythm", "style=x", "style=triangle"];
+var legalAccents = ["trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent", "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge", "open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase", "segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2", "slide", "marcato", "upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4", "turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato", "style=normal", "style=harmonic", "style=rhythm", "style=x", "style=triangle", "D.C.alcoda", "D.C.alfine", "D.S.alcoda", "D.S.alfine", "editorial", "courtesy"];
 var volumeDecorations = ["p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp", "fff", "ffff", "sfz"];
 var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo)", "glissando(", "glissando)"];
 var accentPseudonyms = [["<", "accent"], [">", "accent"], ["tr", "trill"], ["plus", "+"], ["emphasis", "accent"], ["^", "umarcato"], ["marcato", "umarcato"]];
@@ -8932,7 +8938,15 @@ transpose.keySignature = function (multilineVars, keyName, root, acc, localTrans
     baseKey += keyName[1];
     keyName = keyName.substr(2);
   } else keyName = keyName.substr(1);
-  var index = keyIndex[baseKey] + multilineVars.localTranspose;
+  var thisKeyIndex = keyIndex[baseKey];
+  var recognized = thisKeyIndex !== undefined;
+  if (!recognized) {
+    // Either the key sig is "none" or we don't recognize it. Either way we don't change it, and we assume key of C for the purposes of this calculation.
+    thisKeyIndex = 0;
+    baseKey = "C";
+    keyName = "";
+  }
+  var index = thisKeyIndex + multilineVars.localTranspose;
   while (index < 0) {
     index += 12;
   }
@@ -8959,10 +8973,14 @@ transpose.keySignature = function (multilineVars, keyName, root, acc, localTrans
     }
   }
   if (multilineVars.localTranspose > 0) multilineVars.localTransposeVerticalMovement = distance + Math.floor(multilineVars.localTranspose / 12) * 7;else multilineVars.localTransposeVerticalMovement = distance + Math.ceil(multilineVars.localTranspose / 12) * 7;
-  return {
+  if (recognized) return {
     accidentals: newKeySig,
     root: newKeyName[0],
     acc: newKeyName.length > 1 ? newKeyName[1] : ""
+  };else return {
+    accidentals: [],
+    root: root,
+    acc: acc
   };
 };
 transpose.chordName = function (multilineVars, chord) {
@@ -9014,7 +9032,7 @@ var accidentals3 = {
   "1": "^",
   "2": "^^"
 };
-var count = 0;
+//var count = 0
 transpose.note = function (multilineVars, el) {
   // the "el" that is passed in has el.name, el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
   // localTranspose is the number of half steps
@@ -12692,7 +12710,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 (function () {
   "use strict";
 
-  var measureLength;
+  var measureLength = 1; // This should be set by the meter, but just in case that is missing, we'll take a guess.
   // The abc is provided to us line by line. It might have repeats in it. We want to re arrange the elements to
   // be an array of voices with all the repeats embedded, and no lines. Then it is trivial to go through the events
   // one at a time and turn it into midi.
@@ -18829,7 +18847,7 @@ var stackedDecoration = function stackedDecoration(decoration, width, abselem, y
     }
     return y;
   }
-  function textDecoration(text, placement) {
+  function textDecoration(text, placement, anchor) {
     var y = getPlacement(placement);
     var textFudge = 2;
     var textHeight = 5;
@@ -18837,7 +18855,8 @@ var stackedDecoration = function stackedDecoration(decoration, width, abselem, y
     abselem.addFixedX(new RelativeElement(text, width / 2, 0, y + textFudge, {
       type: "decoration",
       klass: 'ornament',
-      thickness: 3
+      thickness: 3,
+      anchor: anchor
     }));
     incrementPlacement(placement, textHeight);
   }
@@ -18894,11 +18913,27 @@ var stackedDecoration = function stackedDecoration(decoration, width, abselem, y
       case "5":
       case "D.C.":
       case "D.S.":
-        textDecoration(decoration[i], positioning);
+        textDecoration(decoration[i], positioning, 'middle');
+        hasOne = true;
+        break;
+      case "D.C.alcoda":
+        textDecoration("D.C. al coda", positioning, 'left');
+        hasOne = true;
+        break;
+      case "D.C.alfine":
+        textDecoration("D.C. al fine", positioning, 'left');
+        hasOne = true;
+        break;
+      case "D.S.alcoda":
+        textDecoration("D.S. al coda", positioning, 'left');
+        hasOne = true;
+        break;
+      case "D.S.alfine":
+        textDecoration("D.S. al fine", positioning, 'left');
         hasOne = true;
         break;
       case "fine":
-        textDecoration("FINE", positioning);
+        textDecoration("FINE", positioning, 'middle');
         hasOne = true;
         break;
       case "+":
@@ -20049,6 +20084,7 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
   this.pitch2 = opt.pitch2;
   this.linewidth = opt.linewidth;
   this.klass = opt.klass;
+  this.anchor = opt.anchor ? opt.anchor : 'middle';
   this.top = pitch;
   if (this.pitch2 !== undefined && this.pitch2 > this.top) this.top = this.pitch2;
   this.bottom = pitch;
@@ -22171,7 +22207,7 @@ function drawRelativeElement(renderer, params, bartop) {
         text: params.c,
         type: 'annotationfont',
         klass: renderer.controller.classes.generate("annotation"),
-        anchor: "middle",
+        anchor: params.anchor,
         centerVertically: true,
         dim: params.dim
       }, false);
@@ -24566,9 +24602,15 @@ function setupSelection(engraver, svgs) {
     }
   }
   for (var i = 0; i < svgs.length; i++) {
-    svgs[i].addEventListener('touchstart', mouseDown.bind(engraver));
-    svgs[i].addEventListener('touchmove', mouseMove.bind(engraver));
-    svgs[i].addEventListener('touchend', mouseUp.bind(engraver));
+    svgs[i].addEventListener('touchstart', mouseDown.bind(engraver), {
+      passive: true
+    });
+    svgs[i].addEventListener('touchmove', mouseMove.bind(engraver), {
+      passive: true
+    });
+    svgs[i].addEventListener('touchend', mouseUp.bind(engraver), {
+      passive: true
+    });
     svgs[i].addEventListener('mousedown', mouseDown.bind(engraver));
     svgs[i].addEventListener('mousemove', mouseMove.bind(engraver));
     svgs[i].addEventListener('mouseup', mouseUp.bind(engraver));
@@ -25530,7 +25572,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.8';
+var version = '6.1.9';
 module.exports = version;
 
 /***/ })
