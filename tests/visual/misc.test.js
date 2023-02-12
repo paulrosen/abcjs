@@ -61,6 +61,43 @@ describe("Miscellaneous", function () {
 		{ c: '5', anchor: 'middle'},
 	]
 	
+	var abcSetFont = 'X:1\n' +
+		'%%setfont-1 cursive 16 bold\n' +
+		'T:Title $1bold$0 $$100 reg\n' +
+		'C:Thomas $1Fats$0 Waller\n' +
+		'H:one $1two $0 three\n' +
+		'L:1/4\n' +
+		'M:4/4\n' +
+		'K:C\n' +
+		'"C$1m$7"G E2 F | "^above $1the$0 staff"D4 |]\n' +
+		'w: la $1le $0lu\n' +
+		'W: lo $1loo $0lou $$1dollar\n'
+
+	var expectedSetFont = [
+		{"key":"title","text":"Title"},
+		{"key":"title","text":"bold","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
+		{"key":"title","text":"$$100 reg"},
+		{"key":"composer","text":"Thomas"},
+		{"key":"composer","text":"Fats","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
+		{"key":"composer","text":"Waller"},
+		{"key":"chord","text":"C"},
+		{"key":"chord","text":"m","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
+		{"key":"chord","text":"7"},
+		{"key":"lyric","text":"la"},
+		{"key":"lyric","text":"le","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
+		{"key":"lyric","text":"lu"},
+		{"key":"chord","text":"above"},
+		{"key":"chord","text":"the","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
+		{"key":"chord","text":"staff"},
+		{"key":"bottom","font":"wordsfont","text":"lo "},
+		{"key":"bottom","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16},"text":"loo "},
+		{"key":"bottom","font":"wordsfont","text":"lou $"},
+		{"key":"bottom","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16},"text":"dollar"},
+		{"key":"bottom","font":"historyfont","text":"History: one"},
+		{"key":"bottom","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16},"text":"two"},
+		{"key":"bottom","font":"historyfont","text":"three\n"},
+	]
+
 	it("jazz chords", function () {
 		extractChords(abcJazzChords, expectedJazzChords);
 	})
@@ -83,7 +120,57 @@ describe("Miscellaneous", function () {
 		}
 		chai.assert.deepEqual(results, expectedDirectives)
 	})
+
+	it("set-font", function() {
+		var visualObj = abcjs.renderAbc("paper", abcSetFont);
+		var results = extractText(visualObj)
+		chai.assert.deepEqual(results, expectedSetFont)
+	})
 })
+
+function extractText(visualObj) {
+	var textResults = []
+	Object.keys(visualObj[0].metaText).forEach(key => {
+		if (key !== 'unalignedWords' && key !== 'history')
+		textResults.push({key: key, text: visualObj[0].metaText[key] })
+	})
+
+	var voice = visualObj[0].lines[0].staff[0].voices[0]
+	for (var i = 0; i < voice.length; i++) {
+		var elem = voice[i];
+		if (elem.chord) {
+			for (var j = 0; j < elem.chord.length; j++) {
+				var chord = elem.chord[j]
+				var item = { key: "chord", text: chord.name}
+				if (chord.font)
+					item.font = chord.font
+				textResults.push(item)
+			}
+		}
+		if (elem.lyric) {
+			for (var j = 0; j < elem.lyric.length; j++) {
+				var lyric = elem.lyric[j]
+				var item = {key: "lyric", text: lyric.syllable}
+				if (lyric.font)
+					item.font = lyric.font
+				textResults.push(item)
+			}
+		}
+	}
+
+	var bottomText = visualObj[0].bottomText.rows.filter(item => {
+		return item.text !== undefined
+	}).map(item => {
+		var ret = {}
+		if (item.key) ret.key = item.key; else ret.key = 'bottom'
+		if (item.font) ret.font = item.font
+		if (item.text) ret.text = item.text
+		return ret
+	})
+	textResults = textResults.concat(bottomText)
+	console.log(JSON.stringify(textResults))
+	return textResults
+}
 
 function extractChords(abc, expected) {
 	var visualObj = abcjs.renderAbc("paper", abc);
