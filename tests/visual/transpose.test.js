@@ -69,6 +69,36 @@ describe("Transpose", function() {
 	var expectedChords1 = [{"key":"Db","notes":[{"note":"d","pitch":8,"chord":"D♭"},{"note":"=d","pitch":8,"chord":"D"},{"note":"e","pitch":9,"chord":"E♭"},{"note":"=e","pitch":9,"chord":"E"},{},{"note":"f","pitch":10,"chord":"F"},{"note":"G","pitch":4,"chord":"G♭"},{"note":"=G","pitch":4,"chord":"G"},{"note":"A","pitch":5,"chord":"A♭"},{},{"note":"=A","pitch":5,"chord":"A"},{"note":"B","pitch":6,"chord":"B♭"},{"note":"=B","pitch":6,"chord":"B"},{"note":"c","pitch":7,"chord":"C"},{},{"note":"__e","pitch":9,"chord":"D"},{"note":"_f","pitch":10,"chord":"E"},{"note":"__A","pitch":5,"chord":"G"},{"note":"__B","pitch":6,"chord":"A"},{},{"note":"_c","pitch":7,"chord":"B"},{}]}]
 	var expectedChords2 = [{"key":"D","notes":[{ note: 'G', pitch: 4, chord: 'N.C.' },{ note: 'A', pitch: 5 },{},{"note":"d","pitch":8,"chord":"D"},{"note":"^d","pitch":8,"chord":"D♯"},{"note":"e","pitch":9,"chord":"E"},{"note":"^e","pitch":9,"chord":"F"},{},{"note":"f","pitch":10,"chord":"F♯"},{"note":"G","pitch":4,"chord":"G"},{"note":"^G","pitch":4,"chord":"G♯"},{"note":"A","pitch":5,"chord":"A"},{},{"note":"^A","pitch":5,"chord":"A♯"},{"note":"B","pitch":6,"chord":"B"},{"note":"^B","pitch":6,"chord":"C"},{"note":"c","pitch":7,"chord":"C♯"},{},{"note":"_e","pitch":9,"chord":"D♯"},{"note":"=f","pitch":10,"chord":"F"},{"note":"_A","pitch":5,"chord":"G♯"},{"note":"_B","pitch":6,"chord":"A♯"},{},{"note":"=c","pitch":7,"chord":"C"},{}]}]
 
+	var abcNone = "X:1\n" +
+	"K:none\n" +
+	"C,,D,E,F, G,A,B,c,|CDEF GABc|^C^D^E^F ^G^A^B^c|_C_D_E_F _G_A_B_c|defg abc''d'||"
+
+	var expectedNone4 = [{"key":"none","notes":[
+		{"note":"E,,","pitch":-12},{"note":"^F,","pitch":-4},{"note":"^G,","pitch":-3},{"note":"A,","pitch":-2},{"note":"B,","pitch":-1},{"note":"^C","pitch":0},{"note":"^D","pitch":1},{"note":"E","pitch":2},{},
+		{"note":"E","pitch":2},{"note":"^F","pitch":3},{"note":"^G","pitch":4},{"note":"A","pitch":5},{"note":"B","pitch":6},{"note":"^c","pitch":7},{"note":"^d","pitch":8},{"note":"e","pitch":9},{},
+		{"note":"F","pitch":3},{"note":"G","pitch":3},{"note":"A","pitch":5},{"note":"^A","pitch":5},{"note":"c","pitch":7},{"note":"d","pitch":8},{"note":"e","pitch":9},{"note":"^f","pitch":10},{},
+		{"note":"_E","pitch":2},{"note":"_F","pitch":3},{"note":"_G","pitch":4},{"note":"_A","pitch":5},{"note":"_B","pitch":6},{"note":"_c","pitch":7},{"note":"_d","pitch":8},{"note":"_e","pitch":9},{},
+		{"note":"f","pitch":10},{"note":"g","pitch":11},{"note":"a","pitch":12},{"note":"b","pitch":13},{"note":"c'","pitch":14},{"note":"d'","pitch":15},{"note":"e''","pitch":23},{"note":"f'","pitch":17},{}
+	]}]
+
+	// TODO-PER: this test isn't correct
+	var expectedNone1 = [{"key":"fix-test","notes":[
+		{"note":"D,,","pitch":-13},{"note":"E,","pitch":-5},{"note":"F,","pitch":-4},{"note":"G,","pitch":-3},{"note":"A,","pitch":-2},{"note":"B,","pitch":-1},{"note":"c,","pitch":0},{"note":"d,","pitch":1},{},
+		{"note":"D","pitch":1},{"note":"E","pitch":2},{"note":"F","pitch":3},{"note":"G","pitch":4},{"note":"A","pitch":5},{"note":"B","pitch":6},{"note":"c","pitch":7},{"note":"d","pitch":8},{},
+		{"note":"^D","pitch":1},{"note":"^E","pitch":2},{"note":"^F","pitch":3},{"note":"^G","pitch":4},{"note":"^A","pitch":5},{"note":"^B","pitch":6},{"note":"^c","pitch":7},{"note":"^d","pitch":8},{},
+		{"note":"_D","pitch":1},{"note":"_E","pitch":2},{"note":"_F","pitch":3},{"note":"_G","pitch":4},{"note":"_A","pitch":5},{"note":"_B","pitch":6},{"note":"_c","pitch":7},{"note":"_d","pitch":8},{},
+		{"note":"e","pitch":9},{"note":"f","pitch":10},{"note":"g","pitch":11},{"note":"a","pitch":12},{"note":"b","pitch":13},{"note":"c'","pitch":14},{"note":"d''","pitch":22},{"note":"e'","pitch":16},{}]}]
+
+	// TODO-PER: this test isn't correct
+	var expectedNone_1 = [{"key":"fix-test","notes":[
+		{"note":"B,,,","pitch":-15},{"note":"C,","pitch":-7},{"note":"D,","pitch":-6},{"note":"E,","pitch":-5},{"note":"F,","pitch":-4},{"note":"G,","pitch":-3},{"note":"A,","pitch":-2},{"note":"B,","pitch":-1},{},
+		{"note":"B,","pitch":-1},{"note":"C","pitch":0},{"note":"D","pitch":1},{"note":"E","pitch":2},{"note":"F","pitch":3},{"note":"G","pitch":4},{"note":"A","pitch":5},{"note":"B","pitch":6},{},
+		{"note":"^B,","pitch":-1},{"note":"^C","pitch":0},{"note":"^D","pitch":1},{"note":"^E","pitch":2},{"note":"^F","pitch":3},{"note":"^G","pitch":4},{"note":"^A","pitch":5},{"note":"^B","pitch":6},{},
+		{"note":"_B,","pitch":-1},{"note":"_C","pitch":0},{"note":"_D","pitch":1},{"note":"_E","pitch":2},{"note":"_F","pitch":3},{"note":"_G","pitch":4},{"note":"_A","pitch":5},{"note":"_B","pitch":6},{},
+		{"note":"c","pitch":7},{"note":"d","pitch":8},{"note":"e","pitch":9},{"note":"f","pitch":10},{"note":"g","pitch":11},{"note":"a","pitch":12},{"note":"B''","pitch":20},{"note":"c'","pitch":14},{}
+	]}]
+
+
 	it("transpose-inline", function () {
 		transposeTest(abcInline, 3, expectedInline)
 	})
@@ -111,6 +141,12 @@ describe("Transpose", function() {
 		transposeTest(abcChords, 0, expectedChords0)
 		transposeTest(abcChords, 1, expectedChords1)
 		transposeTest(abcChords, 2, expectedChords2)
+	})
+
+	it("transpose-none", function () {
+		transposeTest(abcNone, 4, expectedNone4)
+		transposeTest(abcNone, 1, expectedNone1)
+		transposeTest(abcNone, -1, expectedNone_1)
 	})
 })
 

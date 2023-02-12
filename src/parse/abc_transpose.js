@@ -51,7 +51,15 @@ transpose.keySignature = function(multilineVars, keyName, root, acc, localTransp
 		keyName = keyName.substr(2);
 	} else
 		keyName = keyName.substr(1);
-	var index = keyIndex[baseKey] + multilineVars.localTranspose;
+	var thisKeyIndex = keyIndex[baseKey]
+	var recognized = thisKeyIndex !== undefined
+	if (!recognized) {
+		// Either the key sig is "none" or we don't recognize it. Either way we don't change it, and we assume key of C for the purposes of this calculation.
+		thisKeyIndex = 0
+		baseKey = "C"
+		keyName = ""
+	}
+	var index = thisKeyIndex + multilineVars.localTranspose;
 	while (index < 0) index += 12;
 	if (index > 11) index = index % 12;
 	var newKeyName = (keyName[0] === 'm' ? newKeyMinor[index] : newKey[index]);
@@ -87,7 +95,10 @@ transpose.keySignature = function(multilineVars, keyName, root, acc, localTransp
 		multilineVars.localTransposeVerticalMovement = distance + Math.floor(multilineVars.localTranspose / 12) * 7;
 	else
 		multilineVars.localTransposeVerticalMovement = distance + Math.ceil(multilineVars.localTranspose / 12) * 7;
-	return { accidentals: newKeySig, root: newKeyName[0], acc: newKeyName.length > 1 ? newKeyName[1] : "" };
+	if (recognized)
+		return { accidentals: newKeySig, root: newKeyName[0], acc: newKeyName.length > 1 ? newKeyName[1] : "" };
+	else
+		return { accidentals: [], root: root, acc: acc };
 };
 
 transpose.chordName = function(multilineVars, chord) {
@@ -145,7 +156,7 @@ var accidentals3 = {
 	"1": "^",
 	"2": "^^"
 };
-var count = 0
+//var count = 0
 transpose.note = function(multilineVars, el) {
 	// the "el" that is passed in has el.name, el.accidental, and el.pitch. "pitch" is the vertical position (0=middle C)
 	// localTranspose is the number of half steps
