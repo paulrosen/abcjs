@@ -1,6 +1,6 @@
 # Javascript library for inserting music in the browser.
 
-![abcjs](img/abcjs_comp_extended_08.svg)
+![abcjs](https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg)
 
 **ABC Music Notation** is a format for specifying sheet music using only a string of characters. 
 For instance, the following string encodes the music that is shown below it. That music was
