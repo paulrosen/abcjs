@@ -797,7 +797,7 @@ declare module 'abcjs' {
 		getPickupLength: NumberFunction;
 		getKeySignature: () => KeySignature;
 		getElementFromChar: (charPos: number) => VoiceItem | null;
-		millisecondsPerMeasure: NumberFunction;
+		millisecondsPerMeasure: (bpm?: number) => number;
 		setTiming: (bpm?: number, measuresOfDelay? : number) => void;
 		setUpAudio: (options: SynthOptions) => AudioTracks;
 		makeVoicesArray: () => Array<Selectable[]>
