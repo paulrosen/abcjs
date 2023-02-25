@@ -172,6 +172,32 @@ declare module 'abcjs' {
 
 	export type MidiPitches = Array<MidiPitch>;
 
+	export interface RelativeElement {
+		x: number;
+		c: string;
+		dx: number;
+		w: number;
+		pitch: number;
+		pitch2?: number;
+		scaleX: number;
+		scaleY: number;
+		type: string;
+		name: string;
+		linewidth?: number;
+		klass?: string;
+		anchor?: "start" | "middle" | "end";
+		top: number;
+		bottom: number;
+		dim?: number;
+		position?: number;
+		realWidth?: number;
+		partHeightAbove?: number;
+		chordHeightAbove?: number;
+		chordHeightBelow?: number;
+		lyricHeightAbove?: number;
+		lyricHeightBelow?: number;
+	}
+
 	export interface AbsoluteElement {
 		abcelem : AbcElem;
 		bottom : number;
