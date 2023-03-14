@@ -1167,7 +1167,7 @@ declare module 'abcjs' {
 		toggleLoop(): void
 		restart(): void
 		setProgress(ev: number): void
-		setWarp(percent: number): void
+		setWarp(percent: number): Promise<void>
 		download(fName: string): void
 	}
 
