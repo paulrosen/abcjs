@@ -1161,7 +1161,7 @@ declare module 'abcjs' {
 	export interface SynthObjectController {
 		disable(isDisabled: boolean): void
 		setTune(visualObj: TuneObject, userAction: boolean, audioParams?: SynthOptions): Promise<SynthInitResponse>
-		load(selector: string, cursorControl?: CursorControl | null, visualOptions?: SynthVisualOptions): void
+		load(selector: Selector, cursorControl?: CursorControl | null, visualOptions?: SynthVisualOptions): void
 		play(): void
 		pause(): void
 		toggleLoop(): void
