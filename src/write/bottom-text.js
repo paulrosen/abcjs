@@ -10,7 +10,6 @@ function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize)
 }
 
 BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spacing, getTextSize) {
-	var indent = 50;
 	var klass = 'meta-bottom unaligned-words';
 	var defFont = 'wordsfont';
 	this.rows.push({startGroup: "unalignedWords", klass: 'abcjs-meta-bottom abcjs-unaligned-words', name: "words"});
@@ -22,7 +21,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
 		if (unalignedWords[j] === '')
 			this.rows.push({move: space.height});
 		else if (typeof unalignedWords[j] === 'string') {
-			addTextIf(this.rows, { marginLeft: paddingLeft + indent, text: unalignedWords[j], font: defFont, klass: klass, inGroup: true, name: "words"}, getTextSize);
+			addTextIf(this.rows, { marginLeft: paddingLeft, text: unalignedWords[j], font: defFont, klass: klass, inGroup: true, name: "words"}, getTextSize);
 		} else {
 			var largestY = 0;
 			var offsetX = 0;
@@ -30,7 +29,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
 				var thisWord = unalignedWords[j][k];
 				var font = (thisWord.font) ? thisWord.font : defFont;
 				this.rows.push({
-					left: paddingLeft + indent + offsetX,
+					left: paddingLeft + offsetX,
 					text: thisWord.text,
 					font: font,
 					anchor: 'start'
