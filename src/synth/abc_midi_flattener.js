@@ -145,6 +145,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 							startingMeter = element;
 						meter = element;
 						beatFraction = getBeatFraction(meter);
+						drumDefinition = metronomeDrumDefinition(70);
 						break;
 					case "tempo":
 						if (!startingTempo)
@@ -1129,6 +1130,17 @@ var pitchesToPerc = require('./pitches-to-perc');
 		}
 	}
 
+	function metronomeDrumDefinition(metronomeVolume) {
+		let beats = meter.num;
+		let pattern = "d".repeat(beats);
+		let instruments = [76].concat(Array(beats-1).fill(77));
+		let volumes = Array(+beats).fill(metronomeVolume);
+		return normalizeDrumDefinition({
+			on: true,
+			bars: 1,
+			pattern: [pattern, ...instruments, ...volumes]
+		});
+	}
 	function normalizeDrumDefinition(params) {
 		// Be very strict with the drum definition. If anything is not perfect,
 		// just turn the drums off.
