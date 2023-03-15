@@ -50,13 +50,13 @@ describe("Miscellaneous", function () {
 
 	var abcDirectives = "X:1\n" +
 	"L:1/4\n" +
-	"!D.C.alcoda!CCCC|!D.C.alfine!DDDD|!D.S.alcoda!EEEE|!D.S.alfine!FFFF|!D.C.!G!5!GGG|\n"
+	"CCCC!D.C.alcoda!|DDDD!D.C.alfine!|EEEE!D.S.alcoda!|FFFF!D.S.alfine!|!D.C.!G!5!GGG|\n"
 
 	var expectedDirectives = [
-		{ c: 'D.C. al coda', anchor: 'left'},
-		{ c: 'D.C. al fine', anchor: 'left'},
-		{ c: 'D.S. al coda', anchor: 'left'},
-		{ c: 'D.S. al fine', anchor: 'left'},
+		{ c: 'D.C. al coda', anchor: 'end'},
+		{ c: 'D.C. al fine', anchor: 'end'},
+		{ c: 'D.S. al coda', anchor: 'end'},
+		{ c: 'D.S. al fine', anchor: 'end'},
 		{ c: 'D.C.', anchor: 'middle'},
 		{ c: '5', anchor: 'middle'},
 	]

@@ -209,19 +209,19 @@ var Decoration = function Decoration() {
 					hasOne = true;
 					break;
 				case "D.C.alcoda":
-					textDecoration("D.C. al coda", positioning, 'left');
+					textDecoration("D.C. al coda", positioning, 'end');
 					hasOne = true;
 					break;
 				case "D.C.alfine":
-					textDecoration("D.C. al fine", positioning, 'left');
+					textDecoration("D.C. al fine", positioning, 'end');
 					hasOne = true;
 					break;
 				case "D.S.alcoda":
-					textDecoration("D.S. al coda", positioning, 'left');
+					textDecoration("D.S. al coda", positioning, 'end');
 					hasOne = true;
 					break;
 				case "D.S.alfine":
-					textDecoration("D.S. al fine", positioning, 'left');
+					textDecoration("D.S. al fine", positioning, 'end');
 					hasOne = true;
 					break;
 				case "fine":
