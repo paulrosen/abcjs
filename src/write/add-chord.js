@@ -1,8 +1,8 @@
 var RelativeElement = require('./abc_relative_element');
 var spacing = require('./abc_spacing');
-const formatJazzChord = require("./format-jazz-chord");
+const translateChord = require("./translate-chord");
 
-var addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords) {
+var addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords, germanAlphabet) {
 		for (var i = 0; i < elem.chord.length; i++) {
 			var pos = elem.chord[i].position;
 			var rel_position = elem.chord[i].rel_position;
@@ -19,8 +19,7 @@ var addChord = function (getTextSize, abselem, elem, roomTaken, roomTakenRight, 
 				} else {
 					font = 'gchordfont';
 					klass = "chord";
-					if (jazzchords)
-						chord = formatJazzChord(chord);
+					chord = translateChord(chord, jazzchords, germanAlphabet);
 				}
 				var attr = getTextSize.attr(font, klass);
 				var dim = getTextSize.calc(chord, font, klass);

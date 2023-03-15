@@ -53,6 +53,7 @@ var AbstractEngraver = function(getTextSize, tuneNumber, options) {
 	this.percmap = options.percmap;
 	this.initialClef = options.initialClef
 	this.jazzchords = !!options.jazzchords
+	this.germanAlphabet = !!options.germanAlphabet
 	this.reset();
 };
 
@@ -825,7 +826,7 @@ AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff
 	ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
 
   if (elem.chord !== undefined) {
- 	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth, this.jazzchords);
+ 	var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth, this.jazzchords, this.germanAlphabet);
 	  roomtaken = ret3.roomTaken;
 	  roomtakenright = ret3.roomTakenRight;
   }
@@ -1016,7 +1017,7 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
 	abselem.extraw -= 5;
 
 	if (elem.chord !== undefined) {
-		var ret3 = addChord(this.getTextSize, abselem, elem, 0, 0, 0, false);
+		var ret3 = addChord(this.getTextSize, abselem, elem, 0, 0, 0, false, this.germanAlphabet);
 	}
 
 	return abselem;
