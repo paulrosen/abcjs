@@ -259,7 +259,7 @@ declare module 'abcjs' {
 		dragColor?: string;
 		dragging?: boolean;
 		foregroundColor?: string;
-		format?: { [attr: FormatAttributes]: any };
+		format?: { [attr in FormatAttributes]: any };
 		header_only?: boolean;
 		initialClef?: boolean;
 		jazzchords?: boolean;
