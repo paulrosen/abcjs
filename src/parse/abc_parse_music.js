@@ -1042,6 +1042,8 @@ MusicParser.prototype.startNewLine = function() {
 			params.staffscale = multilineVars.currentVoice.staffscale;
 		if (multilineVars.currentVoice.scale)
 			params.scale = multilineVars.currentVoice.scale;
+		if (multilineVars.currentVoice.color)
+			params.color = multilineVars.currentVoice.color;
 		if (multilineVars.currentVoice.style)
 			params.style = multilineVars.currentVoice.style;
 		if (multilineVars.currentVoice.transpose)

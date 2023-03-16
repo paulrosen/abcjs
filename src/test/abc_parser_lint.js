@@ -335,6 +335,7 @@ var ParserLint = function() {
 		field: "el_type",
 		types: [
 			{ value: "clef", properties: appendPositioning(clefProperties) },
+			{ value: "color", properties: { color: {type: "string", optional: true } } },
 			{ value: "bar", properties: prependPositioning(barProperties) },
 			{ value: "gap", properties: { type: "number", optional: true } },	// staffbreak
 			{ value: "key", properties: appendPositioning(keyProperties) },

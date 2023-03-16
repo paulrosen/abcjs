@@ -808,6 +808,15 @@ var parseDirective = {};
 					tuneBuilder.changeVoiceScale(multilineVars.currentVoice.scale);
 				}
 				return null;
+			case "voicecolor":
+				if (tokens.length !== 1) // this could either be of type alpha or quote, but it's ok if it is a number
+					return "voicecolor requires one string as a parameter";
+				var voiceColor = tokens.shift();
+				if (multilineVars.currentVoice) {
+					multilineVars.currentVoice.color = voiceColor.token;
+					tuneBuilder.changeVoiceColor(multilineVars.currentVoice.color);
+				}
+				return null;
 			case "vskip":
 				var vskip = Math.round(getRequiredMeasurement(cmd, tokens));
 				if (vskip.error)

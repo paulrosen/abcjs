@@ -61,10 +61,12 @@ AbstractEngraver.prototype.reset = function() {
 	this.slurs = {};
 	this.ties = [];
 	this.voiceScale = 1;
+	this.voiceColor = undefined;
 	this.slursbyvoice = {};
 	this.tiesbyvoice = {};
 	this.endingsbyvoice = {};
 	this.scaleByVoice = {};
+	this.colorByVoice = {};
 	this.tripletmultiplier = 1;
 
 	this.abcline = undefined;
@@ -91,6 +93,8 @@ AbstractEngraver.prototype.pushCrossLineElems = function(s,v) {
   this.tiesbyvoice[this.getCurrentVoiceId(s,v)] = this.ties;
   this.endingsbyvoice[this.getCurrentVoiceId(s,v)] = this.partstartelem;
   this.scaleByVoice[this.getCurrentVoiceId(s,v)] = this.voiceScale;
+  if (this.voiceColor)
+	  this.colorByVoice[this.getCurrentVoiceId(s,v)] = this.voiceColor;
 };
 
 AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
@@ -99,6 +103,7 @@ AbstractEngraver.prototype.popCrossLineElems = function(s,v) {
   this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(s,v)];
   this.voiceScale = this.scaleByVoice[this.getCurrentVoiceId(s,v)];
   if (this.voiceScale === undefined) this.voiceScale = 1;
+  this.voiceColor = this.colorByVoice[this.getCurrentVoiceId(s,v)];
 };
 
 	AbstractEngraver.prototype.containsLyrics = function(staves) {
@@ -361,6 +366,10 @@ AbstractEngraver.prototype.createABCElement = function(isFirstStaff, isSingleLin
 		break;
 	  case "scale":
 	  	this.voiceScale = elem.size;
+	  	break;
+	  case "color":
+	  	this.voiceColor = elem.color;
+		voice.color = this.voiceColor;
 	  	break;
 
   default:

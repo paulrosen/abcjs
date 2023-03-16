@@ -11,6 +11,9 @@ var drawAbsolute = require('./absolute');
 function drawVoice(renderer, params, bartop, selectables, staffPos) {
 	var width = params.w-1;
 	renderer.staffbottom = params.staff.bottom;
+	var saveColor = renderer.foregroundColor
+	if (params.color)
+		renderer.foregroundColor = params.color
 
 	if (params.header) { // print voice name
 		var textEl = renderText(renderer, {x: renderer.padding.left, y: renderer.calcY(params.headerPosition), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true, name: "voice-name"}, true);
@@ -29,21 +32,16 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 			renderer.controller.classes.startMeasure();
 			justInitializedMeasureNumber = true;
 		}
-		switch (child.type) {
-			// case "tempo":
-			// 	child.elemset = drawTempo(renderer, child);
-			// 	break;
-			default:
-				if (params.staff.isTabStaff) {
-					child.invisible = false;
-  				if ( child.type == 'bar' ) {
-						if (child.abcelem.lastBar) {
-							bartop = params.topLine;
-						}
-					}
-				} 
-				drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables, staffPos);
-		}
+		if (params.staff.isTabStaff) {
+			child.invisible = false;
+		if ( child.type == 'bar' ) {
+				if (child.abcelem.lastBar) {
+					bartop = params.topLine;
+				}
+			}
+		} 
+		drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables, staffPos);
+
 		if (child.type === 'note' || isNonSpacerRest(child))
 			renderer.controller.classes.incrNote();
 		if (child.type === 'bar' && !justInitializedMeasureNumber && foundNote) {
@@ -92,6 +90,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 			}
 		}
 	}
+	renderer.foregroundColor = saveColor
 
 }
 

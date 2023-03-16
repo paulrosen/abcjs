@@ -68,7 +68,7 @@ var TuneBuilder = function(tune) {
 									durationThisBar += event.duration;
 									durationsPerLines[i] += event.duration;
 								}
-							} else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose") {
+							} else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose" || event.el_type === "color") {
 								// These types of events are duplicated on the overlay layer.
 								overlayVoice[k].voice.push(event);
 							}
@@ -702,6 +702,9 @@ var TuneBuilder = function(tune) {
 	this.changeVoiceScale = function(scale) {
 		self.appendElement('scale', null, null, { size: scale} );
 	};
+	this.changeVoiceColor = function(color) {
+		self.appendElement('color', null, null, { color: color} );
+	};
 
 	this.startNewLine = function(params) {
 		// If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.
@@ -734,6 +737,8 @@ var TuneBuilder = function(tune) {
 			}
 			if (params.scale)
 				self.appendElement('scale', null, null, { size: params.scale} );
+			if (params.color)
+				self.appendElement('color', null, null, { color: params.color} );
 		};
 		var createStaff = function(params) {
 			if (params.key && params.key.impliedNaturals) {

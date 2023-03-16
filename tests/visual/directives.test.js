@@ -13,6 +13,17 @@ describe("Directives", function() {
 			]
 		);
 	})
+
+	var voiceColorAbc = 'K:C\nV:1\nC\nV:2\n%%voicecolor orange\nE\nV:3\n%%voicecolor "#f0a0f0"\nG\nV:4\nB\nV:1\n%%voicecolor blue\nC\nV:2\nE\nV:3\nG\nV:4\nB\n'
+
+	var voiceColorExpected = [ 'currentColor', 'orange', '#f0a0f0', 'currentColor', 'blue', 'orange', '#f0a0f0', 'currentColor', ]
+
+	var voiceColorAbc2 = '%%staves (1 2 3 4)\nK:C\nV:1\nC,\nV:2\n%%voicecolor "orange"\nE\nV:3\n%%voicecolor "#f0a0f0"\ne\nV:4\nb\'\nV:1\n%%voicecolor blue\nC,\nV:2\nE\nV:3\ne\nV:4\nb\'\n'
+
+	it("voicecolor", function() {
+		doColorTest(voiceColorAbc, voiceColorExpected)
+		doColorTest(voiceColorAbc2, voiceColorExpected)
+	})
 })
 
 function allTests(abc, directive, blankExpected, values, expectedArray) {
@@ -35,4 +46,14 @@ function doDirectiveTest(abc, params, expected, comment) {
 	var msg = comment + "\nrcv: " + JSON.stringify(xes) + "\n" +
 		"exp: " + JSON.stringify(expected) + "\n";
 	chai.assert.deepStrictEqual(xes, expected, msg);
+}
+
+function doColorTest(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc);
+	console.log(visualObj[0].lines[0].staff)
+	var els = document.querySelectorAll('[data-name="note"]')
+	var colors = []
+	for (var i = 0; i < els.length; i++)
+		colors.push(els[i].attributes.fill.value)
+	chai.assert.deepStrictEqual(colors, expected)
 }
