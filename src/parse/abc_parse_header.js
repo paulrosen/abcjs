@@ -403,6 +403,8 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 						return [ e-i+1+ws, line.charAt(i+1), line.substring(i+3, e)];
 					}
 					break;
+				case "[r:":
+					return [ e-i+1+ws ];
 
 				default:
 					// TODO: complain about unhandled header

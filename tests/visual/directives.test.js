@@ -24,6 +24,15 @@ describe("Directives", function() {
 		doColorTest(voiceColorAbc, voiceColorExpected)
 		doColorTest(voiceColorAbc2, voiceColorExpected)
 	})
+
+	var abcRemark = "DEF [r:and this is a remark] FED:|\n"
+
+	var abcRemarkExpected = ['note', 'note', 'note', 'note', 'note', 'note', 'bar']
+
+	it("remark", function() {
+		doNoteTest(abcRemark, abcRemarkExpected)
+	})
+
 })
 
 function allTests(abc, directive, blankExpected, values, expectedArray) {
@@ -56,4 +65,15 @@ function doColorTest(abc, expected) {
 	for (var i = 0; i < els.length; i++)
 		colors.push(els[i].attributes.fill.value)
 	chai.assert.deepStrictEqual(colors, expected)
+}
+
+function doNoteTest(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc);
+	chai.assert.equal(visualObj[0].warnings, undefined)
+	var elements = [  ]
+	for (var i = 0; i < visualObj[0].lines[0].staff[0].voices[0].length; i++) {
+		var item = visualObj[0].lines[0].staff[0].voices[0][i]
+		elements.push(item.el_type)
+	}
+	chai.assert.deepStrictEqual(elements, expected)
 }
