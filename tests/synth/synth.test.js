@@ -82,6 +82,27 @@ describe("Synth", function() {
 		})
 
 	})
+
+	// it("swing", function() {
+	// 	this.timeout(22000);
+	// 	const tune = abcjs.renderAbc("paper", abcThatsAPlenty, {
+	// 		add_classes: true,
+	// 	});
+	// 	const midiBuffer = new abcjs.synth.CreateSynth();
+	// 	return midiBuffer.init({
+	// 		visualObj: tune[0],
+	// 		millisecondsPerMeasure: tune[0].millisecondsPerMeasure(),
+	// 		swing: 0.5
+	// 	}).then(function (response) {
+	// 		return midiBuffer.prime().then(function () {
+	// 			midiBuffer.start();
+	// 			return sleep(20000).then(function () {
+	// 				console.log("finished")
+	// 			});
+	// 		})
+	// 	})
+
+	// })
 })
 
 function setUpSynth() {

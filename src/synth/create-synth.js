@@ -26,11 +26,13 @@ function CreateSynth() {
 	self.audioBuffers = []; // cache of the buffers so starting play can be fast.
 	self.duration = undefined; // the duration of the tune in seconds.
 	self.isRunning = false; // whether there is currently a sound buffer running.
+//	self.options = undefined
 
 	// Load and cache all needed sounds
 	self.init = function(options) {
 		if (!options)
 			options = {};
+//		self.options = options
 		registerAudioContext(options.audioContext); // This works no matter what - if there is already an ac it is a nop; if the context is not passed in, then it creates one.
 		var startTime = activeAudioContext().currentTime;
 		self.debugCallback = options.debugCallback;
@@ -283,6 +285,8 @@ function CreateSynth() {
 			self.stop();
 
 			var noteMapTracks = createNoteMap(self.flattened);
+			// if (self.options.swing)
+			// 	addSwing(noteMapTracks, self.options.swing, self.beatsPerMeasure)
 			if (self.sequenceCallback)
 				self.sequenceCallback(noteMapTracks, self.callbackContext);
 
@@ -506,6 +510,39 @@ function CreateSynth() {
 			};
 		}
 	};
+
+	// // this is a first attempt at adding a little bit of swing to the output, but the algorithm isn't correct.
+	// function addSwing(noteMapTracks, swing, beatsPerMeasure) {
+	// 	console.log("addSwing", noteMapTracks, swing, beatsPerMeasure)
+	// 	// Swing should be between -0.9 and 0.9. Make sure the input is between them.
+	// 	// Then that is the percentage to add to the first beat, so a negative number moves the second beat earlier.
+	// 	// A value of zero is the same as no swing at all.
+	// 	// This only works when there are an even number of beats in a measure.
+	// 	if (beatsPerMeasure % 2 !== 0)
+	// 		return;
+	// 	swing = parseFloat(swing)
+	// 	if (isNaN(swing))
+	// 		return
+	// 	if (swing < -0.9)
+	// 		swing = -0.9
+	// 	if (swing > 0.9)
+	// 		swing = 0.9
+	// 	var beatLength = (1 / beatsPerMeasure)*2
+	// 	swing = beatLength * swing
+	// 	for (var t = 0; t < noteMapTracks.length; t++) {
+	// 		var track = noteMapTracks[t];
+	// 		for (var i = 0; i < track.length; i++) {
+	// 			var event = track[i];
+	// 			if (event.start % beatLength) {
+	// 				// This is the off beat
+	// 				event.start += swing;
+	// 			} else {
+	// 				// This is the beat
+	// 				event.end += swing;
+	// 			}
+	// 		}
+	// 	}
+	// }
 }
 
 module.exports = CreateSynth;
