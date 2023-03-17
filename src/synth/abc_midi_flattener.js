@@ -32,6 +32,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 	var chordSourceTrack;
 	var chordTrackFinished;
 	var chordChannel;
+	var bassInstrument = 0;
 	var chordInstrument = 0;
 	var drumInstrument = 128;
 	var boomVolume = 64;
@@ -64,8 +65,9 @@ var pitchesToPerc = require('./pitches-to-perc');
 	var slurredBreakBetweenNotes = -0.001; // make the slurred notes actually overlap
 	var staccatoBreakBetweenNotes = 0.4; // some people say staccato is half duration, some say 3/4 so this splits it
 
-	flatten = function(voices, options, percmap_) {
+	flatten = function(voices, options, percmap_, midiOptions) {
 		if (!options) options = {};
+		if (!midiOptions) midiOptions = {};
 		barAccidentals = [];
 		accidentals = [0,0,0,0,0,0,0];
 		bagpipes = false;
@@ -88,8 +90,10 @@ var pitchesToPerc = require('./pitches-to-perc');
 		chordChannel = voices.length; // first free channel for chords
 		chordTrackFinished = false;
 		currentChords = [];
-		boomVolume = 64;
-		chickVolume = 48;
+		bassInstrument = midiOptions.bassprog && midiOptions.bassprog.length === 1 ? midiOptions.bassprog[0] : 0;
+		chordInstrument = midiOptions.chordprog && midiOptions.chordprog.length === 1 ? midiOptions.chordprog[0] : 0;
+		boomVolume = midiOptions.bassvol && midiOptions.bassvol.length === 1 ? midiOptions.bassvol[0] : 64;
+		chickVolume = midiOptions.chordvol && midiOptions.chordvol.length === 1 ? midiOptions.chordvol[0] : 48;
 		lastChord = undefined;
 		chordLastBar = undefined;
 		gChordTacet = options.chordsOff ? true : false;
@@ -1017,7 +1021,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 	function writeBoom(boom, beatLength, volume, beat, noteLength) {
 		// undefined means there is a stop time.
 		if (boom !== undefined)
-			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), gap: 0, instrument: chordInstrument});
+			chordTrack.push({cmd: 'note', pitch: boom, volume: volume, start: lastBarTime+beat*durationRounded(beatLength), duration: durationRounded(noteLength), gap: 0, instrument: bassInstrument});
 	}
 
 	function writeChick(chick, beatLength, volume, beat, noteLength) {

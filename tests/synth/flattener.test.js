@@ -2672,6 +2672,49 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcGuitarChordParams = 'X: 1\n' +
+	'L: 1/4\n' +
+	'M: 4/4\n' +
+	'%%MIDI bassprog 10\n' +
+	'%%MIDI bassvol 125\n' +
+	'%%MIDI chordprog 72\n' +
+	'%%MIDI chordvol 23\n' +
+	'K:C\n' +
+	'"C"z4|"G7"z4|\n'
+
+	var expectedGuitarChordParams = 
+		{
+			"tempo":180,"instrument":0,"tracks":[
+				[
+					{"cmd":"program","channel":0,"instrument":0}
+				],
+				[
+					{"cmd":"program","channel":1,"instrument":72},
+					{"cmd":"note","pitch":36,"volume":125,"start":0,"duration":0.125,"gap":0,"instrument":10},
+					{"cmd":"note","pitch":48,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":52,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":55,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":31,"volume":125,"start":0.5,"duration":0.125,"gap":0,"instrument":10},
+					{"cmd":"note","pitch":48,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":52,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":55,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":43,"volume":125,"start":1,"duration":0.125,"gap":0,"instrument":10},
+					{"cmd":"note","pitch":55,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":59,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":62,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":65,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":38,"volume":125,"start":1.5,"duration":0.125,"gap":0,"instrument":10},
+					{"cmd":"note","pitch":55,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},{"cmd":"note","pitch":59,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":62,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},
+					{"cmd":"note","pitch":65,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72}
+				]
+			],
+			"totalDuration":2
+		}
+
+
+	//////////////////////////////////////////////////////////
+
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
@@ -2811,6 +2854,11 @@ describe("Audio flattener", function() {
 	it("flatten-no-chord-voice", function() {
 		doFlattenTest(abcNoChordVoice, expectedNoChordVoice, {chordsOff: true});
 	})
+
+	it("flatten-chord-params", function() {
+		doFlattenTest(abcGuitarChordParams, expectedGuitarChordParams);
+	})
+
 })
 
 //////////////////////////////////////////////////////////

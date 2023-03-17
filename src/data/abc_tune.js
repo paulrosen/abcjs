@@ -611,7 +611,7 @@ var Tune = function() {
 	this.setUpAudio = function(options) {
 		if (!options) options = {};
 		var seq = sequence(this, options);
-		return flatten(seq, options, this.formatting.percmap);
+		return flatten(seq, options, this.formatting.percmap, this.formatting.midi);
 	};
 	this.deline = function(options) {
 		return delineTune(this.lines, options);

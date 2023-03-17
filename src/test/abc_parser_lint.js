@@ -318,7 +318,7 @@ var ParserLint = function() {
 	var midiProperties = {
 		cmd: { type: 'string', Enum: [
 			"nobarlines", "barlines", "beataccents", "nobeataccents", "droneon", "droneoff", "noportamento", "channel", "c",
-			"drumon", "drumoff", "fermatafixed", "fermataproportional", "gchordon", "gchordoff", "bassvol", "chordvol",
+			"drumon", "drumoff", "fermatafixed", "fermataproportional", "gchordon", "gchordoff", "bassvol", "chordvol", "bassprog", "chordprog",
 			"controlcombo", "temperamentnormal", "gchord", "ptstress", "beatmod", "deltaloudness", "drumbars", "pitchbend",
 			"gracedivider", "makechordchannels", "randomchordattack", "chordattack", "stressmodel", "transpose",
 			"rtranspose", "volinc", "program", "ratio", "snt", "bendvelocity", "control", "temperamentlinear", "beat", "beatstring",

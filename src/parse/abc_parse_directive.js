@@ -485,6 +485,8 @@ var parseDirective = {};
 	var midiCmdParam1Integer = [
 		"bassvol",
 		"chordvol",
+		"bassprog",
+		"chordprog",
 		"c",
 		"channel",
 		"beatmod",
