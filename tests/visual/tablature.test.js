@@ -362,6 +362,13 @@ describe("Tablature", function () {
 		}
 	];
 
+	var accidentalParams = [
+		{
+			instrument: 'guitar',
+			tuning: ['^D,', '_A,', '_D', '^G', '_B', '^d'],
+		}
+	];
+
 	var badTuningParams = [
 		{
 			instrument: 'guitar',
@@ -707,6 +714,28 @@ describe("Tablature", function () {
 			{"el_type":"bar","type":"bar_thin","endChar":67,"startChar":66},
 		]
 	]
+
+	var accidentalsInDef = "X: 1\n" +
+	"M: 4/4\n" +
+	"L: 1/4\n" +
+	"K: G\n" +
+	"G,CEGda\n"
+
+	var accidentalsInDefOutput = [
+		[
+			{"el_type":"note","startChar":24,"endChar":26,"notes":[{"num":4,"str":5,"pitch":"G,"}]},
+			{"el_type":"note","startChar":26,"endChar":27,"notes":[{"num":4,"str":4,"pitch":"C"}]},
+			{"el_type":"note","startChar":27,"endChar":28,"notes":[{"num":3,"str":3,"pitch":"E"}]},
+			{"el_type":"note","startChar":28,"endChar":29,"notes":[{"num":2,"str":3,"pitch":"G"}]},
+			{"el_type":"note","startChar":29,"endChar":30,"notes":[{"num":4,"str":1,"pitch":"d"}]},
+			{"el_type":"note","startChar":30,"endChar":31,"notes":[{"num":6,"str":0,"pitch":"a"}]},
+		]
+	]
+
+	// TODO-PER: This test causes an infinite loop
+	// it("accidentals-in-def", function () {
+	// 	doStaffTest(accidentalsInDef, accidentalsInDefOutput, accidentalParams);
+	// });
 
 	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
