@@ -134,6 +134,29 @@ describe("Timing", function() {
 		'K:G\n' +
 		'G3 F- F4 :|\n';
 
+	var abcBeatCallback = "X:1\n" +
+		"M:2/4\n" +
+		"L:1/16\n" +
+		"K:C clef=bass\n" +
+		"!f!C,2D,2 E,4|G,6 A,2|G,4 E,4|]\n"
+
+var expectedBeatCallback = [
+	{beat: 0, left: 'NONE' },
+	{beat: 1, left: 'NONE' },
+	{beat: 2, left: 'NONE' },
+	{beat: 3, left: 'NONE' },
+	{beat: 4, left: 70 },
+	{beat: 5, left: 165 },
+	{beat: 6, left: 240 },
+	{beat: 4, left: 70 },
+	{beat: 5, left: 165 },
+	{beat: 6, left: 240 },
+	{beat: 7, left: 290 },
+	{beat: 8, left: 375 },
+	{beat: 9, left: 440 },
+	{beat: 10, left: 'NONE'},
+]
+
 //////////////////////////////////////////////////////////
 
 	it("of repeated sections", function() {
@@ -178,6 +201,10 @@ describe("Timing", function() {
 		for (var i = 0; i < warpTestsNoQ.length; i++) {
 			doWarpTest(abcWarpNoQ, warpTestsNoQ[i], warpMsNoQ[i]);
 		}
+	});
+
+	it("beat-callback", function() {
+		return doBeatCallbackTest(abcBeatCallback, expectedBeatCallback)
 	});
 });
 
@@ -266,4 +293,42 @@ function listener(abcElem, expected) {
 	for (var i = 0; i < abcElem.midiPitches.length; i++)
 		chai.assert.equal(abcElem.midiPitches[i].pitch,expected.pitches[i]);
 	chai.assert.deepStrictEqual(abcElem.currentTrackMilliseconds,expected.ms);
+}
+
+//////////////////////////////////////////////////////////
+
+function doBeatCallbackTest(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc, { staffwidth: 500, stretchlast: true})
+	var timing = new abcjs.TimingCallbacks(visualObj[0], {
+		beatCallback: beatCallback,
+		beatSubdivisions: 1,
+		extraMeasuresAtBeginning: 2,
+		qpm: 400,
+	})
+	var actual = []
+	function beatCallback(beat,total,totalTime,position) {
+		var left = position.left === undefined ? 'NONE' : Math.round(position.left/5)*5
+		actual.push({beat: beat, left: left})
+	}
+
+	timing.start()
+	return sleep(900).then(function () {
+		timing.setProgress(0.6, "seconds")
+		return sleep(900).then(function () {
+			var msg = []
+			for (var i = 0; i < Math.min(actual.length, expected.length); i++) {
+				var err = JSON.stringify(actual[i]) !== JSON.stringify(expected[i]) ? 'XXXX' : ''
+				msg.push(JSON.stringify(actual[i]) + ' = ' + JSON.stringify(expected[i]) + ' ' + err)
+			}
+			msg = "\n" + msg.join("\n") + "\n"
+			chai.assert.deepStrictEqual(actual,expected, msg);
+			return Promise.resolve();
+		})
+	})
+}
+
+function sleep(ms) {
+	return new Promise(function (resolve) {
+		setTimeout(resolve, ms);
+	});
 }

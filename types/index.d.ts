@@ -940,7 +940,7 @@ declare module 'abcjs' {
 		ev: NoteTimingEvent;
 		endMs: number;
 		offMs: number;
-		offPs: number;
+		offPx: number;
 		gapMs: number;
 		gapPx: number;
 	}

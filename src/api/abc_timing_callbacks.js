@@ -128,7 +128,7 @@ var TimingCallbacks = function(target, params) {
 			var ev;
 			if (next < self.noteTimings.length) {
 				endMs = self.noteTimings[next].milliseconds;
-				next = self.currentEvent - 1;
+				next = Math.max(0, self.currentEvent - 1);
 				while (next >= 0 && self.noteTimings[next].left === null)
 					next--;
 
@@ -153,15 +153,19 @@ var TimingCallbacks = function(target, params) {
 				var offMs = Math.max(0, timestamp-self.startTime-ev.milliseconds); // Offset in time from the last beat
 				var gapMs = endMs - ev.milliseconds; // Length of this event in time
 				var gapPx = ev.endX - ev.left; // The length in pixels
-				var offPx = offMs * gapPx / gapMs;
+				var offPx = gapMs ? offMs * gapPx / gapMs : 0;
 				position.left = ev.left + offPx;
+				// See if this is before the first event - that is the case where there are "prep beats"
+				if (self.currentEvent === 0 && ev.milliseconds > timestamp-self.startTime)
+					position.left = undefined
+				
 				debugInfo = {
 					timestamp: timestamp,
 					startTime: self.startTime,
 					ev: ev,
 					endMs: endMs,
 					offMs: offMs,
-					offPs: offPx,
+					offPx: offPx,
 					gapMs: gapMs,
 					gapPx: gapPx
 				};
