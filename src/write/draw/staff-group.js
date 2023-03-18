@@ -25,7 +25,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 		renderer.moveY(spacing.STEP, staff1.top);
 		staff1.absoluteY = renderer.y;
 		if (renderer.showDebug) {
-			if (renderer.showDebug.indexOf("box") >= 0) {
+			if (renderer.showDebug.indexOf("box") >= 0 && staff1.voices) {
 				boxAllElements(renderer, params.voices, staff1.voices);
 			}
 			if (renderer.showDebug.indexOf("grid") >= 0) {
@@ -145,7 +145,7 @@ function drawStaffGroup(renderer, params, selectables,lineNumber) {
 	function debugPrintGridItem(staff, key) {
 		var colors = [ "rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)",
 			"rgb(31,170,177)", "rgb(220,166,142)" ];
-		if (staff.positionY[key]) {
+		if (staff.positionY && staff.positionY[key]) {
 			var height = staff.specialY[key] * spacing.STEP;
 			if (key === "chordHeightAbove" && staff.specialY.chordLines && staff.specialY.chordLines.above)
 				height *= staff.specialY.chordLines.above;
