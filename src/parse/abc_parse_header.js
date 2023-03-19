@@ -189,7 +189,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 
 	this.setDefaultLength = function(line, start, end) {
-		var len = parseCommon.gsub(line.substring(start, end), " ", "");
+		var len = line.substring(start, end).replace(/ /g, "");
 		var len_arr = len.split('/');
 		if (len_arr.length === 2) {
 			var n = parseInt(len_arr[0]);

@@ -15,7 +15,7 @@ var bookParser = function(book) {
 	// Keep track of the character position each tune starts with. If the string starts with white space, count that, too.
 	var pos = initialWhiteSpace ? initialWhiteSpace[0].length : 0;
 	var tunes = [];
-	parseCommon.each(tuneStrings, function(tune) {
+	tuneStrings.forEach(function(tune) {
 		tunes.push({ abc: tune, startPos: pos});
 		pos += tune.length + 1; // We also lost a newline when splitting, so count that.
 	});
@@ -25,7 +25,7 @@ var bookParser = function(book) {
 		// the tune is parsed all at once. The directives will be seen before the engraver begins processing.
 		var dir = tunes.shift();
 		var arrDir = dir.abc.split('\n');
-		parseCommon.each(arrDir, function(line) {
+		arrDir.forEach(function(line) {
 			if (parseCommon.startsWith(line, '%%'))
 				directives += line + '\n';
 		});
@@ -33,7 +33,7 @@ var bookParser = function(book) {
 	var header = directives;
 
 	// Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
-	parseCommon.each(tunes, function(tune) {
+	tunes.forEach(function(tune) {
 		var end = tune.abc.indexOf('\n\n');
 		if (end > 0)
 			tune.abc = tune.abc.substring(0, end);

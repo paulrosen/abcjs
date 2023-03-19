@@ -756,7 +756,7 @@ var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, add
 
 	AbstractEngraver.prototype.addLyric = function(abselem, elem) {
 		var lyricStr = "";
-		parseCommon.each(elem.lyric, function(ly) {
+		elem.lyric.forEach(function(ly) {
 			var div = ly.divider === ' ' ? "" : ly.divider;
 			lyricStr += ly.syllable + div + "\n";
 		});

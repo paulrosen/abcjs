@@ -388,7 +388,7 @@ MusicParser.prototype.parseMusic = function(line) {
 								}
 
 								if (isInTie(multilineVars,  overlayLevel, el)) {
-									parseCommon.each(el.pitches, function(pitch) { pitch.endTie = true; });
+									el.pitches.forEach(function(pitch) { pitch.endTie = true; });
 									setIsInTie(multilineVars,  overlayLevel, false);
 								}
 
@@ -410,7 +410,7 @@ MusicParser.prototype.parseMusic = function(line) {
 											if (el.endSlur === undefined) el.endSlur = 1; else el.endSlur++;
 											break;
 										case '-':
-											parseCommon.each(el.pitches, function(pitch) { pitch.startTie = {}; });
+											el.pitches.forEach(function(pitch) { pitch.startTie = {}; });
 											setIsInTie(multilineVars,  overlayLevel, true);
 											break;
 										case '>':
@@ -755,26 +755,18 @@ var letter_to_accent = function(line, i) {
 			macro = macro.substring(1);
 		if (macro[macro.length-1] === '!' || macro[macro.length-1] === '+')
 			macro = macro.substring(0, macro.length-1);
-		if (parseCommon.detect(legalAccents, function(acc) {
-			return (macro === acc);
-		}))
+		if (legalAccents.includes(macro))
 			return [ 1, macro ];
-		else if (parseCommon.detect(volumeDecorations, function(acc) {
-			return (macro === acc);
-		})) {
+		else if (volumeDecorations.includes(macro)) {
 			if (multilineVars.volumePosition === 'hidden')
 				macro = "";
 			return [1, macro];
-		} else if (parseCommon.detect(dynamicDecorations, function(acc) {
+		} else if (dynamicDecorations.includes(macro)) {
 			if (multilineVars.dynamicPosition === 'hidden')
 				macro = "";
-			return (macro === acc);
-		})) {
 			return [1, macro];
 		} else {
-			if (!parseCommon.detect(multilineVars.ignoredDecorations, function(dec) {
-				return (macro === dec);
-			}))
+			if (!multilineVars.ignoredDecorations.includes(macro))
 				warn("Unknown macro: " + macro, line, i);
 			return [1, '' ];
 		}
@@ -794,45 +786,33 @@ var letter_to_accent = function(line, i) {
 			// Be sure that the accent is recognizable.
 			if (ret[1].length > 1 && (ret[1][0] === '^' || ret[1][0] ==='_'))
 				ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
-			if (parseCommon.detect(legalAccents, function(acc) {
-				return (ret[1] === acc);
-			}))
+			if (legalAccents.includes(ret[1]))
 				return ret;
-			if (parseCommon.detect(volumeDecorations, function(acc) {
-				return (ret[1] === acc);
-			})) {
+			if (volumeDecorations.includes(ret[1])) {
 				if (multilineVars.volumePosition === 'hidden' )
 					ret[1] = '';
 				return ret;
 			}
-			if (parseCommon.detect(dynamicDecorations, function(acc) {
-				return (ret[1] === acc);
-			})) {
+			if (dynamicDecorations.includes(ret[1])) {
 				if (multilineVars.dynamicPosition === 'hidden' )
 					ret[1] = '';
 				return ret;
 			}
 
-			if (parseCommon.detect(accentPseudonyms, function(acc) {
-				if (ret[1] === acc[0]) {
-					ret[1] = acc[1];
-					return true;
-				} else
-					return false;
-			}))
+			var ind = accentPseudonyms.findIndex(function (acc) { return ret[1] === acc[0]})
+			if (ind >= 0) {
+				ret[1] = accentPseudonyms[ind][1];
 				return ret;
+			}
 
-			if (parseCommon.detect(accentDynamicPseudonyms, function(acc) {
-				if (ret[1] === acc[0]) {
-					ret[1] = acc[1];
-					return true;
-				} else
-					return false;
-			})) {
+			ind = accentDynamicPseudonyms.findIndex(function (acc) { return ret[1] === acc[0]})
+			if (ind >= 0) {
+				ret[1] = accentDynamicPseudonyms[ind][1];
 				if (multilineVars.dynamicPosition === 'hidden' )
 					ret[1] = '';
 				return ret;
 			}
+
 			// We didn't find the accent in the list, so consume the space, but don't return an accent.
 			// Although it is possible that ! was used as a line break, so accept that.
 			if (line[i] === '!' && (ret[0] === 1 || line[i+ret[0]-1] !== '!'))
@@ -1005,7 +985,7 @@ MusicParser.prototype.startNewLine = function() {
 	parseKeyVoice.addPosToKey(params.clef, params.key);
 	if (multilineVars.meter !== null) {
 		if (multilineVars.currentVoice) {
-			parseCommon.each(multilineVars.staves, function(st) {
+			multilineVars.staves.forEach(function(st) {
 				st.meter = multilineVars.meter;
 			});
 			params.meter = multilineVars.staves[multilineVars.currentVoice.staffNum].meter;

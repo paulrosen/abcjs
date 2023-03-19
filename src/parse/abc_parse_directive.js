@@ -330,7 +330,7 @@ var parseDirective = {};
 
 	var setScale = function(cmd, tokens) {
 		var scratch = "";
-		parseCommon.each(tokens, function(tok) {
+		tokens.forEach(function(tok) {
 			scratch += tok.token;
 		});
 		var num = parseFloat(scratch);

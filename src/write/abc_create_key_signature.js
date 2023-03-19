@@ -4,8 +4,6 @@ var AbsoluteElement = require('./abc_absolute_element');
 var glyphs = require('./abc_glyphs');
 var RelativeElement = require('./abc_relative_element');
 
-var parseCommon = require('../parse/abc_common');
-
 var createKeySignature = function(elem, tuneNumber) {
 	elem.el_type = "keySignature";
 		if (!elem.accidentals || elem.accidentals.length === 0)
@@ -13,7 +11,7 @@ var createKeySignature = function(elem, tuneNumber) {
 		var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra key-signature', tuneNumber);
 		abselem.isKeySig = true;
 		var dx = 0;
-		parseCommon.each(elem.accidentals, function(acc) {
+		elem.accidentals.forEach(function(acc) {
 			var symbol;
 			var fudge = 0;
 			switch(acc.acc) {

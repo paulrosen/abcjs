@@ -743,14 +743,14 @@ var ParserLint = function() {
 	this.lint = function(tune, warnings) {
 		var ret = JSONSchema.validate(tune, musicSchema);
 		var err = "";
-		parseCommon.each(ret.errors, function(e) {
+		ret.errors.forEach(function(e) {
 			err += e.property + ": " + e.message + "\n";
 		});
 		var out = ret.output.join("\n");
 
 		var warn = warnings === undefined ? "No errors" : warnings.join('\n');
-		warn = parseCommon.gsub(warn, '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
-		warn = parseCommon.gsub(warn, '</span>', '$$$$');
+		warn = warn.replace(/<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">/g, '$$$$$$$$');
+		warn = warn.replace(/<\/span>/g, '$$$$$$$$');
 		return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
 	};
 };

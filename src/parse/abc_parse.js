@@ -181,10 +181,10 @@ var Parse = function() {
 	};
 
 	var encode = function(str) {
-		var ret = parseCommon.gsub(str, '\x12', ' ');
-		ret = parseCommon.gsub(ret, '&', '&amp;');
-		ret = parseCommon.gsub(ret, '<', '&lt;');
-		return parseCommon.gsub(ret, '>', '&gt;');
+		var ret = str.replace(/\x12/g, ' ');
+		ret = ret.replace(/&/g, '&amp;');
+		ret = ret.replace(/</g, '&lt;');
+		return ret.replace(/>/g, '&gt;');
 	};
 
 	var warn = function(str, line, col_num) {
@@ -229,7 +229,7 @@ var Parse = function() {
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
-					word = parseCommon.gsub(word,'~', ' ');
+					word = word.replace(/~/g, ' ');
 				var div = words[i];
 				if (div !== '_' && div !== '-')
 					div = ' ';
@@ -280,7 +280,7 @@ var Parse = function() {
 		}
 
 		var inSlur = false;
-		parseCommon.each(line, function(el) {
+		line.forEach(function(el) {
 			if (word_list.length !== 0) {
 				if (word_list[0].skip) {
 					switch (word_list[0].to) {
@@ -331,7 +331,7 @@ var Parse = function() {
 			last_divider = i+1;
 			if (word.length > 0) {
 				if (replace)
-					word = parseCommon.gsub(word, '~', ' ');
+					word = word.replace(/~/g, ' ');
 				var div = words[i];
 				if (div !== '_' && div !== '-')
 					div = ' ';
@@ -372,7 +372,7 @@ var Parse = function() {
 		}
 
 		var inSlur = false;
-		parseCommon.each(line, function(el) {
+		line.forEach(function(el) {
 			if (word_list.length !== 0) {
 				if (word_list[0].skip) {
 					switch (word_list[0].to) {

@@ -178,10 +178,10 @@ var TuneBuilder = function(tune) {
 			}
 		}
 		if (anyDeleted) {
-			tune.lines = parseCommon.compact(tune.lines);
-			parseCommon.each(tune.lines, function(line) {
+			tune.lines = tune.lines.filter(function (line) { return !!line });
+			tune.lines.forEach(function(line) {
 				if (line.staff)
-					line.staff = parseCommon.compact(line.staff);
+					line.staff = line.staff.filter(function (line) { return !!line });
 			});
 		}
 
@@ -212,9 +212,9 @@ var TuneBuilder = function(tune) {
 				}
 			}
 			if (anyDeleted) {
-				parseCommon.each(tune.lines, function(line) {
+				tune.lines.forEach(function(line) {
 					if (line.staff)
-						line.staff = parseCommon.compact(line.staff);
+						line.staff = line.staff.filter(function (staff) { return !!staff });
 				});
 			}
 		}
@@ -253,7 +253,7 @@ var TuneBuilder = function(tune) {
 					}
 					if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
 						var offNum = chordPos*100+1;
-						parseCommon.each(obj.endSlur, function(x) { if (offNum === x) --offNum; });
+						obj.endSlur.forEach(function(x) { if (offNum === x) --offNum; });
 						currSlur[staffNum][voiceNum][chordPos] = [offNum];
 					}
 				}
@@ -276,12 +276,12 @@ var TuneBuilder = function(tune) {
 				var nextNum = chordPos*100+1;
 				for (var i = 0; i < num; i++) {
 					if (usedNums) {
-						parseCommon.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
-						parseCommon.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
-						parseCommon.each(usedNums, function(x) { if (nextNum === x) ++nextNum; });
+						usedNums.forEach(function(x) { if (nextNum === x) ++nextNum; });
+						usedNums.forEach(function(x) { if (nextNum === x) ++nextNum; });
+						usedNums.forEach(function(x) { if (nextNum === x) ++nextNum; });
 					}
-					parseCommon.each(currSlur[staffNum][voiceNum][chordPos], function(x) { if (nextNum === x) ++nextNum; });
-					parseCommon.each(currSlur[staffNum][voiceNum][chordPos], function(x) { if (nextNum === x) ++nextNum; });
+					currSlur[staffNum][voiceNum][chordPos].forEach(function(x) { if (nextNum === x) ++nextNum; });
+					currSlur[staffNum][voiceNum][chordPos].forEach(function(x) { if (nextNum === x) ++nextNum; });
 
 					currSlur[staffNum][voiceNum][chordPos].push(nextNum);
 					obj.startSlur.push({ label: nextNum });
@@ -512,11 +512,11 @@ var TuneBuilder = function(tune) {
 			}
 			if (hp.pitches !== undefined) {
 				var mid = currStaff.workingClef.verticalPos;
-				parseCommon.each(hp.pitches, function(p) { p.verticalPos = p.pitch - mid; });
+				hp.pitches.forEach(function(p) { p.verticalPos = p.pitch - mid; });
 			}
 			if (hp.gracenotes !== undefined) {
 				var mid2 = currStaff.workingClef.verticalPos;
-				parseCommon.each(hp.gracenotes, function(p) { p.verticalPos = p.pitch - mid2; });
+				hp.gracenotes.forEach(function(p) { p.verticalPos = p.pitch - mid2; });
 			}
 			currStaff.voices[This.voiceNum].push(hp);
 		};

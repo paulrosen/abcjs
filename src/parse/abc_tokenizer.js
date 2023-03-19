@@ -566,7 +566,7 @@ var Tokenizer = function(lines, multilineVars) {
 		var arr = str.split('\\');
 		if (arr.length === 1) return str;
 		var out = null;
-		parseCommon.each(arr, function(s) {
+		arr.forEach(function(s) {
 			if (out === null)
 				out = s;
 			else {

@@ -892,7 +892,6 @@ var Tune = __webpack_require__(/*! ../data/abc_tune */ "./src/data/abc_tune.js")
 var EngraverController = __webpack_require__(/*! ../write/abc_engraver_controller */ "./src/write/abc_engraver_controller.js");
 var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse.js");
 var wrap = __webpack_require__(/*! ../parse/wrap_lines */ "./src/parse/wrap_lines.js");
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 // var tablatures = require('./abc_tablatures');
 
 var resizeDivs = {};
@@ -2649,9 +2648,6 @@ parseCommon.cloneHashOfArrayOfHash = function (source) {
   }
   return destination;
 };
-parseCommon.gsub = function (source, pattern, replacement) {
-  return source.split(pattern).join(replacement);
-};
 parseCommon.strip = function (str) {
   return str.replace(/^\s+/, '').replace(/\s+$/, '');
 };
@@ -2662,27 +2658,9 @@ parseCommon.endsWith = function (str, pattern) {
   var d = str.length - pattern.length;
   return d >= 0 && str.lastIndexOf(pattern) === d;
 };
-parseCommon.each = function (arr, iterator, context) {
-  for (var i = 0, length = arr.length; i < length; i++) {
-    iterator.apply(context, [arr[i], i]);
-  }
-};
 parseCommon.last = function (arr) {
   if (arr.length === 0) return null;
   return arr[arr.length - 1];
-};
-parseCommon.compact = function (arr) {
-  var output = [];
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i]) output.push(arr[i]);
-  }
-  return output;
-};
-parseCommon.detect = function (arr, iterator) {
-  for (var i = 0; i < arr.length; i++) {
-    if (iterator(arr[i])) return true;
-  }
-  return false;
 };
 module.exports = parseCommon;
 
@@ -2870,10 +2848,10 @@ var Parse = function Parse() {
     multilineVars.warningObjects.push(warningObject);
   };
   var encode = function encode(str) {
-    var ret = parseCommon.gsub(str, '\x12', ' ');
-    ret = parseCommon.gsub(ret, '&', '&amp;');
-    ret = parseCommon.gsub(ret, '<', '&lt;');
-    return parseCommon.gsub(ret, '>', '&gt;');
+    var ret = str.replace(/\x12/g, ' ');
+    ret = ret.replace(/&/g, '&amp;');
+    ret = ret.replace(/</g, '&lt;');
+    return ret.replace(/>/g, '&gt;');
   };
   var warn = function warn(str, line, col_num) {
     if (!line) line = " ";
@@ -2918,7 +2896,7 @@ var Parse = function Parse() {
       word = word.replace(/\\([-_*|~])/g, '$1');
       last_divider = i + 1;
       if (word.length > 0) {
-        if (replace) word = parseCommon.gsub(word, '~', ' ');
+        if (replace) word = word.replace(/~/g, ' ');
         var div = words[i];
         if (div !== '_' && div !== '-') div = ' ';
         word_list.push({
@@ -2982,7 +2960,7 @@ var Parse = function Parse() {
       escNext = words[i] === '\\';
     }
     var inSlur = false;
-    parseCommon.each(line, function (el) {
+    line.forEach(function (el) {
       if (word_list.length !== 0) {
         if (word_list[0].skip) {
           switch (word_list[0].to) {
@@ -3038,7 +3016,7 @@ var Parse = function Parse() {
       var word = parseCommon.strip(words.substring(last_divider, i));
       last_divider = i + 1;
       if (word.length > 0) {
-        if (replace) word = parseCommon.gsub(word, '~', ' ');
+        if (replace) word = word.replace(/~/g, ' ');
         var div = words[i];
         if (div !== '_' && div !== '-') div = ' ';
         word_list.push({
@@ -3092,7 +3070,7 @@ var Parse = function Parse() {
       }
     }
     var inSlur = false;
-    parseCommon.each(line, function (el) {
+    line.forEach(function (el) {
       if (word_list.length !== 0) {
         if (word_list[0].skip) {
           switch (word_list[0].to) {
@@ -3320,7 +3298,7 @@ var bookParser = function bookParser(book) {
   // Keep track of the character position each tune starts with. If the string starts with white space, count that, too.
   var pos = initialWhiteSpace ? initialWhiteSpace[0].length : 0;
   var tunes = [];
-  parseCommon.each(tuneStrings, function (tune) {
+  tuneStrings.forEach(function (tune) {
     tunes.push({
       abc: tune,
       startPos: pos
@@ -3335,14 +3313,14 @@ var bookParser = function bookParser(book) {
     // the tune is parsed all at once. The directives will be seen before the engraver begins processing.
     var dir = tunes.shift();
     var arrDir = dir.abc.split('\n');
-    parseCommon.each(arrDir, function (line) {
+    arrDir.forEach(function (line) {
       if (parseCommon.startsWith(line, '%%')) directives += line + '\n';
     });
   }
   var header = directives;
 
   // Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
-  parseCommon.each(tunes, function (tune) {
+  tunes.forEach(function (tune) {
     var end = tune.abc.indexOf('\n\n');
     if (end > 0) tune.abc = tune.abc.substring(0, end);
     tune.pure = tune.abc;
@@ -4000,7 +3978,7 @@ var parseDirective = {};
   };
   var setScale = function setScale(cmd, tokens) {
     var scratch = "";
-    parseCommon.each(tokens, function (tok) {
+    tokens.forEach(function (tok) {
       scratch += tok.token;
     });
     var num = parseFloat(scratch);
@@ -4950,7 +4928,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     multilineVars.macros[before] = after;
   };
   this.setDefaultLength = function (line, start, end) {
-    var len = parseCommon.gsub(line.substring(start, end), " ", "");
+    var len = line.substring(start, end).replace(/ /g, "");
     var len_arr = len.split('/');
     if (len_arr.length === 2) {
       var n = parseInt(len_arr[0]);
@@ -5583,7 +5561,7 @@ var parseKeyVoice = {};
       acc: key.acc,
       mode: key.mode
     };
-    parseCommon.each(key.accidentals, function (k) {
+    key.accidentals.forEach(function (k) {
       ret.accidentals.push(parseCommon.clone(k));
     });
     return ret;
@@ -5608,43 +5586,43 @@ var parseKeyVoice = {};
     // Shift the key signature from the treble positions to whatever position is needed for the clef.
     // This may put the key signature unnaturally high or low, so if it does, then shift it.
     var mid = clef.verticalPos;
-    parseCommon.each(key.accidentals, function (acc) {
+    key.accidentals.forEach(function (acc) {
       var pitch = pitches[acc.note];
       pitch = pitch - mid;
       acc.verticalPos = pitch;
     });
-    if (key.impliedNaturals) parseCommon.each(key.impliedNaturals, function (acc) {
+    if (key.impliedNaturals) key.impliedNaturals.forEach(function (acc) {
       var pitch = pitches[acc.note];
       pitch = pitch - mid;
       acc.verticalPos = pitch;
     });
     if (mid < -10) {
-      parseCommon.each(key.accidentals, function (acc) {
+      key.accidentals.forEach(function (acc) {
         acc.verticalPos -= 7;
         if (acc.verticalPos >= 11 || acc.verticalPos === 10 && acc.acc === 'flat') acc.verticalPos -= 7;
         if (acc.note === 'A' && acc.acc === 'sharp') acc.verticalPos -= 7;
         if ((acc.note === 'G' || acc.note === 'F') && acc.acc === 'flat') acc.verticalPos -= 7;
       });
-      if (key.impliedNaturals) parseCommon.each(key.impliedNaturals, function (acc) {
+      if (key.impliedNaturals) key.impliedNaturals.forEach(function (acc) {
         acc.verticalPos -= 7;
         if (acc.verticalPos >= 11 || acc.verticalPos === 10 && acc.acc === 'flat') acc.verticalPos -= 7;
         if (acc.note === 'A' && acc.acc === 'sharp') acc.verticalPos -= 7;
         if ((acc.note === 'G' || acc.note === 'F') && acc.acc === 'flat') acc.verticalPos -= 7;
       });
     } else if (mid < -4) {
-      parseCommon.each(key.accidentals, function (acc) {
+      key.accidentals.forEach(function (acc) {
         acc.verticalPos -= 7;
         if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp') acc.verticalPos -= 7;
       });
-      if (key.impliedNaturals) parseCommon.each(key.impliedNaturals, function (acc) {
+      if (key.impliedNaturals) key.impliedNaturals.forEach(function (acc) {
         acc.verticalPos -= 7;
         if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp') acc.verticalPos -= 7;
       });
     } else if (mid >= 7) {
-      parseCommon.each(key.accidentals, function (acc) {
+      key.accidentals.forEach(function (acc) {
         acc.verticalPos += 7;
       });
-      if (key.impliedNaturals) parseCommon.each(key.impliedNaturals, function (acc) {
+      if (key.impliedNaturals) key.impliedNaturals.forEach(function (acc) {
         acc.verticalPos += 7;
       });
     }
@@ -6696,7 +6674,7 @@ MusicParser.prototype.parseMusic = function (line) {
                   multilineVars.next_note_duration = 0;
                 }
                 if (isInTie(multilineVars, overlayLevel, el)) {
-                  parseCommon.each(el.pitches, function (pitch) {
+                  el.pitches.forEach(function (pitch) {
                     pitch.endTie = true;
                   });
                   setIsInTie(multilineVars, overlayLevel, false);
@@ -6718,7 +6696,7 @@ MusicParser.prototype.parseMusic = function (line) {
                       if (el.endSlur === undefined) el.endSlur = 1;else el.endSlur++;
                       break;
                     case '-':
-                      parseCommon.each(el.pitches, function (pitch) {
+                      el.pitches.forEach(function (pitch) {
                         pitch.startTie = {};
                       });
                       setIsInTie(multilineVars, overlayLevel, true);
@@ -6990,22 +6968,14 @@ var letter_to_accent = function letter_to_accent(line, i) {
   if (macro !== undefined) {
     if (macro[0] === '!' || macro[0] === '+') macro = macro.substring(1);
     if (macro[macro.length - 1] === '!' || macro[macro.length - 1] === '+') macro = macro.substring(0, macro.length - 1);
-    if (parseCommon.detect(legalAccents, function (acc) {
-      return macro === acc;
-    })) return [1, macro];else if (parseCommon.detect(volumeDecorations, function (acc) {
-      return macro === acc;
-    })) {
+    if (legalAccents.includes(macro)) return [1, macro];else if (volumeDecorations.includes(macro)) {
       if (multilineVars.volumePosition === 'hidden') macro = "";
       return [1, macro];
-    } else if (parseCommon.detect(dynamicDecorations, function (acc) {
+    } else if (dynamicDecorations.includes(macro)) {
       if (multilineVars.dynamicPosition === 'hidden') macro = "";
-      return macro === acc;
-    })) {
       return [1, macro];
     } else {
-      if (!parseCommon.detect(multilineVars.ignoredDecorations, function (dec) {
-        return macro === dec;
-      })) warn("Unknown macro: " + macro, line, i);
+      if (!multilineVars.ignoredDecorations.includes(macro)) warn("Unknown macro: " + macro, line, i);
       return [1, ''];
     }
   }
@@ -7026,36 +6996,31 @@ var letter_to_accent = function letter_to_accent(line, i) {
       var ret = tokenizer.getBrackettedSubstring(line, i, 5);
       // Be sure that the accent is recognizable.
       if (ret[1].length > 1 && (ret[1][0] === '^' || ret[1][0] === '_')) ret[1] = ret[1].substring(1); // TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
-      if (parseCommon.detect(legalAccents, function (acc) {
-        return ret[1] === acc;
-      })) return ret;
-      if (parseCommon.detect(volumeDecorations, function (acc) {
-        return ret[1] === acc;
-      })) {
+      if (legalAccents.includes(ret[1])) return ret;
+      if (volumeDecorations.includes(ret[1])) {
         if (multilineVars.volumePosition === 'hidden') ret[1] = '';
         return ret;
       }
-      if (parseCommon.detect(dynamicDecorations, function (acc) {
-        return ret[1] === acc;
-      })) {
+      if (dynamicDecorations.includes(ret[1])) {
         if (multilineVars.dynamicPosition === 'hidden') ret[1] = '';
         return ret;
       }
-      if (parseCommon.detect(accentPseudonyms, function (acc) {
-        if (ret[1] === acc[0]) {
-          ret[1] = acc[1];
-          return true;
-        } else return false;
-      })) return ret;
-      if (parseCommon.detect(accentDynamicPseudonyms, function (acc) {
-        if (ret[1] === acc[0]) {
-          ret[1] = acc[1];
-          return true;
-        } else return false;
-      })) {
+      var ind = accentPseudonyms.findIndex(function (acc) {
+        return ret[1] === acc[0];
+      });
+      if (ind >= 0) {
+        ret[1] = accentPseudonyms[ind][1];
+        return ret;
+      }
+      ind = accentDynamicPseudonyms.findIndex(function (acc) {
+        return ret[1] === acc[0];
+      });
+      if (ind >= 0) {
+        ret[1] = accentDynamicPseudonyms[ind][1];
         if (multilineVars.dynamicPosition === 'hidden') ret[1] = '';
         return ret;
       }
+
       // We didn't find the accent in the list, so consume the space, but don't return an accent.
       // Although it is possible that ! was used as a line break, so accept that.
       if (line[i] === '!' && (ret[0] === 1 || line[i + ret[0] - 1] !== '!')) return [1, null];
@@ -7224,7 +7189,7 @@ MusicParser.prototype.startNewLine = function () {
   parseKeyVoice.addPosToKey(params.clef, params.key);
   if (multilineVars.meter !== null) {
     if (multilineVars.currentVoice) {
-      parseCommon.each(multilineVars.staves, function (st) {
+      multilineVars.staves.forEach(function (st) {
         st.meter = multilineVars.meter;
       });
       params.meter = multilineVars.staves[multilineVars.currentVoice.staffNum].meter;
@@ -8616,7 +8581,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     var arr = str.split('\\');
     if (arr.length === 1) return str;
     var out = null;
-    parseCommon.each(arr, function (s) {
+    arr.forEach(function (s) {
       if (out === null) out = s;else {
         var c = charMap[s.substring(0, 2)];
         if (c !== undefined) out += c + s.substring(2);else {
@@ -9344,9 +9309,13 @@ var TuneBuilder = function TuneBuilder(tune) {
       }
     }
     if (anyDeleted) {
-      tune.lines = parseCommon.compact(tune.lines);
-      parseCommon.each(tune.lines, function (line) {
-        if (line.staff) line.staff = parseCommon.compact(line.staff);
+      tune.lines = tune.lines.filter(function (line) {
+        return !!line;
+      });
+      tune.lines.forEach(function (line) {
+        if (line.staff) line.staff = line.staff.filter(function (line) {
+          return !!line;
+        });
       });
     }
 
@@ -9377,8 +9346,10 @@ var TuneBuilder = function TuneBuilder(tune) {
         }
       }
       if (anyDeleted) {
-        parseCommon.each(tune.lines, function (line) {
-          if (line.staff) line.staff = parseCommon.compact(line.staff);
+        tune.lines.forEach(function (line) {
+          if (line.staff) line.staff = line.staff.filter(function (staff) {
+            return !!staff;
+          });
         });
       }
     }
@@ -9414,7 +9385,7 @@ var TuneBuilder = function TuneBuilder(tune) {
           }
           if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
             var offNum = chordPos * 100 + 1;
-            parseCommon.each(obj.endSlur, function (x) {
+            obj.endSlur.forEach(function (x) {
               if (offNum === x) --offNum;
             });
             currSlur[staffNum][voiceNum][chordPos] = [offNum];
@@ -9438,20 +9409,20 @@ var TuneBuilder = function TuneBuilder(tune) {
         var nextNum = chordPos * 100 + 1;
         for (var i = 0; i < num; i++) {
           if (usedNums) {
-            parseCommon.each(usedNums, function (x) {
+            usedNums.forEach(function (x) {
               if (nextNum === x) ++nextNum;
             });
-            parseCommon.each(usedNums, function (x) {
+            usedNums.forEach(function (x) {
               if (nextNum === x) ++nextNum;
             });
-            parseCommon.each(usedNums, function (x) {
+            usedNums.forEach(function (x) {
               if (nextNum === x) ++nextNum;
             });
           }
-          parseCommon.each(currSlur[staffNum][voiceNum][chordPos], function (x) {
+          currSlur[staffNum][voiceNum][chordPos].forEach(function (x) {
             if (nextNum === x) ++nextNum;
           });
-          parseCommon.each(currSlur[staffNum][voiceNum][chordPos], function (x) {
+          currSlur[staffNum][voiceNum][chordPos].forEach(function (x) {
             if (nextNum === x) ++nextNum;
           });
           currSlur[staffNum][voiceNum][chordPos].push(nextNum);
@@ -9658,13 +9629,13 @@ var TuneBuilder = function TuneBuilder(tune) {
       }
       if (hp.pitches !== undefined) {
         var mid = currStaff.workingClef.verticalPos;
-        parseCommon.each(hp.pitches, function (p) {
+        hp.pitches.forEach(function (p) {
           p.verticalPos = p.pitch - mid;
         });
       }
       if (hp.gracenotes !== undefined) {
         var mid2 = currStaff.workingClef.verticalPos;
-        parseCommon.each(hp.gracenotes, function (p) {
+        hp.gracenotes.forEach(function (p) {
           p.verticalPos = p.pitch - mid2;
         });
       }
@@ -17909,7 +17880,7 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
 };
 AbstractEngraver.prototype.addLyric = function (abselem, elem) {
   var lyricStr = "";
-  parseCommon.each(elem.lyric, function (ly) {
+  elem.lyric.forEach(function (ly) {
     var div = ly.divider === ' ' ? "" : ly.divider;
     lyricStr += ly.syllable + div + "\n";
   });
@@ -18489,14 +18460,13 @@ module.exports = createClef;
 var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
 var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 var createKeySignature = function createKeySignature(elem, tuneNumber) {
   elem.el_type = "keySignature";
   if (!elem.accidentals || elem.accidentals.length === 0) return null;
   var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra key-signature', tuneNumber);
   abselem.isKeySig = true;
   var dx = 0;
-  parseCommon.each(elem.accidentals, function (acc) {
+  elem.accidentals.forEach(function (acc) {
     var symbol;
     var fudge = 0;
     switch (acc.acc) {

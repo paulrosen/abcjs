@@ -83,7 +83,7 @@ var parseKeyVoice = {};
 
 	parseKeyVoice.deepCopyKey = function(key) {
 		var ret = { accidentals: [], root: key.root, acc: key.acc, mode: key.mode };
-		parseCommon.each(key.accidentals, function(k) {
+		key.accidentals.forEach(function(k) {
 		ret.accidentals.push(parseCommon.clone(k));
 		});
 		return ret;
@@ -95,20 +95,20 @@ var parseKeyVoice = {};
 		// Shift the key signature from the treble positions to whatever position is needed for the clef.
 		// This may put the key signature unnaturally high or low, so if it does, then shift it.
 		var mid = clef.verticalPos;
-		parseCommon.each(key.accidentals, function(acc) {
+		key.accidentals.forEach(function(acc) {
 			var pitch = pitches[acc.note];
 			pitch = pitch - mid;
 			acc.verticalPos = pitch;
 		});
 		if (key.impliedNaturals)
-			parseCommon.each(key.impliedNaturals, function(acc) {
+			key.impliedNaturals.forEach(function(acc) {
 				var pitch = pitches[acc.note];
 				pitch = pitch - mid;
 				acc.verticalPos = pitch;
 			});
 
 		if (mid < -10) {
-			parseCommon.each(key.accidentals, function(acc) {
+			key.accidentals.forEach(function(acc) {
 				acc.verticalPos -= 7;
 				if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 					acc.verticalPos -= 7;
@@ -118,7 +118,7 @@ var parseKeyVoice = {};
 					acc.verticalPos -=7;
 			});
 			if (key.impliedNaturals)
-				parseCommon.each(key.impliedNaturals, function(acc) {
+				key.impliedNaturals.forEach(function(acc) {
 					acc.verticalPos -= 7;
 					if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 						acc.verticalPos -= 7;
@@ -128,23 +128,23 @@ var parseKeyVoice = {};
 						acc.verticalPos -=7;
 				});
 		} else if (mid < -4) {
-			parseCommon.each(key.accidentals, function(acc) {
+			key.accidentals.forEach(function(acc) {
 				acc.verticalPos -= 7;
 				if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp' )
 					acc.verticalPos -=7;
 			});
 			if (key.impliedNaturals)
-				parseCommon.each(key.impliedNaturals, function(acc) {
+				key.impliedNaturals.forEach(function(acc) {
 					acc.verticalPos -= 7;
 					if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp' )
 						acc.verticalPos -=7;
 				});
 		} else if (mid >= 7) {
-			parseCommon.each(key.accidentals, function(acc) {
+			key.accidentals.forEach(function(acc) {
 				acc.verticalPos += 7;
 			});
 			if (key.impliedNaturals)
-				parseCommon.each(key.impliedNaturals, function(acc) {
+				key.impliedNaturals.forEach(function(acc) {
 					acc.verticalPos += 7;
 				});
 		}
