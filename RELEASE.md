@@ -1,3 +1,33 @@
+# Version 6.2.0
+
+## Features
+
+* implement %%MIDI bassprog, bassvol, chordprog, chordvol
+
+* Add support for `[r: ... ]` remark
+
+* add support for %%voicecolor
+
+* add germanAlphabet option: display chords using German music alphabet
+
+## Bugs
+
+* fix placement of ties when they extend to a new line
+
+* fix crash with tablature and showDebug are used at the same time.
+
+* fix bug in getting the location of the beat from TimingCallbacks when there are prep beats.
+
+* Change D.C. and D.S. decorations to be right aligned
+
+* fix metronome with changing meter
+
+* don't indent unaligned words
+
+## Documentation
+
+* Improved the typescript types somewhat.
+
 # Version 6.1.9
 
 ## Features

@@ -453,7 +453,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
       var ev;
       if (next < self.noteTimings.length) {
         endMs = self.noteTimings[next].milliseconds;
-        next = self.currentEvent - 1;
+        next = Math.max(0, self.currentEvent - 1);
         while (next >= 0 && self.noteTimings[next].left === null) {
           next--;
         }
@@ -477,15 +477,17 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
         var offMs = Math.max(0, timestamp - self.startTime - ev.milliseconds); // Offset in time from the last beat
         var gapMs = endMs - ev.milliseconds; // Length of this event in time
         var gapPx = ev.endX - ev.left; // The length in pixels
-        var offPx = offMs * gapPx / gapMs;
+        var offPx = gapMs ? offMs * gapPx / gapMs : 0;
         position.left = ev.left + offPx;
+        // See if this is before the first event - that is the case where there are "prep beats"
+        if (self.currentEvent === 0 && ev.milliseconds > timestamp - self.startTime) position.left = undefined;
         debugInfo = {
           timestamp: timestamp,
           startTime: self.startTime,
           ev: ev,
           endMs: endMs,
           offMs: offMs,
-          offPs: offPx,
+          offPx: offPx,
           gapMs: gapMs,
           gapPx: gapPx
         };
@@ -1827,7 +1829,7 @@ var Tune = function Tune() {
   this.setUpAudio = function (options) {
     if (!options) options = {};
     var seq = sequence(this, options);
-    return flatten(seq, options, this.formatting.percmap);
+    return flatten(seq, options, this.formatting.percmap, this.formatting.midi);
   };
   this.deline = function (options) {
     return delineTune(this.lines, options);
@@ -4096,7 +4098,7 @@ var parseDirective = {};
   };
   var midiCmdParam0 = ["nobarlines", "barlines", "beataccents", "nobeataccents", "droneon", "droneoff", "drumon", "drumoff", "fermatafixed", "fermataproportional", "gchordon", "gchordoff", "controlcombo", "temperamentnormal", "noportamento"];
   var midiCmdParam1String = ["gchord", "ptstress", "beatstring"];
-  var midiCmdParam1Integer = ["bassvol", "chordvol", "c", "channel", "beatmod", "deltaloudness", "drumbars", "gracedivider", "makechordchannels", "randomchordattack", "chordattack", "stressmodel", "transpose", "rtranspose", "vol", "volinc"];
+  var midiCmdParam1Integer = ["bassvol", "chordvol", "bassprog", "chordprog", "c", "channel", "beatmod", "deltaloudness", "drumbars", "gracedivider", "makechordchannels", "randomchordattack", "chordattack", "stressmodel", "transpose", "rtranspose", "vol", "volinc"];
   var midiCmdParam1Integer1OptionalInteger = ["program"];
   var midiCmdParam2Integer = ["ratio", "snt", "bendvelocity", "pitchbend", "control", "temperamentlinear"];
   var midiCmdParam4Integer = ["beat"];
@@ -4277,6 +4279,9 @@ var parseDirective = {};
       case "jazzchords":
         tune.formatting.jazzchords = true;
         break;
+      case "germanAlphabet":
+        tune.formatting.germanAlphabet = true;
+        break;
       case "landscape":
         multilineVars.landscape = true;
         break;
@@ -4340,6 +4345,16 @@ var parseDirective = {};
         if (multilineVars.currentVoice) {
           multilineVars.currentVoice.scale = voiceScale.floatt;
           tuneBuilder.changeVoiceScale(multilineVars.currentVoice.scale);
+        }
+        return null;
+      case "voicecolor":
+        if (tokens.length !== 1)
+          // this could either be of type alpha or quote, but it's ok if it is a number
+          return "voicecolor requires one string as a parameter";
+        var voiceColor = tokens.shift();
+        if (multilineVars.currentVoice) {
+          multilineVars.currentVoice.color = voiceColor.token;
+          tuneBuilder.changeVoiceColor(multilineVars.currentVoice.color);
         }
         return null;
       case "vskip":
@@ -5167,6 +5182,8 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
             return [e - i + 1 + ws, line.charAt(i + 1), line.substring(i + 3, e)];
           }
           break;
+        case "[r:":
+          return [e - i + 1 + ws];
         default:
         // TODO: complain about unhandled header
       }
@@ -6433,7 +6450,7 @@ var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{"; // use this to prescreen so we 
 var isInTie = function isInTie(multilineVars, overlayLevel, el) {
   if (multilineVars.inTie[overlayLevel] === undefined) return false;
   // If this is single voice music then the voice index isn't set, so we use the first voice.
-  var voiceIndex = multilineVars.currentVoice ? multilineVars.currentVoice.index : 0;
+  var voiceIndex = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum * 100 + multilineVars.currentVoice.index : 0;
   if (multilineVars.inTie[overlayLevel][voiceIndex]) {
     if (el.pitches !== undefined || el.rest.type !== 'spacer') return true;
   }
@@ -6861,7 +6878,7 @@ MusicParser.prototype.parseMusic = function (line) {
 };
 var setIsInTie = function setIsInTie(multilineVars, overlayLevel, value) {
   // If this is single voice music then the voice index isn't set, so we use the first voice.
-  var voiceIndex = multilineVars.currentVoice ? multilineVars.currentVoice.index : 0;
+  var voiceIndex = multilineVars.currentVoice ? multilineVars.currentVoice.staffNum * 100 + multilineVars.currentVoice.index : 0;
   if (multilineVars.inTie[overlayLevel] === undefined) multilineVars.inTie[overlayLevel] = [];
   multilineVars.inTie[overlayLevel][voiceIndex] = value;
 };
@@ -7256,6 +7273,7 @@ MusicParser.prototype.startNewLine = function () {
     if (multilineVars.currentVoice.stafflines) params.stafflines = multilineVars.currentVoice.stafflines;
     if (multilineVars.currentVoice.staffscale) params.staffscale = multilineVars.currentVoice.staffscale;
     if (multilineVars.currentVoice.scale) params.scale = multilineVars.currentVoice.scale;
+    if (multilineVars.currentVoice.color) params.color = multilineVars.currentVoice.color;
     if (multilineVars.currentVoice.style) params.style = multilineVars.currentVoice.style;
     if (multilineVars.currentVoice.transpose) params.clef.transpose = multilineVars.currentVoice.transpose;
   }
@@ -9238,7 +9256,7 @@ var TuneBuilder = function TuneBuilder(tune) {
                   durationThisBar += event.duration;
                   durationsPerLines[i] += event.duration;
                 }
-              } else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose") {
+              } else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose" || event.el_type === "color") {
                 // These types of events are duplicated on the overlay layer.
                 overlayVoice[k].voice.push(event);
               }
@@ -9870,6 +9888,11 @@ var TuneBuilder = function TuneBuilder(tune) {
       size: scale
     });
   };
+  this.changeVoiceColor = function (color) {
+    self.appendElement('color', null, null, {
+      color: color
+    });
+  };
   this.startNewLine = function (params) {
     // If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.
     // If it does exist and has music, then increment the line number. If the new element doesn't exist, create it.
@@ -9908,6 +9931,9 @@ var TuneBuilder = function TuneBuilder(tune) {
       }
       if (params.scale) self.appendElement('scale', null, null, {
         size: params.scale
+      });
+      if (params.color) self.appendElement('color', null, null, {
+        color: params.color
       });
     };
     var createStaff = function createStaff(params) {
@@ -11054,6 +11080,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
   var chordSourceTrack;
   var chordTrackFinished;
   var chordChannel;
+  var bassInstrument = 0;
   var chordInstrument = 0;
   var drumInstrument = 128;
   var boomVolume = 64;
@@ -11075,6 +11102,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
   var drumTrack;
   var drumTrackFinished;
   var drumDefinition = {};
+  var drumBars;
   var pickupLength = 0;
   var percmap;
 
@@ -11083,8 +11111,9 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
   var slurredBreakBetweenNotes = -0.001; // make the slurred notes actually overlap
   var staccatoBreakBetweenNotes = 0.4; // some people say staccato is half duration, some say 3/4 so this splits it
 
-  flatten = function flatten(voices, options, percmap_) {
+  flatten = function flatten(voices, options, percmap_, midiOptions) {
     if (!options) options = {};
+    if (!midiOptions) midiOptions = {};
     barAccidentals = [];
     accidentals = [0, 0, 0, 0, 0, 0, 0];
     bagpipes = false;
@@ -11110,8 +11139,10 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     chordChannel = voices.length; // first free channel for chords
     chordTrackFinished = false;
     currentChords = [];
-    boomVolume = 64;
-    chickVolume = 48;
+    bassInstrument = midiOptions.bassprog && midiOptions.bassprog.length === 1 ? midiOptions.bassprog[0] : 0;
+    chordInstrument = midiOptions.chordprog && midiOptions.chordprog.length === 1 ? midiOptions.chordprog[0] : 0;
+    boomVolume = midiOptions.bassvol && midiOptions.bassvol.length === 1 ? midiOptions.bassvol[0] : 64;
+    chickVolume = midiOptions.chordvol && midiOptions.chordvol.length === 1 ? midiOptions.chordvol[0] : 48;
     lastChord = undefined;
     chordLastBar = undefined;
     gChordTacet = options.chordsOff ? true : false;
@@ -11129,6 +11160,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     drumTrack = [];
     drumTrackFinished = false;
     drumDefinition = {};
+    drumBars = 1;
     if (voices.length > 0 && voices[0].length > 0) pickupLength = voices[0][0].pickupLength;
 
     // First adjust the input to resolve ties, set the starting time for each note, etc. That will make the rest of the logic easier
@@ -11167,6 +11199,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
             if (!startingMeter) startingMeter = element;
             meter = element;
             beatFraction = getBeatFraction(meter);
+            alignDrumToMeter();
             break;
           case "tempo":
             if (!startingTempo) startingTempo = element.qpm;else tempoChangeFactor = element.qpm ? startingTempo / element.qpm : 1;
@@ -11210,6 +11243,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
             break;
           case "drum":
             drumDefinition = normalizeDrumDefinition(element.params);
+            alignDrumToMeter();
             break;
           case "gchord":
             if (!options.chordsOff) gChordTacet = element.tacet;
@@ -12116,7 +12150,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
       start: lastBarTime + beat * durationRounded(beatLength),
       duration: durationRounded(noteLength),
       gap: 0,
-      instrument: chordInstrument
+      instrument: bassInstrument
     });
   }
   function writeChick(chick, beatLength, volume, beat, noteLength) {
@@ -12332,18 +12366,25 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
         pitch: null
       });
     }
+    drumBars = params.bars ? params.bars : 1;
+    return ret;
+  }
+  function alignDrumToMeter() {
+    if (!drumDefinition || !drumDefinition.pattern) {
+      return;
+    }
+    var ret = drumDefinition;
     // Now normalize the pattern to cover the correct number of measures. The note lengths passed are relative to each other and need to be scaled to fit a measure.
     var totalTime = 0;
     var measuresPerBeat = meter.num / meter.den;
     for (var ii = 0; ii < ret.pattern.length; ii++) {
       totalTime += ret.pattern[ii].len;
     }
-    var numBars = params.bars ? params.bars : 1;
-    var factor = totalTime / numBars / measuresPerBeat;
+    var factor = totalTime / drumBars / measuresPerBeat;
     for (ii = 0; ii < ret.pattern.length; ii++) {
       ret.pattern[ii].len = ret.pattern[ii].len / factor;
     }
-    return ret;
+    drumDefinition = ret;
   }
   function writeDrum(channel) {
     if (drumTrack.length === 0 && !drumDefinition.on) return;
@@ -13770,10 +13811,12 @@ function CreateSynth() {
   self.audioBuffers = []; // cache of the buffers so starting play can be fast.
   self.duration = undefined; // the duration of the tune in seconds.
   self.isRunning = false; // whether there is currently a sound buffer running.
+  //	self.options = undefined
 
   // Load and cache all needed sounds
   self.init = function (options) {
     if (!options) options = {};
+    //		self.options = options
     registerAudioContext(options.audioContext); // This works no matter what - if there is already an ac it is a nop; if the context is not passed in, then it creates one.
     var startTime = activeAudioContext().currentTime;
     self.debugCallback = options.debugCallback;
@@ -13992,6 +14035,8 @@ function CreateSynth() {
       // There might be a previous run that needs to be turned off.
       self.stop();
       var noteMapTracks = createNoteMap(self.flattened);
+      // if (self.options.swing)
+      // 	addSwing(noteMapTracks, self.options.swing, self.beatsPerMeasure)
       if (self.sequenceCallback) self.sequenceCallback(noteMapTracks, self.callbackContext);
       var panDistances = setPan(noteMapTracks.length, self.pan);
 
@@ -14197,7 +14242,41 @@ function CreateSynth() {
       };
     }
   };
+
+  // // this is a first attempt at adding a little bit of swing to the output, but the algorithm isn't correct.
+  // function addSwing(noteMapTracks, swing, beatsPerMeasure) {
+  // 	console.log("addSwing", noteMapTracks, swing, beatsPerMeasure)
+  // 	// Swing should be between -0.9 and 0.9. Make sure the input is between them.
+  // 	// Then that is the percentage to add to the first beat, so a negative number moves the second beat earlier.
+  // 	// A value of zero is the same as no swing at all.
+  // 	// This only works when there are an even number of beats in a measure.
+  // 	if (beatsPerMeasure % 2 !== 0)
+  // 		return;
+  // 	swing = parseFloat(swing)
+  // 	if (isNaN(swing))
+  // 		return
+  // 	if (swing < -0.9)
+  // 		swing = -0.9
+  // 	if (swing > 0.9)
+  // 		swing = 0.9
+  // 	var beatLength = (1 / beatsPerMeasure)*2
+  // 	swing = beatLength * swing
+  // 	for (var t = 0; t < noteMapTracks.length; t++) {
+  // 		var track = noteMapTracks[t];
+  // 		for (var i = 0; i < track.length; i++) {
+  // 			var event = track[i];
+  // 			if (event.start % beatLength) {
+  // 				// This is the off beat
+  // 				event.start += swing;
+  // 			} else {
+  // 				// This is the beat
+  // 				event.end += swing;
+  // 			}
+  // 		}
+  // 	}
+  // }
 }
+
 module.exports = CreateSynth;
 
 /***/ }),
@@ -17126,16 +17205,19 @@ var AbstractEngraver = function AbstractEngraver(getTextSize, tuneNumber, option
   this.percmap = options.percmap;
   this.initialClef = options.initialClef;
   this.jazzchords = !!options.jazzchords;
+  this.germanAlphabet = !!options.germanAlphabet;
   this.reset();
 };
 AbstractEngraver.prototype.reset = function () {
   this.slurs = {};
   this.ties = [];
   this.voiceScale = 1;
+  this.voiceColor = undefined;
   this.slursbyvoice = {};
   this.tiesbyvoice = {};
   this.endingsbyvoice = {};
   this.scaleByVoice = {};
+  this.colorByVoice = {};
   this.tripletmultiplier = 1;
   this.abcline = undefined;
   this.accidentalSlot = undefined;
@@ -17158,6 +17240,7 @@ AbstractEngraver.prototype.pushCrossLineElems = function (s, v) {
   this.tiesbyvoice[this.getCurrentVoiceId(s, v)] = this.ties;
   this.endingsbyvoice[this.getCurrentVoiceId(s, v)] = this.partstartelem;
   this.scaleByVoice[this.getCurrentVoiceId(s, v)] = this.voiceScale;
+  if (this.voiceColor) this.colorByVoice[this.getCurrentVoiceId(s, v)] = this.voiceColor;
 };
 AbstractEngraver.prototype.popCrossLineElems = function (s, v) {
   this.slurs = this.slursbyvoice[this.getCurrentVoiceId(s, v)] || {};
@@ -17165,6 +17248,7 @@ AbstractEngraver.prototype.popCrossLineElems = function (s, v) {
   this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId(s, v)];
   this.voiceScale = this.scaleByVoice[this.getCurrentVoiceId(s, v)];
   if (this.voiceScale === undefined) this.voiceScale = 1;
+  this.voiceColor = this.colorByVoice[this.getCurrentVoiceId(s, v)];
 };
 AbstractEngraver.prototype.containsLyrics = function (staves) {
   for (var i = 0; i < staves.length; i++) {
@@ -17429,6 +17513,10 @@ AbstractEngraver.prototype.createABCElement = function (isFirstStaff, isSingleLi
       break;
     case "scale":
       this.voiceScale = elem.size;
+      break;
+    case "color":
+      this.voiceColor = elem.color;
+      voice.color = this.voiceColor;
       break;
     default:
       var abselem2 = new AbsoluteElement(elem, 0, 0, 'unsupported', this.tuneNumber);
@@ -17921,7 +18009,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
   // ledger lines
   ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
   if (elem.chord !== undefined) {
-    var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth, this.jazzchords);
+    var ret3 = addChord(this.getTextSize, abselem, elem, roomtaken, roomtakenright, symbolWidth, this.jazzchords, this.germanAlphabet);
     roomtaken = ret3.roomTaken;
     roomtakenright = ret3.roomTakenRight;
   }
@@ -18131,7 +18219,7 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
   // Add a little space to the left of the bar line so that nothing can crowd it.
   abselem.extraw -= 5;
   if (elem.chord !== undefined) {
-    var ret3 = addChord(this.getTextSize, abselem, elem, 0, 0, 0, false);
+    var ret3 = addChord(this.getTextSize, abselem, elem, 0, 0, 0, false, this.germanAlphabet);
   }
   return abselem;
 };
@@ -18917,19 +19005,19 @@ var stackedDecoration = function stackedDecoration(decoration, width, abselem, y
         hasOne = true;
         break;
       case "D.C.alcoda":
-        textDecoration("D.C. al coda", positioning, 'left');
+        textDecoration("D.C. al coda", positioning, 'end');
         hasOne = true;
         break;
       case "D.C.alfine":
-        textDecoration("D.C. al fine", positioning, 'left');
+        textDecoration("D.C. al fine", positioning, 'end');
         hasOne = true;
         break;
       case "D.S.alcoda":
-        textDecoration("D.S. al coda", positioning, 'left');
+        textDecoration("D.S. al coda", positioning, 'end');
         hasOne = true;
         break;
       case "D.S.alfine":
-        textDecoration("D.S. al fine", positioning, 'left');
+        textDecoration("D.S. al fine", positioning, 'end');
         hasOne = true;
         break;
       case "fine":
@@ -19179,6 +19267,7 @@ var EngraverController = function EngraverController(paper, params) {
   this.renderer.setPaddingOverride(params);
   if (params.showDebug) this.renderer.showDebug = params.showDebug;
   if (params.jazzchords) this.jazzchords = params.jazzchords;
+  if (params.germanAlphabet) this.germanAlphabet = params.germanAlphabet;
   this.renderer.controller = this; // TODO-GD needed for highlighting
   this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
   if (params.ariaLabel !== undefined) this.renderer.ariaLabel = params.ariaLabel;
@@ -19283,7 +19372,8 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
     // undefined is the default, which is true
     percmap: abcTune.formatting.percmap,
     initialClef: this.initialClef,
-    jazzchords: this.jazzchords
+    jazzchords: this.jazzchords,
+    germanAlphabet: this.germanAlphabet
   });
   this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
   this.engraver.measureLength = abcTune.getMeterFraction().num / abcTune.getMeterFraction().den;
@@ -20663,7 +20753,11 @@ TieElem.prototype.calcX = function (lineStartX, lineEndX) {
       // this is a grace note - don't offset the tie as much.
       this.startX -= 3;
   } else if (this.startLimitX) this.startX = this.startLimitX.x + this.startLimitX.w; // if there is no start element, but there is a repeat mark before the start of the line.
-  else this.startX = lineStartX; // There is no element and no repeat mark: extend to the beginning of the line.
+  else {
+    if (this.anchor2) this.startX = this.anchor2.x - 20; // There is no element and no repeat mark: make a small arc
+    else this.startX = lineStartX; // Don't have any guidance, so extend to beginning of line
+  }
+
   if (!this.anchor1 && this.dotted) this.startX -= 3; // The arc needs to be long enough to tell that it is dotted.
 
   if (this.anchor2) this.endX = this.anchor2.x; // The normal case where there is a starting element to attach to.
@@ -20848,8 +20942,8 @@ module.exports = VoiceElement;
 
 var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
 var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
-var formatJazzChord = __webpack_require__(/*! ./format-jazz-chord */ "./src/write/format-jazz-chord.js");
-var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords) {
+var translateChord = __webpack_require__(/*! ./translate-chord */ "./src/write/translate-chord.js");
+var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords, germanAlphabet) {
   for (var i = 0; i < elem.chord.length; i++) {
     var pos = elem.chord[i].position;
     var rel_position = elem.chord[i].rel_position;
@@ -20867,7 +20961,7 @@ var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTake
       } else {
         font = 'gchordfont';
         klass = "chord";
-        if (jazzchords) chord = formatJazzChord(chord);
+        chord = translateChord(chord, jazzchords, germanAlphabet);
       }
       var attr = getTextSize.attr(font, klass);
       var dim = getTextSize.calc(chord, font, klass);
@@ -21013,7 +21107,6 @@ function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize)
   if (metaText.footer && isPrint) this.footer(metaText.footer, width, paddingLeft, getTextSize);
 }
 BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spacing, getTextSize) {
-  var indent = 50;
   var klass = 'meta-bottom unaligned-words';
   var defFont = 'wordsfont';
   this.rows.push({
@@ -21030,7 +21123,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
       move: space.height
     });else if (typeof unalignedWords[j] === 'string') {
       addTextIf(this.rows, {
-        marginLeft: paddingLeft + indent,
+        marginLeft: paddingLeft,
         text: unalignedWords[j],
         font: defFont,
         klass: klass,
@@ -21044,7 +21137,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spa
         var thisWord = unalignedWords[j][k];
         var font = thisWord.font ? thisWord.font : defFont;
         this.rows.push({
-          left: paddingLeft + indent + offsetX,
+          left: paddingLeft + offsetX,
           text: thisWord.text,
           font: font,
           anchor: 'start'
@@ -22551,7 +22644,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
     renderer.moveY(spacing.STEP, staff1.top);
     staff1.absoluteY = renderer.y;
     if (renderer.showDebug) {
-      if (renderer.showDebug.indexOf("box") >= 0) {
+      if (renderer.showDebug.indexOf("box") >= 0 && staff1.voices) {
         boxAllElements(renderer, params.voices, staff1.voices);
       }
       if (renderer.showDebug.indexOf("grid") >= 0) {
@@ -22686,7 +22779,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
   renderer.y = startY;
   function debugPrintGridItem(staff, key) {
     var colors = ["rgb(207,27,36)", "rgb(168,214,80)", "rgb(110,161,224)", "rgb(191,119,218)", "rgb(195,30,151)", "rgb(31,170,177)", "rgb(220,166,142)"];
-    if (staff.positionY[key]) {
+    if (staff.positionY && staff.positionY[key]) {
       var height = staff.specialY[key] * spacing.STEP;
       if (key === "chordHeightAbove" && staff.specialY.chordLines && staff.specialY.chordLines.above) height *= staff.specialY.chordLines.above;
       if (key === "chordHeightBelow" && staff.specialY.chordLines && staff.specialY.chordLines.below) height *= staff.specialY.chordLines.below;
@@ -23167,6 +23260,8 @@ var drawAbsolute = __webpack_require__(/*! ./absolute */ "./src/write/draw/absol
 function drawVoice(renderer, params, bartop, selectables, staffPos) {
   var width = params.w - 1;
   renderer.staffbottom = params.staff.bottom;
+  var saveColor = renderer.foregroundColor;
+  if (params.color) renderer.foregroundColor = params.color;
   if (params.header) {
     // print voice name
     var textEl = renderText(renderer, {
@@ -23197,21 +23292,15 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
       renderer.controller.classes.startMeasure();
       justInitializedMeasureNumber = true;
     }
-    switch (child.type) {
-      // case "tempo":
-      // 	child.elemset = drawTempo(renderer, child);
-      // 	break;
-      default:
-        if (params.staff.isTabStaff) {
-          child.invisible = false;
-          if (child.type == 'bar') {
-            if (child.abcelem.lastBar) {
-              bartop = params.topLine;
-            }
-          }
+    if (params.staff.isTabStaff) {
+      child.invisible = false;
+      if (child.type == 'bar') {
+        if (child.abcelem.lastBar) {
+          bartop = params.topLine;
         }
-        drawAbsolute(renderer, child, params.barto || i === params.children.length - 1 ? bartop : 0, selectables, staffPos);
+      }
     }
+    drawAbsolute(renderer, child, params.barto || i === params.children.length - 1 ? bartop : 0, selectables, staffPos);
     if (child.type === 'note' || isNonSpacerRest(child)) renderer.controller.classes.incrNote();
     if (child.type === 'bar' && !justInitializedMeasureNumber && foundNote) {
       renderer.controller.classes.incrMeasure();
@@ -23256,6 +23345,7 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
       }
     }
   }
+  renderer.foregroundColor = saveColor;
 }
 function isNonSpacerRest(elem) {
   if (elem.type !== 'rest') return false;
@@ -23263,28 +23353,6 @@ function isNonSpacerRest(elem) {
   return false;
 }
 module.exports = drawVoice;
-
-/***/ }),
-
-/***/ "./src/write/format-jazz-chord.js":
-/*!****************************************!*\
-  !*** ./src/write/format-jazz-chord.js ***!
-  \****************************************/
-/***/ (function(module) {
-
-function formatJazzChord(chordString) {
-  // This puts markers in the pieces of the chord that are read by the svg creator.
-  // After the main part of the chord (the letter, a sharp or flat, and "m") a marker is added. Before a slash a marker is added.
-  var lines = chordString.split("\n");
-  for (var i = 0; i < lines.length; i++) {
-    var chord = lines[i];
-    // If the chord isn't in a recognizable format then just skip the formatting.
-    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/[ABCDEFG][#b♯♭]?)?/);
-    if (reg) lines[i] = (reg[1] ? reg[1] : '') + "\x03" + (reg[2] ? reg[2] : '') + "\x03" + (reg[3] ? reg[3] : '');
-  }
-  return lines.join("\n");
-}
-module.exports = formatJazzChord;
 
 /***/ }),
 
@@ -25550,6 +25618,55 @@ module.exports = TopText;
 
 /***/ }),
 
+/***/ "./src/write/translate-chord.js":
+/*!**************************************!*\
+  !*** ./src/write/translate-chord.js ***!
+  \**************************************/
+/***/ (function(module) {
+
+function germanNote(note) {
+  switch (note) {
+    case "B#":
+      return "H#";
+    case "B♯":
+      return "H♯";
+    case "B":
+      return "H";
+    case "Bb":
+      return "B";
+    case "B♭":
+      return "B";
+  }
+  return note;
+}
+function translateChord(chordString, jazzchords, germanAlphabet) {
+  var lines = chordString.split("\n");
+  for (var i = 0; i < lines.length; i++) {
+    var chord = lines[i];
+    // If the chord isn't in a recognizable format then just skip it.
+    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/([ABCDEFG][#b♯♭]?))?/);
+    if (!reg) {
+      continue;
+    }
+    var baseChord = reg[1] || "";
+    var modifier = reg[2] || "";
+    var bassNote = reg[4] || "";
+    if (germanAlphabet) {
+      baseChord = germanNote(baseChord);
+      bassNote = germanNote(bassNote);
+    }
+    // This puts markers in the pieces of the chord that are read by the svg creator.
+    // After the main part of the chord (the letter, a sharp or flat, and "m") a marker is added. Before a slash a marker is added.
+    var marker = jazzchords ? "\x03" : "";
+    var bass = bassNote ? "/" + bassNote : "";
+    lines[i] = [baseChord, modifier, bass].join(marker);
+  }
+  return lines.join("\n");
+}
+module.exports = translateChord;
+
+/***/ }),
+
 /***/ "./src/write/unhighlight.js":
 /*!**********************************!*\
   !*** ./src/write/unhighlight.js ***!
@@ -25572,7 +25689,7 @@ module.exports = unhighlight;
   \********************/
 /***/ (function(module) {
 
-var version = '6.1.9';
+var version = '6.2.0';
 module.exports = version;
 
 /***/ })
