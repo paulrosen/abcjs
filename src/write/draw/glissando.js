@@ -9,18 +9,18 @@ function drawGlissando(renderer, params, selectables) {
 	var margin = 4;
 	var leftY = renderer.calcY(params.anchor1.heads[0].pitch)
 	var rightY = renderer.calcY(params.anchor2.heads[0].pitch)
-	var leftX = params.anchor1.x + params.anchor1.w/2
-	var rightX = params.anchor2.x + params.anchor2.w/2
+	var leftX = params.anchor1.x + params.anchor1.w / 2
+	var rightX = params.anchor2.x + params.anchor2.w / 2
 	var len = lineLength(leftX, leftY, rightX, rightY)
-	var marginLeft = params.anchor1.w/2 + margin
-	var marginRight = params.anchor2.w/2 + margin
+	var marginLeft = params.anchor1.w / 2 + margin
+	var marginRight = params.anchor2.w / 2 + margin
 	var s = slope(leftX, leftY, rightX, rightY)
 	var leftYAdj = getY(leftY, s, marginLeft)
 	var rightYAdj = getY(rightY, s, -marginRight)
-	var num = numSquigglies(len-marginLeft-marginRight)
+	var num = numSquigglies(len - marginLeft - marginRight)
 
-	var el = drawSquiggly(renderer, leftX+marginLeft, leftYAdj, num, s)
-	selectables.wrapSvgEl({el_type: "glissando", startChar: -1, endChar: -1}, el);
+	var el = drawSquiggly(renderer, leftX + marginLeft, leftYAdj, num, s)
+	selectables.wrapSvgEl({ el_type: "glissando", startChar: -1, endChar: -1 }, el);
 	return [el];
 }
 
@@ -28,20 +28,20 @@ function lineLength(leftX, leftY, rightX, rightY) {
 	// The length from notehead center to notehead center.
 	var w = rightX - leftX
 	var h = rightY - leftY
-	return Math.sqrt(w*w + h*h)
+	return Math.sqrt(w * w + h * h)
 }
 
 function slope(leftX, leftY, rightX, rightY) {
-	return (rightY-leftY) / (rightX - leftX)
+	return (rightY - leftY) / (rightX - leftX)
 }
 
 function getY(y, slope, xOfs) {
-	return roundNumber(y + (xOfs)*slope);
+	return roundNumber(y + (xOfs) * slope);
 }
 
 function numSquigglies(length) {
 	var endLen = 5; // The width of the end - that is, the non repeating part
-	return Math.max(2, Math.floor((length - endLen*2) / 6));
+	return Math.max(2, Math.floor((length - endLen * 2) / 6));
 }
 
 var leftStart = [[3.5, -4.8]]
@@ -58,18 +58,18 @@ function segment(arr, slope) {
 	return ret
 }
 
-var drawSquiggly = function(renderer, x, y, num, slope) {
+var drawSquiggly = function (renderer, x, y, num, slope) {
 	var p = sprintf("M %f %f", x, y);
 	p += segment(leftStart, slope)
 	var i
 	for (i = 0; i < num; i++) {
-		p+=segment(top, slope)
+		p += segment(top, slope)
 	}
 	p += segment(right, slope)
-	for ( i = 0; i < num; i++)
-		p+=segment(bottom, slope)
-	p+=segment(leftEnd, slope) + 'z'
-	return printPath(renderer, {path:p, highlight: "stroke", stroke:renderer.foregroundColor, 'class': renderer.controller.classes.generate('decoration'), "data-name": "glissando"});
+	for (i = 0; i < num; i++)
+		p += segment(bottom, slope)
+	p += segment(leftEnd, slope) + 'z'
+	return printPath(renderer, { path: p, highlight: "stroke", stroke: renderer.foregroundColor, 'class': renderer.controller.classes.generate('decoration'), "data-name": "glissando" });
 }
 
 module.exports = drawGlissando;

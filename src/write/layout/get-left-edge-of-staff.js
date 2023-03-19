@@ -5,10 +5,10 @@ function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
 	var voiceheaderw = 0;
 	var i;
 	var size;
-	for (i=0;i<voices.length;i++) {
-		if(voices[i].header) {
+	for (i = 0; i < voices.length; i++) {
+		if (voices[i].header) {
 			size = getTextSize.calc(voices[i].header, 'voicefont', '');
-			voiceheaderw = Math.max(voiceheaderw,size.width);
+			voiceheaderw = Math.max(voiceheaderw, size.width);
 		}
 	}
 	voiceheaderw = addBraceSize(voiceheaderw, brace, getTextSize);
@@ -32,7 +32,7 @@ function addBraceSize(voiceheaderw, brace, getTextSize) {
 		for (var i = 0; i < brace.length; i++) {
 			if (brace[i].header) {
 				var size = getTextSize.calc(brace[i].header, 'voicefont', '');
-				voiceheaderw = Math.max(voiceheaderw,size.width);
+				voiceheaderw = Math.max(voiceheaderw, size.width);
 			}
 		}
 	}

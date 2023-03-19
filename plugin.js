@@ -28,7 +28,7 @@ THE SOFTWARE.
 
 var TuneBook = require('./src/api/abc_tunebook').TuneBook;
 var Parse = require('./src/parse/abc_parse');
-var EngraverController = require('./src/write/abc_engraver_controller');
+var EngraverController = require('./src/write/engraver-controller');
 
 var Plugin = function() {
 	"use strict";

@@ -9,21 +9,21 @@ var renderText = require('./text');
 var drawAbsolute = require('./absolute');
 
 function drawVoice(renderer, params, bartop, selectables, staffPos) {
-	var width = params.w-1;
+	var width = params.w - 1;
 	renderer.staffbottom = params.staff.bottom;
 	var saveColor = renderer.foregroundColor
 	if (params.color)
 		renderer.foregroundColor = params.color
 
 	if (params.header) { // print voice name
-		var textEl = renderText(renderer, {x: renderer.padding.left, y: renderer.calcY(params.headerPosition), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true, name: "voice-name"}, true);
+		var textEl = renderText(renderer, { x: renderer.padding.left, y: renderer.calcY(params.headerPosition), text: params.header, type: 'voicefont', klass: 'staff-extra voice-name', anchor: 'start', centerVertically: true, name: "voice-name" }, true);
 		selectables.wrapSvgEl({ el_type: "voiceName", startChar: -1, endChar: -1, text: params.header }, textEl);
 	}
 
 	var i;
 	var child;
 	var foundNote = false;
-	for (i=0; i < params.children.length; i++) {
+	for (i = 0; i < params.children.length; i++) {
 		child = params.children[i];
 		if (child.type === 'note' || child.type === 'rest')
 			foundNote = true;
@@ -34,13 +34,13 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 		}
 		if (params.staff.isTabStaff) {
 			child.invisible = false;
-		if ( child.type == 'bar' ) {
+			if (child.type == 'bar') {
 				if (child.abcelem.lastBar) {
 					bartop = params.topLine;
 				}
 			}
-		} 
-		drawAbsolute(renderer, child,(params.barto || i === params.children.length - 1) ? bartop : 0, selectables, staffPos);
+		}
+		drawAbsolute(renderer, child, (params.barto || i === params.children.length - 1) ? bartop : 0, selectables, staffPos);
 
 		if (child.type === 'note' || isNonSpacerRest(child))
 			renderer.controller.classes.incrNote();

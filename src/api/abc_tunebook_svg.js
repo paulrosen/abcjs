@@ -1,7 +1,7 @@
 var tunebook = require('./abc_tunebook');
 var Tune = require('../data/abc_tune');
 
-var EngraverController = require('../write/abc_engraver_controller');
+var EngraverController = require('../write/engraver-controller');
 var Parse = require('../parse/abc_parse');
 var wrap = require('../parse/wrap_lines');
 // var tablatures = require('./abc_tablatures');

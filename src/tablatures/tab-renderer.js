@@ -1,7 +1,7 @@
 /* eslint-disable no-debugger */
-var VoiceElement = require('../write/abc_voice_element');
+var VoiceElement = require('../write/creation/elements/voice-element');
 var TabAbsoluteElements = require('./tab-absolute-elements');
-var spacing = require('../write/abc_spacing');
+var spacing = require('../write/helpers/spacing');
 
 function initSpecialY() {
   return {

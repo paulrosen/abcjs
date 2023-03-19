@@ -1,8 +1,8 @@
-var RelativeElement = require('../abc_relative_element');
-var spacing = require('../abc_spacing');
-var getBarYAt = require('./getBarYAt');
+var RelativeElement = require('../creation/elements/relative-element');
+var spacing = require('../helpers/spacing');
+var getBarYAt = require('./get-bar-y-at');
 
-var layoutBeam = function(beam) {
+var layoutBeam = function (beam) {
 	if (beam.elems.length === 0 || beam.allrests) return;
 
 	var dy = calcDy(beam.stemsUp, beam.isgrace); // This is the width of the beam line.
@@ -28,14 +28,14 @@ var layoutBeam = function(beam) {
 	createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote);
 };
 
-var getDurlog = function(duration) {
+var getDurlog = function (duration) {
 	// TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
 	// but there's definitely a case where it isn't. [Probably something to do with triplets.]
 	if (duration === undefined) {
 		return 0;
 	}
 	//        console.log("getDurlog: " + duration);
-	return Math.floor(Math.log(duration)/Math.log(2));
+	return Math.floor(Math.log(duration) / Math.log(2));
 };
 
 //
@@ -78,7 +78,7 @@ function calcXPos(asc, firstElement, lastElement) {
 	if (asc) startX += starthead.w - 0.6;
 	var endX = endhead.x;
 	endX += (asc) ? endhead.w : 0.6;
-	return [ startX, endX ];
+	return [startX, endX];
 }
 
 function calcYPos(average, numElements, stemHeight, asc, firstAveragePitch, lastAveragePitch, isFlat, minPitch, maxPitch, isGrace) {
@@ -101,7 +101,7 @@ function calcYPos(average, numElements, stemHeight, asc, firstAveragePitch, last
 		}
 	}
 
-	return [ startY, endY];
+	return [startY, endY];
 }
 
 function createStems(elems, asc, beam, dy, mainNote) {
@@ -168,11 +168,11 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 					durlog: durlog, single: true
 				};
 			}
-			if (i > 0 && elem.abcelem.beambr && elem.abcelem.beambr <= (index+1)) {
+			if (i > 0 && elem.abcelem.beambr && elem.abcelem.beambr <= (index + 1)) {
 				if (!auxBeams[index].split)
 					auxBeams[index].split = [auxBeams[index].x];
-				var xPos = calcXPos(asc, elems[i-1], elem);
-				if (auxBeams[index].split[auxBeams[index].split.length-1] >= xPos[0]) {
+				var xPos = calcXPos(asc, elems[i - 1], elem);
+				if (auxBeams[index].split[auxBeams[index].split.length - 1] >= xPos[0]) {
 					// the reduction in beams leaves a note unattached so create a small flag for it.
 					xPos[0] += elem.w;
 				}
@@ -195,9 +195,9 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 				var b = { startX: auxBeams[j].x, endX: auxBeamEndX, startY: auxBeams[j].y, endY: auxBeamEndY, dy: dy }
 				if (auxBeams[j].split !== undefined) {
 					var split = auxBeams[j].split;
-					if (b.endX <= split[split.length-1]) {
+					if (b.endX <= split[split.length - 1]) {
 						// the reduction in beams leaves the last note by itself, so create a little flag for it
-						split[split.length-1] -= elem.w;
+						split[split.length - 1] -= elem.w;
 					}
 					split.push(b.endX);
 					b.split = auxBeams[j].split;

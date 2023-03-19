@@ -24,7 +24,7 @@ THE SOFTWARE.
 var abcjs = require('./index');
 var version = require('./version');
 var Parse = require('./src/parse/abc_parse');
-var EngraverController = require('./src/write/abc_engraver_controller')
+var EngraverController = require('./src/write/engraver-controller')
 
 abcjs.signature = "abcjs-test v" + version;
 

@@ -9,9 +9,9 @@ function drawBeam(renderer, params) {
 		var beam = params.beams[i];
 		if (beam.split) {
 			var slope = getSlope(renderer, beam.startX, beam.startY, beam.endX, beam.endY);
-			var xes = [ ];
-			for (var j = 0; j < beam.split.length; j+=2) {
-				xes.push([beam.split[j], beam.split[j+1]]);
+			var xes = [];
+			for (var j = 0; j < beam.split.length; j += 2) {
+				xes.push([beam.split[j], beam.split[j + 1]]);
 			}
 			for (j = 0; j < xes.length; j++) {
 				var y1 = getY(beam.startX, beam.startY, slope, xes[j][0]);
@@ -21,8 +21,8 @@ function drawBeam(renderer, params) {
 		} else
 			pathString += draw(renderer, beam.startX, beam.startY, beam.endX, beam.endY, beam.dy);
 	}
-	var durationClass = ("abcjs-d"+params.duration).replace(/\./g,"-");
-	var klasses = renderer.controller.classes.generate('beam-elem '+durationClass);
+	var durationClass = ("abcjs-d" + params.duration).replace(/\./g, "-");
+	var klasses = renderer.controller.classes.generate('beam-elem ' + durationClass);
 	var el = printPath(renderer, {
 		path: pathString,
 		stroke: "none",
@@ -38,8 +38,8 @@ function draw(renderer, startX, startY, endX, endY, dy) {
 	endY = roundNumber(renderer.calcY(endY));
 	startX = roundNumber(startX);
 	endX = roundNumber(endX);
-	var startY2 = roundNumber(startY+dy);
-	var endY2 = roundNumber(endY+dy);
+	var startY2 = roundNumber(startY + dy);
+	var endY2 = roundNumber(endY + dy);
 	return "M" + startX + " " + startY + " L" + endX + " " + endY +
 		"L" + endX + " " + endY2 + " L" + startX + " " + startY2 + "z";
 }
@@ -50,7 +50,7 @@ function getSlope(renderer, startX, startY, endX, endY) {
 
 function getY(startX, startY, slope, currentX) {
 	var x = currentX - startX;
-	return startY + x*slope;
+	return startY + x * slope;
 }
 
 module.exports = drawBeam;

@@ -14,11 +14,11 @@ function drawCrescendo(renderer, params, selectables) {
 
 	var el;
 	if (params.dir === "<") {
-		el = drawLine(renderer, y+height/2, y, y+height/2, y+height, left, right);
+		el = drawLine(renderer, y + height / 2, y, y + height / 2, y + height, left, right);
 	} else {
-		el = drawLine(renderer, y, y+height/2, y+height, y+height/2, left, right);
+		el = drawLine(renderer, y, y + height / 2, y + height, y + height / 2, left, right);
 	}
-	selectables.wrapSvgEl({el_type: "dynamicDecoration", startChar: -1, endChar: -1}, el);
+	selectables.wrapSvgEl({ el_type: "dynamicDecoration", startChar: -1, endChar: -1 }, el);
 	return [el];
 }
 
@@ -32,7 +32,7 @@ var drawLine = function (renderer, y1, y2, y3, y4, left, right) {
 
 	var pathString = sprintf("M %f %f L %f %f M %f %f L %f %f",
 		left, y1, right, y2, left, y3, right, y4);
-	return printPath(renderer, {path:pathString, highlight: "stroke", stroke:renderer.foregroundColor, 'class': renderer.controller.classes.generate('dynamics decoration'), "data-name": "dynamics"});
+	return printPath(renderer, { path: pathString, highlight: "stroke", stroke: renderer.foregroundColor, 'class': renderer.controller.classes.generate('dynamics decoration'), "data-name": "dynamics" });
 };
 
 module.exports = drawCrescendo;

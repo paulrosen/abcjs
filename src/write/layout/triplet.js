@@ -1,4 +1,4 @@
-var getBarYAt = require('./getBarYAt');
+var getBarYAt = require('./get-bar-y-at');
 
 function layoutTriplet(element) {
 	// TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
@@ -7,13 +7,13 @@ function layoutTriplet(element) {
 		var beam = element.anchor1.parent.beam;
 		// if hasBeam is true, then the first and last element in the triplet have the same beam.
 		// We also need to check if the beam doesn't contain other notes so that `(3 dcdcc` will do a bracket.
-		if (element.hasBeam && (beam.elems[0] !== element.anchor1.parent || beam.elems[beam.elems.length-1] !== element.anchor2.parent))
+		if (element.hasBeam && (beam.elems[0] !== element.anchor1.parent || beam.elems[beam.elems.length - 1] !== element.anchor2.parent))
 			element.hasBeam = false;
 
 		if (element.hasBeam) {
 			// If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
 			var left = isAbove(beam) ? element.anchor1.x + element.anchor1.w : element.anchor1.x;
-			element.yTextPos = heightAtMidpoint(left,  element.anchor2.x, beam);
+			element.yTextPos = heightAtMidpoint(left, element.anchor2.x, beam);
 			element.yTextPos += isAbove(beam) ? 3 : -2; // This creates some space between the beam and the number.
 			element.xTextPos = xAtMidpoint(left, element.anchor2.x);
 			element.top = element.yTextPos + 1;
@@ -69,7 +69,7 @@ function heightAtMidpoint(startX, endX, beam) {
 }
 
 function xAtMidpoint(startX, endX) {
-	return startX + (endX - startX)/2;
+	return startX + (endX - startX) / 2;
 }
 
 module.exports = layoutTriplet;

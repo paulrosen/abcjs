@@ -3,7 +3,7 @@ var roundNumber = require("./round-number");
 function renderText(renderer, params, alreadyInGroup) {
 	var y = params.y;
 	if (params.lane) {
-		var laneMargin = params.dim.font.size*0.25;
+		var laneMargin = params.dim.font.size * 0.25;
 		y += (params.dim.font.size + laneMargin) * params.lane;
 	}
 
@@ -12,7 +12,7 @@ function renderText(renderer, params, alreadyInGroup) {
 		hash = params.dim;
 		hash.attr.class = params.klass;
 	} else
-		 hash = renderer.controller.getFontAndAttr.calc(params.type, params.klass);
+		hash = renderer.controller.getFontAndAttr.calc(params.type, params.klass);
 	if (params.anchor)
 		hash.attr["text-anchor"] = params.anchor;
 	hash.attr.x = params.x;
@@ -32,7 +32,7 @@ function renderText(renderer, params, alreadyInGroup) {
 
 	if (hash.font.box) {
 		if (!alreadyInGroup)
-			renderer.paper.openGroup({klass: hash.attr['class'], fill: renderer.foregroundColor, "data-name": params.name});
+			renderer.paper.openGroup({ klass: hash.attr['class'], fill: renderer.foregroundColor, "data-name": params.name });
 		if (hash.attr["text-anchor"] === "end") {
 			hash.attr.x -= hash.font.padding;
 		} else if (hash.attr["text-anchor"] === "start") {
@@ -53,7 +53,7 @@ function renderText(renderer, params, alreadyInGroup) {
 
 		var delta = 0;
 		if (hash.attr["text-anchor"] === "middle") {
-		 	delta = size.width / 2 + hash.font.padding;
+			delta = size.width / 2 + hash.font.padding;
 		} else if (hash.attr["text-anchor"] === "end") {
 			delta = size.width + hash.font.padding * 2;
 		}
@@ -61,7 +61,7 @@ function renderText(renderer, params, alreadyInGroup) {
 		if (params.centerVertically) {
 			deltaY = size.height - hash.font.padding;
 		}
-		renderer.paper.rect({ "data-name": "box", x: Math.round(params.x - delta), y: Math.round(y - deltaY), width: Math.round(size.width + hash.font.padding*2), height: Math.round(size.height + hash.font.padding*2)});
+		renderer.paper.rect({ "data-name": "box", x: Math.round(params.x - delta), y: Math.round(y - deltaY), width: Math.round(size.width + hash.font.padding * 2), height: Math.round(size.height + hash.font.padding * 2) });
 		if (!alreadyInGroup)
 			elem = renderer.paper.closeGroup();
 	}

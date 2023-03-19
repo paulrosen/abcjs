@@ -1,7 +1,7 @@
 //    abc_tune.js: a computer usable internal structure representing one tune.
 
 var parseCommon = require('../parse/abc_common');
-var spacing = require('../write/abc_spacing');
+var spacing = require('../write/helpers/spacing');
 var sequence = require('../synth/abc_midi_sequencer');
 var flatten = require('../synth/abc_midi_flattener');
 var delineTune = require("./deline-tune");

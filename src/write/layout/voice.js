@@ -1,8 +1,8 @@
 var layoutBeam = require('./beam');
-var getBarYAt = require('./getBarYAt');
+var getBarYAt = require('./get-bar-y-at');
 var layoutTriplet = require('./triplet');
 
-var layoutVoice = function(voice) {
+var layoutVoice = function (voice) {
 	for (var i = 0; i < voice.beams.length; i++) {
 		if (voice.beams[i].type === 'BeamElem') {
 			layoutBeam(voice.beams[i]);
@@ -66,7 +66,7 @@ function placeInLane(rightMost, relElem) {
 		}
 		// If we didn't return early, then we need a new row
 		rightMost.push(xCoords.right);
-		relElem.putChordInLane(rightMost.length-1);
+		relElem.putChordInLane(rightMost.length - 1);
 	}
 }
 
@@ -90,7 +90,7 @@ function setLaneForChord(absElems) {
 				placeInLane(rightMostAbove, relElem);
 			}
 		}
-		for (j = absElems[i].children.length-1; j >=0; j--) {
+		for (j = absElems[i].children.length - 1; j >= 0; j--) {
 			relElem = absElems[i].children[j];
 			if (relElem.chordHeightBelow) {
 				placeInLane(rightMostBelow, relElem);
@@ -121,8 +121,8 @@ function setLane(absElems, numLanesAbove, numLanesBelow) {
 			var relElem = absElems[i].children[j];
 			if (relElem.chordHeightAbove) {
 				relElem.invertLane(numLanesAbove);
-			// } else if (relElem.chordHeightBelow) {
-			// 	relElem.invertLane(below);
+				// } else if (relElem.chordHeightBelow) {
+				// 	relElem.invertLane(below);
 			}
 		}
 	}

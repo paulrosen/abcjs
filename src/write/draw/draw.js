@@ -1,7 +1,7 @@
 var drawStaffGroup = require('./staff-group');
 var setPaperSize = require('./set-paper-size');
 var nonMusic = require('./non-music');
-var spacing = require('../abc_spacing');
+var spacing = require('../helpers/spacing');
 var Selectables = require('./selectables');
 
 function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset) {
@@ -22,8 +22,8 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 			}
 			if (staffgroups.length >= 1)
 				addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
-			var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables,line);
-			staffgroup.line = lineOffset+line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
+			var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
+			staffgroup.line = lineOffset + line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 			staffgroups.push(staffgroup);
 			renderer.paper.closeGroup()
 		} else if (abcLine.nonMusic) {
@@ -44,21 +44,21 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 	return { staffgroups: staffgroups, selectables: selectables.getElements() };
 }
 
-function engraveStaffLine(renderer, staffGroup, selectables,lineNumber) {
-	drawStaffGroup(renderer, staffGroup, selectables,lineNumber);
+function engraveStaffLine(renderer, staffGroup, selectables, lineNumber) {
+	drawStaffGroup(renderer, staffGroup, selectables, lineNumber);
 	var height = staffGroup.height * spacing.STEP;
 	renderer.y += height;
 	return staffGroup;
 }
 
 function addStaffPadding(renderer, staffSeparation, lastStaffGroup, thisStaffGroup) {
-	var lastStaff = lastStaffGroup.staffs[lastStaffGroup.staffs.length-1];
+	var lastStaff = lastStaffGroup.staffs[lastStaffGroup.staffs.length - 1];
 	var lastBottomLine = -(lastStaff.bottom - 2); // The 2 is because the scale goes to 2 below the last line.
 	var nextTopLine = thisStaffGroup.staffs[0].top - 10; // Because 10 represents the top line.
 	var naturalSeparation = nextTopLine + lastBottomLine; // This is how far apart they'd be without extra spacing
 	var separationInPixels = naturalSeparation * spacing.STEP;
 	if (separationInPixels < staffSeparation)
-		renderer.moveY(staffSeparation-separationInPixels);
+		renderer.moveY(staffSeparation - separationInPixels);
 }
 
 module.exports = draw;

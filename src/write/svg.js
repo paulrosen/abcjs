@@ -10,7 +10,7 @@ function Svg(wrapper) {
 	wrapper.appendChild(this.svg);
 }
 
-Svg.prototype.clear = function() {
+Svg.prototype.clear = function () {
 	if (this.svg) {
 		var wrapper = this.svg.parentNode;
 		this.svg = createSvg();
@@ -23,14 +23,14 @@ Svg.prototype.clear = function() {
 	}
 };
 
-Svg.prototype.setTitle = function(title) {
+Svg.prototype.setTitle = function (title) {
 	var titleEl = document.createElement("title");
 	var titleNode = document.createTextNode(title);
 	titleEl.appendChild(titleNode);
 	this.svg.insertBefore(titleEl, this.svg.firstChild);
 };
 
-Svg.prototype.setResponsiveWidth = function(w, h) {
+Svg.prototype.setResponsiveWidth = function (w, h) {
 	// this technique is from: http://thenewcode.com/744/Make-SVG-Responsive, thx to https://github.com/iantresman
 	this.svg.setAttribute("viewBox", "0 0 " + w + " " + h);
 	this.svg.setAttribute("preserveAspectRatio", "xMinYMin meet");
@@ -59,20 +59,20 @@ Svg.prototype.setResponsiveWidth = function(w, h) {
 	}
 };
 
-Svg.prototype.setSize = function(w, h) {
+Svg.prototype.setSize = function (w, h) {
 	this.svg.setAttribute('width', w);
 	this.svg.setAttribute('height', h);
 };
 
-Svg.prototype.setAttribute = function(attr, value) {
+Svg.prototype.setAttribute = function (attr, value) {
 	this.svg.setAttribute(attr, value);
 };
 
-Svg.prototype.setScale = function(scale) {
+Svg.prototype.setScale = function (scale) {
 	if (scale !== 1) {
-		this.svg.style.transform = "scale("+scale+","+scale+")";
-		this.svg.style['-ms-transform'] = "scale("+scale+","+scale+")";
-		this.svg.style['-webkit-transform'] = "scale("+scale+","+scale+")";
+		this.svg.style.transform = "scale(" + scale + "," + scale + ")";
+		this.svg.style['-ms-transform'] = "scale(" + scale + "," + scale + ")";
+		this.svg.style['-webkit-transform'] = "scale(" + scale + "," + scale + ")";
 		this.svg.style['transform-origin'] = "0 0";
 		this.svg.style['-ms-transform-origin-x'] = "0";
 		this.svg.style['-ms-transform-origin-y'] = "0";
@@ -85,14 +85,14 @@ Svg.prototype.setScale = function(scale) {
 	}
 };
 
-Svg.prototype.insertStyles = function(styles) {
+Svg.prototype.insertStyles = function (styles) {
 	var el = document.createElementNS(svgNS, "style");
 	el.textContent = styles;
 	this.svg.insertBefore(el, this.svg.firstChild); // prepend is not available on older browsers.
-//	this.svg.prepend(el);
+	//	this.svg.prepend(el);
 };
 
-Svg.prototype.setParentStyles = function(attr) {
+Svg.prototype.setParentStyles = function (attr) {
 	// This is needed to get the size right when there is scaling involved.
 	for (var key in attr) {
 		if (attr.hasOwnProperty(key)) {
@@ -125,7 +125,7 @@ function constructVLine(x1, y1, y2) {
 		" l " + 0 + " " + (-len) + " " + " z ";
 }
 
-Svg.prototype.rect = function(attr) {
+Svg.prototype.rect = function (attr) {
 	// This uses path instead of rect so that it can be hollow and the color changes with "fill" instead of "stroke".
 	var lines = [];
 	var x1 = attr.x;
@@ -140,7 +140,7 @@ Svg.prototype.rect = function(attr) {
 	return this.path({ path: lines.join(" "), stroke: "none", "data-name": attr["data-name"] });
 };
 
-Svg.prototype.dottedLine = function(attr) {
+Svg.prototype.dottedLine = function (attr) {
 	var el = document.createElementNS(svgNS, 'line');
 	el.setAttribute("x1", attr.x1);
 	el.setAttribute("x2", attr.x2);
@@ -151,7 +151,7 @@ Svg.prototype.dottedLine = function(attr) {
 	this.svg.insertBefore(el, this.svg.firstChild);
 };
 
-Svg.prototype.rectBeneath = function(attr) {
+Svg.prototype.rectBeneath = function (attr) {
 	var el = document.createElementNS(svgNS, 'rect');
 	el.setAttribute("x", attr.x);
 	el.setAttribute("width", attr.width);
@@ -168,7 +168,7 @@ Svg.prototype.rectBeneath = function(attr) {
 	this.svg.insertBefore(el, this.svg.firstChild);
 };
 
-Svg.prototype.text = function(text, attr, target) {
+Svg.prototype.text = function (text, attr, target) {
 	var el = document.createElementNS(svgNS, 'text');
 	el.setAttribute("stroke", "none");
 	for (var key in attr) {
@@ -176,7 +176,7 @@ Svg.prototype.text = function(text, attr, target) {
 			el.setAttribute(key, attr[key]);
 		}
 	}
-	var lines = (""+text).split("\n");
+	var lines = ("" + text).split("\n");
 	for (var i = 0; i < lines.length; i++) {
 		var line = document.createElementNS(svgNS, 'tspan');
 		line.setAttribute("x", attr.x ? attr.x : 0);
@@ -211,24 +211,24 @@ Svg.prototype.text = function(text, attr, target) {
 	return el;
 };
 
-Svg.prototype.guessWidth = function(text, attr) {
+Svg.prototype.guessWidth = function (text, attr) {
 	var svg = this.createDummySvg();
 	var el = this.text(text, attr, svg);
 	var size;
 	try {
-		size  = el.getBBox();
+		size = el.getBBox();
 		if (isNaN(size.height) || !size.height) // TODO-PER: I don't think this can happen unless there isn't a browser at all.
-			size = { width: attr['font-size']/2, height: attr['font-size'] + 2 }; // Just a wild guess.
+			size = { width: attr['font-size'] / 2, height: attr['font-size'] + 2 }; // Just a wild guess.
 		else
-			size = {width: size.width, height: size.height};
+			size = { width: size.width, height: size.height };
 	} catch (ex) {
-		size = { width: attr['font-size']/2, height: attr['font-size'] + 2 }; // Just a wild guess.
+		size = { width: attr['font-size'] / 2, height: attr['font-size'] + 2 }; // Just a wild guess.
 	}
 	svg.removeChild(el);
 	return size;
 };
 
-Svg.prototype.createDummySvg = function() {
+Svg.prototype.createDummySvg = function () {
 	if (!this.dummySvg) {
 		this.dummySvg = createSvg();
 		var styles = [
@@ -247,9 +247,9 @@ Svg.prototype.createDummySvg = function() {
 
 var sizeCache = {};
 
-Svg.prototype.getTextSize = function(text, attr, el) {
+Svg.prototype.getTextSize = function (text, attr, el) {
 	if (typeof text === 'number')
-		text = ''+text;
+		text = '' + text;
 	if (!text || text.match(/^\s+$/))
 		return { width: 0, height: 0 };
 	var key;
@@ -264,11 +264,11 @@ Svg.prototype.getTextSize = function(text, attr, el) {
 		el = this.text(text, attr);
 	var size;
 	try {
-		size  = el.getBBox();
+		size = el.getBBox();
 		if (isNaN(size.height) || !size.height)
 			size = this.guessWidth(text, attr);
 		else
-			size = {width: size.width, height: size.height};
+			size = { width: size.width, height: size.height };
 	} catch (ex) {
 		size = this.guessWidth(text, attr);
 	}
@@ -283,7 +283,7 @@ Svg.prototype.getTextSize = function(text, attr, el) {
 	return size;
 };
 
-Svg.prototype.openGroup = function(options) {
+Svg.prototype.openGroup = function (options) {
 	options = options ? options : {};
 	var el = document.createElementNS(svgNS, "g");
 	if (options.klass)
@@ -303,7 +303,7 @@ Svg.prototype.openGroup = function(options) {
 	return el;
 };
 
-Svg.prototype.closeGroup = function() {
+Svg.prototype.closeGroup = function () {
 	var g = this.currentGroup.shift();
 	if (g && g.children.length === 0) {
 		// If nothing was added to the group it is because all the elements were invisible. We don't need the group, then.
@@ -313,7 +313,7 @@ Svg.prototype.closeGroup = function() {
 	return g;
 };
 
-Svg.prototype.path = function(attr) {
+Svg.prototype.path = function (attr) {
 	var el = document.createElementNS(svgNS, "path");
 	for (var key in attr) {
 		if (attr.hasOwnProperty(key)) {
@@ -329,7 +329,7 @@ Svg.prototype.path = function(attr) {
 	return el;
 };
 
-Svg.prototype.pathToBack = function(attr) {
+Svg.prototype.pathToBack = function (attr) {
 	var el = document.createElementNS(svgNS, "path");
 	for (var key in attr) {
 		if (attr.hasOwnProperty(key)) {
@@ -345,14 +345,14 @@ Svg.prototype.pathToBack = function(attr) {
 	return el;
 };
 
-Svg.prototype.append = function(el) {
+Svg.prototype.append = function (el) {
 	if (this.currentGroup.length > 0)
 		this.currentGroup[0].appendChild(el);
 	else
 		this.svg.appendChild(el);
 };
 
-Svg.prototype.prepend = function(el) {
+Svg.prototype.prepend = function (el) {
 	// The entire group is prepended, so don't prepend the individual elements.
 	if (this.currentGroup.length > 0)
 		this.currentGroup[0].appendChild(el);
@@ -360,7 +360,7 @@ Svg.prototype.prepend = function(el) {
 		this.svg.insertBefore(el, this.svg.firstChild);
 };
 
-Svg.prototype.setAttributeOnElement = function(el, attr) {
+Svg.prototype.setAttributeOnElement = function (el, attr) {
 	for (var key in attr) {
 		if (attr.hasOwnProperty(key)) {
 			el.setAttributeNS(null, key, attr[key]);
@@ -368,7 +368,7 @@ Svg.prototype.setAttributeOnElement = function(el, attr) {
 	}
 };
 
-Svg.prototype.moveElementToChild = function(parent, child) {
+Svg.prototype.moveElementToChild = function (parent, child) {
 	parent.appendChild(child);
 };
 

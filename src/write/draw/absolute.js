@@ -1,7 +1,7 @@
 var drawTempo = require('./tempo');
 var drawRelativeElement = require('./relative');
-var spacing = require('../abc_spacing');
-var setClass = require('../set-class');
+var spacing = require('../helpers/spacing');
+var setClass = require('../helpers/set-class');
 var elementGroup = require('./group-elements');
 
 function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
@@ -9,7 +9,7 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 	var isTempo = params.children.length > 0 && params.children[0].type === "TempoElement";
 	params.elemset = [];
 	elementGroup.beginGroup(renderer.paper, renderer.controller);
-	for (var i=0; i<params.children.length; i++) {
+	for (var i = 0; i < params.children.length; i++) {
 		var child = params.children[i];
 		switch (child.type) {
 			case "TempoElement":
@@ -22,7 +22,7 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 	var klass = params.type;
 	if (params.type === 'note' || params.type === 'rest') {
 		params.counters = renderer.controller.classes.getCurrent();
-		klass += ' d' + Math.round(params.durationClass*1000)/1000;
+		klass += ' d' + Math.round(params.durationClass * 1000) / 1000;
 		klass = klass.replace(/\./g, '-');
 		if (params.abcelem.pitches) {
 			for (var j = 0; j < params.abcelem.pitches.length; j++) {
@@ -66,7 +66,7 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 		params.notePositions = [];
 		for (var jj = 0; jj < params.heads.length; jj++) {
 			params.notePositions.push({
-				x: params.heads[jj].x + params.heads[jj].w/2,
+				x: params.heads[jj].x + params.heads[jj].w / 2,
 				y: staffPos.zero - params.heads[jj].pitch * spacing.STEP
 			});
 		}

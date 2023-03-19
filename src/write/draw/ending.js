@@ -11,22 +11,22 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 	var pathString = '';
 
 	if (params.anchor1) {
-		linestartx = roundNumber(params.anchor1.x+params.anchor1.w);
+		linestartx = roundNumber(params.anchor1.x + params.anchor1.w);
 		pathString += sprintf("M %f %f L %f %f ",
-			linestartx, y, linestartx, roundNumber(y+height));
+			linestartx, y, linestartx, roundNumber(y + height));
 	}
 
 	if (params.anchor2) {
 		lineendx = roundNumber(params.anchor2.x);
 		pathString += sprintf("M %f %f L %f %f ",
-			lineendx, y, lineendx, roundNumber(y+height));
+			lineendx, y, lineendx, roundNumber(y + height));
 	}
 
 	pathString += sprintf("M %f %f L %f %f ",
 		linestartx, y, lineendx, y);
 
-	renderer.paper.openGroup({klass: renderer.controller.classes.generate("ending"), "data-name": "ending"});
-	printPath(renderer, {path: pathString, stroke: renderer.foregroundColor, fill: renderer.foregroundColor, "data-name": "line"});
+	renderer.paper.openGroup({ klass: renderer.controller.classes.generate("ending"), "data-name": "ending" });
+	printPath(renderer, { path: pathString, stroke: renderer.foregroundColor, fill: renderer.foregroundColor, "data-name": "line" });
 	if (params.anchor1)
 		renderText(renderer, {
 			x: roundNumber(linestartx + 5),
@@ -39,7 +39,7 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
 			name: params.text
 		});
 	var g = renderer.paper.closeGroup();
-	selectables.wrapSvgEl({el_type: "ending", startChar: -1, endChar: -1}, g);
+	selectables.wrapSvgEl({ el_type: "ending", startChar: -1, endChar: -1 }, g);
 	return [g];
 }
 

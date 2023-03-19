@@ -137,7 +137,7 @@ doTest(abcString) {
 ```
 ## Font Info
 
-The glyphs in `src/write/abc_glyphs.js` are generated using the files in the `font_generator` folder.
+The glyphs in `src/write/creation/glyphs.js` are generated using the files in the `font_generator` folder.
 
 You can see all the glyphs by loading this file in the browser: `abcjs/font_generator/font_gen.html`.
 

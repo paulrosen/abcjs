@@ -1,5 +1,5 @@
 var renderText = require('./text');
-var glyphs = require('../abc_glyphs');
+var glyphs = require('../creation/glyphs');
 var elementGroup = require('./group-elements');
 
 /**
@@ -14,17 +14,17 @@ function printSymbol(renderer, x, offset, symbol, options) {
 	if (!symbol) return null;
 	if (symbol.length > 1 && symbol.indexOf(".") < 0) {
 		var groupClass = elementGroup.isInGroup() ? '' : options.klass // If this is already in a group then don't repeat the classes for the sub-group)
-		renderer.paper.openGroup({"data-name": options.name, klass: groupClass});
+		renderer.paper.openGroup({ "data-name": options.name, klass: groupClass });
 		var dx = 0;
 		for (var i = 0; i < symbol.length; i++) {
 			var s = symbol[i];
 			ycorr = glyphs.getYCorr(s);
-			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, {stroke: options.stroke, fill: options.fill});
+			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, { stroke: options.stroke, fill: options.fill });
 			if (el) {
 				if (i < symbol.length - 1)
 					dx += kernSymbols(s, symbol[i + 1], glyphs.getSymbolWidth(s));
 			} else {
-				renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'}, false);
+				renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start' }, false);
 			}
 		}
 		var g = renderer.paper.closeGroup();
@@ -32,14 +32,14 @@ function printSymbol(renderer, x, offset, symbol, options) {
 	} else {
 		ycorr = glyphs.getYCorr(symbol);
 		if (elementGroup.isInGroup()) {
-			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, {"data-name": options.name});
+			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, { "data-name": options.name });
 		} else {
-			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, {klass: options.klass, stroke: options.stroke, fill: options.fill, "data-name": options.name});
+			el = glyphs.printSymbol(x, renderer.calcY(offset + ycorr), symbol, renderer.paper, { klass: options.klass, stroke: options.stroke, fill: options.fill, "data-name": options.name });
 		}
 		if (el) {
 			return el;
 		}
-		renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'}, false);
+		renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start' }, false);
 		return null;
 	}
 }
@@ -48,11 +48,11 @@ function kernSymbols(lastSymbol, thisSymbol, lastSymbolWidth) {
 	// This is just some adjustments to make it look better.
 	var width = lastSymbolWidth;
 	if (lastSymbol === 'f' && thisSymbol === 'f')
-		width = width*2/3;
+		width = width * 2 / 3;
 	if (lastSymbol === 'p' && thisSymbol === 'p')
-		width = width*5/6;
+		width = width * 5 / 6;
 	if (lastSymbol === 'f' && thisSymbol === 'z')
-		width = width*5/8;
+		width = width * 5 / 8;
 	return width;
 }
 
