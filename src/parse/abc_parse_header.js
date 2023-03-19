@@ -346,7 +346,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	{
 		var ws = tokenizer.eatWhiteSpace(line, i);
 		i +=ws;
-		if (line.length >= i+5 && line.charAt(i) === '[' && line.charAt(i+2) === ':') {
+		if (line.length >= i+5 && line[i] === '[' && line[i+2] === ':') {
 			var e = line.indexOf(']', i);
 			var startChar = multilineVars.iChar + i;
 			var endChar = multilineVars.iChar + e + 1;
@@ -393,14 +393,14 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 							else
 								multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo]
 						}
-						return [ e-i+1+ws, line.charAt(i+1), line.substring(i+3, e)];
+						return [ e-i+1+ws, line[i+1], line.substring(i+3, e)];
 					}
 					break;
 				case "[V:":
 					if (e > 0) {
 						parseKeyVoice.parseVoice(line, i+3, e);
 						//startNewLine();
-						return [ e-i+1+ws, line.charAt(i+1), line.substring(i+3, e)];
+						return [ e-i+1+ws, line[i+1], line.substring(i+3, e)];
 					}
 					break;
 				case "[r:":
@@ -447,11 +447,11 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 					var tempo = this.setTempo(line, i+2, e, multilineVars.iChar);
 					if (tempo.type === 'delaySet') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, this.calcTempo(tempo.tempo));
 					else if (tempo.type === 'immediate') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, tempo.tempo);
-				return [ e, line.charAt(i), parseCommon.strip(line.substring(i+2))];
+				return [ e, line[i], parseCommon.strip(line.substring(i+2))];
 				case "V:":
 					parseKeyVoice.parseVoice(line, i+2, line.length);
 //						startNewLine();
-					return [ line.length, line.charAt(i), parseCommon.strip(line.substring(i+2))];
+					return [ line.length, line[i], parseCommon.strip(line.substring(i+2))];
 				default:
 					// TODO: complain about unhandled header
 			}
@@ -476,7 +476,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 
 	this.parseHeader = function(line) {
-		var field = metaTextHeaders[line.charAt(0)];
+		var field = metaTextHeaders[line[0]];
 		if (field !== undefined) {
 			if (field === 'unalignedWords')
 				tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+line.length});
@@ -486,12 +486,12 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 		} else {
 			var startChar = multilineVars.iChar;
 			var endChar = startChar + line.length;
-			switch(line.charAt(0))
+			switch(line[0])
 			{
 				case  'H':
 					tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+line.length});
 					line = tokenizer.peekLine()
-					while (line && line.charAt(1) !== ':') {
+					while (line && line[1] !== ':') {
 						tokenizer.nextLine()
 						tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)), { startChar: multilineVars.iChar, endChar: multilineVars.iChar+line.length});
 						line = tokenizer.peekLine()

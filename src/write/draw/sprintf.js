@@ -51,7 +51,7 @@ var sprintf = function() {
         case 'X': a = a.toString(16).toUpperCase(); break;
       }
       a = (/[def]/.test(m[7]) && m[2] && a > 0 ? '+' + a : a);
-      c = m[3] ? m[3] == '0' ? '0' : m[3].charAt(1) : ' ';
+      c = m[3] ? m[3] == '0' ? '0' : m[3][1] : ' ';
       x = m[5] - String(a).length;
       p = m[5] ? str_repeat(c, x) : '';
       o.push(m[4] ? a + p : p + a);

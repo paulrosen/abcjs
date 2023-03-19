@@ -158,15 +158,15 @@ var parseKeyVoice = {};
 
 	var parseMiddle = function(str) {
 		var i = 0;
-		var p = str.charAt(i++);
+		var p = str[i++];
 		if (p === '^' || p === '_')
-			p = str.charAt(i++);
+			p = str[i++];
 	  var mid = pitches[p];
 		if (mid === undefined)
 			mid = 6; // If a legal middle note wasn't received, just ignore it.
 		for ( ; i < str.length; i++) {
-			if (str.charAt(i) === ',') mid -= 7;
-			else if (str.charAt(i) === "'") mid += 7;
+			if (str[i] === ',') mid -= 7;
+			else if (str[i] === "'") mid += 7;
 			else break;
 		}
 		return { mid: mid - 6, str: str.substring(i) };	// We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
@@ -528,7 +528,7 @@ var parseKeyVoice = {};
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
 			else if (attr.err !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
-			else if (attr.token.length === 0 && line.charAt(start) !== '"')
+			else if (attr.token.length === 0 && line[start] !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else
 				staffInfo[name] = attr.token;
@@ -540,7 +540,7 @@ var parseKeyVoice = {};
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
 			else if (attr.err !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
-			else if (attr.token.length === 0 && line.charAt(start) !== '"')
+			else if (attr.token.length === 0 && line[start] !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else {
 				if (type === 'number')
@@ -555,7 +555,7 @@ var parseKeyVoice = {};
 				warn("Expected value for " + name + " in voice: " + attr.warn, line, start);
 			else if (attr.err !== undefined)
 				warn("Expected value for " + name + " in voice: " + attr.err, line, start);
-			else if (attr.token.length === 0 && line.charAt(start) !== '"')
+			else if (attr.token.length === 0 && line[start] !== '"')
 				warn("Expected value for " + name + " in voice", line, start);
 			else {
 				if (type === 'number')
@@ -574,7 +574,7 @@ var parseKeyVoice = {};
 			var attr = tokenizer.getVoiceToken(line, start, end);
 			if (attr.warn !== undefined)
 				warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice: " + attr.warn, line, start);
-			else if (attr.token.length === 0 && line.charAt(start) !== '"')
+			else if (attr.token.length === 0 && line[start] !== '"')
 				warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice", line, start);
 			else {
 				var t = noteToTransposition[attr.token];

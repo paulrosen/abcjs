@@ -11,7 +11,7 @@ var setClass = function (elemset, addClass, removeClass, color) {
 		kls = kls.replace(removeClass, "");
 		kls = kls.replace(addClass, "");
 		if (addClass.length > 0) {
-			if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ') kls += " ";
+			if (kls.length > 0 && kls[kls.length - 1] !== ' ') kls += " ";
 			kls += addClass;
 		}
 		el.setAttribute("class", kls);

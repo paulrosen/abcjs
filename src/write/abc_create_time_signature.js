@@ -17,19 +17,19 @@ var createTimeSignature = function(elem, tuneNumber) {
 				if (elem.value[i].den) {
 					var numWidth = 0;
 					for (var i2 = 0; i2 < elem.value[i].num.length; i2++)
-						numWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i2));
+						numWidth += glyphs.getSymbolWidth(elem.value[i].num[i2]);
 					var denWidth = 0;
 					for (i2 = 0; i2 < elem.value[i].num.length; i2++)
-						denWidth += glyphs.getSymbolWidth(elem.value[i].den.charAt(i2));
+						denWidth += glyphs.getSymbolWidth(elem.value[i].den[i2]);
 					var maxWidth = Math.max(numWidth, denWidth);
-					abselem.addRight(new RelativeElement(elem.value[i].num, x+(maxWidth-numWidth)/2, numWidth, 8, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
-					abselem.addRight(new RelativeElement(elem.value[i].den, x+(maxWidth-denWidth)/2, denWidth, 4, { thickness: glyphs.symbolHeightInPitches(elem.value[i].den.charAt(0)) }));
+					abselem.addRight(new RelativeElement(elem.value[i].num, x+(maxWidth-numWidth)/2, numWidth, 8, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num[0]) }));
+					abselem.addRight(new RelativeElement(elem.value[i].den, x+(maxWidth-denWidth)/2, denWidth, 4, { thickness: glyphs.symbolHeightInPitches(elem.value[i].den[0]) }));
 					x += maxWidth
 				} else {
 					var thisWidth = 0;
 					for (var i3 = 0; i3 < elem.value[i].num.length; i3++)
-						thisWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i3));
-					abselem.addRight(new RelativeElement(elem.value[i].num, x, thisWidth, 6, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0)) }));
+						thisWidth += glyphs.getSymbolWidth(elem.value[i].num[i3]);
+					abselem.addRight(new RelativeElement(elem.value[i].num, x, thisWidth, 6, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num[0]) }));
 					x += thisWidth;
 				}
 			}

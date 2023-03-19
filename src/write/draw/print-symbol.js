@@ -17,12 +17,12 @@ function printSymbol(renderer, x, offset, symbol, options) {
 		renderer.paper.openGroup({"data-name": options.name, klass: groupClass});
 		var dx = 0;
 		for (var i = 0; i < symbol.length; i++) {
-			var s = symbol.charAt(i);
+			var s = symbol[i];
 			ycorr = glyphs.getYCorr(s);
 			el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, {stroke: options.stroke, fill: options.fill});
 			if (el) {
 				if (i < symbol.length - 1)
-					dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
+					dx += kernSymbols(s, symbol[i + 1], glyphs.getSymbolWidth(s));
 			} else {
 				renderText(renderer, { x: x, y: renderer.y, text: "no symbol:" + symbol, type: "debugfont", klass: 'debug-msg', anchor: 'start'}, false);
 			}

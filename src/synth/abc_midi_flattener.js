@@ -1003,9 +1003,9 @@ var pitchesToPerc = require('./pitches-to-perc');
 	function chordNotes(bass, modifier) {
 		var intervals = chordIntervals[modifier];
 		if (!intervals) {
-			if (modifier.slice(0,2).toLowerCase() === 'ma' || modifier.charAt(0) === 'M')
+			if (modifier.slice(0,2).toLowerCase() === 'ma' || modifier[0] === 'M')
 				intervals = chordIntervals.M;
-			else if (modifier.charAt(0) === 'm' || modifier.charAt(0) === '-')
+			else if (modifier[0] === 'm' || modifier[0] === '-')
 				intervals = chordIntervals.m;
 			else
 				intervals = chordIntervals.M;

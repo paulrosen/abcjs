@@ -2684,28 +2684,6 @@ parseCommon.detect = function (arr, iterator) {
   }
   return false;
 };
-
-// The following is a polyfill for Object.remove for IE9, IE10, and IE11.
-// from:https://github.com/jserz/js_piece/blob/master/DOM/ChildNode/remove()/remove().md
-try {
-  (function (arr) {
-    arr.forEach(function (item) {
-      if (item.hasOwnProperty('remove')) {
-        return;
-      }
-      Object.defineProperty(item, 'remove', {
-        configurable: true,
-        enumerable: true,
-        writable: true,
-        value: function remove() {
-          if (this.parentNode !== null) this.parentNode.removeChild(this);
-        }
-      });
-    });
-  })([Element.prototype, CharacterData.prototype, DocumentType.prototype]);
-} catch (e) {
-  // if we aren't in a browser, this code will crash, but it is not needed then either.
-}
 module.exports = parseCommon;
 
 /***/ }),
@@ -2899,8 +2877,8 @@ var Parse = function Parse() {
   };
   var warn = function warn(str, line, col_num) {
     if (!line) line = " ";
-    var bad_char = line.charAt(col_num);
-    if (bad_char === ' ') bad_char = "SPACE";
+    var bad_char = line[col_num];
+    if (bad_char === ' ' || !bad_char) bad_char = "SPACE";
     var clean_line = encode(line.substring(col_num - 64, col_num)) + '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' + encode(line.substring(col_num + 1).substring(0, 64));
     addWarning("Music Line:" + tokenizer.lineIndex + ":" + (col_num + 1) + ': ' + str + ":  " + clean_line);
     addWarningObject({
@@ -2930,7 +2908,7 @@ var Parse = function Parse() {
       return;
     }
     words = parseCommon.strip(words);
-    if (words.charAt(words.length - 1) !== '-') words = words + ' '; // Just makes it easier to parse below, since every word has a divider after it.
+    if (words[words.length - 1] !== '-') words = words + ' '; // Just makes it easier to parse below, since every word has a divider after it.
     var word_list = [];
     // first make a list of words from the string we are passed. A word is divided on either a space or dash.
     var last_divider = 0;
@@ -2941,7 +2919,7 @@ var Parse = function Parse() {
       last_divider = i + 1;
       if (word.length > 0) {
         if (replace) word = parseCommon.gsub(word, '~', ' ');
-        var div = words.charAt(i);
+        var div = words[i];
         if (div !== '_' && div !== '-') div = ' ';
         word_list.push({
           syllable: tokenizer.translateString(word),
@@ -3051,7 +3029,7 @@ var Parse = function Parse() {
       return;
     }
     words = parseCommon.strip(words);
-    if (words.charAt(words.length - 1) !== '-') words = words + ' '; // Just makes it easier to parse below, since every word has a divider after it.
+    if (words[words.length - 1] !== '-') words = words + ' '; // Just makes it easier to parse below, since every word has a divider after it.
     var word_list = [];
     // first make a list of words from the string we are passed. A word is divided on either a space or dash.
     var last_divider = 0;
@@ -3061,7 +3039,7 @@ var Parse = function Parse() {
       last_divider = i + 1;
       if (word.length > 0) {
         if (replace) word = parseCommon.gsub(word, '~', ' ');
-        var div = words.charAt(i);
+        var div = words[i];
         if (div !== '_' && div !== '-') div = ' ';
         word_list.push({
           syllable: tokenizer.translateString(word),
@@ -3073,7 +3051,7 @@ var Parse = function Parse() {
       return false;
     };
     for (var i = 0; i < words.length; i++) {
-      switch (words.charAt(i)) {
+      switch (words[i]) {
         case ' ':
         case '\x12':
           addWord(i);
@@ -3155,7 +3133,7 @@ var Parse = function Parse() {
       addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
       return;
     }
-    if (line.length < 2 || line.charAt(1) !== ':' || music.lineContinuation) {
+    if (line.length < 2 || line[1] !== ':' || music.lineContinuation) {
       music.parseMusic(line);
       return;
     }
@@ -4213,18 +4191,18 @@ var parseDirective = {};
         text: textParts[0]
       }];
       for (var i = 1; i < textParts.length; i++) {
-        if (textParts[i].charAt(0) === '0') textarr.push({
+        if (textParts[i][0] === '0') textarr.push({
           text: textParts[i].substring(1)
-        });else if (textParts[i].charAt(0) === '1' && multilineVars.setfont[1]) textarr.push({
+        });else if (textParts[i][0] === '1' && multilineVars.setfont[1]) textarr.push({
           font: multilineVars.setfont[1],
           text: textParts[i].substring(1)
-        });else if (textParts[i].charAt(0) === '2' && multilineVars.setfont[2]) textarr.push({
+        });else if (textParts[i][0] === '2' && multilineVars.setfont[2]) textarr.push({
           font: multilineVars.setfont[2],
           text: textParts[i].substring(1)
-        });else if (textParts[i].charAt(0) === '3' && multilineVars.setfont[3]) textarr.push({
+        });else if (textParts[i][0] === '3' && multilineVars.setfont[3]) textarr.push({
           font: multilineVars.setfont[3],
           text: textParts[i].substring(1)
-        });else if (textParts[i].charAt(0) === '4' && multilineVars.setfont[4]) textarr.push({
+        });else if (textParts[i][0] === '4' && multilineVars.setfont[4]) textarr.push({
           font: multilineVars.setfont[4],
           text: textParts[i].substring(1)
         });else textarr[textarr.length - 1].text += '$' + textParts[i];
@@ -4634,7 +4612,7 @@ var parseDirective = {};
       case "footer":
         var footerStr = tokenizer.getMeat(restOfString, 0, restOfString.length);
         footerStr = restOfString.substring(footerStr.start, footerStr.end);
-        if (footerStr.charAt(0) === '"' && footerStr.charAt(footerStr.length - 1) === '"') footerStr = footerStr.substring(1, footerStr.length - 1);
+        if (footerStr[0] === '"' && footerStr[footerStr.length - 1] === '"') footerStr = footerStr.substring(1, footerStr.length - 1);
         var footerArr = footerStr.split('\t');
         var footer = {};
         if (footerArr.length === 1) footer = {
@@ -5134,7 +5112,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
   this.letter_to_inline_header = function (line, i, startLine) {
     var ws = tokenizer.eatWhiteSpace(line, i);
     i += ws;
-    if (line.length >= i + 5 && line.charAt(i) === '[' && line.charAt(i + 2) === ':') {
+    if (line.length >= i + 5 && line[i] === '[' && line[i + 2] === ':') {
       var e = line.indexOf(']', i);
       var startChar = multilineVars.iChar + i;
       var endChar = multilineVars.iChar + e + 1;
@@ -5172,14 +5150,14 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
             } else if (tempo.type === 'immediate') {
               if (!startLine && tuneBuilder.hasBeginMusic()) tuneBuilder.appendElement('tempo', startChar, endChar, tempo.tempo);else multilineVars.tempoForNextLine = ['tempo', startChar, endChar, tempo.tempo];
             }
-            return [e - i + 1 + ws, line.charAt(i + 1), line.substring(i + 3, e)];
+            return [e - i + 1 + ws, line[i + 1], line.substring(i + 3, e)];
           }
           break;
         case "[V:":
           if (e > 0) {
             parseKeyVoice.parseVoice(line, i + 3, e);
             //startNewLine();
-            return [e - i + 1 + ws, line.charAt(i + 1), line.substring(i + 3, e)];
+            return [e - i + 1 + ws, line[i + 1], line.substring(i + 3, e)];
           }
           break;
         case "[r:":
@@ -5220,11 +5198,11 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           if (e === -1) e = line.length;
           var tempo = this.setTempo(line, i + 2, e, multilineVars.iChar);
           if (tempo.type === 'delaySet') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, this.calcTempo(tempo.tempo));else if (tempo.type === 'immediate') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, tempo.tempo);
-          return [e, line.charAt(i), parseCommon.strip(line.substring(i + 2))];
+          return [e, line[i], parseCommon.strip(line.substring(i + 2))];
         case "V:":
           parseKeyVoice.parseVoice(line, i + 2, line.length);
           //						startNewLine();
-          return [line.length, line.charAt(i), parseCommon.strip(line.substring(i + 2))];
+          return [line.length, line[i], parseCommon.strip(line.substring(i + 2))];
         default:
         // TODO: complain about unhandled header
       }
@@ -5248,7 +5226,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     Z: 'transcription'
   };
   this.parseHeader = function (line) {
-    var field = metaTextHeaders[line.charAt(0)];
+    var field = metaTextHeaders[line[0]];
     if (field !== undefined) {
       if (field === 'unalignedWords') tuneBuilder.addMetaTextArray(field, parseDirective.parseFontChangeLine(tokenizer.translateString(tokenizer.stripComment(line.substring(2)))), {
         startChar: multilineVars.iChar,
@@ -5261,14 +5239,14 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     } else {
       var startChar = multilineVars.iChar;
       var endChar = startChar + line.length;
-      switch (line.charAt(0)) {
+      switch (line[0]) {
         case 'H':
           tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line.substring(2))), {
             startChar: multilineVars.iChar,
             endChar: multilineVars.iChar + line.length
           });
           line = tokenizer.peekLine();
-          while (line && line.charAt(1) !== ':') {
+          while (line && line[1] !== ':') {
             tokenizer.nextLine();
             tuneBuilder.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)), {
               startChar: multilineVars.iChar,
@@ -5678,12 +5656,12 @@ var parseKeyVoice = {};
   };
   var parseMiddle = function parseMiddle(str) {
     var i = 0;
-    var p = str.charAt(i++);
-    if (p === '^' || p === '_') p = str.charAt(i++);
+    var p = str[i++];
+    if (p === '^' || p === '_') p = str[i++];
     var mid = pitches[p];
     if (mid === undefined) mid = 6; // If a legal middle note wasn't received, just ignore it.
     for (; i < str.length; i++) {
-      if (str.charAt(i) === ',') mid -= 7;else if (str.charAt(i) === "'") mid += 7;else break;
+      if (str[i] === ',') mid -= 7;else if (str[i] === "'") mid += 7;else break;
     }
     return {
       mid: mid - 6,
@@ -6132,12 +6110,12 @@ var parseKeyVoice = {};
     };
     var addNextTokenToStaffInfo = function addNextTokenToStaffInfo(name) {
       var attr = tokenizer.getVoiceToken(line, start, end);
-      if (attr.warn !== undefined) warn("Expected value for " + name + " in voice: " + attr.warn, line, start);else if (attr.err !== undefined) warn("Expected value for " + name + " in voice: " + attr.err, line, start);else if (attr.token.length === 0 && line.charAt(start) !== '"') warn("Expected value for " + name + " in voice", line, start);else staffInfo[name] = attr.token;
+      if (attr.warn !== undefined) warn("Expected value for " + name + " in voice: " + attr.warn, line, start);else if (attr.err !== undefined) warn("Expected value for " + name + " in voice: " + attr.err, line, start);else if (attr.token.length === 0 && line[start] !== '"') warn("Expected value for " + name + " in voice", line, start);else staffInfo[name] = attr.token;
       start += attr.len;
     };
     var addNextTokenToVoiceInfo = function addNextTokenToVoiceInfo(id, name, type) {
       var attr = tokenizer.getVoiceToken(line, start, end);
-      if (attr.warn !== undefined) warn("Expected value for " + name + " in voice: " + attr.warn, line, start);else if (attr.err !== undefined) warn("Expected value for " + name + " in voice: " + attr.err, line, start);else if (attr.token.length === 0 && line.charAt(start) !== '"') warn("Expected value for " + name + " in voice", line, start);else {
+      if (attr.warn !== undefined) warn("Expected value for " + name + " in voice: " + attr.warn, line, start);else if (attr.err !== undefined) warn("Expected value for " + name + " in voice: " + attr.err, line, start);else if (attr.token.length === 0 && line[start] !== '"') warn("Expected value for " + name + " in voice", line, start);else {
         if (type === 'number') attr.token = parseFloat(attr.token);
         multilineVars.voices[id][name] = attr.token;
       }
@@ -6145,7 +6123,7 @@ var parseKeyVoice = {};
     };
     var getNextToken = function getNextToken(name, type) {
       var attr = tokenizer.getVoiceToken(line, start, end);
-      if (attr.warn !== undefined) warn("Expected value for " + name + " in voice: " + attr.warn, line, start);else if (attr.err !== undefined) warn("Expected value for " + name + " in voice: " + attr.err, line, start);else if (attr.token.length === 0 && line.charAt(start) !== '"') warn("Expected value for " + name + " in voice", line, start);else {
+      if (attr.warn !== undefined) warn("Expected value for " + name + " in voice: " + attr.warn, line, start);else if (attr.err !== undefined) warn("Expected value for " + name + " in voice: " + attr.err, line, start);else if (attr.token.length === 0 && line[start] !== '"') warn("Expected value for " + name + " in voice", line, start);else {
         if (type === 'number') attr.token = parseFloat(attr.token);
         return attr.token;
       }
@@ -6159,7 +6137,7 @@ var parseKeyVoice = {};
         "_e": -3
       };
       var attr = tokenizer.getVoiceToken(line, start, end);
-      if (attr.warn !== undefined) warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice: " + attr.warn, line, start);else if (attr.token.length === 0 && line.charAt(start) !== '"') warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice", line, start);else {
+      if (attr.warn !== undefined) warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice: " + attr.warn, line, start);else if (attr.token.length === 0 && line[start] !== '"') warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice", line, start);else {
         var t = noteToTransposition[attr.token];
         if (!t) warn("Expected one of (_B, _E, _b, _e) for " + name + " in voice", line, start);else multilineVars.voices[id][name] = t;
       }
@@ -6464,10 +6442,10 @@ MusicParser.prototype.parseMusic = function (line) {
   var i = 0;
   var startOfLine = multilineVars.iChar;
   // see if there is nothing but a comment on this line. If so, just ignore it. A full line comment is optional white space followed by %
-  while (tokenizer.isWhiteSpace(line.charAt(i)) && i < line.length) {
+  while (tokenizer.isWhiteSpace(line[i]) && i < line.length) {
     i++;
   }
-  if (i === line.length || line.charAt(i) === '%') return;
+  if (i === line.length || line[i] === '%') return;
 
   // Start with the standard staff, clef and key symbols on each line
   var delayStartNewLine = multilineVars.start_new_line;
@@ -6487,7 +6465,7 @@ MusicParser.prototype.parseMusic = function (line) {
   var overlayLevel = 0;
   while (i < line.length) {
     var startI = i;
-    if (line.charAt(i) === '%') break;
+    if (line[i] === '%') break;
     var retInlineHeader = header.letter_to_inline_header(line, i, delayStartNewLine);
     if (retInlineHeader[0] > 0) {
       i += retInlineHeader[0];
@@ -6516,7 +6494,7 @@ MusicParser.prototype.parseMusic = function (line) {
         if (ret > 0) {
           i += ret;
         }
-        if (i > 0 && line.charAt(i - 1) === '\x12') {
+        if (i > 0 && line[i - 1] === '\x12') {
           // there is one case where a line continuation isn't the same as being on the same line, and that is if the next character after it is a header.
           ret = header.letter_to_body_header(line, i);
           if (ret[0] > 0) {
@@ -6559,7 +6537,7 @@ MusicParser.prototype.parseMusic = function (line) {
           if (ii > 0) el.force_end_beam_last = true;
           i += ii;
         } else {
-          if (nonDecorations.indexOf(line.charAt(i)) === -1) ret = letter_to_accent(line, i);else ret = [0];
+          if (nonDecorations.indexOf(line[i]) === -1) ret = letter_to_accent(line, i);else ret = [0];
           if (ret[0] > 0) {
             if (ret[1] === null) {
               if (i + 1 < line.length) this.startNewLine(); // There was a ! in the middle of the line. Start a new line if there is anything after it.
@@ -6661,7 +6639,7 @@ MusicParser.prototype.parseMusic = function (line) {
         }
 
         // handle chords.
-        if (line.charAt(i) === '[') {
+        if (line[i] === '[') {
           var chordStartChar = i;
           i++;
           var chordDuration = null;
@@ -6705,12 +6683,12 @@ MusicParser.prototype.parseMusic = function (line) {
               if (chordNote.startTie) multilineVars.inTieChord[el.pitches.length] = true;
               i = chordNote.endChar;
               delete chordNote.endChar;
-            } else if (line.charAt(i) === ' ') {
+            } else if (line[i] === ' ') {
               // Spaces are not allowed in chords, but we can recover from it by ignoring it.
               warn("Spaces are not allowed in chords", line, i);
               i++;
             } else {
-              if (i < line.length && line.charAt(i) === ']') {
+              if (i < line.length && line[i] === ']') {
                 // consume the close bracket
                 i++;
                 if (multilineVars.next_note_duration !== 0) {
@@ -6731,7 +6709,7 @@ MusicParser.prototype.parseMusic = function (line) {
                 }
                 var postChordDone = false;
                 while (i < line.length && !postChordDone) {
-                  switch (line.charAt(i)) {
+                  switch (line[i]) {
                     case ' ':
                     case '\t':
                       addEndBeam(el);
@@ -6765,8 +6743,9 @@ MusicParser.prototype.parseMusic = function (line) {
                       var fraction = tokenizer.getFraction(line, i);
                       chordDuration = fraction.value;
                       i = fraction.index;
-                      if (line.charAt(i) === ' ') rememberEndBeam = true;
-                      if (line.charAt(i) === '-' || line.charAt(i) === ')' || line.charAt(i) === ' ' || line.charAt(i) === '<' || line.charAt(i) === '>') i--; // Subtracting one because one is automatically added below
+                      var ch = line[i];
+                      if (ch === ' ') rememberEndBeam = true;
+                      if (ch === '-' || ch === ')' || ch === ' ' || ch === '<' || ch === '>') i--; // Subtracting one because one is automatically added below
                       else postChordDone = true;
                       break;
                     default:
@@ -6865,7 +6844,7 @@ MusicParser.prototype.parseMusic = function (line) {
         }
         if (i === startI) {
           // don't know what this is, so ignore it.
-          if (line.charAt(i) !== ' ' && line.charAt(i) !== '`') warn("Unknown character ignored", line, i);
+          if (line[i] !== ' ' && line[i] !== '`') warn("Unknown character ignored", line, i);
           i++;
         }
       }
@@ -6883,25 +6862,25 @@ var setIsInTie = function setIsInTie(multilineVars, overlayLevel, value) {
   multilineVars.inTie[overlayLevel][voiceIndex] = value;
 };
 var letter_to_chord = function letter_to_chord(line, i) {
-  if (line.charAt(i) === '"') {
+  if (line[i] === '"') {
     var chord = tokenizer.getBrackettedSubstring(line, i, 5);
     if (!chord[2]) warn("Missing the closing quote while parsing the chord symbol", line, i);
     // If it starts with ^, then the chord appears above.
     // If it starts with _ then the chord appears below.
     // (note that the 2.0 draft standard defines them as not chords, but annotations and also defines @.)
-    if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '^') {
+    if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '^') {
       chord[1] = chord[1].substring(1);
       chord[2] = 'above';
-    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '_') {
+    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '_') {
       chord[1] = chord[1].substring(1);
       chord[2] = 'below';
-    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '<') {
+    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '<') {
       chord[1] = chord[1].substring(1);
       chord[2] = 'left';
-    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '>') {
+    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '>') {
       chord[1] = chord[1].substring(1);
       chord[2] = 'right';
-    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1].charAt(0) === '@') {
+    } else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '@') {
       // @-15,5.7
       chord[1] = chord[1].substring(1);
       var x = tokenizer.getFloat(chord[1]);
@@ -6937,7 +6916,7 @@ var letter_to_chord = function letter_to_chord(line, i) {
 };
 var letter_to_grace = function letter_to_grace(line, i) {
   // Grace notes are an array of: startslur, note, endslur, space; where note is accidental, pitch, duration
-  if (line.charAt(i) === '{') {
+  if (line[i] === '{') {
     // fetch the gracenotes string and consume that into the array
     var gra = tokenizer.getBrackettedSubstring(line, i, 1, '}');
     if (!gra[2]) warn("Missing the closing '}' while parsing grace note", line, i);
@@ -6951,7 +6930,7 @@ var letter_to_grace = function letter_to_grace(line, i) {
     var inTie = false;
     while (ii < gra[1].length) {
       var acciaccatura = false;
-      if (gra[1].charAt(ii) === '/') {
+      if (gra[1][ii] === '/') {
         acciaccatura = true;
         ii++;
       }
@@ -6974,9 +6953,9 @@ var letter_to_grace = function letter_to_grace(line, i) {
         }
       } else {
         // We shouldn't get anything but notes or a space here, so report an error
-        if (gra[1].charAt(ii) === ' ') {
+        if (gra[1][ii] === ' ') {
           if (gracenotes.length > 0) gracenotes[gracenotes.length - 1].endBeam = true;
-        } else warn("Unknown character '" + gra[1].charAt(ii) + "' while parsing grace note", line, i);
+        } else warn("Unknown character '" + gra[1][ii] + "' while parsing grace note", line, i);
         ii++;
       }
     }
@@ -6985,9 +6964,9 @@ var letter_to_grace = function letter_to_grace(line, i) {
   return [0];
 };
 function letter_to_overlay(line, i) {
-  if (line.charAt(i) === '&') {
+  if (line[i] === '&') {
     var start = i;
-    while (line.charAt(i) && line.charAt(i) !== ':' && line.charAt(i) !== '|') {
+    while (line[i] && line[i] !== ':' && line[i] !== '|') {
       i++;
     }
     return [i - start, line.substring(start + 1, i)];
@@ -7007,10 +6986,10 @@ var dynamicDecorations = ["crescendo(", "crescendo)", "diminuendo(", "diminuendo
 var accentPseudonyms = [["<", "accent"], [">", "accent"], ["tr", "trill"], ["plus", "+"], ["emphasis", "accent"], ["^", "umarcato"], ["marcato", "umarcato"]];
 var accentDynamicPseudonyms = [["<(", "crescendo("], ["<)", "crescendo)"], [">(", "diminuendo("], [">)", "diminuendo)"]];
 var letter_to_accent = function letter_to_accent(line, i) {
-  var macro = multilineVars.macros[line.charAt(i)];
+  var macro = multilineVars.macros[line[i]];
   if (macro !== undefined) {
-    if (macro.charAt(0) === '!' || macro.charAt(0) === '+') macro = macro.substring(1);
-    if (macro.charAt(macro.length - 1) === '!' || macro.charAt(macro.length - 1) === '+') macro = macro.substring(0, macro.length - 1);
+    if (macro[0] === '!' || macro[0] === '+') macro = macro.substring(1);
+    if (macro[macro.length - 1] === '!' || macro[macro.length - 1] === '+') macro = macro.substring(0, macro.length - 1);
     if (parseCommon.detect(legalAccents, function (acc) {
       return macro === acc;
     })) return [1, macro];else if (parseCommon.detect(volumeDecorations, function (acc) {
@@ -7030,7 +7009,7 @@ var letter_to_accent = function letter_to_accent(line, i) {
       return [1, ''];
     }
   }
-  switch (line.charAt(i)) {
+  switch (line[i]) {
     case '.':
       if (line[i + 1] === '(' || line[i + 1] === '-')
         // a dot then open paren is a dotted slur; likewise dot dash is dotted tie.
@@ -7046,7 +7025,7 @@ var letter_to_accent = function letter_to_accent(line, i) {
     case '+':
       var ret = tokenizer.getBrackettedSubstring(line, i, 5);
       // Be sure that the accent is recognizable.
-      if (ret[1].length > 1 && (ret[1].charAt(0) === '^' || ret[1].charAt(0) === '_')) ret[1] = ret[1].substring(1); // TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
+      if (ret[1].length > 1 && (ret[1][0] === '^' || ret[1][0] === '_')) ret[1] = ret[1].substring(1); // TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
       if (parseCommon.detect(legalAccents, function (acc) {
         return ret[1] === acc;
       })) return ret;
@@ -7079,7 +7058,7 @@ var letter_to_accent = function letter_to_accent(line, i) {
       }
       // We didn't find the accent in the list, so consume the space, but don't return an accent.
       // Although it is possible that ! was used as a line break, so accept that.
-      if (line.charAt(i) === '!' && (ret[0] === 1 || line.charAt(i + ret[0] - 1) !== '!')) return [1, null];
+      if (line[i] === '!' && (ret[0] === 1 || line[i + ret[0] - 1] !== '!')) return [1, null];
       warn("Unknown decoration: " + ret[1], line, i);
       ret[1] = "";
       return ret;
@@ -7106,7 +7085,7 @@ var letter_to_accent = function letter_to_accent(line, i) {
 };
 var letter_to_spacer = function letter_to_spacer(line, i) {
   var start = i;
-  while (tokenizer.isWhiteSpace(line.charAt(i))) {
+  while (tokenizer.isWhiteSpace(line[i])) {
     i++;
   }
   return [i - start];
@@ -7129,15 +7108,15 @@ var letter_to_bar = function letter_to_bar(line, curr_pos) {
   // It can also optionally start with '[', which is ignored.
   // Also, it can have white space before the '['.
   for (var ws = 0; ws < line.length; ws++) {
-    if (line.charAt(curr_pos + ret.len + ws) !== ' ') break;
+    if (line[curr_pos + ret.len + ws] !== ' ') break;
   }
   var orig_bar_len = ret.len;
-  if (line.charAt(curr_pos + ret.len + ws) === '[') {
+  if (line[curr_pos + ret.len + ws] === '[') {
     ret.len += ws + 1;
   }
 
   // It can also be a quoted string. It is unclear whether that construct requires '[', but it seems like it would. otherwise it would be confused with a regular chord.
-  if (line.charAt(curr_pos + ret.len) === '"' && line.charAt(curr_pos + ret.len - 1) === '[') {
+  if (line[curr_pos + ret.len] === '"' && line[curr_pos + ret.len - 1] === '[') {
     var ending = tokenizer.getBrackettedSubstring(line, curr_pos + ret.len, 5);
     return [ret.len + ending[0], ret.token, ending[1]];
   }
@@ -7167,14 +7146,14 @@ var letter_to_open_slurs_and_triplets = function letter_to_open_slurs_and_triple
     ret.dottedSlur = true;
     i++;
   }
-  while (line.charAt(i) === '(' || tokenizer.isWhiteSpace(line.charAt(i))) {
-    if (line.charAt(i) === '(') {
-      if (i + 1 < line.length && line.charAt(i + 1) >= '2' && line.charAt(i + 1) <= '9') {
+  while (line[i] === '(' || tokenizer.isWhiteSpace(line[i])) {
+    if (line[i] === '(') {
+      if (i + 1 < line.length && line[i + 1] >= '2' && line[i + 1] <= '9') {
         if (ret.triplet !== undefined) warn("Can't nest triplets", line, i);else {
-          ret.triplet = line.charAt(i + 1) - '0';
+          ret.triplet = line[i + 1] - '0';
           ret.tripletQ = tripletQ[ret.triplet];
           ret.num_notes = ret.triplet;
-          if (i + 2 < line.length && line.charAt(i + 2) === ':') {
+          if (i + 2 < line.length && line[i + 2] === ':') {
             // We are expecting "(p:q:r" or "(p:q" or "(p::r"
             // That is: "put p notes into the time of q for the next r notes"
             // if r is missing, then it is equal to p.
@@ -7187,17 +7166,17 @@ var letter_to_open_slurs_and_triplets = function letter_to_open_slurs_and_triple
             // (7 notes in the time of n
             // (8 notes in the time of 3
             // (9 notes in the time of n
-            if (i + 3 < line.length && line.charAt(i + 3) === ':') {
+            if (i + 3 < line.length && line[i + 3] === ':') {
               // The second number, 'q', is not present.
-              if (i + 4 < line.length && line.charAt(i + 4) >= '1' && line.charAt(i + 4) <= '9') {
-                ret.num_notes = line.charAt(i + 4) - '0';
+              if (i + 4 < line.length && line[i + 4] >= '1' && line[i + 4] <= '9') {
+                ret.num_notes = line[i + 4] - '0';
                 i += 3;
               } else warn("expected number after the two colons after the triplet to mark the duration", line, i);
-            } else if (i + 3 < line.length && line.charAt(i + 3) >= '1' && line.charAt(i + 3) <= '9') {
-              ret.tripletQ = line.charAt(i + 3) - '0';
-              if (i + 4 < line.length && line.charAt(i + 4) === ':') {
-                if (i + 5 < line.length && line.charAt(i + 5) >= '1' && line.charAt(i + 5) <= '9') {
-                  ret.num_notes = line.charAt(i + 5) - '0';
+            } else if (i + 3 < line.length && line[i + 3] >= '1' && line[i + 3] <= '9') {
+              ret.tripletQ = line[i + 3] - '0';
+              if (i + 4 < line.length && line[i + 4] === ':') {
+                if (i + 5 < line.length && line[i + 5] >= '1' && line[i + 5] <= '9') {
+                  ret.num_notes = line[i + 5] - '0';
                   i += 4;
                 }
               } else {
@@ -7336,7 +7315,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
   var state = 'startSlur';
   var durationSetByPreviousNote = false;
   while (1) {
-    switch (line.charAt(index)) {
+    switch (line[index]) {
       case '(':
         if (state === 'startSlur') {
           if (el.startSlur === undefined) el.startSlur = 1;else el.startSlur++;
@@ -7398,9 +7377,9 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
       case 'f':
       case 'g':
         if (state === 'startSlur' || state === 'sharp2' || state === 'flat2' || state === 'pitch') {
-          el.pitch = pitches[line.charAt(index)];
+          el.pitch = pitches[line[index]];
           el.pitch += 7 * (multilineVars.currentVoice && multilineVars.currentVoice.octave !== undefined ? multilineVars.currentVoice.octave : multilineVars.octave);
-          el.name = line.charAt(index);
+          el.name = line[index];
           if (el.accidental) el.name = accMap[el.accidental] + el.name;
           transpose.note(multilineVars, el);
           state = 'octave';
@@ -7412,7 +7391,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
           } else el.duration = multilineVars.default_length;
           // If the clef is percussion, there is probably some translation of the pitch to a particular drum kit item.
           if (multilineVars.clef && multilineVars.clef.type === "perc" || multilineVars.currentVoice && multilineVars.currentVoice.clef === "perc") {
-            var key = line.charAt(index);
+            var key = line[index];
             if (el.accidental) {
               key = accMap[el.accidental] + key;
             }
@@ -7448,7 +7427,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
       case 'Z':
         if (state === 'startSlur') {
           el.rest = {
-            type: rests[line.charAt(index)]
+            type: rests[line[index]]
           };
           // There shouldn't be some of the properties that notes have. If some sneak in due to bad syntax in the abc file,
           // just nix them here.
@@ -7494,8 +7473,8 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
           el.duration = el.duration * fraction.value;
           // TODO-PER: We can test the returned duration here and give a warning if it isn't the one expected.
           el.endChar = fraction.index;
-          while (fraction.index < line.length && (tokenizer.isWhiteSpace(line.charAt(fraction.index)) || line.charAt(fraction.index) === '-')) {
-            if (line.charAt(fraction.index) === '-') el.startTie = {};else el = addEndBeam(el);
+          while (fraction.index < line.length && (tokenizer.isWhiteSpace(line[fraction.index]) || line[fraction.index] === '-')) {
+            if (line[fraction.index] === '-') el.startTie = {};else el = addEndBeam(el);
             fraction.index++;
           }
           index = fraction.index - 1;
@@ -7523,7 +7502,7 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
           el.startTie = {};
           if (!durationSetByPreviousNote && canHaveBrokenRhythm) state = 'broken_rhythm';else {
             // Peek ahead to the next character. If it is a space, then we have an end beam.
-            if (tokenizer.isWhiteSpace(line.charAt(index + 1))) addEndBeam(el);
+            if (tokenizer.isWhiteSpace(line[index + 1])) addEndBeam(el);
             el.endChar = index + 1;
             return el;
           }
@@ -7539,18 +7518,18 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
           // look ahead to see if there is a tie
           dottedTie = false;
           do {
-            if (line.charAt(index) === '.' && line.charAt(index + 1) === '-') {
+            if (line[index] === '.' && line[index + 1] === '-') {
               dottedTie = true;
               index++;
             }
-            if (line.charAt(index) === '-') {
+            if (line[index] === '-') {
               el.startTie = {};
               if (dottedTie) el.startTie.style = "dotted";
             }
             index++;
-          } while (index < line.length && (tokenizer.isWhiteSpace(line.charAt(index)) || line.charAt(index) === '-') || line.charAt(index) === '.' && line.charAt(index + 1) === '-');
+          } while (index < line.length && (tokenizer.isWhiteSpace(line[index]) || line[index] === '-') || line[index] === '.' && line[index + 1] === '-');
           el.endChar = index;
-          if (!durationSetByPreviousNote && canHaveBrokenRhythm && (line.charAt(index) === '<' || line.charAt(index) === '>')) {
+          if (!durationSetByPreviousNote && canHaveBrokenRhythm && (line[index] === '<' || line[index] === '>')) {
             // TODO-PER: Don't need the test for < and >, but that makes the endChar work out for the regression test.
             index--;
             state = 'broken_rhythm';
@@ -7590,17 +7569,17 @@ var getCoreNote = function getCoreNote(line, index, el, canHaveBrokenRhythm) {
   return null;
 };
 var getBrokenRhythm = function getBrokenRhythm(line, index) {
-  switch (line.charAt(index)) {
+  switch (line[index]) {
     case '>':
-      if (index < line.length - 2 && line.charAt(index + 1) === '>' && line.charAt(index + 2) === '>')
+      if (index < line.length - 2 && line[index + 1] === '>' && line[index + 2] === '>')
         // triple >>>
-        return [3, 1.875, 0.125];else if (index < line.length - 1 && line.charAt(index + 1) === '>')
+        return [3, 1.875, 0.125];else if (index < line.length - 1 && line[index + 1] === '>')
         // double >>
         return [2, 1.75, 0.25];else return [1, 1.5, 0.5];
     case '<':
-      if (index < line.length - 2 && line.charAt(index + 1) === '<' && line.charAt(index + 2) === '<')
+      if (index < line.length - 2 && line[index + 1] === '<' && line[index + 2] === '<')
         // triple <<<
-        return [3, 0.125, 1.875];else if (index < line.length - 1 && line.charAt(index + 1) === '<')
+        return [3, 0.125, 1.875];else if (index < line.length - 1 && line[index + 1] === '<')
         // double <<
         return [2, 0.25, 1.75];else return [1, 0.5, 1.5];
   }
@@ -7630,7 +7609,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   this.multilineVars = multilineVars;
   this.skipWhiteSpace = function (str) {
     for (var i = 0; i < str.length; i++) {
-      if (!this.isWhiteSpace(str.charAt(i))) return i;
+      if (!this.isWhiteSpace(str[i])) return i;
     }
     return str.length; // It must have been all white space
   };
@@ -7640,7 +7619,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   };
   this.eatWhiteSpace = function (line, index) {
     for (var i = index; i < line.length; i++) {
-      if (!this.isWhiteSpace(line.charAt(i))) return i - index;
+      if (!this.isWhiteSpace(line[i])) return i - index;
     }
     return i - index;
   };
@@ -7651,7 +7630,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     if (finished(str, i)) return {
       len: 0
     };
-    switch (str.charAt(i)) {
+    switch (str[i]) {
       case 'A':
         return {
           len: i + 1,
@@ -7706,7 +7685,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     if (str === 'bass') return {
       len: 0
     };
-    switch (str.charAt(0)) {
+    switch (str[0]) {
       case '#':
         return {
           len: 1,
@@ -7725,7 +7704,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   this.getMode = function (str) {
     var skipAlpha = function skipAlpha(str, start) {
       // This returns the index of the next non-alphabetic char, or the entire length of the string if not found.
-      while (start < str.length && (str.charAt(start) >= 'a' && str.charAt(start) <= 'z' || str.charAt(start) >= 'A' && str.charAt(start) <= 'Z')) {
+      while (start < str.length && (str[start] >= 'a' && str[start] <= 'z' || str[start] >= 'A' && str[start] <= 'Z')) {
         start++;
       }
       return start;
@@ -7735,7 +7714,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
       len: 0
     };
     var firstThree = str.substring(i, i + 3).toLowerCase();
-    if (firstThree.length > 1 && firstThree.charAt(1) === ' ' || firstThree.charAt(1) === '^' || firstThree.charAt(1) === '_' || firstThree.charAt(1) === '=') firstThree = firstThree.charAt(0); // This will handle the case of 'm'
+    if (firstThree.length > 1 && firstThree[1] === ' ' || firstThree[1] === '^' || firstThree[1] === '_' || firstThree[1] === '=') firstThree = firstThree[0]; // This will handle the case of 'm'
     switch (firstThree) {
       case 'mix':
         return {
@@ -7839,10 +7818,10 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   // This returns one of the legal bar lines
   // This is called alot and there is no obvious tokenable items, so this is broken apart.
   this.getBarLine = function (line, i) {
-    switch (line.charAt(i)) {
+    switch (line[i]) {
       case ']':
         ++i;
-        switch (line.charAt(i)) {
+        switch (line[i]) {
           case '|':
             return {
               len: 2,
@@ -7850,7 +7829,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
             };
           case '[':
             ++i;
-            if (line.charAt(i) >= '1' && line.charAt(i) <= '9' || line.charAt(i) === '"') return {
+            if (line[i] >= '1' && line[i] <= '9' || line[i] === '"') return {
               len: 2,
               token: "bar_invisible"
             };
@@ -7867,7 +7846,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
         break;
       case ':':
         ++i;
-        switch (line.charAt(i)) {
+        switch (line[i]) {
           case ':':
             return {
               len: 2,
@@ -7876,15 +7855,15 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           case '|':
             // :|
             ++i;
-            switch (line.charAt(i)) {
+            switch (line[i]) {
               case ']':
                 // :|]
                 ++i;
-                switch (line.charAt(i)) {
+                switch (line[i]) {
                   case '|':
                     // :|]|
                     ++i;
-                    if (line.charAt(i) === ':') return {
+                    if (line[i] === ':') return {
                       len: 5,
                       token: "bar_dbl_repeat"
                     };
@@ -7902,7 +7881,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
               case '|':
                 // :||
                 ++i;
-                if (line.charAt(i) === ':') return {
+                if (line[i] === ':') return {
                   len: 4,
                   token: "bar_dbl_repeat"
                 };
@@ -7927,10 +7906,10 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
       case '[':
         // [
         ++i;
-        if (line.charAt(i) === '|') {
+        if (line[i] === '|') {
           // [|
           ++i;
-          switch (line.charAt(i)) {
+          switch (line[i]) {
             case ':':
               return {
                 len: 3,
@@ -7948,7 +7927,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
               };
           }
         } else {
-          if (line.charAt(i) >= '1' && line.charAt(i) <= '9' || line.charAt(i) === '"') return {
+          if (line[i] >= '1' && line[i] <= '9' || line[i] === '"') return {
             len: 1,
             token: "bar_invisible"
           };
@@ -7960,7 +7939,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
       case '|':
         // |
         ++i;
-        switch (line.charAt(i)) {
+        switch (line[i]) {
           case ']':
             return {
               len: 2,
@@ -7969,7 +7948,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           case '|':
             // ||
             ++i;
-            if (line.charAt(i) === ':') return {
+            if (line[i] === ':') return {
               len: 3,
               token: "bar_left_repeat"
             };
@@ -7980,7 +7959,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           case ':':
             // |:
             var colons = 0;
-            while (line.charAt(i + colons) === ':') {
+            while (line[i + colons] === ':') {
               colons++;
             }
             return {
@@ -8003,7 +7982,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   // this returns all the characters in the string that match one of the characters in the legalChars string
   this.getTokenOf = function (str, legalChars) {
     for (var i = 0; i < str.length; i++) {
-      if (legalChars.indexOf(str.charAt(i)) < 0) return {
+      if (legalChars.indexOf(str[i]) < 0) return {
         len: i,
         token: str.substring(0, i)
       };
@@ -8016,7 +7995,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   this.getToken = function (str, start, end) {
     // This returns the next set of chars that doesn't contain spaces
     var i = start;
-    while (i < end && !this.isWhiteSpace(str.charAt(i))) {
+    while (i < end && !this.isWhiteSpace(str[i])) {
       i++;
     }
     return str.substring(start, i);
@@ -8120,7 +8099,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
         accs: accs,
         warn: 'Expected note name after ' + acc
       };
-      switch (tokens[0].token.charAt(0)) {
+      switch (tokens[0].token[0]) {
         case 'a':
         case 'b':
         case 'c':
@@ -8138,7 +8117,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           if (accs === undefined) accs = [];
           accs.push({
             acc: acc,
-            note: tokens[0].token.charAt(0)
+            note: tokens[0].token[0]
           });
           if (tokens[0].token.length === 1) tokens.shift();else tokens[0].token = tokens[0].token.substring(1);
           break;
@@ -8170,11 +8149,11 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
       len: 0
     };
     var acc = null;
-    switch (str.charAt(i)) {
+    switch (str[i]) {
       case '^':
       case '_':
       case '=':
-        acc = str.charAt(i);
+        acc = str[i];
         break;
       default:
         return {
@@ -8186,7 +8165,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
       len: 1,
       warn: 'Expected note name after accidental'
     };
-    switch (str.charAt(i)) {
+    switch (str[i]) {
       case 'a':
       case 'b':
       case 'c':
@@ -8205,19 +8184,19 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           len: i + 1,
           token: {
             acc: accTranslation[acc],
-            note: str.charAt(i)
+            note: str[i]
           }
         };
       case '^':
       case '_':
       case '/':
-        acc += str.charAt(i);
+        acc += str[i];
         i++;
         if (finished(str, i)) return {
           len: 2,
           warn: 'Expected note name after accidental'
         };
-        switch (str.charAt(i)) {
+        switch (str[i]) {
           case 'a':
           case 'b':
           case 'c':
@@ -8236,7 +8215,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
               len: i + 1,
               token: {
                 acc: accTranslation[acc],
-                note: str.charAt(i)
+                note: str[i]
               }
             };
           default:
@@ -8261,10 +8240,10 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     // it returns just the start and end characters that contain the meat.
     var comment = line.indexOf('%', start);
     if (comment >= 0 && comment < end) end = comment;
-    while (start < end && (line.charAt(start) === ' ' || line.charAt(start) === '\t' || line.charAt(start) === '\x12')) {
+    while (start < end && (line[start] === ' ' || line[start] === '\t' || line[start] === '\x12')) {
       start++;
     }
-    while (start < end && (line.charAt(end - 1) === ' ' || line.charAt(end - 1) === '\t' || line.charAt(end - 1) === '\x12')) {
+    while (start < end && (line[end - 1] === ' ' || line[end - 1] === '\t' || line[end - 1] === '\x12')) {
       end--;
     }
     return {
@@ -8292,9 +8271,9 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     var tokens = [];
     var i;
     while (start < end) {
-      if (line.charAt(start) === '"') {
+      if (line[start] === '"') {
         i = start + 1;
-        while (i < end && line.charAt(i) !== '"') {
+        while (i < end && line[i] !== '"') {
           i++;
         }
         tokens.push({
@@ -8304,26 +8283,26 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           end: i
         });
         i++;
-      } else if (isLetter(line.charAt(start))) {
+      } else if (isLetter(line[start])) {
         i = start + 1;
-        if (alphaUntilWhiteSpace) while (i < end && !this.isWhiteSpace(line.charAt(i))) {
+        if (alphaUntilWhiteSpace) while (i < end && !this.isWhiteSpace(line[i])) {
           i++;
-        } else while (i < end && isLetter(line.charAt(i))) {
+        } else while (i < end && isLetter(line[i])) {
           i++;
         }
         tokens.push({
           type: 'alpha',
           token: line.substring(start, i),
-          continueId: isNumber(line.charAt(i)),
+          continueId: isNumber(line[i]),
           start: start,
           end: i
         });
         start = i + 1;
-      } else if (line.charAt(start) === '.' && isNumber(line.charAt(i + 1))) {
+      } else if (line[start] === '.' && isNumber(line[i + 1])) {
         i = start + 1;
         var int2 = null;
         var float2 = null;
-        while (i < end && isNumber(line.charAt(i))) {
+        while (i < end && isNumber(line[i])) {
           i++;
         }
         float2 = parseFloat(line.substring(start, i));
@@ -8332,21 +8311,21 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           token: line.substring(start, i),
           intt: int2,
           floatt: float2,
-          continueId: isLetter(line.charAt(i)),
+          continueId: isLetter(line[i]),
           start: start,
           end: i
         });
         start = i + 1;
-      } else if (isNumber(line.charAt(start)) || line.charAt(start) === '-' && isNumber(line.charAt(i + 1))) {
+      } else if (isNumber(line[start]) || line[start] === '-' && isNumber(line[i + 1])) {
         i = start + 1;
         var intt = null;
         var floatt = null;
-        while (i < end && isNumber(line.charAt(i))) {
+        while (i < end && isNumber(line[i])) {
           i++;
         }
-        if (line.charAt(i) === '.' && isNumber(line.charAt(i + 1))) {
+        if (line[i] === '.' && isNumber(line[i + 1])) {
           i++;
-          while (i < end && isNumber(line.charAt(i))) {
+          while (i < end && isNumber(line[i])) {
             i++;
           }
         } else intt = parseInt(line.substring(start, i));
@@ -8356,17 +8335,17 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
           token: line.substring(start, i),
           intt: intt,
           floatt: floatt,
-          continueId: isLetter(line.charAt(i)),
+          continueId: isLetter(line[i]),
           start: start,
           end: i
         });
         start = i + 1;
-      } else if (line.charAt(start) === ' ' || line.charAt(start) === '\t') {
+      } else if (line[start] === ' ' || line[start] === '\t') {
         i = start + 1;
       } else {
         tokens.push({
           type: 'punct',
-          token: line.charAt(start),
+          token: line[start],
           start: start,
           end: start + 1
         });
@@ -8379,10 +8358,10 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   this.getVoiceToken = function (line, start, end) {
     // This finds the next token. A token is delimited by a space or an equal sign. If it starts with a quote, then the portion between the quotes is returned.
     var i = start;
-    while (i < end && this.isWhiteSpace(line.charAt(i)) || line.charAt(i) === '=') {
+    while (i < end && this.isWhiteSpace(line[i]) || line[i] === '=') {
       i++;
     }
-    if (line.charAt(i) === '"') {
+    if (line[i] === '"') {
       var close = line.indexOf('"', i + 1);
       if (close === -1 || close >= end) return {
         len: 1,
@@ -8394,7 +8373,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
       };
     } else {
       var ii = i;
-      while (ii < end && !this.isWhiteSpace(line.charAt(ii)) && line.charAt(ii) !== '=') {
+      while (ii < end && !this.isWhiteSpace(line[ii]) && line[ii] !== '=') {
         ii++;
       }
       return {
@@ -8654,7 +8633,7 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   this.getNumber = function (line, index) {
     var num = 0;
     while (index < line.length) {
-      switch (line.charAt(index)) {
+      switch (line[index]) {
         case '0':
           num = num * 10;
           index++;
@@ -8710,16 +8689,16 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
   this.getFraction = function (line, index) {
     var num = 1;
     var den = 1;
-    if (line.charAt(index) !== '/') {
+    if (line[index] !== '/') {
       var ret = this.getNumber(line, index);
       num = ret.num;
       index = ret.index;
     }
-    if (line.charAt(index) === '/') {
+    if (line[index] === '/') {
       index++;
-      if (line.charAt(index) === '/') {
+      if (line[index] === '/') {
         var div = 0.5;
-        while (line.charAt(index++) === '/') {
+        while (line[index++] === '/') {
           div = div / 2;
         }
         return {
@@ -8858,14 +8837,14 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     // It returns the substring and the number of characters consumed.
     // The number of characters consumed is normally two more than the size of the substring,
     // but in the error case it might not be.
-    var matchChar = _matchChar || line.charAt(i);
+    var matchChar = _matchChar || line[i];
     var pos = i + 1;
     var esc = false;
     while (pos < line.length && (esc || line[pos] !== matchChar)) {
       esc = line[pos] === '\\';
       ++pos;
     }
-    if (line.charAt(pos) === matchChar) return [pos - i + 1, substInChord(line.substring(i + 1, pos)), true];else
+    if (line[pos] === matchChar) return [pos - i + 1, substInChord(line.substring(i + 1, pos)), true];else
       // we hit the end of line, so we'll just pick an arbitrary num of chars so the line doesn't disappear.
       {
         pos = i + maxErrorChars;
@@ -12132,7 +12111,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
   function chordNotes(bass, modifier) {
     var intervals = chordIntervals[modifier];
     if (!intervals) {
-      if (modifier.slice(0, 2).toLowerCase() === 'ma' || modifier.charAt(0) === 'M') intervals = chordIntervals.M;else if (modifier.charAt(0) === 'm' || modifier.charAt(0) === '-') intervals = chordIntervals.m;else intervals = chordIntervals.M;
+      if (modifier.slice(0, 2).toLowerCase() === 'ma' || modifier[0] === 'M') intervals = chordIntervals.M;else if (modifier[0] === 'm' || modifier[0] === '-') intervals = chordIntervals.m;else intervals = chordIntervals.M;
     }
     bass += 12; // the chord is an octave above the bass note.
     var notes = [];
@@ -18709,27 +18688,27 @@ var createTimeSignature = function createTimeSignature(elem, tuneNumber) {
       if (elem.value[i].den) {
         var numWidth = 0;
         for (var i2 = 0; i2 < elem.value[i].num.length; i2++) {
-          numWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i2));
+          numWidth += glyphs.getSymbolWidth(elem.value[i].num[i2]);
         }
         var denWidth = 0;
         for (i2 = 0; i2 < elem.value[i].num.length; i2++) {
-          denWidth += glyphs.getSymbolWidth(elem.value[i].den.charAt(i2));
+          denWidth += glyphs.getSymbolWidth(elem.value[i].den[i2]);
         }
         var maxWidth = Math.max(numWidth, denWidth);
         abselem.addRight(new RelativeElement(elem.value[i].num, x + (maxWidth - numWidth) / 2, numWidth, 8, {
-          thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0))
+          thickness: glyphs.symbolHeightInPitches(elem.value[i].num[0])
         }));
         abselem.addRight(new RelativeElement(elem.value[i].den, x + (maxWidth - denWidth) / 2, denWidth, 4, {
-          thickness: glyphs.symbolHeightInPitches(elem.value[i].den.charAt(0))
+          thickness: glyphs.symbolHeightInPitches(elem.value[i].den[0])
         }));
         x += maxWidth;
       } else {
         var thisWidth = 0;
         for (var i3 = 0; i3 < elem.value[i].num.length; i3++) {
-          thisWidth += glyphs.getSymbolWidth(elem.value[i].num.charAt(i3));
+          thisWidth += glyphs.getSymbolWidth(elem.value[i].num[i3]);
         }
         abselem.addRight(new RelativeElement(elem.value[i].num, x, thisWidth, 6, {
-          thickness: glyphs.symbolHeightInPitches(elem.value[i].num.charAt(0))
+          thickness: glyphs.symbolHeightInPitches(elem.value[i].num[0])
         }));
         x += thisWidth;
       }
@@ -22134,14 +22113,14 @@ function printSymbol(renderer, x, offset, symbol, options) {
     });
     var dx = 0;
     for (var i = 0; i < symbol.length; i++) {
-      var s = symbol.charAt(i);
+      var s = symbol[i];
       ycorr = glyphs.getYCorr(s);
       el = glyphs.printSymbol(x + dx, renderer.calcY(offset + ycorr), s, renderer.paper, {
         stroke: options.stroke,
         fill: options.fill
       });
       if (el) {
-        if (i < symbol.length - 1) dx += kernSymbols(s, symbol.charAt(i + 1), glyphs.getSymbolWidth(s));
+        if (i < symbol.length - 1) dx += kernSymbols(s, symbol[i + 1], glyphs.getSymbolWidth(s));
       } else {
         renderText(renderer, {
           x: x,
@@ -22599,7 +22578,7 @@ var sprintf = function sprintf() {
           break;
       }
       a = /[def]/.test(m[7]) && m[2] && a > 0 ? '+' + a : a;
-      c = m[3] ? m[3] == '0' ? '0' : m[3].charAt(1) : ' ';
+      c = m[3] ? m[3] == '0' ? '0' : m[3][1] : ' ';
       x = m[5] - String(a).length;
       p = m[5] ? str_repeat(c, x) : '';
       o.push(m[4] ? a + p : p + a);
@@ -25111,7 +25090,7 @@ var setClass = function setClass(elemset, addClass, removeClass, color) {
     kls = kls.replace(removeClass, "");
     kls = kls.replace(addClass, "");
     if (addClass.length > 0) {
-      if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ') kls += " ";
+      if (kls.length > 0 && kls[kls.length - 1] !== ' ') kls += " ";
       kls += addClass;
     }
     el.setAttribute("class", kls);

@@ -189,8 +189,8 @@ var Parse = function() {
 
 	var warn = function(str, line, col_num) {
 		if (!line) line = " ";
-		var bad_char = line.charAt(col_num);
-		if (bad_char === ' ')
+		var bad_char = line[col_num];
+		if (bad_char === ' ' || !bad_char)
 			bad_char = "SPACE";
 		var clean_line = encode(line.substring(col_num - 64, col_num)) + '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">' + bad_char + '</span>' + encode(line.substring(col_num + 1).substring(0,64));
 		addWarning("Music Line:" + tokenizer.lineIndex + ":" + (col_num+1) + ': ' + str + ":  " + clean_line);
@@ -217,7 +217,7 @@ var Parse = function() {
 
 		if (!line) { warn("Can't add words before the first line of music", line, 0); return; }
 		words = parseCommon.strip(words);
-		if (words.charAt(words.length-1) !== '-')
+		if (words[words.length-1] !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 		var word_list = [];
 		// first make a list of words from the string we are passed. A word is divided on either a space or dash.
@@ -230,7 +230,7 @@ var Parse = function() {
 			if (word.length > 0) {
 				if (replace)
 					word = parseCommon.gsub(word,'~', ' ');
-				var div = words.charAt(i);
+				var div = words[i];
 				if (div !== '_' && div !== '-')
 					div = ' ';
 				word_list.push({syllable: tokenizer.translateString(word), divider: div});
@@ -320,7 +320,7 @@ var Parse = function() {
 		// TODO-PER: Currently copied from w: line. This needs to be read as symbols instead.
 		if (!line) { warn("Can't add symbols before the first line of music", line, 0); return; }
 		words = parseCommon.strip(words);
-		if (words.charAt(words.length-1) !== '-')
+		if (words[words.length-1] !== '-')
 			words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
 		var word_list = [];
 		// first make a list of words from the string we are passed. A word is divided on either a space or dash.
@@ -332,7 +332,7 @@ var Parse = function() {
 			if (word.length > 0) {
 				if (replace)
 					word = parseCommon.gsub(word, '~', ' ');
-				var div = words.charAt(i);
+				var div = words[i];
 				if (div !== '_' && div !== '-')
 					div = ' ';
 				word_list.push({syllable: tokenizer.translateString(word), divider: div});
@@ -342,7 +342,7 @@ var Parse = function() {
 			return false;
 		};
 		for (var i = 0; i < words.length; i++) {
-			switch (words.charAt(i)) {
+			switch (words[i]) {
 				case ' ':
 				case '\x12':
 					addWord(i);
@@ -416,7 +416,7 @@ var Parse = function() {
 			addSymbols(tuneBuilder.getCurrentVoice(), line.substring(2));
 			return
 		}
-		if (line.length < 2 || line.charAt(1) !== ':' || music.lineContinuation) {
+		if (line.length < 2 || line[1] !== ':' || music.lineContinuation) {
 			music.parseMusic(line);
 			return
 		}
