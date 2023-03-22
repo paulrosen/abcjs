@@ -1170,6 +1170,7 @@ declare module 'abcjs' {
 		setProgress(ev: number): void
 		setWarp(percent: number): Promise<void>
 		download(fName: string): void
+		getAudioBuffer(): AudioBuffer | undefined
 	}
 
 	export interface SynthSequenceClass {

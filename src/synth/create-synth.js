@@ -481,6 +481,10 @@ function CreateSynth() {
 		return downloadBuffer(self);
 	};
 
+	self.getAudioBuffer = function() {
+		return self.audioBuffers[0];
+	};
+
 	/////////////// Private functions //////////////
 
 	self._deviceCapable = function() {
