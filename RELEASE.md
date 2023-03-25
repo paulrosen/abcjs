@@ -10,7 +10,9 @@
 
 * add germanAlphabet option: display chords using German music alphabet
 
-# add lineThickness option: allow tweaking of the size of the lines
+* add lineThickness option: allow tweaking of the size of the lines
+
+* add a public access to the audio buffer through CreateSynth.getAudioBuffer() so that it can be processed outside of abcjs
 
 ## Bugs
 

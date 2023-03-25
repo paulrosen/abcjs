@@ -150,6 +150,10 @@ Stops playing the sound and resets the progress to the beginning of the sound fi
 
 This returns the audio buffer created. (It is in WAV format.)
 
+### getAudioBuffer()
+
+This returns the AudioBuffer that was created in the the `prime()` call.
+
 ## SynthController
 
 Creates a visual widget that allows the user to control playback, including play and stop buttons, a progress bar, etc. This is the quickest way to set up a playback widget. See the section below for options.
