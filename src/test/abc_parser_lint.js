@@ -467,6 +467,7 @@ var ParserLint = function() {
 			leftmargin: { type: "number", optional: true },
 			linesep: { type: "number", optional: true },
 			lineskipfac: { type: "number", optional: true },
+			lineThickness: { type: "number", optional: true },
 			map: { type: "string", optional: true },
 			maxshrink: { type: "number", optional: true },
 			maxstaffsep: { type: "number", optional: true },

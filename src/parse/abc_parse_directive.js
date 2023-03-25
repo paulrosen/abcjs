@@ -761,6 +761,13 @@ var parseDirective = {};
 				else
 					return "Directive graceslurs requires one parameter: 0 or 1 (received " + tokens[0].token + ')';
 				break;
+			case "lineThickness":
+				var sl = parseStretchLast(tokens);
+				if (sl.value !== undefined)
+					tune.formatting.lineThickness = sl.value;
+				if (sl.error)
+					return sl.error;
+				break;
 			case "stretchlast":
 				var sl = parseStretchLast(tokens);
 				if (sl.value !== undefined)

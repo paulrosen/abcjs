@@ -11,7 +11,7 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
 	var firstYLine = 0;
 	var lastYLine = 0;
 	if (numLines === 1) {
-		printStaffLine(renderer, startx, endx, 6, klass);
+		printStaffLine(renderer, startx, endx, 6, klass, null, dy + renderer.lineThickness);
 		firstYLine = renderer.calcY(10);
 		lastYLine = renderer.calcY(2);
 	} else {
@@ -22,7 +22,7 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
 			if (firstYLine === 0) {
 				firstYLine = lastYLine;
 			}
-			printStaffLine(renderer, startx, endx, curpitch, klass, null, dy);
+			printStaffLine(renderer, startx, endx, curpitch, klass, null, dy + renderer.lineThickness);
 			klass = undefined;
 		}
 	}

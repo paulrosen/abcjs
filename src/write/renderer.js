@@ -25,6 +25,7 @@ Renderer.prototype.reset = function () {
 	this.abctune = null;
 	this.path = null;
 	this.isPrint = false;
+	this.lineThickness = 0;
 	this.initVerticalSpace();
 };
 
@@ -35,6 +36,10 @@ Renderer.prototype.newTune = function (abcTune) {
 	//this.noteNumber = null;
 	this.isPrint = abcTune.media === 'print';
 	this.setPadding(abcTune);
+};
+
+Renderer.prototype.setLineThickness = function (lineThickness) {
+	this.lineThickness = lineThickness
 };
 
 Renderer.prototype.setPaddingOverride = function (params) {

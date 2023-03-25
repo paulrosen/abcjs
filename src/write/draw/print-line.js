@@ -2,7 +2,6 @@ var sprintf = require('./sprintf');
 var roundNumber = require("./round-number");
 
 function printLine(renderer, x1, x2, y, klass, name, dy) {
-	if (!dy) dy = 0.35;
 	var fill = renderer.foregroundColor;
 	x1 = roundNumber(x1);
 	x2 = roundNumber(x2);

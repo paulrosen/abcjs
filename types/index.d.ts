@@ -265,6 +265,7 @@ declare module 'abcjs' {
 		jazzchords?: boolean;
 		germanAlphabet?: boolean;
 		lineBreaks?: Array<number>;
+		lineThickness?: number;
 		minPadding?: number;
 		oneSvgPerLine?: boolean;
 		paddingbottom?: number;

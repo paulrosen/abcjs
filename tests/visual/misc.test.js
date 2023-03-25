@@ -98,6 +98,31 @@ describe("Miscellaneous", function () {
 		{"key":"bottom","font":"historyfont","text":"three\n"},
 	]
 
+	var abcLineWidth = 'X:1\n' +
+		"L:1/8\n" +
+		"AB||ef g D|Df f/D/| A,4 c'4|]\n"
+
+	it("line-width", function () {
+		abcjs.renderAbc("paper", abcLineWidth, { add_classes: true});
+		var height = extractHeight()
+		chai.assert.equal(height, "0.700", "No change to lineThickness")
+		abcjs.renderAbc("paper", abcLineWidth, { add_classes: true, lineThickness: 0.1});
+		height = extractHeight()
+		chai.assert.equal(height, "0.900", "lineThickness = 0.1")
+		abcjs.renderAbc("paper", abcLineWidth, { add_classes: true, lineThickness: 0.5});
+		height = extractHeight()
+		chai.assert.equal(height, "1.700", "lineThickness = 0.5")
+	})
+
+	function extractHeight() {
+		var topLine = document.querySelector("#paper .abcjs-top-line")
+		var path = topLine.getAttribute('d')
+		var coordinates = path.split(" L ")
+		var first = coordinates[1].split(' ')
+		var second = coordinates[2].split(' ')
+		return (parseFloat(second[1]) - parseFloat(first[1])).toFixed(3)
+	}
+
 	it("jazz chords", function () {
 		extractChords(abcJazzChords, expectedJazzChords);
 	})

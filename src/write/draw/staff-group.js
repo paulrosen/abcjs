@@ -89,7 +89,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
 					linePitch = staff.linePitch;
 				}
 				renderer.controller.classes.newMeasure();
-				var lines = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
+				var lines = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, 0.35);
 				bottomLine = lines[1];
 				staff.bottomLine = bottomLine;
 				staff.topLine = lines[0];

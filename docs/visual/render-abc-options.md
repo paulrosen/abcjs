@@ -91,6 +91,14 @@ Format the chord symbols in a way that is sometimes found in fake books. The roo
 
 For example, for the chord "F#m7b5/C#", `F#` is regular size, `m7b5` is smaller and a superscript, and `/C#` is smaller and a subscript.
 
+## lineThickness
+
+Default: 0
+
+The amount to *increase* the line thickness - this is for the staff lines, the bar lines, the ledger lines, and the note stems. With some scaling, on some devices, and with some color schemes, the lines can appear thin so this is a way to tweak them.
+
+A value of `0.3` is a nice place to start if you are experimenting with this.
+
 ## germanAlphabet
 
 Default: false

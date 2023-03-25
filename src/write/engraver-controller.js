@@ -66,6 +66,8 @@ var EngraverController = function (paper, params) {
 		this.jazzchords = params.jazzchords;
 	if (params.germanAlphabet)
 		this.germanAlphabet = params.germanAlphabet;
+	if (params.lineThickness)
+		this.lineThickness = params.lineThickness;
 	this.renderer.controller = this; // TODO-GD needed for highlighting
 	this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
 	if (params.ariaLabel !== undefined)
@@ -86,6 +88,8 @@ EngraverController.prototype.reset = function () {
 	this.dragIndex = -1;
 	this.dragMouseStart = { x: -1, y: -1 };
 	this.dragYStep = 0;
+	if (this.lineThickness)
+		this.renderer.setLineThickness(this.lineThickness)
 };
 
 /**

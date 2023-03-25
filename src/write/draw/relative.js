@@ -58,11 +58,12 @@ function drawRelativeElement(renderer, params, bartop) {
 			params.graphelem = renderText(renderer, { x: params.x, y: y, text: params.c, type: 'partsfont', klass: renderer.controller.classes.generate("part"), anchor: "start", dim: params.dim, name: params.c }, true);
 			break;
 		case "bar":
-			params.graphelem = printStem(renderer, params.x, params.linewidth, y, (bartop) ? bartop : renderer.calcY(params.pitch2), null, "bar"); break; // bartop can't be 0
+			params.graphelem = printStem(renderer, params.x, params.linewidth + renderer.lineThickness, y, (bartop) ? bartop : renderer.calcY(params.pitch2), null, "bar"); break; // bartop can't be 0
 		case "stem":
-			params.graphelem = printStem(renderer, params.x, params.linewidth, y, renderer.calcY(params.pitch2), 'abcjs-stem', 'stem'); break;
+			var stemWidth = params.linewidth > 0 ? params.linewidth + renderer.lineThickness : params.linewidth - renderer.lineThickness
+			params.graphelem = printStem(renderer, params.x, stemWidth, y, renderer.calcY(params.pitch2), 'abcjs-stem', 'stem'); break;
 		case "ledger":
-			params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger"); break;
+			params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger", 0.35 + renderer.lineThickness); break;
 	}
 	if (params.scalex !== 1 && params.graphelem) {
 		scaleExistingElem(renderer.paper, params.graphelem, params.scalex, params.scaley, params.x, y);

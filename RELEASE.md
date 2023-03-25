@@ -10,6 +10,8 @@
 
 * add germanAlphabet option: display chords using German music alphabet
 
+# add lineThickness option: allow tweaking of the size of the lines
+
 ## Bugs
 
 * fix placement of ties when they extend to a new line
