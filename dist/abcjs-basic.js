@@ -55,7 +55,7 @@ Object.keys(tuneBook).forEach(function (key) {
 });
 abcjs.renderAbc = __webpack_require__(/*! ./src/api/abc_tunebook_svg */ "./src/api/abc_tunebook_svg.js");
 abcjs.TimingCallbacks = __webpack_require__(/*! ./src/api/abc_timing_callbacks */ "./src/api/abc_timing_callbacks.js");
-var glyphs = __webpack_require__(/*! ./src/write/abc_glyphs */ "./src/write/abc_glyphs.js");
+var glyphs = __webpack_require__(/*! ./src/write/creation/glyphs */ "./src/write/creation/glyphs.js");
 abcjs.setGlyph = glyphs.setSymbol;
 abcjs.strTranspose = strTranspose;
 var CreateSynth = __webpack_require__(/*! ./src/synth/create-synth */ "./src/synth/create-synth.js");
@@ -889,7 +889,7 @@ module.exports = tunebook;
 
 var tunebook = __webpack_require__(/*! ./abc_tunebook */ "./src/api/abc_tunebook.js");
 var Tune = __webpack_require__(/*! ../data/abc_tune */ "./src/data/abc_tune.js");
-var EngraverController = __webpack_require__(/*! ../write/abc_engraver_controller */ "./src/write/abc_engraver_controller.js");
+var EngraverController = __webpack_require__(/*! ../write/engraver-controller */ "./src/write/engraver-controller.js");
 var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse.js");
 var wrap = __webpack_require__(/*! ../parse/wrap_lines */ "./src/parse/wrap_lines.js");
 // var tablatures = require('./abc_tablatures');
@@ -1274,7 +1274,7 @@ module.exports = {
 //    abc_tune.js: a computer usable internal structure representing one tune.
 
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
-var spacing = __webpack_require__(/*! ../write/abc_spacing */ "./src/write/abc_spacing.js");
+var spacing = __webpack_require__(/*! ../write/helpers/spacing */ "./src/write/helpers/spacing.js");
 var sequence = __webpack_require__(/*! ../synth/abc_midi_sequencer */ "./src/synth/abc_midi_sequencer.js");
 var flatten = __webpack_require__(/*! ../synth/abc_midi_flattener */ "./src/synth/abc_midi_flattener.js");
 var delineTune = __webpack_require__(/*! ./deline-tune */ "./src/data/deline-tune.js");
@@ -4247,6 +4247,11 @@ var parseDirective = {};
       case "graceslurs":
         if (tokens.length !== 1) return "Directive graceslurs requires one parameter: 0 or 1";
         if (tokens[0].token === '0' || tokens[0].token === 'false') tune.formatting.graceSlurs = false;else if (tokens[0].token === '1' || tokens[0].token === 'true') tune.formatting.graceSlurs = true;else return "Directive graceslurs requires one parameter: 0 or 1 (received " + tokens[0].token + ')';
+        break;
+      case "lineThickness":
+        var lt = parseStretchLast(tokens);
+        if (lt.value !== undefined) tune.formatting.lineThickness = lt.value;
+        if (lt.error) return lt.error;
         break;
       case "stretchlast":
         var sl = parseStretchLast(tokens);
@@ -14163,6 +14168,9 @@ function CreateSynth() {
   self.download = function () {
     return downloadBuffer(self);
   };
+  self.getAudioBuffer = function () {
+    return self.audioBuffers[0];
+  };
 
   /////////////// Private functions //////////////
 
@@ -14482,6 +14490,63 @@ var getNote = function getNote(url, instrument, name, audioContext) {
   return instrumentCache[name];
 };
 module.exports = getNote;
+
+/***/ }),
+
+/***/ "./src/synth/note-to-midi.js":
+/*!***********************************!*\
+  !*** ./src/synth/note-to-midi.js ***!
+  \***********************************/
+/***/ (function(module) {
+
+var accidentals = {
+  "__": -2,
+  "_": -1,
+  "_/": -0.5,
+  "=": 0,
+  "": 0,
+  "^/": 0.5,
+  "^": 1,
+  "^^": 2
+};
+var notesInOrder = ['C', '-', 'D', '-', 'E', 'F', '-', 'G', '-', 'A', '-', 'B', 'c', '-', 'd', '-', 'e', 'f', '-', 'g', '-', 'a', '-', 'b'];
+function noteToMidi(note) {
+  var reg = note.match(/([_^\/]*)([ABCDEFGabcdefg])(,*)('*)/);
+  if (reg && reg.length === 5) {
+    var acc = accidentals[reg[1]];
+    var pitch = notesInOrder.indexOf(reg[2]);
+    var octave = reg[4].length - reg[3].length;
+    return 48 + pitch + acc + octave * 12;
+  }
+  return 0;
+}
+function midiToNote(midi) {
+  midi = parseInt(midi, 10); // TODO-PER: not sure how to handle quarter sharps and flats, so strip them for now.
+  var octave = Math.floor(midi / 12);
+  var pitch = midi % 12;
+  var name = notesInOrder[pitch];
+  if (name === '-') {
+    name = '^' + notesInOrder[pitch - 1];
+  }
+  if (octave > 4) {
+    name = name.toLowerCase();
+    octave -= 5;
+    while (octave > 0) {
+      name += "'";
+      octave--;
+    }
+  } else {
+    while (octave < 4) {
+      name += ',';
+      octave++;
+    }
+  }
+  return name;
+}
+module.exports = {
+  noteToMidi: noteToMidi,
+  midiToNote: midiToNote
+};
 
 /***/ }),
 
@@ -15212,31 +15277,6 @@ module.exports = SynthSequence;
 
 /***/ }),
 
-/***/ "./src/tablatures/instruments/guitar/guitar-fonts.js":
-/*!***********************************************************!*\
-  !*** ./src/tablatures/instruments/guitar/guitar-fonts.js ***!
-  \***********************************************************/
-/***/ (function(module) {
-
-/**
- * Dedicated fonts for violin tabs
- */
-
-/**
- * Set here the fonts used by renderer/drawer 
- * for the violin plugin
- * @param {} tune 
- */
-// eslint-disable-next-line no-unused-vars
-function setGuitarFonts(tune) {
-  /* enhance or change instrument fonts here */
-  // tune.formatting.tabnumberfont = { face: "\"Times New Roman\"", size: 9, weight: "normal", style: "normal", decoration: "none" };
-  // tune.formatting.tabgracefont = { face: "\"Times New Roman\"", size: 7, weight: "normal", style: "normal", decoration: "none" };
-}
-module.exports = setGuitarFonts;
-
-/***/ }),
-
 /***/ "./src/tablatures/instruments/guitar/guitar-patterns.js":
 /*!**************************************************************!*\
   !*** ./src/tablatures/instruments/guitar/guitar-patterns.js ***!
@@ -15277,7 +15317,6 @@ var StringTablature = __webpack_require__(/*! ../string-tablature */ "./src/tabl
 var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
 var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablatures/tab-renderer.js");
 var GuitarPatterns = __webpack_require__(/*! ./guitar-patterns */ "./src/tablatures/instruments/guitar/guitar-patterns.js");
-var setGuitarFonts = __webpack_require__(/*! ./guitar-fonts */ "./src/tablatures/instruments/guitar/guitar-fonts.js");
 
 /**
 * upon init mainly store provided instances for later usage
@@ -15301,7 +15340,6 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
   if (this.tablature.bypass(line)) return;
-  setGuitarFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
   rndrer.doLayout();
 };
@@ -15326,6 +15364,8 @@ module.exports = AbcGuitarTab;
   \*******************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
+var _require = __webpack_require__(/*! ../../synth/note-to-midi */ "./src/synth/note-to-midi.js"),
+  noteToMidi = _require.noteToMidi;
 var TabNote = __webpack_require__(/*! ./tab-note */ "./src/tablatures/instruments/tab-note.js");
 var TabNotes = __webpack_require__(/*! ./tab-notes */ "./src/tablatures/instruments/tab-notes.js");
 function buildCapo(self) {
@@ -15404,7 +15444,9 @@ function sameString(self, chord) {
 function handleChordNotes(self, notes) {
   var retNotes = [];
   for (var iiii = 0; iiii < notes.length; iiii++) {
-    var note = new TabNote.TabNote(notes[iiii].name);
+    if (notes[iiii].endTie) continue;
+    var note = new TabNote.TabNote(notes[iiii].name, self.clefTranspose);
+    note.checkKeyAccidentals(self.accidentals, self.measureAccidentals);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
@@ -15449,28 +15491,24 @@ function toNumber(self, note) {
     } else if (note.natural) acc = "=";
     self.measureAccidentals[note.name.toUpperCase()] = acc;
   }
-  var num = null;
-  var str = 0;
-  var lowestString = self.strings[self.strings.length - 1];
-  var lowestNote = new TabNote.TabNote(lowestString[0]);
-  if (note.isLowerThan(lowestNote)) {
-    return {
-      num: "?",
-      str: self.strings.length - 1,
-      note: note,
-      error: note.emit() + ': unexpected note for instrument'
-    };
-  }
-  while (str < self.strings.length) {
-    num = noteToNumber(self, note, str);
-    if (num) {
-      return num;
+  for (var i = self.stringPitches.length - 1; i >= 0; i--) {
+    if (note.pitch + note.pitchAltered >= self.stringPitches[i]) {
+      var num = note.pitch + note.pitchAltered - self.stringPitches[i];
+      if (note.quarter === '^') num -= 0.5;else if (note.quarter === "v") num += 0.5;
+      return {
+        num: Math.round(num),
+        str: self.stringPitches.length - 1 - i,
+        // reverse the strings because string 0 is on the bottom
+        note: note
+      };
     }
-    str++;
   }
-  return null; // not found
+  return {
+    num: "?",
+    str: self.stringPitches.length - 1,
+    note: note
+  };
 }
-
 StringPatterns.prototype.stringToPitch = function (stringNumber) {
   var startingPitch = 5.3;
   var bottom = this.strings.length - 1;
@@ -15498,13 +15536,16 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         error = retNotes.error;
       }
     } else {
-      note = new TabNote.TabNote(notes[0].name);
-      number = toNumber(this, note);
-      if (number) {
-        retNotes.push(number);
-      } else {
-        invalidNumber(retNotes, note);
-        error = retNotes.error;
+      if (!notes[0].endTie) {
+        note = new TabNote.TabNote(notes[0].name, this.clefTranspose);
+        note.checkKeyAccidentals(this.accidentals, this.measureAccidentals);
+        number = toNumber(this, note);
+        if (number) {
+          retNotes.push(number);
+        } else {
+          invalidNumber(retNotes, note);
+          error = retNotes.error;
+        }
       }
     }
   }
@@ -15513,7 +15554,8 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   if (graces) {
     retGraces = [];
     for (var iiii = 0; iiii < graces.length; iiii++) {
-      note = new TabNote.TabNote(graces[iiii].name);
+      note = new TabNote.TabNote(graces[iiii].name, this.clefTranspose);
+      note.checkKeyAccidentals(this.accidentals, this.measureAccidentals);
       number = toNumber(this, note);
       if (number) {
         retGraces.push(number);
@@ -15530,7 +15572,13 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   };
 };
 StringPatterns.prototype.toString = function () {
-  return this.tuning.join('').replaceAll(',', '').toUpperCase();
+  var arr = [];
+  for (var i = 0; i < this.tuning.length; i++) {
+    var str = this.tuning[i].replaceAll(',', '').replaceAll("'", '').toUpperCase();
+    if (str[0] === '_') str = str[1] + 'b ';else if (str[0] === '^') str = str[1] + "# ";
+    arr.push(str);
+  }
+  return arr.join('');
 };
 StringPatterns.prototype.tabInfos = function (plugin) {
   var _super = plugin._super;
@@ -15572,7 +15620,13 @@ function StringPatterns(plugin) {
   if (capo) {
     this.capo = capo;
   }
+  this.transpose = plugin.transpose ? plugin.transpose : 0;
   this.tuning = tuning;
+  this.stringPitches = [];
+  for (var i = 0; i < this.tuning.length; i++) {
+    var pitch = noteToMidi(this.tuning[i]) + this.capo;
+    this.stringPitches.push(pitch);
+  }
   if (this.capo > 0) {
     this.capoTuning = buildCapo(this);
   }
@@ -15654,7 +15708,11 @@ module.exports = StringTablature;
 /*!************************************************!*\
   !*** ./src/tablatures/instruments/tab-note.js ***!
   \************************************************/
-/***/ (function(module) {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var _require = __webpack_require__(/*! ../../synth/note-to-midi */ "./src/synth/note-to-midi.js"),
+  noteToMidi = _require.noteToMidi,
+  midiToNote = _require.midiToNote;
 
 /**
  * 
@@ -15662,9 +15720,11 @@ module.exports = StringTablature;
  * 
  */
 var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-function TabNote(note) {
+function TabNote(note, clefTranspose) {
+  var pitch = noteToMidi(note);
+  if (clefTranspose) pitch += clefTranspose;
+  var newNote = midiToNote(pitch);
   var isFlat = false;
-  var newNote = note;
   var isSharp = false;
   var isAltered = false;
   var natural = null;
@@ -15709,8 +15769,10 @@ function TabNote(note) {
       newNote = note.slice(1);
     }
   }
-  var hasComma = (note.match(/,/g) || []).length;
-  var hasQuote = (note.match(/'/g) || []).length;
+  var hasComma = (newNote.match(/,/g) || []).length;
+  var hasQuote = (newNote.match(/'/g) || []).length;
+  this.pitch = pitch;
+  this.pitchAltered = 0;
   this.name = newNote;
   this.acc = acc;
   this.isSharp = isSharp;
@@ -15729,6 +15791,7 @@ function TabNote(note) {
 function cloneNote(self) {
   var newNote = self.name;
   var newTabNote = new TabNote(newNote);
+  newTabNote.pitch = self.pitch;
   newTabNote.hasComma = self.hasComma;
   newTabNote.isLower = self.isLower;
   newTabNote.isQuoted = self.isQuoted;
@@ -15739,27 +15802,10 @@ function cloneNote(self) {
   return newTabNote;
 }
 TabNote.prototype.sameNoteAs = function (note) {
-  if (this.name == note.name && this.hasComma == note.hasComma && this.isLower == note.isLower && this.isQuoted == note.isQuoted && this.isSharp == note.isSharp && this.isFlat == note.isFlat) {
-    return true;
-  } else {
-    return false;
-  }
+  return note.pitch === this.pitch;
 };
 TabNote.prototype.isLowerThan = function (note) {
-  var noteComparator = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  if (this.hasComma > note.hasComma) return true;
-  if (note.hasComma > this.hasComma) return false;
-  if (this.isQuoted > note.isQuoted) return false;
-  if (note.isQuoted > this.isQuoted) return true;
-  if (this.isLower) {
-    if (!note.isLower) return false;
-  } else {
-    if (note.isLower) return true;
-  }
-  var noteName = note.name[0].toUpperCase();
-  var thisName = this.name[0].toUpperCase();
-  if (noteComparator.indexOf(thisName) < noteComparator.indexOf(noteName)) return true;
-  return false;
+  return note.pitch > this.pitch;
 };
 TabNote.prototype.checkKeyAccidentals = function (accidentals, measureAccidentals) {
   if (this.isAltered || this.natural) return;
@@ -15767,22 +15813,26 @@ TabNote.prototype.checkKeyAccidentals = function (accidentals, measureAccidental
     switch (measureAccidentals[this.name.toUpperCase()]) {
       case "__":
         this.acc = -2;
+        this.pitchAltered = -2;
         return;
       case "_":
         this.acc = -1;
+        this.pitchAltered = -1;
         return;
       case "=":
         this.acc = 0;
+        this.pitchAltered = 0;
         return;
       case "^":
         this.acc = 1;
+        this.pitchAltered = 1;
         return;
       case "^^":
         this.acc = 2;
+        this.pitchAltered = 2;
         return;
     }
-  }
-  if (accidentals) {
+  } else if (accidentals) {
     var curNote = this.name;
     for (var iii = 0; iii < accidentals.length; iii++) {
       var curAccidentals = accidentals[iii];
@@ -15790,10 +15840,12 @@ TabNote.prototype.checkKeyAccidentals = function (accidentals, measureAccidental
         if (curAccidentals.acc == 'flat') {
           this.acc = -1;
           this.isKeyFlat = true;
+          this.pitchAltered = -1;
         }
         if (curAccidentals.acc == 'sharp') {
           this.acc = +1;
           this.isKeySharp = true;
+          this.pitchAltered = 1;
         }
       }
     }
@@ -15815,74 +15867,12 @@ TabNote.prototype.getAccidentalEquiv = function () {
   return cloned;
 };
 TabNote.prototype.nextNote = function () {
-  var newTabNote = cloneNote(this);
-  if (!this.isSharp && !this.isKeySharp) {
-    if (this.name != 'E' && this.name != 'B') {
-      newTabNote.isSharp = true;
-      return newTabNote;
-    }
-  } else {
-    // cleanup
-    newTabNote.isSharp = false;
-    newTabNote.isKeySharp = false;
-  }
-  var noteIndex = notes.indexOf(this.name);
-  if (noteIndex == notes.length - 1) {
-    noteIndex = 0;
-  } else {
-    noteIndex++;
-  }
-  newTabNote.name = notes[noteIndex];
-  if (newTabNote.name == 'C') {
-    if (newTabNote.hasComma > 0) {
-      newTabNote.hasComma--;
-    } else {
-      if (!newTabNote.isLower) {
-        newTabNote.isLower = true;
-      } else {
-        newTabNote.isQuoted = true;
-      }
-    }
-  }
-  return newTabNote;
+  var note = midiToNote(this.pitch + 1 + this.pitchAltered);
+  return new TabNote(note);
 };
 TabNote.prototype.prevNote = function () {
-  var newTabNote = cloneNote(this);
-  if (this.isSharp) {
-    newTabNote.isSharp = false;
-    return newTabNote;
-  }
-  var noteIndex = notes.indexOf(this.name);
-  if (noteIndex == 0) {
-    noteIndex = notes.length - 1;
-  } else {
-    noteIndex--;
-  }
-  newTabNote.name = notes[noteIndex];
-  if (newTabNote.name == 'B') {
-    if (newTabNote.isLower) {
-      newTabNote.hasComma = 1;
-    } else {
-      if (newTabNote.hasComma > 0) {
-        newTabNote.hasComma++;
-      } else {
-        if (newTabNote.isQuoted > 0) {
-          newTabNote.isQuoted -= 1;
-        } else {
-          newTabNote.isLower = true;
-        }
-      }
-    }
-  }
-  if (this.isFlat) {
-    newTabNote.isFlat = false;
-    return newTabNote;
-  } else {
-    if (this.name != 'E' && this.name != 'B') {
-      newTabNote.isSharp = true;
-    }
-  }
-  return newTabNote;
+  var note = midiToNote(this.pitch - 1 + this.pitchAltered);
+  return new TabNote(note);
 };
 TabNote.prototype.emitNoAccidentals = function () {
   var returned = this.name;
@@ -15992,7 +15982,6 @@ var StringTablature = __webpack_require__(/*! ../string-tablature */ "./src/tabl
 var TabCommon = __webpack_require__(/*! ../../tab-common */ "./src/tablatures/tab-common.js");
 var TabRenderer = __webpack_require__(/*! ../../tab-renderer */ "./src/tablatures/tab-renderer.js");
 var ViolinPatterns = __webpack_require__(/*! ./violin-patterns */ "./src/tablatures/instruments/violin/violin-patterns.js");
-var setViolinFonts = __webpack_require__(/*! ./violin-fonts */ "./src/tablatures/instruments/violin/violin-fonts.js");
 
 /**
  * upon init mainly store provided instances for later usage
@@ -16016,7 +16005,6 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
   if (this.tablature.bypass(line)) return;
-  setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
   rndrer.doLayout();
 };
@@ -16032,31 +16020,6 @@ var AbcViolinTab = function AbcViolinTab() {
   };
 };
 module.exports = AbcViolinTab;
-
-/***/ }),
-
-/***/ "./src/tablatures/instruments/violin/violin-fonts.js":
-/*!***********************************************************!*\
-  !*** ./src/tablatures/instruments/violin/violin-fonts.js ***!
-  \***********************************************************/
-/***/ (function(module) {
-
-/**
- * Dedicated fonts for violin tabs
- */
-
-/**
- * Set here the fonts used by renderer/drawer 
- * for the violin plugin
- * @param {} tune 
- */
-// eslint-disable-next-line no-unused-vars
-function setViolinFonts(tune) {
-  /* enhance or change instrument fonts here */
-  // tune.formatting.tabnumberfont = { face: "\"Times New Roman\"", size: 9, weight: "normal", style: "normal", decoration: "none" };
-  // tune.formatting.tabgracefont = { face: "\"Times New Roman\"", size: 7, weight: "normal", style: "normal", decoration: "none" };
-}
-module.exports = setViolinFonts;
 
 /***/ }),
 
@@ -16096,9 +16059,8 @@ module.exports = ViolinPatterns;
 /**
  * Tablature Absolute elements factory
  */
-var AbsoluteElement = __webpack_require__(/*! ../write/abc_absolute_element */ "./src/write/abc_absolute_element.js");
-var RelativeElement = __webpack_require__(/*! ../write/abc_relative_element */ "./src/write/abc_relative_element.js");
-var Transposer = __webpack_require__(/*! ./transposer */ "./src/tablatures/transposer.js");
+var AbsoluteElement = __webpack_require__(/*! ../write/creation/elements/absolute-element */ "./src/write/creation/elements/absolute-element.js");
+var RelativeElement = __webpack_require__(/*! ../write/creation/elements/relative-element */ "./src/write/creation/elements/relative-element.js");
 function isObject(a) {
   return a != null && a.constructor === Object;
 }
@@ -16233,19 +16195,6 @@ function graceInRest(absElem) {
   }
   return null;
 }
-function checkTransposition(plugin, transposer, pitches, graceNotes) {
-  if (plugin.transpose) {
-    //transposer.transpose(plugin.transpose);
-    for (var jj = 0; jj < pitches.length; jj++) {
-      pitches[jj] = transposer.transposeNote(pitches[jj]);
-    }
-    if (graceNotes) {
-      for (var kk = 0; kk < graceNotes.length; kk++) {
-        graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
-      }
-    }
-  }
-}
 function convertToNumber(plugin, pitches, graceNotes) {
   var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
   if (tabPos.error) {
@@ -16285,7 +16234,6 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
   var staffSize = getInitialStaffSize(staffAbsolute);
   var source = staffAbsolute[staffIndex + voiceIndex];
   var dest = staffAbsolute[staffSize + staffIndex + voiceIndex];
-  var transposer = null;
   var tabPos = null;
   var defNote = null;
   if (source.children[0].abcelem.el_type != 'clef') {
@@ -16303,15 +16251,14 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
     // }
     if (absChild.isClef) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
+      if (absChild.abcelem.type.indexOf('-8') >= 0) plugin.semantics.strings.clefTranspose = -12;
+      if (absChild.abcelem.type.indexOf('+8') >= 0) plugin.semantics.strings.clefTranspose = 12;
     }
     switch (absChild.type) {
       case 'staff-extra key-signature':
         // refresh key accidentals
         this.accidentals = absChild.abcelem.accidentals;
         plugin.semantics.strings.accidentals = this.accidentals;
-        if (plugin.transpose) {
-          transposer = new Transposer(absChild.abcelem.accidentals, plugin.transpose);
-        }
         break;
       case 'bar':
         plugin.semantics.strings.measureAccidentals = {};
@@ -16344,8 +16291,6 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
       case 'rest':
         var restGraces = graceInRest(absChild);
         if (restGraces) {
-          // check transpose
-          checkTransposition(plugin, transposer, null, restGraces);
           // to number conversion 
           tabPos = convertToNumber(plugin, null, restGraces);
           if (tabPos.error) return;
@@ -16366,9 +16311,7 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.abcelem.gracenotes;
-        // check transpose
         abs.type = 'tabNumber';
-        checkTransposition(plugin, transposer, pitches, graceNotes);
         // to number conversion 
         tabPos = convertToNumber(plugin, pitches, graceNotes);
         if (tabPos.error) return;
@@ -16405,9 +16348,11 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
           var tabNoteRelative = buildRelativeTabNote(plugin, abs.x + absChild.heads[ll].dx, defNote, curNote, false);
           abs.children.push(tabNoteRelative);
         }
-        defNote.abselem = abs;
-        tabVoice.push(defNote);
-        dest.children.push(abs);
+        if (defNote.notes.length > 0) {
+          defNote.abselem = abs;
+          tabVoice.push(defNote);
+          dest.children.push(abs);
+        }
         break;
     }
   }
@@ -16457,9 +16402,9 @@ module.exports = TabCommon;
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /* eslint-disable no-debugger */
-var VoiceElement = __webpack_require__(/*! ../write/abc_voice_element */ "./src/write/abc_voice_element.js");
+var VoiceElement = __webpack_require__(/*! ../write/creation/elements/voice-element */ "./src/write/creation/elements/voice-element.js");
 var TabAbsoluteElements = __webpack_require__(/*! ./tab-absolute-elements */ "./src/tablatures/tab-absolute-elements.js");
-var spacing = __webpack_require__(/*! ../write/abc_spacing */ "./src/write/abc_spacing.js");
+var spacing = __webpack_require__(/*! ../write/helpers/spacing */ "./src/write/helpers/spacing.js");
 function initSpecialY() {
   return {
     tempoHeightAbove: 0,
@@ -16684,374 +16629,34 @@ module.exports = TabRenderer;
 
 /***/ }),
 
-/***/ "./src/tablatures/transposer.js":
-/*!**************************************!*\
-  !*** ./src/tablatures/transposer.js ***!
-  \**************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-/**
- *
- * generic transposer
- *
- */
-var TabNote = __webpack_require__(/*! ./instruments/tab-note */ "./src/tablatures/instruments/tab-note.js");
-function buildAccEquiv(acc, note) {
-  var equiv = note.getAccidentalEquiv();
-  if (acc.note.toUpperCase() == equiv.name.toUpperCase()) {
-    equiv.isSharp = false;
-    equiv.isFlat = false;
-    return equiv;
-  }
-  return note;
-}
-function adjustNoteToKey(acc, note) {
-  if (acc.acc == 'sharp') {
-    if (note.isFlat) {
-      return buildAccEquiv(acc, note);
-    } else if (note.isSharp) {
-      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
-        note.isSharp = false;
-        note.isKeySharp = true;
-      } else {
-        if (acc.note.toUpperCase() == note.name.toUpperCase()) {
-          note.natural = true;
-        }
-      }
-    }
-  } else if (acc.acc == 'flat') {
-    if (note.isSharp) {
-      return buildAccEquiv(acc, note);
-    } else if (note.isFlat) {
-      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
-        note.isFlat = false;
-        note.isKeyFlat = true;
-      }
-    } else {
-      if (acc.note.toUpperCase() == note.name.toUpperCase()) {
-        note.natural = true;
-      }
-    }
-  }
-  return note;
-}
-function replaceNote(self, newNote, start, end) {
-  if (self.lastEnd) {
-    while (start > self.lastEnd) {
-      self.updatedSrc.push(self.abcSrc[self.lastEnd]);
-      self.lastEnd++;
-    }
-  }
-  var nNote = newNote.split('');
-  for (var ii = 0; ii < nNote.length; ii++) {
-    self.updatedSrc.push(nNote[ii]);
-  }
-  var curPos = start + ii;
-  while (end >= curPos) {
-    self.updatedSrc.push(nNote[curPos]);
-    curPos++;
-  }
-  self.lastEnd = end;
-}
-function checkKeys(self, note) {
-  var accs = self.transposedKey;
-  for (var ii = 0; ii < accs.length; ii++) {
-    note = adjustNoteToKey(accs[ii], note);
-  }
-  return note;
-}
-Transposer.prototype.transposeNote = function (note) {
-  var returned = note;
-  var curNote = new TabNote.TabNote(returned.name);
-  if (this.transposeBy > 0) {
-    for (var ii = 0; ii < this.transposeBy; ii++) {
-      curNote = checkKeys(this, curNote.nextNote());
-    }
-  } else if (this.transposeBy < 0) {
-    for (var jj = this.transposeBy; jj < 0; jj++) {
-      curNote = checkKeys(this, curNote.prevNote());
-    }
-  }
-  returned.name = curNote.emit();
-  return returned;
-};
-Transposer.prototype.upgradeSource = function (note, startChar, endChar) {
-  var n = new TabNote.TabNote(note.name);
-  var newNote = n.emit();
-  replaceNote(this, newNote, startChar, endChar - 1);
-};
-function Transposer(transposedKey, transposeBy) {
-  this.transposeBy = transposeBy;
-  this.transposedKey = transposedKey;
-  this.lastEnd = this.kEnd + 1;
-}
-module.exports = Transposer;
-
-/***/ }),
-
-/***/ "./src/write/abc_absolute_element.js":
-/*!*******************************************!*\
-  !*** ./src/write/abc_absolute_element.js ***!
-  \*******************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-//    abc_absolute_element.js: Definition of the AbsoluteElement class.
-
-var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
-var highlight = __webpack_require__(/*! ./highlight */ "./src/write/highlight.js");
-var unhighlight = __webpack_require__(/*! ./unhighlight */ "./src/write/unhighlight.js");
-
-// Everything that is placed in the SVG is first created as an absolute element. This is one unit of graphic information.
-// That is, it embodies a concept: a clef, a time signature, a bar line,etc. or most complexly:
-// a note with its accidental, grace note, chord symbol, trill, stem, eighth flags, etc.
-// In the largest sense, these are placed on the page at a particular place that is determined during the layout phase.
-// This object doesn't contain any of the drawing information, though. That information is contained in an array of
-// RelativeElements as the "children" of this class.
-// During the layout phase, the width of all the children is calculated and the X coordinate of the absolute element is set.
-//
-// So, after the AbsoluteElement is placed, then its children can be placed relative to that. There are different types of
-// relative elements that are placed with different rules:
-// 1) Fixed - these elements don't move relative to the absolute element's coordinates. These are things like the notehead,
-// any ledger lines, accidentals, etc.
-// 2) Slotted - these elements can move vertically and don't get Y coordinates until after the absolute element is placed.
-// These are things like the chord symbol, many decorations, the lyrics, etc.
-//
-// Relative elements are also classified by how they are related. This could be:
-// 1) Increases the absolute element's width to the left. This doesn't change the center point of
-// the absolute element, so adding a sharp to the note won't move it to the right. However, if the elements
-// are close together then this enforces a minimum distance.
-// 2) Has no effect on the width. Annotations and the tempo act like this. No matter how long they are the width doesn't change.
-// 3) Increases the absolute element's width to the right. This doesn't change the center point,
-// but it will increase the minimum distance.
-// 4) Sets the width on both sides. This is the note heads. They are centered on both sides of the absolute element's X coordinate.
-
-// duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
-// minspacing - spacing which must be taken on top of the width defined by the duration
-// type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
-var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, type, tuneNumber, options) {
-  //	console.log("Absolute:",abcelem, duration, minspacing, type, tuneNumber, options);
-  if (!options) options = {};
-  this.tuneNumber = tuneNumber;
-  this.abcelem = abcelem;
-  this.duration = duration;
-  this.durationClass = options.durationClassOveride ? options.durationClassOveride : this.duration;
-  this.minspacing = minspacing || 0;
-  this.x = 0;
-  this.children = [];
-  this.heads = [];
-  this.extra = [];
-  this.extraw = 0;
-  this.w = 0;
-  this.right = [];
-  this.invisible = false;
-  this.bottom = undefined;
-  this.top = undefined;
-  this.type = type;
-
-  // The following are the dimensions of the fixed part of the element.
-  // That is, the chord text will be a different height depending on lot of factors, but the 8th flag will always be in the same place.
-  this.fixed = {
-    w: 0,
-    t: undefined,
-    b: undefined
-  }; // there is no x-coord here, because that is set later.
-
-  // these are the heights of all of the vertical elements that can't be placed until the end of the line.
-  // the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
-  // the vertical order of elements that are below is: lyric, chord, volume/dynamic
-  this.specialY = {
-    tempoHeightAbove: 0,
-    partHeightAbove: 0,
-    volumeHeightAbove: 0,
-    dynamicHeightAbove: 0,
-    endingHeightAbove: 0,
-    chordHeightAbove: 0,
-    lyricHeightAbove: 0,
-    lyricHeightBelow: 0,
-    chordHeightBelow: 0,
-    volumeHeightBelow: 0,
-    dynamicHeightBelow: 0
-  };
-};
-AbsoluteElement.prototype.getFixedCoords = function () {
-  return {
-    x: this.x,
-    w: this.fixed.w,
-    t: this.fixed.t,
-    b: this.fixed.b
-  };
-};
-AbsoluteElement.prototype.addExtra = function (extra) {
-  // used for accidentals, multi-measure rest text,
-  // left-side decorations, gracenote heads,
-  // left annotations, gracenote stems.
-  // if (!(extra.c && extra.c.indexOf("accidentals") >= 0) &&
-  // 	!(extra.c && extra.c.indexOf("arpeggio") >= 0) &&
-  // 	extra.type !== "multimeasure-text" &&
-  // 	!(extra.c === "noteheads.quarter" && (extra.scalex === 0.6 || extra.scalex === 0.36)) &&
-  // 	!(extra.type === "stem" && extra.linewidth === -0.6) &&
-  // 	extra.position !== "left"
-  // )
-  // 	console.log("extra", extra);
-
-  this.fixed.w = Math.max(this.fixed.w, extra.dx + extra.w);
-  if (this.fixed.t === undefined) this.fixed.t = extra.top;else this.fixed.t = Math.max(this.fixed.t, extra.top);
-  if (this.fixed.b === undefined) this.fixed.b = extra.bottom;else this.fixed.b = Math.min(this.fixed.b, extra.bottom);
-  if (extra.dx < this.extraw) this.extraw = extra.dx;
-  this.extra[this.extra.length] = extra;
-  this._addChild(extra);
-};
-AbsoluteElement.prototype.addHead = function (head) {
-  if (head.dx < this.extraw) this.extraw = head.dx;
-  this.heads[this.heads.length] = head;
-  this.addRight(head);
-};
-AbsoluteElement.prototype.addRight = function (right) {
-  // // used for clefs, note heads, bar lines, stems, key-signature accidentals, non-beamed flags, dots
-  // if (!(right.c && right.c.indexOf("clefs") >= 0) &&
-  // 	!(right.c && right.c.indexOf("noteheads") >= 0) &&
-  // 	!(right.c && right.c.indexOf("flags") >= 0) &&
-  // 	!(right.c && right.c.indexOf("rests") >= 0) &&
-  // 	!(right.c && right.c.indexOf("dots.dot") >= 0) &&
-  // 	right.type !== "stem" &&
-  // 	right.type !== "bar" &&
-  // 	right.type !== "none" && // used when an invisible anchor is needed.
-  // 	!(this.type.indexOf("clef") >= -1 && right.c === "8") &&
-  // 	this.type.indexOf("key-signature") === -1 &&
-  // 	this.type.indexOf("time-signature") === -1 &&
-  // 	!(this.abcelem && this.abcelem.rest && this.abcelem.rest.type === "spacer") &&
-  // 	!(this.abcelem && this.abcelem.rest && this.abcelem.rest.type === "invisible") &&
-  // 	!(right.type === "text" && right.position === "relative") &&
-  // 	!(right.type === "text" && right.position === "right") &&
-  // 	!(right.type === "text" && right.position === "above") &&
-  // 	!(right.type === "text" && right.position === "below")
-  // )
-  // 	console.log("right", right);
-  // These are the elements that are the fixed part.
-  this.fixed.w = Math.max(this.fixed.w, right.dx + right.w);
-  if (right.top !== undefined) {
-    if (this.fixed.t === undefined) this.fixed.t = right.top;else this.fixed.t = Math.max(this.fixed.t, right.top);
-  }
-  if (right.bottom !== undefined) {
-    if (this.fixed.b === undefined) this.fixed.b = right.bottom;else this.fixed.b = Math.min(this.fixed.b, right.bottom);
-  }
-  // if (isNaN(this.fixed.t) || isNaN(this.fixed.b))
-  // 	debugger;
-  if (right.dx + right.w > this.w) this.w = right.dx + right.w;
-  this.right[this.right.length] = right;
-  this._addChild(right);
-};
-AbsoluteElement.prototype.addFixed = function (elem) {
-  // used for elements that can't move relative to other elements after they have been placed.
-  // used for ledger lines, bar numbers, debug msgs, clef, key sigs, time sigs
-  this._addChild(elem);
-};
-AbsoluteElement.prototype.addFixedX = function (elem) {
-  // used for elements that can't move horizontally relative to other elements after they have been placed.
-  // used for parts, tempo, decorations
-  this._addChild(elem);
-};
-AbsoluteElement.prototype.addCentered = function (elem) {
-  // // used for chord labels, lyrics
-  // if (!(elem.type === "chord" && elem.position === "above") &&
-  // 	!(elem.type === "chord" && elem.position === "below") &&
-  // 	elem.type !== 'lyric'
-  // )
-  // 	console.log("centered", elem);
-  var half = elem.w / 2;
-  if (-half < this.extraw) this.extraw = -half;
-  this.extra[this.extra.length] = elem;
-  if (elem.dx + half > this.w) this.w = elem.dx + half;
-  this.right[this.right.length] = elem;
-  this._addChild(elem);
-};
-AbsoluteElement.prototype.setLimit = function (member, child) {
-  if (!child[member]) return;
-  if (!this.specialY[member]) this.specialY[member] = child[member];else this.specialY[member] = Math.max(this.specialY[member], child[member]);
-};
-AbsoluteElement.prototype._addChild = function (child) {
-  //	console.log("Relative:",child);
-  child.parent = this;
-  this.children[this.children.length] = child;
-  this.pushTop(child.top);
-  this.pushBottom(child.bottom);
-  this.setLimit('tempoHeightAbove', child);
-  this.setLimit('partHeightAbove', child);
-  this.setLimit('volumeHeightAbove', child);
-  this.setLimit('dynamicHeightAbove', child);
-  this.setLimit('endingHeightAbove', child);
-  this.setLimit('chordHeightAbove', child);
-  this.setLimit('lyricHeightAbove', child);
-  this.setLimit('lyricHeightBelow', child);
-  this.setLimit('chordHeightBelow', child);
-  this.setLimit('volumeHeightBelow', child);
-  this.setLimit('dynamicHeightBelow', child);
-};
-AbsoluteElement.prototype.pushTop = function (top) {
-  if (top !== undefined) {
-    if (this.top === undefined) this.top = top;else this.top = Math.max(top, this.top);
-  }
-};
-AbsoluteElement.prototype.pushBottom = function (bottom) {
-  if (bottom !== undefined) {
-    if (this.bottom === undefined) this.bottom = bottom;else this.bottom = Math.min(bottom, this.bottom);
-  }
-};
-AbsoluteElement.prototype.setX = function (x) {
-  this.x = x;
-  for (var i = 0; i < this.children.length; i++) {
-    this.children[i].setX(x);
-  }
-};
-AbsoluteElement.prototype.center = function (before, after) {
-  // Used to center whole rests
-  var midpoint = (after.x - before.x) / 2 + before.x;
-  this.x = midpoint - this.w / 2;
-  for (var k = 0; k < this.children.length; k++) {
-    this.children[k].setX(this.x);
-  }
-};
-AbsoluteElement.prototype.setHint = function () {
-  this.hint = true;
-};
-AbsoluteElement.prototype.highlight = function (klass, color) {
-  highlight.bind(this)(klass, color);
-};
-AbsoluteElement.prototype.unhighlight = function (klass, color) {
-  unhighlight.bind(this)(klass, color);
-};
-module.exports = AbsoluteElement;
-
-/***/ }),
-
-/***/ "./src/write/abc_abstract_engraver.js":
-/*!********************************************!*\
-  !*** ./src/write/abc_abstract_engraver.js ***!
-  \********************************************/
+/***/ "./src/write/creation/abstract-engraver.js":
+/*!*************************************************!*\
+  !*** ./src/write/creation/abstract-engraver.js ***!
+  \*************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 // abc_abstract_engraver.js: Creates a data structure suitable for printing a line of abc
 
-var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
-var BeamElem = __webpack_require__(/*! ./abc_beam_element */ "./src/write/abc_beam_element.js");
-var BraceElem = __webpack_require__(/*! ./abc_brace_element */ "./src/write/abc_brace_element.js");
-var createClef = __webpack_require__(/*! ./abc_create_clef */ "./src/write/abc_create_clef.js");
-var createKeySignature = __webpack_require__(/*! ./abc_create_key_signature */ "./src/write/abc_create_key_signature.js");
-var createNoteHead = __webpack_require__(/*! ./abc_create_note_head */ "./src/write/abc_create_note_head.js");
-var createTimeSignature = __webpack_require__(/*! ./abc_create_time_signature */ "./src/write/abc_create_time_signature.js");
-var Decoration = __webpack_require__(/*! ./abc_decoration */ "./src/write/abc_decoration.js");
-var EndingElem = __webpack_require__(/*! ./abc_ending_element */ "./src/write/abc_ending_element.js");
-var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
-var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
-var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
-var StaffGroupElement = __webpack_require__(/*! ./abc_staff_group_element */ "./src/write/abc_staff_group_element.js");
-var TempoElement = __webpack_require__(/*! ./abc_tempo_element */ "./src/write/abc_tempo_element.js");
-var TieElem = __webpack_require__(/*! ./abc_tie_element */ "./src/write/abc_tie_element.js");
-var TripletElem = __webpack_require__(/*! ./abc_triplet_element */ "./src/write/abc_triplet_element.js");
-var VoiceElement = __webpack_require__(/*! ./abc_voice_element */ "./src/write/abc_voice_element.js");
-var addChord = __webpack_require__(/*! ./add-chord */ "./src/write/add-chord.js");
-var pitchesToPerc = __webpack_require__(/*! ../synth/pitches-to-perc */ "./src/synth/pitches-to-perc.js");
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
+var AbsoluteElement = __webpack_require__(/*! ./elements/absolute-element */ "./src/write/creation/elements/absolute-element.js");
+var BeamElem = __webpack_require__(/*! ./elements/beam-element */ "./src/write/creation/elements/beam-element.js");
+var BraceElem = __webpack_require__(/*! ./elements/brace-element */ "./src/write/creation/elements/brace-element.js");
+var createClef = __webpack_require__(/*! ./create-clef */ "./src/write/creation/create-clef.js");
+var createKeySignature = __webpack_require__(/*! ./create-key-signature */ "./src/write/creation/create-key-signature.js");
+var createNoteHead = __webpack_require__(/*! ./create-note-head */ "./src/write/creation/create-note-head.js");
+var createTimeSignature = __webpack_require__(/*! ./create-time-signature */ "./src/write/creation/create-time-signature.js");
+var Decoration = __webpack_require__(/*! ./decoration */ "./src/write/creation/decoration.js");
+var EndingElem = __webpack_require__(/*! ./elements/ending-element */ "./src/write/creation/elements/ending-element.js");
+var glyphs = __webpack_require__(/*! ./glyphs */ "./src/write/creation/glyphs.js");
+var RelativeElement = __webpack_require__(/*! ./elements/relative-element */ "./src/write/creation/elements/relative-element.js");
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
+var StaffGroupElement = __webpack_require__(/*! ./elements/staff-group-element */ "./src/write/creation/elements/staff-group-element.js");
+var TempoElement = __webpack_require__(/*! ./elements/tempo-element */ "./src/write/creation/elements/tempo-element.js");
+var TieElem = __webpack_require__(/*! ./elements/tie-element */ "./src/write/creation/elements/tie-element.js");
+var TripletElem = __webpack_require__(/*! ./elements/triplet-element */ "./src/write/creation/elements/triplet-element.js");
+var VoiceElement = __webpack_require__(/*! ./elements/voice-element */ "./src/write/creation/elements/voice-element.js");
+var addChord = __webpack_require__(/*! ./add-chord */ "./src/write/creation/add-chord.js");
+var pitchesToPerc = __webpack_require__(/*! ../../synth/pitches-to-perc */ "./src/synth/pitches-to-perc.js");
+var parseCommon = __webpack_require__(/*! ../../parse/abc_common */ "./src/parse/abc_common.js");
 var getDuration = function getDuration(elem) {
   var d = 0;
   if (elem.duration) {
@@ -18177,165 +17782,200 @@ module.exports = AbstractEngraver;
 
 /***/ }),
 
-/***/ "./src/write/abc_beam_element.js":
-/*!***************************************!*\
-  !*** ./src/write/abc_beam_element.js ***!
-  \***************************************/
+/***/ "./src/write/creation/add-chord.js":
+/*!*****************************************!*\
+  !*** ./src/write/creation/add-chord.js ***!
+  \*****************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var RelativeElement = __webpack_require__(/*! ./elements/relative-element */ "./src/write/creation/elements/relative-element.js");
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
+var translateChord = __webpack_require__(/*! ./translate-chord */ "./src/write/creation/translate-chord.js");
+var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords, germanAlphabet) {
+  for (var i = 0; i < elem.chord.length; i++) {
+    var pos = elem.chord[i].position;
+    var rel_position = elem.chord[i].rel_position;
+    var chords = elem.chord[i].name.split("\n");
+    for (var j = chords.length - 1; j >= 0; j--) {
+      // parse these in opposite order because we place them from bottom to top.
+      var chord = chords[j];
+      var x = 0;
+      var y;
+      var font;
+      var klass;
+      if (pos === "left" || pos === "right" || pos === "below" || pos === "above" || !!rel_position) {
+        font = 'annotationfont';
+        klass = "annotation";
+      } else {
+        font = 'gchordfont';
+        klass = "chord";
+        chord = translateChord(chord, jazzchords, germanAlphabet);
+      }
+      var attr = getTextSize.attr(font, klass);
+      var dim = getTextSize.calc(chord, font, klass);
+      var chordWidth = dim.width;
+      var chordHeight = dim.height / spacing.STEP;
+      switch (pos) {
+        case "left":
+          roomTaken += chordWidth + 7;
+          x = -roomTaken; // TODO-PER: This is just a guess from trial and error
+          y = elem.averagepitch;
+          abselem.addExtra(new RelativeElement(chord, x, chordWidth + 4, y, {
+            type: "text",
+            height: chordHeight,
+            dim: attr,
+            position: "left"
+          }));
+          break;
+        case "right":
+          roomTakenRight += 4;
+          x = roomTakenRight; // TODO-PER: This is just a guess from trial and error
+          y = elem.averagepitch;
+          abselem.addRight(new RelativeElement(chord, x, chordWidth + 4, y, {
+            type: "text",
+            height: chordHeight,
+            dim: attr,
+            position: "right"
+          }));
+          break;
+        case "below":
+          // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
+          abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
+            type: "text",
+            position: "below",
+            height: chordHeight,
+            dim: attr,
+            realWidth: chordWidth
+          }));
+          break;
+        case "above":
+          // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
+          abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
+            type: "text",
+            position: "above",
+            height: chordHeight,
+            dim: attr,
+            realWidth: chordWidth
+          }));
+          break;
+        default:
+          if (rel_position) {
+            var relPositionY = rel_position.y + 3 * spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
+            abselem.addRight(new RelativeElement(chord, x + rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
+              position: "relative",
+              type: "text",
+              height: chordHeight,
+              dim: attr
+            }));
+          } else {
+            // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
+            var pos2 = 'above';
+            if (elem.positioning && elem.positioning.chordPosition) pos2 = elem.positioning.chordPosition;
+            if (pos2 !== 'hidden') {
+              abselem.addCentered(new RelativeElement(chord, noteheadWidth / 2, chordWidth, undefined, {
+                type: "chord",
+                position: pos2,
+                height: chordHeight,
+                dim: attr,
+                realWidth: chordWidth
+              }));
+            }
+          }
+      }
+    }
+  }
+  return {
+    roomTaken: roomTaken,
+    roomTakenRight: roomTakenRight
+  };
+};
+module.exports = addChord;
+
+/***/ }),
+
+/***/ "./src/write/creation/add-text-if.js":
+/*!*******************************************!*\
+  !*** ./src/write/creation/add-text-if.js ***!
+  \*******************************************/
 /***/ (function(module) {
 
-//    abc_beam_element.js: Definition of the BeamElem class.
-
-// Most elements on the page are related to a particular absolute element -- notes, rests, bars, etc. Beams, however, span multiple elements.
-// This means that beams can't be laid out until the absolute elements are placed. There is the further complication that the stems for beamed
-// notes can't be laid out until the beams are because we don't know how long they will be until we know the slope of the beam and the horizontal
-// spacing of the absolute elements.
-//
-// So, when a beam is detected, a BeamElem is created, then all notes belonging to that beam are added to it. These notes are not given stems at that time.
-// Then, after the horizontal layout is complete, all of the BeamElem are iterated to set the beam position, then all of the notes that are beamed are given
-// stems. After that, we are ready for the drawing step.
-
-// There are three phases: the setup phase, when new elements are being discovered, the layout phase, when everything is calculated, and the drawing phase,
-// when the object is not changed, but is used to put the elements on the page.
-
-//
-// Setup phase
-//
-var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
-  // type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
-  this.type = "BeamElem";
-  this.isflat = !!flat;
-  this.isgrace = !!(type && type === "grace");
-  this.forceup = !!(this.isgrace || type && type === "up");
-  this.forcedown = !!(type && type === "down");
-  this.elems = []; // all the AbsoluteElements that this beam touches. It may include embedded rests.
-  this.total = 0;
-  this.average = 6; // use middle line as start for average.
-  this.allrests = true;
-  this.stemHeight = stemHeight;
-  this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
-  if (firstElement && firstElement.duration) {
-    this.duration = firstElement.duration;
-    if (firstElement.startTriplet) {
-      this.duration *= firstElement.tripletMultiplier;
-    }
-    this.duration = Math.round(this.duration * 1000) / 1000;
-  } else this.duration = 0;
-};
-BeamElem.prototype.setHint = function () {
-  this.hint = true;
-};
-BeamElem.prototype.runningDirection = function (abcelem) {
-  var pitch = abcelem.averagepitch;
-  if (pitch === undefined) return; // don't include elements like spacers in beams
-  this.total = Math.round(this.total + pitch);
-  if (!this.count) this.count = 0;
-  this.count++;
-};
-BeamElem.prototype.add = function (abselem) {
-  var pitch = abselem.abcelem.averagepitch;
-  if (pitch === undefined) return; // don't include elements like spacers in beams
-  if (!abselem.abcelem.rest) this.allrests = false;
-  abselem.beam = this;
-  this.elems.push(abselem);
-  this.total = Math.round(this.total + pitch);
-  if (this.min === undefined || abselem.abcelem.minpitch < this.min) {
-    this.min = abselem.abcelem.minpitch;
+function addTextIf(rows, params, getTextSize) {
+  if (!params.text) return;
+  if (!params.marginLeft) params.marginLeft = 0;
+  if (!params.klass) params.klass = '';
+  if (!params.anchor) params.anchor = 'start';
+  if (!params.info) params.info = {
+    startChar: -2,
+    endChar: -2
+  };
+  if (params.marginTop) rows.push({
+    move: params.marginTop
+  });
+  var attr = {
+    left: params.marginLeft,
+    text: params.text,
+    font: params.font,
+    anchor: params.anchor,
+    startChar: params.info.startChar,
+    endChar: params.info.endChar
+  };
+  if (params.absElemType) attr.absElemType = params.absElemType;
+  if (!params.inGroup) attr.klass = params.klass;
+  if (params.name) attr.name = params.name;
+  rows.push(attr);
+  // If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
+  var size = getTextSize.calc("A", params.font, params.klass);
+  var numLines = params.text.split("\n").length;
+  if (params.text[params.text.length - 1] === '\n') numLines--; // If there is a new line at the end of the string, then an extra line will be counted.
+  if (!params.noMove) {
+    var h = size.height * 1.1 * numLines;
+    rows.push({
+      move: Math.round(h)
+    });
+    if (params.marginBottom) rows.push({
+      move: params.marginBottom
+    });
   }
-  if (this.max === undefined || abselem.abcelem.maxpitch > this.max) {
-    this.max = abselem.abcelem.maxpitch;
-  }
-};
-BeamElem.prototype.addBeam = function (beam) {
-  this.beams.push(beam);
-};
-BeamElem.prototype.setStemDirection = function () {
-  // Have to figure this out before the notes are placed because placing the notes also places the decorations.
-  this.average = calcAverage(this.total, this.count);
-  if (this.forceup) {
-    this.stemsUp = true;
-  } else if (this.forcedown) {
-    this.stemsUp = false;
-  } else {
-    var middleLine = 6; // hardcoded 6 is B
-    this.stemsUp = this.average < middleLine; // true is up, false is down;
-  }
-
-  delete this.count;
-  this.total = 0;
-};
-BeamElem.prototype.calcDir = function () {
-  this.average = calcAverage(this.total, this.elems.length);
-  if (this.forceup) {
-    this.stemsUp = true;
-  } else if (this.forcedown) {
-    this.stemsUp = false;
-  } else {
-    var middleLine = 6; // hardcoded 6 is B
-    this.stemsUp = this.average < middleLine; // true is up, false is down;
-  }
-
-  var dir = this.stemsUp ? 'up' : 'down';
-  for (var i = 0; i < this.elems.length; i++) {
-    for (var j = 0; j < this.elems[i].heads.length; j++) {
-      this.elems[i].heads[j].stemDir = dir;
-    }
-  }
-};
-function calcAverage(total, numElements) {
-  if (!numElements) return 0;
-  return total / numElements;
 }
-module.exports = BeamElem;
+module.exports = addTextIf;
 
 /***/ }),
 
-/***/ "./src/write/abc_brace_element.js":
-/*!****************************************!*\
-  !*** ./src/write/abc_brace_element.js ***!
-  \****************************************/
+/***/ "./src/write/creation/calc-height.js":
+/*!*******************************************!*\
+  !*** ./src/write/creation/calc-height.js ***!
+  \*******************************************/
 /***/ (function(module) {
 
-//    abc_brace_element.js: Definition of the BraceElement class.
-
-var BraceElem = function BraceElem(voice, type) {
-  this.startVoice = voice;
-  this.type = type;
-};
-BraceElem.prototype.setBottomStaff = function (voice) {
-  this.endVoice = voice;
-  // If only the start brace has a name then the name belongs to the brace instead of the staff.
-  if (this.startVoice.header && !this.endVoice.header) {
-    this.header = this.startVoice.header;
-    delete this.startVoice.header;
+var calcHeight = function calcHeight(staffGroup) {
+  // the height is calculated here in a parallel way to the drawing below in hopes that both of these functions will be modified together.
+  // TODO-PER: also add the space between staves. (That's systemStaffSeparation, which is the minimum distance between the staff LINES.)
+  var height = 0;
+  for (var i = 0; i < staffGroup.voices.length; i++) {
+    var staff = staffGroup.voices[i].staff;
+    if (!staffGroup.voices[i].duplicate) {
+      height += staff.top;
+      //if (staff.bottom < 0)
+      height += -staff.bottom;
+    }
   }
+  return height;
 };
-BraceElem.prototype.continuing = function (voice) {
-  // If the final staff isn't present, then use the last one we saw.
-  this.lastContinuedVoice = voice;
-};
-BraceElem.prototype.getWidth = function () {
-  return 10; // TODO-PER: right now the drawing function doesn't vary the width at all. If it does in the future then this will change.
-};
-
-BraceElem.prototype.isStartVoice = function (voice) {
-  if (this.startVoice && this.startVoice.staff && this.startVoice.staff.voices.length > 0 && this.startVoice.staff.voices[0] === voice) return true;
-  return false;
-};
-module.exports = BraceElem;
+module.exports = calcHeight;
 
 /***/ }),
 
-/***/ "./src/write/abc_create_clef.js":
-/*!**************************************!*\
-  !*** ./src/write/abc_create_clef.js ***!
-  \**************************************/
+/***/ "./src/write/creation/create-clef.js":
+/*!*******************************************!*\
+  !*** ./src/write/creation/create-clef.js ***!
+  \*******************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_create_clef.js
 
-var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
-var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
-var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
+var AbsoluteElement = __webpack_require__(/*! ./elements/absolute-element */ "./src/write/creation/elements/absolute-element.js");
+var glyphs = __webpack_require__(/*! ./glyphs */ "./src/write/creation/glyphs.js");
+var RelativeElement = __webpack_require__(/*! ./elements/relative-element */ "./src/write/creation/elements/relative-element.js");
 var createClef = function createClef(elem, tuneNumber) {
   var clef;
   var octave = 0;
@@ -18449,17 +18089,17 @@ module.exports = createClef;
 
 /***/ }),
 
-/***/ "./src/write/abc_create_key_signature.js":
-/*!***********************************************!*\
-  !*** ./src/write/abc_create_key_signature.js ***!
-  \***********************************************/
+/***/ "./src/write/creation/create-key-signature.js":
+/*!****************************************************!*\
+  !*** ./src/write/creation/create-key-signature.js ***!
+  \****************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_create_key_signature.js
 
-var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
-var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
-var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
+var AbsoluteElement = __webpack_require__(/*! ./elements/absolute-element */ "./src/write/creation/elements/absolute-element.js");
+var glyphs = __webpack_require__(/*! ./glyphs */ "./src/write/creation/glyphs.js");
+var RelativeElement = __webpack_require__(/*! ./elements/relative-element */ "./src/write/creation/elements/relative-element.js");
 var createKeySignature = function createKeySignature(elem, tuneNumber) {
   elem.el_type = "keySignature";
   if (!elem.accidentals || elem.accidentals.length === 0) return null;
@@ -18505,14 +18145,14 @@ module.exports = createKeySignature;
 
 /***/ }),
 
-/***/ "./src/write/abc_create_note_head.js":
-/*!*******************************************!*\
-  !*** ./src/write/abc_create_note_head.js ***!
-  \*******************************************/
+/***/ "./src/write/creation/create-note-head.js":
+/*!************************************************!*\
+  !*** ./src/write/creation/create-note-head.js ***!
+  \************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
-var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
+var glyphs = __webpack_require__(/*! ./glyphs */ "./src/write/creation/glyphs.js");
+var RelativeElement = __webpack_require__(/*! ./elements/relative-element */ "./src/write/creation/elements/relative-element.js");
 var createNoteHead = function createNoteHead(abselem, c, pitchelem, options) {
   if (!options) options = {};
   var dir = options.dir !== undefined ? options.dir : null;
@@ -18632,17 +18272,17 @@ module.exports = createNoteHead;
 
 /***/ }),
 
-/***/ "./src/write/abc_create_time_signature.js":
-/*!************************************************!*\
-  !*** ./src/write/abc_create_time_signature.js ***!
-  \************************************************/
+/***/ "./src/write/creation/create-time-signature.js":
+/*!*****************************************************!*\
+  !*** ./src/write/creation/create-time-signature.js ***!
+  \*****************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 //    abc_create_time_signature.js
 
-var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
-var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
-var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
+var AbsoluteElement = __webpack_require__(/*! ./elements/absolute-element */ "./src/write/creation/elements/absolute-element.js");
+var glyphs = __webpack_require__(/*! ./glyphs */ "./src/write/creation/glyphs.js");
+var RelativeElement = __webpack_require__(/*! ./elements/relative-element */ "./src/write/creation/elements/relative-element.js");
 var createTimeSignature = function createTimeSignature(elem, tuneNumber) {
   elem.el_type = "timeSignature";
   var abselem = new AbsoluteElement(elem, 0, 10, 'staff-extra time-signature', tuneNumber);
@@ -18716,41 +18356,20 @@ module.exports = createTimeSignature;
 
 /***/ }),
 
-/***/ "./src/write/abc_crescendo_element.js":
-/*!********************************************!*\
-  !*** ./src/write/abc_crescendo_element.js ***!
-  \********************************************/
-/***/ (function(module) {
-
-//    abc_crescendo_element.js: Definition of the CrescendoElem class.
-
-var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
-  this.type = "CrescendoElem";
-  this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
-  this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
-  this.dir = dir; // either "<" or ">"
-  if (positioning === 'above') this.dynamicHeightAbove = 6;else this.dynamicHeightBelow = 6;
-  this.pitch = undefined; // This will be set later
-};
-
-module.exports = CrescendoElem;
-
-/***/ }),
-
-/***/ "./src/write/abc_decoration.js":
-/*!*************************************!*\
-  !*** ./src/write/abc_decoration.js ***!
-  \*************************************/
+/***/ "./src/write/creation/decoration.js":
+/*!******************************************!*\
+  !*** ./src/write/creation/decoration.js ***!
+  \******************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 // abc_decoration.js: Creates a data structure suitable for printing a line of abc
 
-var DynamicDecoration = __webpack_require__(/*! ./abc_dynamic_decoration */ "./src/write/abc_dynamic_decoration.js");
-var CrescendoElem = __webpack_require__(/*! ./abc_crescendo_element */ "./src/write/abc_crescendo_element.js");
-var GlissandoElem = __webpack_require__(/*! ./abc_glissando_element */ "./src/write/abc_glissando_element.js");
-var glyphs = __webpack_require__(/*! ./abc_glyphs */ "./src/write/abc_glyphs.js");
-var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
-var TieElem = __webpack_require__(/*! ./abc_tie_element */ "./src/write/abc_tie_element.js");
+var DynamicDecoration = __webpack_require__(/*! ./elements/dynamic-decoration */ "./src/write/creation/elements/dynamic-decoration.js");
+var CrescendoElem = __webpack_require__(/*! ./elements/crescendo-element */ "./src/write/creation/elements/crescendo-element.js");
+var GlissandoElem = __webpack_require__(/*! ./elements/glissando-element */ "./src/write/creation/elements/glissando-element.js");
+var glyphs = __webpack_require__(/*! ./glyphs */ "./src/write/creation/glyphs.js");
+var RelativeElement = __webpack_require__(/*! ./elements/relative-element */ "./src/write/creation/elements/relative-element.js");
+var TieElem = __webpack_require__(/*! ./elements/tie-element */ "./src/write/creation/elements/tie-element.js");
 var Decoration = function Decoration() {
   this.startDiminuendoX = undefined;
   this.startCrescendoX = undefined;
@@ -19106,10 +18725,545 @@ module.exports = Decoration;
 
 /***/ }),
 
-/***/ "./src/write/abc_dynamic_decoration.js":
-/*!*********************************************!*\
-  !*** ./src/write/abc_dynamic_decoration.js ***!
-  \*********************************************/
+/***/ "./src/write/creation/elements/absolute-element.js":
+/*!*********************************************************!*\
+  !*** ./src/write/creation/elements/absolute-element.js ***!
+  \*********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+//    abc_absolute_element.js: Definition of the AbsoluteElement class.
+
+var highlight = __webpack_require__(/*! ../../interactive/highlight */ "./src/write/interactive/highlight.js");
+var unhighlight = __webpack_require__(/*! ../../interactive/unhighlight */ "./src/write/interactive/unhighlight.js");
+
+// Everything that is placed in the SVG is first created as an absolute element. This is one unit of graphic information.
+// That is, it embodies a concept: a clef, a time signature, a bar line,etc. or most complexly:
+// a note with its accidental, grace note, chord symbol, trill, stem, eighth flags, etc.
+// In the largest sense, these are placed on the page at a particular place that is determined during the layout phase.
+// This object doesn't contain any of the drawing information, though. That information is contained in an array of
+// RelativeElements as the "children" of this class.
+// During the layout phase, the width of all the children is calculated and the X coordinate of the absolute element is set.
+//
+// So, after the AbsoluteElement is placed, then its children can be placed relative to that. There are different types of
+// relative elements that are placed with different rules:
+// 1) Fixed - these elements don't move relative to the absolute element's coordinates. These are things like the notehead,
+// any ledger lines, accidentals, etc.
+// 2) Slotted - these elements can move vertically and don't get Y coordinates until after the absolute element is placed.
+// These are things like the chord symbol, many decorations, the lyrics, etc.
+//
+// Relative elements are also classified by how they are related. This could be:
+// 1) Increases the absolute element's width to the left. This doesn't change the center point of
+// the absolute element, so adding a sharp to the note won't move it to the right. However, if the elements
+// are close together then this enforces a minimum distance.
+// 2) Has no effect on the width. Annotations and the tempo act like this. No matter how long they are the width doesn't change.
+// 3) Increases the absolute element's width to the right. This doesn't change the center point,
+// but it will increase the minimum distance.
+// 4) Sets the width on both sides. This is the note heads. They are centered on both sides of the absolute element's X coordinate.
+
+// duration - actual musical duration - different from notehead duration in triplets. refer to abcelem to get the notehead duration
+// minspacing - spacing which must be taken on top of the width defined by the duration
+// type is a meta-type for the element. It is not necessary for drawing, but it is useful to make semantic sense of the element. For instance, it can be used in the element's class name.
+var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, type, tuneNumber, options) {
+  //	console.log("Absolute:",abcelem, duration, minspacing, type, tuneNumber, options);
+  if (!options) options = {};
+  this.tuneNumber = tuneNumber;
+  this.abcelem = abcelem;
+  this.duration = duration;
+  this.durationClass = options.durationClassOveride ? options.durationClassOveride : this.duration;
+  this.minspacing = minspacing || 0;
+  this.x = 0;
+  this.children = [];
+  this.heads = [];
+  this.extra = [];
+  this.extraw = 0;
+  this.w = 0;
+  this.right = [];
+  this.invisible = false;
+  this.bottom = undefined;
+  this.top = undefined;
+  this.type = type;
+
+  // The following are the dimensions of the fixed part of the element.
+  // That is, the chord text will be a different height depending on lot of factors, but the 8th flag will always be in the same place.
+  this.fixed = {
+    w: 0,
+    t: undefined,
+    b: undefined
+  }; // there is no x-coord here, because that is set later.
+
+  // these are the heights of all of the vertical elements that can't be placed until the end of the line.
+  // the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
+  // the vertical order of elements that are below is: lyric, chord, volume/dynamic
+  this.specialY = {
+    tempoHeightAbove: 0,
+    partHeightAbove: 0,
+    volumeHeightAbove: 0,
+    dynamicHeightAbove: 0,
+    endingHeightAbove: 0,
+    chordHeightAbove: 0,
+    lyricHeightAbove: 0,
+    lyricHeightBelow: 0,
+    chordHeightBelow: 0,
+    volumeHeightBelow: 0,
+    dynamicHeightBelow: 0
+  };
+};
+AbsoluteElement.prototype.getFixedCoords = function () {
+  return {
+    x: this.x,
+    w: this.fixed.w,
+    t: this.fixed.t,
+    b: this.fixed.b
+  };
+};
+AbsoluteElement.prototype.addExtra = function (extra) {
+  // used for accidentals, multi-measure rest text,
+  // left-side decorations, gracenote heads,
+  // left annotations, gracenote stems.
+  // if (!(extra.c && extra.c.indexOf("accidentals") >= 0) &&
+  // 	!(extra.c && extra.c.indexOf("arpeggio") >= 0) &&
+  // 	extra.type !== "multimeasure-text" &&
+  // 	!(extra.c === "noteheads.quarter" && (extra.scalex === 0.6 || extra.scalex === 0.36)) &&
+  // 	!(extra.type === "stem" && extra.linewidth === -0.6) &&
+  // 	extra.position !== "left"
+  // )
+  // 	console.log("extra", extra);
+
+  this.fixed.w = Math.max(this.fixed.w, extra.dx + extra.w);
+  if (this.fixed.t === undefined) this.fixed.t = extra.top;else this.fixed.t = Math.max(this.fixed.t, extra.top);
+  if (this.fixed.b === undefined) this.fixed.b = extra.bottom;else this.fixed.b = Math.min(this.fixed.b, extra.bottom);
+  if (extra.dx < this.extraw) this.extraw = extra.dx;
+  this.extra[this.extra.length] = extra;
+  this._addChild(extra);
+};
+AbsoluteElement.prototype.addHead = function (head) {
+  if (head.dx < this.extraw) this.extraw = head.dx;
+  this.heads[this.heads.length] = head;
+  this.addRight(head);
+};
+AbsoluteElement.prototype.addRight = function (right) {
+  // // used for clefs, note heads, bar lines, stems, key-signature accidentals, non-beamed flags, dots
+  // if (!(right.c && right.c.indexOf("clefs") >= 0) &&
+  // 	!(right.c && right.c.indexOf("noteheads") >= 0) &&
+  // 	!(right.c && right.c.indexOf("flags") >= 0) &&
+  // 	!(right.c && right.c.indexOf("rests") >= 0) &&
+  // 	!(right.c && right.c.indexOf("dots.dot") >= 0) &&
+  // 	right.type !== "stem" &&
+  // 	right.type !== "bar" &&
+  // 	right.type !== "none" && // used when an invisible anchor is needed.
+  // 	!(this.type.indexOf("clef") >= -1 && right.c === "8") &&
+  // 	this.type.indexOf("key-signature") === -1 &&
+  // 	this.type.indexOf("time-signature") === -1 &&
+  // 	!(this.abcelem && this.abcelem.rest && this.abcelem.rest.type === "spacer") &&
+  // 	!(this.abcelem && this.abcelem.rest && this.abcelem.rest.type === "invisible") &&
+  // 	!(right.type === "text" && right.position === "relative") &&
+  // 	!(right.type === "text" && right.position === "right") &&
+  // 	!(right.type === "text" && right.position === "above") &&
+  // 	!(right.type === "text" && right.position === "below")
+  // )
+  // 	console.log("right", right);
+  // These are the elements that are the fixed part.
+  this.fixed.w = Math.max(this.fixed.w, right.dx + right.w);
+  if (right.top !== undefined) {
+    if (this.fixed.t === undefined) this.fixed.t = right.top;else this.fixed.t = Math.max(this.fixed.t, right.top);
+  }
+  if (right.bottom !== undefined) {
+    if (this.fixed.b === undefined) this.fixed.b = right.bottom;else this.fixed.b = Math.min(this.fixed.b, right.bottom);
+  }
+  // if (isNaN(this.fixed.t) || isNaN(this.fixed.b))
+  // 	debugger;
+  if (right.dx + right.w > this.w) this.w = right.dx + right.w;
+  this.right[this.right.length] = right;
+  this._addChild(right);
+};
+AbsoluteElement.prototype.addFixed = function (elem) {
+  // used for elements that can't move relative to other elements after they have been placed.
+  // used for ledger lines, bar numbers, debug msgs, clef, key sigs, time sigs
+  this._addChild(elem);
+};
+AbsoluteElement.prototype.addFixedX = function (elem) {
+  // used for elements that can't move horizontally relative to other elements after they have been placed.
+  // used for parts, tempo, decorations
+  this._addChild(elem);
+};
+AbsoluteElement.prototype.addCentered = function (elem) {
+  // // used for chord labels, lyrics
+  // if (!(elem.type === "chord" && elem.position === "above") &&
+  // 	!(elem.type === "chord" && elem.position === "below") &&
+  // 	elem.type !== 'lyric'
+  // )
+  // 	console.log("centered", elem);
+  var half = elem.w / 2;
+  if (-half < this.extraw) this.extraw = -half;
+  this.extra[this.extra.length] = elem;
+  if (elem.dx + half > this.w) this.w = elem.dx + half;
+  this.right[this.right.length] = elem;
+  this._addChild(elem);
+};
+AbsoluteElement.prototype.setLimit = function (member, child) {
+  if (!child[member]) return;
+  if (!this.specialY[member]) this.specialY[member] = child[member];else this.specialY[member] = Math.max(this.specialY[member], child[member]);
+};
+AbsoluteElement.prototype._addChild = function (child) {
+  //	console.log("Relative:",child);
+  child.parent = this;
+  this.children[this.children.length] = child;
+  this.pushTop(child.top);
+  this.pushBottom(child.bottom);
+  this.setLimit('tempoHeightAbove', child);
+  this.setLimit('partHeightAbove', child);
+  this.setLimit('volumeHeightAbove', child);
+  this.setLimit('dynamicHeightAbove', child);
+  this.setLimit('endingHeightAbove', child);
+  this.setLimit('chordHeightAbove', child);
+  this.setLimit('lyricHeightAbove', child);
+  this.setLimit('lyricHeightBelow', child);
+  this.setLimit('chordHeightBelow', child);
+  this.setLimit('volumeHeightBelow', child);
+  this.setLimit('dynamicHeightBelow', child);
+};
+AbsoluteElement.prototype.pushTop = function (top) {
+  if (top !== undefined) {
+    if (this.top === undefined) this.top = top;else this.top = Math.max(top, this.top);
+  }
+};
+AbsoluteElement.prototype.pushBottom = function (bottom) {
+  if (bottom !== undefined) {
+    if (this.bottom === undefined) this.bottom = bottom;else this.bottom = Math.min(bottom, this.bottom);
+  }
+};
+AbsoluteElement.prototype.setX = function (x) {
+  this.x = x;
+  for (var i = 0; i < this.children.length; i++) {
+    this.children[i].setX(x);
+  }
+};
+AbsoluteElement.prototype.center = function (before, after) {
+  // Used to center whole rests
+  var midpoint = (after.x - before.x) / 2 + before.x;
+  this.x = midpoint - this.w / 2;
+  for (var k = 0; k < this.children.length; k++) {
+    this.children[k].setX(this.x);
+  }
+};
+AbsoluteElement.prototype.setHint = function () {
+  this.hint = true;
+};
+AbsoluteElement.prototype.highlight = function (klass, color) {
+  highlight.bind(this)(klass, color);
+};
+AbsoluteElement.prototype.unhighlight = function (klass, color) {
+  unhighlight.bind(this)(klass, color);
+};
+module.exports = AbsoluteElement;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/beam-element.js":
+/*!*****************************************************!*\
+  !*** ./src/write/creation/elements/beam-element.js ***!
+  \*****************************************************/
+/***/ (function(module) {
+
+//    abc_beam_element.js: Definition of the BeamElem class.
+
+// Most elements on the page are related to a particular absolute element -- notes, rests, bars, etc. Beams, however, span multiple elements.
+// This means that beams can't be laid out until the absolute elements are placed. There is the further complication that the stems for beamed
+// notes can't be laid out until the beams are because we don't know how long they will be until we know the slope of the beam and the horizontal
+// spacing of the absolute elements.
+//
+// So, when a beam is detected, a BeamElem is created, then all notes belonging to that beam are added to it. These notes are not given stems at that time.
+// Then, after the horizontal layout is complete, all of the BeamElem are iterated to set the beam position, then all of the notes that are beamed are given
+// stems. After that, we are ready for the drawing step.
+
+// There are three phases: the setup phase, when new elements are being discovered, the layout phase, when everything is calculated, and the drawing phase,
+// when the object is not changed, but is used to put the elements on the page.
+
+//
+// Setup phase
+//
+var BeamElem = function BeamElem(stemHeight, type, flat, firstElement) {
+  // type is "grace", "up", "down", or undefined. flat is used to force flat beams, as it commonly found in the grace notes of bagpipe music.
+  this.type = "BeamElem";
+  this.isflat = !!flat;
+  this.isgrace = !!(type && type === "grace");
+  this.forceup = !!(this.isgrace || type && type === "up");
+  this.forcedown = !!(type && type === "down");
+  this.elems = []; // all the AbsoluteElements that this beam touches. It may include embedded rests.
+  this.total = 0;
+  this.average = 6; // use middle line as start for average.
+  this.allrests = true;
+  this.stemHeight = stemHeight;
+  this.beams = []; // During the layout phase, this will become a list of the beams that need to be drawn.
+  if (firstElement && firstElement.duration) {
+    this.duration = firstElement.duration;
+    if (firstElement.startTriplet) {
+      this.duration *= firstElement.tripletMultiplier;
+    }
+    this.duration = Math.round(this.duration * 1000) / 1000;
+  } else this.duration = 0;
+};
+BeamElem.prototype.setHint = function () {
+  this.hint = true;
+};
+BeamElem.prototype.runningDirection = function (abcelem) {
+  var pitch = abcelem.averagepitch;
+  if (pitch === undefined) return; // don't include elements like spacers in beams
+  this.total = Math.round(this.total + pitch);
+  if (!this.count) this.count = 0;
+  this.count++;
+};
+BeamElem.prototype.add = function (abselem) {
+  var pitch = abselem.abcelem.averagepitch;
+  if (pitch === undefined) return; // don't include elements like spacers in beams
+  if (!abselem.abcelem.rest) this.allrests = false;
+  abselem.beam = this;
+  this.elems.push(abselem);
+  this.total = Math.round(this.total + pitch);
+  if (this.min === undefined || abselem.abcelem.minpitch < this.min) {
+    this.min = abselem.abcelem.minpitch;
+  }
+  if (this.max === undefined || abselem.abcelem.maxpitch > this.max) {
+    this.max = abselem.abcelem.maxpitch;
+  }
+};
+BeamElem.prototype.addBeam = function (beam) {
+  this.beams.push(beam);
+};
+BeamElem.prototype.setStemDirection = function () {
+  // Have to figure this out before the notes are placed because placing the notes also places the decorations.
+  this.average = calcAverage(this.total, this.count);
+  if (this.forceup) {
+    this.stemsUp = true;
+  } else if (this.forcedown) {
+    this.stemsUp = false;
+  } else {
+    var middleLine = 6; // hardcoded 6 is B
+    this.stemsUp = this.average < middleLine; // true is up, false is down;
+  }
+
+  delete this.count;
+  this.total = 0;
+};
+BeamElem.prototype.calcDir = function () {
+  this.average = calcAverage(this.total, this.elems.length);
+  if (this.forceup) {
+    this.stemsUp = true;
+  } else if (this.forcedown) {
+    this.stemsUp = false;
+  } else {
+    var middleLine = 6; // hardcoded 6 is B
+    this.stemsUp = this.average < middleLine; // true is up, false is down;
+  }
+
+  var dir = this.stemsUp ? 'up' : 'down';
+  for (var i = 0; i < this.elems.length; i++) {
+    for (var j = 0; j < this.elems[i].heads.length; j++) {
+      this.elems[i].heads[j].stemDir = dir;
+    }
+  }
+};
+function calcAverage(total, numElements) {
+  if (!numElements) return 0;
+  return total / numElements;
+}
+module.exports = BeamElem;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/bottom-text.js":
+/*!****************************************************!*\
+  !*** ./src/write/creation/elements/bottom-text.js ***!
+  \****************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var addTextIf = __webpack_require__(/*! ../add-text-if */ "./src/write/creation/add-text-if.js");
+function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize) {
+  this.rows = [];
+  if (metaText.unalignedWords && metaText.unalignedWords.length > 0) this.unalignedWords(metaText.unalignedWords, paddingLeft, spacing, getTextSize);
+  this.extraText(metaText, paddingLeft, spacing, getTextSize);
+  if (metaText.footer && isPrint) this.footer(metaText.footer, width, paddingLeft, getTextSize);
+}
+BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spacing, getTextSize) {
+  var klass = 'meta-bottom unaligned-words';
+  var defFont = 'wordsfont';
+  this.rows.push({
+    startGroup: "unalignedWords",
+    klass: 'abcjs-meta-bottom abcjs-unaligned-words',
+    name: "words"
+  });
+  var space = getTextSize.calc("i", defFont, klass);
+  this.rows.push({
+    move: spacing.words
+  });
+  for (var j = 0; j < unalignedWords.length; j++) {
+    if (unalignedWords[j] === '') this.rows.push({
+      move: space.height
+    });else if (typeof unalignedWords[j] === 'string') {
+      addTextIf(this.rows, {
+        marginLeft: paddingLeft,
+        text: unalignedWords[j],
+        font: defFont,
+        klass: klass,
+        inGroup: true,
+        name: "words"
+      }, getTextSize);
+    } else {
+      var largestY = 0;
+      var offsetX = 0;
+      for (var k = 0; k < unalignedWords[j].length; k++) {
+        var thisWord = unalignedWords[j][k];
+        var font = thisWord.font ? thisWord.font : defFont;
+        this.rows.push({
+          left: paddingLeft + offsetX,
+          text: thisWord.text,
+          font: font,
+          anchor: 'start'
+        });
+        var size = getTextSize.calc(thisWord.text, defFont, klass);
+        largestY = Math.max(largestY, size.height);
+        offsetX += size.width;
+        // If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
+        if (thisWord.text[thisWord.text.length - 1] === ' ') {
+          offsetX += space.width;
+        }
+      }
+      this.rows.push({
+        move: largestY
+      });
+    }
+  }
+  this.rows.push({
+    move: space.height * 2
+  });
+  this.rows.push({
+    endGroup: "unalignedWords",
+    absElemType: "unalignedWords",
+    startChar: -1,
+    endChar: -1,
+    name: "unalignedWords"
+  });
+};
+BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTextSize) {
+  var extraText = "";
+  if (metaText.book) extraText += "Book: " + metaText.book + "\n";
+  if (metaText.source) extraText += "Source: " + metaText.source + "\n";
+  if (metaText.discography) extraText += "Discography: " + metaText.discography + "\n";
+  if (metaText.notes) extraText += "Notes: " + metaText.notes + "\n";
+  if (metaText.transcription) extraText += "Transcription: " + metaText.transcription + "\n";
+  if (metaText.history) extraText += "History: " + metaText.history + "\n";
+  if (metaText['abc-copyright']) extraText += "Copyright: " + metaText['abc-copyright'] + "\n";
+  if (metaText['abc-creator']) extraText += "Creator: " + metaText['abc-creator'] + "\n";
+  if (metaText['abc-edited-by']) extraText += "Edited By: " + metaText['abc-edited-by'] + "\n";
+  if (extraText.length > 0) {
+    addTextIf(this.rows, {
+      marginLeft: marginLeft,
+      text: extraText,
+      font: 'historyfont',
+      klass: 'meta-bottom extra-text',
+      marginTop: spacing.info,
+      absElemType: "extraText",
+      name: "description"
+    }, getTextSize);
+  }
+};
+BottomText.prototype.footer = function (footer, width, paddingLeft, getTextSize) {
+  var klass = 'header meta-bottom';
+  var font = "footerfont";
+  this.rows.push({
+    startGroup: "footer",
+    klass: klass
+  });
+  // Note: whether there is a footer or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
+  addTextIf(this.rows, {
+    marginLeft: paddingLeft,
+    text: footer.left,
+    font: font,
+    klass: klass,
+    name: "footer"
+  }, getTextSize);
+  addTextIf(this.rows, {
+    marginLeft: paddingLeft + width / 2,
+    text: footer.center,
+    font: font,
+    klass: klass,
+    anchor: 'middle',
+    name: "footer"
+  }, getTextSize);
+  addTextIf(this.rows, {
+    marginLeft: paddingLeft + width,
+    text: footer.right,
+    font: font,
+    klass: klass,
+    anchor: 'end',
+    name: "footer"
+  }, getTextSize);
+};
+module.exports = BottomText;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/brace-element.js":
+/*!******************************************************!*\
+  !*** ./src/write/creation/elements/brace-element.js ***!
+  \******************************************************/
+/***/ (function(module) {
+
+//    abc_brace_element.js: Definition of the BraceElement class.
+
+var BraceElem = function BraceElem(voice, type) {
+  this.startVoice = voice;
+  this.type = type;
+};
+BraceElem.prototype.setBottomStaff = function (voice) {
+  this.endVoice = voice;
+  // If only the start brace has a name then the name belongs to the brace instead of the staff.
+  if (this.startVoice.header && !this.endVoice.header) {
+    this.header = this.startVoice.header;
+    delete this.startVoice.header;
+  }
+};
+BraceElem.prototype.continuing = function (voice) {
+  // If the final staff isn't present, then use the last one we saw.
+  this.lastContinuedVoice = voice;
+};
+BraceElem.prototype.getWidth = function () {
+  return 10; // TODO-PER: right now the drawing function doesn't vary the width at all. If it does in the future then this will change.
+};
+
+BraceElem.prototype.isStartVoice = function (voice) {
+  if (this.startVoice && this.startVoice.staff && this.startVoice.staff.voices.length > 0 && this.startVoice.staff.voices[0] === voice) return true;
+  return false;
+};
+module.exports = BraceElem;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/crescendo-element.js":
+/*!**********************************************************!*\
+  !*** ./src/write/creation/elements/crescendo-element.js ***!
+  \**********************************************************/
+/***/ (function(module) {
+
+//    abc_crescendo_element.js: Definition of the CrescendoElem class.
+
+var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
+  this.type = "CrescendoElem";
+  this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
+  this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
+  this.dir = dir; // either "<" or ">"
+  if (positioning === 'above') this.dynamicHeightAbove = 6;else this.dynamicHeightBelow = 6;
+  this.pitch = undefined; // This will be set later
+};
+
+module.exports = CrescendoElem;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/dynamic-decoration.js":
+/*!***********************************************************!*\
+  !*** ./src/write/creation/elements/dynamic-decoration.js ***!
+  \***********************************************************/
 /***/ (function(module) {
 
 //    abc_dynamic_decoration.js: Definition of the DynamicDecoration class.
@@ -19126,10 +19280,10 @@ module.exports = DynamicDecoration;
 
 /***/ }),
 
-/***/ "./src/write/abc_ending_element.js":
-/*!*****************************************!*\
-  !*** ./src/write/abc_ending_element.js ***!
-  \*****************************************/
+/***/ "./src/write/creation/elements/ending-element.js":
+/*!*******************************************************!*\
+  !*** ./src/write/creation/elements/ending-element.js ***!
+  \*******************************************************/
 /***/ (function(module) {
 
 //    abc_ending_element.js: Definition of the EndingElement class.
@@ -19147,334 +19301,100 @@ module.exports = EndingElem;
 
 /***/ }),
 
-/***/ "./src/write/abc_engraver_controller.js":
-/*!**********************************************!*\
-  !*** ./src/write/abc_engraver_controller.js ***!
-  \**********************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/***/ "./src/write/creation/elements/free-text.js":
+/*!**************************************************!*\
+  !*** ./src/write/creation/elements/free-text.js ***!
+  \**************************************************/
+/***/ (function(module) {
 
-//    abc_engraver_controller.js: Controls the engraving process of an ABCJS abstract syntax tree as produced by ABCJS/parse
-
-/*global Math */
-
-var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
-var AbstractEngraver = __webpack_require__(/*! ./abc_abstract_engraver */ "./src/write/abc_abstract_engraver.js");
-var Renderer = __webpack_require__(/*! ./abc_renderer */ "./src/write/abc_renderer.js");
-var FreeText = __webpack_require__(/*! ./free-text */ "./src/write/free-text.js");
-var Separator = __webpack_require__(/*! ./separator */ "./src/write/separator.js");
-var Subtitle = __webpack_require__(/*! ./subtitle */ "./src/write/subtitle.js");
-var TopText = __webpack_require__(/*! ./top-text */ "./src/write/top-text.js");
-var BottomText = __webpack_require__(/*! ./bottom-text */ "./src/write/bottom-text.js");
-var setupSelection = __webpack_require__(/*! ./selection */ "./src/write/selection.js");
-var layout = __webpack_require__(/*! ./layout/layout */ "./src/write/layout/layout.js");
-var Classes = __webpack_require__(/*! ./classes */ "./src/write/classes.js");
-var GetFontAndAttr = __webpack_require__(/*! ./get-font-and-attr */ "./src/write/get-font-and-attr.js");
-var GetTextSize = __webpack_require__(/*! ./get-text-size */ "./src/write/get-text-size.js");
-var draw = __webpack_require__(/*! ./draw/draw */ "./src/write/draw/draw.js");
-var tablatures = __webpack_require__(/*! ../api/abc_tablatures */ "./src/api/abc_tablatures.js");
-
-/**
- * @class
- * Controls the engraving process, from ABCJS Abstract Syntax Tree (ABCJS AST) to rendered score sheet
- *
- * Call engraveABC to run the process. This creates a graphelems ABCJS Abstract Engraving Structure (ABCJS AES) that can be accessed through this.staffgroups
- * this data structure is first laid out (giving the graphelems x and y coordinates) and then drawn onto the renderer
- * each ABCJS AES represents a single staffgroup - all elements that are not in a staffgroup are rendered directly by the controller
- *
- * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape"
- * in the renderer for highlighting purposes
- *
- */
-var EngraverController = function EngraverController(paper, params) {
-  params = params || {};
-  this.oneSvgPerLine = params.oneSvgPerLine;
-  this.selectionColor = params.selectionColor;
-  this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;
-  this.dragging = !!params.dragging;
-  this.selectTypes = params.selectTypes;
-  this.responsive = params.responsive;
-  this.space = 3 * spacing.SPACE;
-  this.initialClef = params.initialClef;
-  this.scale = params.scale ? parseFloat(params.scale) : 0;
-  this.classes = new Classes({
-    shouldAddClasses: params.add_classes
+function FreeText(info, vskip, getFontAndAttr, paddingLeft, width, getTextSize) {
+  var text = info.text;
+  this.rows = [];
+  var size;
+  if (vskip) this.rows.push({
+    move: vskip
   });
-  if (!(this.scale > 0.1)) this.scale = undefined;
-  if (params.staffwidth) {
-    // Note: Normally all measurements to the engraver are in POINTS. However, if a person is formatting for the
-    // screen and directly inputting the width, then it is more logical to have the measurement in pixels.
-    this.staffwidthScreen = params.staffwidth;
-    this.staffwidthPrint = params.staffwidth;
+  var hash = getFontAndAttr.calc('textfont', 'defined-text');
+  if (text === "") {
+    // we do want to print out blank lines if they have been specified.
+    this.rows.push({
+      move: hash.attr['font-size'] * 2
+    }); // move the distance of the line, plus the distance of the margin, which is also one line.
+  } else if (typeof text === 'string') {
+    this.rows.push({
+      move: hash.attr['font-size'] / 2
+    }); // TODO-PER: move down some - the y location should be the top of the text, but we output text specifying the center line.
+    this.rows.push({
+      left: paddingLeft,
+      text: text,
+      font: 'textfont',
+      klass: 'defined-text',
+      anchor: "start",
+      startChar: info.startChar,
+      endChar: info.endChar,
+      absElemType: "freeText",
+      name: "free-text"
+    });
+    size = getTextSize.calc(text, 'textfont', 'defined-text');
+    this.rows.push({
+      move: size.height
+    });
+  } else if (text) {
+    var maxHeight = 0;
+    var leftSide = paddingLeft;
+    var currentFont = 'textfont';
+    for (var i = 0; i < text.length; i++) {
+      if (text[i].font) {
+        currentFont = text[i].font;
+      } else currentFont = 'textfont';
+      this.rows.push({
+        left: leftSide,
+        text: text[i].text,
+        font: currentFont,
+        klass: 'defined-text',
+        anchor: 'start',
+        startChar: info.startChar,
+        endChar: info.endChar,
+        absElemType: "freeText",
+        name: "free-text"
+      });
+      size = getTextSize.calc(text[i].text, getFontAndAttr.calc(currentFont, 'defined-text').font, 'defined-text');
+      leftSide += size.width + size.height / 2; // add a little padding to the right side. The height of the font is probably a close enough approximation.
+      maxHeight = Math.max(maxHeight, size.height);
+    }
+    this.rows.push({
+      move: maxHeight
+    });
   } else {
-    this.staffwidthScreen = 740; // TODO-PER: Not sure where this number comes from, but this is how it's always been.
-    this.staffwidthPrint = 680; // The number of pixels in 8.5", after 1cm of margin has been removed.
-  }
-
-  this.listeners = [];
-  if (params.clickListener) this.addSelectListener(params.clickListener);
-  this.renderer = new Renderer(paper);
-  this.renderer.setPaddingOverride(params);
-  if (params.showDebug) this.renderer.showDebug = params.showDebug;
-  if (params.jazzchords) this.jazzchords = params.jazzchords;
-  if (params.germanAlphabet) this.germanAlphabet = params.germanAlphabet;
-  this.renderer.controller = this; // TODO-GD needed for highlighting
-  this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
-  if (params.ariaLabel !== undefined) this.renderer.ariaLabel = params.ariaLabel;
-  this.renderer.minPadding = params.minPadding ? params.minPadding : 0;
-  this.reset();
-};
-EngraverController.prototype.reset = function () {
-  this.selected = [];
-  this.staffgroups = [];
-  if (this.engraver) this.engraver.reset();
-  this.engraver = null;
-  this.renderer.reset();
-  this.dragTarget = null;
-  this.dragIndex = -1;
-  this.dragMouseStart = {
-    x: -1,
-    y: -1
-  };
-  this.dragYStep = 0;
-};
-
-/**
- * run the engraving process
- */
-EngraverController.prototype.engraveABC = function (abctunes, tuneNumber, lineOffset) {
-  if (abctunes[0] === undefined) {
-    abctunes = [abctunes];
-  }
-  this.reset();
-  for (var i = 0; i < abctunes.length; i++) {
-    if (tuneNumber === undefined) tuneNumber = i;
-    this.getFontAndAttr = new GetFontAndAttr(abctunes[i].formatting, this.classes);
-    this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
-    this.engraveTune(abctunes[i], tuneNumber, lineOffset);
-  }
-};
-
-/**
- * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
- */
-EngraverController.prototype.adjustNonScaledItems = function (scale) {
-  this.width /= scale;
-  this.renderer.adjustNonScaledItems(scale);
-};
-EngraverController.prototype.getMeasureWidths = function (abcTune) {
-  this.reset();
-  this.getFontAndAttr = new GetFontAndAttr(abcTune.formatting, this.classes);
-  this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
-  this.setupTune(abcTune, 0);
-  this.constructTuneElements(abcTune);
-  // layout() sets the x-coordinate of the abcTune element here:
-  // abcTune.lines[0].staffGroup.voices[0].children[0].x
-  layout(this.renderer, abcTune, 0, this.space);
-  var ret = [];
-  var section;
-  var needNewSection = true;
-  for (var i = 0; i < abcTune.lines.length; i++) {
-    var abcLine = abcTune.lines[i];
-    if (abcLine.staff) {
-      if (needNewSection) {
-        section = {
-          left: 0,
-          measureWidths: [],
-          //height: this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24, // the 24 is the empirical value added to the bottom of all tunes.
-          total: 0
-        };
-        ret.push(section);
-        needNewSection = false;
-      }
-      // At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
-      if (abcLine.staffGroup.voices.length > 0) {
-        var voice = abcLine.staffGroup.voices[0];
-        var foundNotStaffExtra = false;
-        var lastXPosition = 0;
-        for (var k = 0; k < voice.children.length; k++) {
-          var child = voice.children[k];
-          if (!foundNotStaffExtra && !child.isClef && !child.isKeySig) {
-            foundNotStaffExtra = true;
-            section.left = child.x;
-            lastXPosition = child.x;
-          }
-          if (child.type === 'bar') {
-            section.measureWidths.push(child.x - lastXPosition);
-            section.total += child.x - lastXPosition;
-            lastXPosition = child.x;
-          }
-        }
-      }
-      //section.height += calcHeight(abcLine.staffGroup) * spacing.STEP;
-    } else needNewSection = true;
-  }
-  return ret;
-};
-EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
-  this.classes.reset();
-  if (abcTune.formatting.jazzchords !== undefined) this.jazzchords = abcTune.formatting.jazzchords;
-  this.renderer.newTune(abcTune);
-  this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
-    bagpipes: abcTune.formatting.bagpipes,
-    flatbeams: abcTune.formatting.flatbeams,
-    graceSlurs: abcTune.formatting.graceSlurs !== false,
-    // undefined is the default, which is true
-    percmap: abcTune.formatting.percmap,
-    initialClef: this.initialClef,
-    jazzchords: this.jazzchords,
-    germanAlphabet: this.germanAlphabet
-  });
-  this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
-  this.engraver.measureLength = abcTune.getMeterFraction().num / abcTune.getMeterFraction().den;
-  if (abcTune.formatting.staffwidth) {
-    this.width = abcTune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
-  } else {
-    this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
-  }
-  var scale = abcTune.formatting.scale ? abcTune.formatting.scale : this.scale;
-  if (this.responsive === "resize")
-    // The resizing will mess with the scaling, so just don't do it explicitly.
-    scale = undefined;
-  if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
-  this.adjustNonScaledItems(scale);
-  return scale;
-};
-EngraverController.prototype.constructTuneElements = function (abcTune) {
-  abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
-
-  // Generate the raw staff line data
-  var i;
-  var abcLine;
-  var hasPrintedTempo = false;
-  var hasSeenNonSubtitle = false;
-  for (i = 0; i < abcTune.lines.length; i++) {
-    abcLine = abcTune.lines[i];
-    if (abcLine.staff) {
-      hasSeenNonSubtitle = true;
-      abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo : null, i);
-      hasPrintedTempo = true;
-    } else if (abcLine.subtitle) {
-      // If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
-      if (hasSeenNonSubtitle) {
-        var center = this.width / 2 + this.renderer.padding.left;
-        abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcTune.formatting, abcLine.subtitle, center, this.renderer.padding.left, this.getTextSize);
-      }
-    } else if (abcLine.text !== undefined) {
-      hasSeenNonSubtitle = true;
-      abcLine.nonMusic = new FreeText(abcLine.text, abcLine.vskip, this.getFontAndAttr, this.renderer.padding.left, this.width, this.getTextSize);
-    } else if (abcLine.separator !== undefined && abcLine.separator.lineLength) {
-      hasSeenNonSubtitle = true;
-      abcLine.nonMusic = new Separator(abcLine.separator.spaceAbove, abcLine.separator.lineLength, abcLine.separator.spaceBelow);
+    // The structure is wrong here: it requires an array to do centering, but it shouldn't have.
+    if (info.length === 1) {
+      var x = width / 2;
+      this.rows.push({
+        left: x,
+        text: info[0].text,
+        font: 'textfont',
+        klass: 'defined-text',
+        anchor: 'middle',
+        startChar: info.startChar,
+        endChar: info.endChar,
+        absElemType: "freeText",
+        name: "free-text"
+      });
+      size = getTextSize.calc(info[0].text, 'textfont', 'defined-text');
+      this.rows.push({
+        move: size.height
+      });
     }
   }
-  abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
-};
-EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOffset) {
-  var scale = this.setupTune(abcTune, tuneNumber);
-
-  // Create all of the element objects that will appear on the page.
-  this.constructTuneElements(abcTune);
-
-  // Do all the positioning, both horizontally and vertically
-  var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
-
-  // Deal with tablature for staff
-  if (abcTune.tablatures) {
-    tablatures.layoutTablatures(this.renderer, abcTune);
-  }
-
-  // Do all the writing to the SVG
-  var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset);
-  this.staffgroups = ret.staffgroups;
-  this.selectables = ret.selectables;
-  if (this.oneSvgPerLine) {
-    var div = this.renderer.paper.svg.parentNode;
-    this.svgs = splitSvgIntoLines(div, abcTune.metaText.title, this.responsive);
-  } else {
-    this.svgs = [this.renderer.paper.svg];
-  }
-  setupSelection(this, this.svgs);
-};
-function splitSvgIntoLines(output, title, responsive) {
-  // Each line is a top level <g> in the svg. To split it into separate
-  // svgs iterate through each of those and put them in a new svg. Since
-  // they are placed absolutely, the viewBox needs to be manipulated to
-  // get the correct vertical positioning.
-  // We copy all the attributes from the original svg except for the aria-label
-  // since we want that to include a count. And the height is now a fraction of the original svg.
-  if (!title) title = "Untitled";
-  var source = output.querySelector("svg");
-  if (responsive === 'resize') output.style.paddingBottom = '';
-  var style = source.querySelector("style");
-  var width = responsive === 'resize' ? source.viewBox.baseVal.width : source.getAttribute("width");
-  var sections = output.querySelectorAll("svg > g"); // each section is a line, or the top matter or the bottom matter, or text that has been inserted.
-  var nextTop = 0; // There are often gaps between the elements for spacing, so the actual top and height needs to be inferred.
-  var wrappers = []; // Create all the elements and place them at once because we use the current svg to get data. It would disappear after placing the first line.
-  var svgs = [];
-  for (var i = 0; i < sections.length; i++) {
-    var section = sections[i];
-    var box = section.getBBox();
-    var gapBetweenLines = box.y - nextTop; // take the margin into account
-    var height = box.height + gapBetweenLines;
-    var wrapper = document.createElement("div");
-    var divStyles = "overflow: hidden;";
-    if (responsive !== 'resize') divStyles += "height:" + height + "px;";
-    wrapper.setAttribute("style", divStyles);
-    var svg = duplicateSvg(source);
-    var fullTitle = "Sheet Music for \"" + title + "\" section " + (i + 1);
-    svg.setAttribute("aria-label", fullTitle);
-    if (responsive !== 'resize') svg.setAttribute("height", height);
-    if (responsive === 'resize') svg.style.position = '';
-    svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + height);
-    svg.appendChild(style.cloneNode(true));
-    var titleEl = document.createElement("title");
-    titleEl.innerText = fullTitle;
-    svg.appendChild(titleEl);
-    svg.appendChild(section);
-    wrapper.appendChild(svg);
-    svgs.push(svg);
-    output.appendChild(wrapper);
-    //wrappers.push(wrapper)
-    nextTop = box.y + box.height;
-  }
-  // for (i = 0; i < wrappers.length; i++)
-  // 	output.appendChild(wrappers[i])
-  output.removeChild(source);
-  return svgs;
 }
-function duplicateSvg(source) {
-  var svgNS = "http://www.w3.org/2000/svg";
-  var svg = document.createElementNS(svgNS, "svg");
-  for (var i = 0; i < source.attributes.length; i++) {
-    var attr = source.attributes[i];
-    if (attr.name !== "height" && attr.name != "aria-label") svg.setAttribute(attr.name, attr.value);
-  }
-  return svg;
-}
-EngraverController.prototype.getDim = function (historyEl) {
-  // Get the dimensions on demand because the getBBox call is expensive.
-  if (!historyEl.dim) {
-    var box = historyEl.svgEl.getBBox();
-    historyEl.dim = {
-      left: Math.round(box.x),
-      top: Math.round(box.y),
-      right: Math.round(box.x + box.width),
-      bottom: Math.round(box.y + box.height)
-    };
-  }
-  return historyEl.dim;
-};
-EngraverController.prototype.addSelectListener = function (clickListener) {
-  this.listeners[this.listeners.length] = clickListener;
-};
-module.exports = EngraverController;
+module.exports = FreeText;
 
 /***/ }),
 
-/***/ "./src/write/abc_glissando_element.js":
-/*!********************************************!*\
-  !*** ./src/write/abc_glissando_element.js ***!
-  \********************************************/
+/***/ "./src/write/creation/elements/glissando-element.js":
+/*!**********************************************************!*\
+  !*** ./src/write/creation/elements/glissando-element.js ***!
+  \**********************************************************/
 /***/ (function(module) {
 
 var GlissandoElem = function GlissandoElem(anchor1, anchor2) {
@@ -19487,13 +19407,792 @@ module.exports = GlissandoElem;
 
 /***/ }),
 
-/***/ "./src/write/abc_glyphs.js":
-/*!*********************************!*\
-  !*** ./src/write/abc_glyphs.js ***!
-  \*********************************/
+/***/ "./src/write/creation/elements/relative-element.js":
+/*!*********************************************************!*\
+  !*** ./src/write/creation/elements/relative-element.js ***!
+  \*********************************************************/
+/***/ (function(module) {
+
+//    abc_relative_element.js: Definition of the RelativeElement class.
+
+var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
+  opt = opt || {};
+  this.x = 0;
+  this.c = c; // character or path or string
+  this.dx = dx; // relative x position
+  this.w = w; // minimum width taken up by this element (can include gratuitous space)
+  this.pitch = pitch; // relative y position by pitch
+  this.scalex = opt.scalex || 1; // should the character/path be scaled?
+  this.scaley = opt.scaley || 1; // should the character/path be scaled?
+  this.type = opt.type || "symbol"; // cheap types.
+  this.pitch2 = opt.pitch2;
+  this.linewidth = opt.linewidth;
+  this.klass = opt.klass;
+  this.anchor = opt.anchor ? opt.anchor : 'middle';
+  this.top = pitch;
+  if (this.pitch2 !== undefined && this.pitch2 > this.top) this.top = this.pitch2;
+  this.bottom = pitch;
+  if (this.pitch2 !== undefined && this.pitch2 < this.bottom) this.bottom = this.pitch2;
+  if (opt.thickness) {
+    this.top += opt.thickness / 2;
+    this.bottom -= opt.thickness / 2;
+  }
+  if (opt.stemHeight) {
+    if (opt.stemHeight > 0) this.top += opt.stemHeight;else this.bottom += opt.stemHeight;
+  }
+  if (opt.dim) this.dim = opt.dim;
+  if (opt.position) this.position = opt.position;
+  this.height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
+  if (opt.top) this.top = opt.top;
+  if (opt.bottom) this.bottom = opt.bottom;
+  if (opt.name) this.name = opt.name;else if (this.c) this.name = this.c;else this.name = this.type;
+  if (opt.realWidth) this.realWidth = opt.realWidth;else this.realWidth = this.w;
+  this.centerVertically = false;
+  switch (this.type) {
+    case "debug":
+      this.chordHeightAbove = this.height;
+      break;
+    case "lyric":
+      if (opt.position && opt.position === 'below') this.lyricHeightBelow = this.height;else this.lyricHeightAbove = this.height;
+      break;
+    case "chord":
+      if (opt.position && opt.position === 'below') this.chordHeightBelow = this.height;else this.chordHeightAbove = this.height;
+      break;
+    case "text":
+      if (this.pitch === undefined) {
+        if (opt.position && opt.position === 'below') this.chordHeightBelow = this.height;else this.chordHeightAbove = this.height;
+      } else this.centerVertically = true;
+      break;
+    case "part":
+      this.partHeightAbove = this.height;
+      break;
+  }
+};
+RelativeElement.prototype.getChordDim = function () {
+  if (this.type === "debug") return null;
+  if (!this.chordHeightAbove && !this.chordHeightBelow) return null;
+  // Chords are centered, annotations are left justified.
+  // NOTE: the font reports extra space to the left and right anyway, so there is a built in margin.
+  // We add a little margin so that items can't touch - we use half the font size as the margin, so that is 1/4 on each side.
+  // if there is only one character that we're printing, use half of that margin.
+  // var margin = this.dim.font.size/4;
+  // if (this.c.length === 1)
+  // 	margin = margin / 2;
+  var margin = 0;
+  var offset = this.type === "chord" ? this.realWidth / 2 : 0;
+  var left = this.x - offset - margin;
+  var right = left + this.realWidth + margin;
+  return {
+    left: left,
+    right: right
+  };
+};
+RelativeElement.prototype.invertLane = function (total) {
+  if (this.lane === undefined) this.lane = 0;
+  this.lane = total - this.lane - 1;
+};
+RelativeElement.prototype.putChordInLane = function (i) {
+  this.lane = i;
+  // Add some extra space to account for the character's descenders.
+  if (this.chordHeightAbove) this.chordHeightAbove = this.height * 1.25 * this.lane;else this.chordHeightBelow = this.height * 1.25 * this.lane;
+};
+RelativeElement.prototype.getLane = function () {
+  if (this.lane === undefined) return 0;
+  return this.lane;
+};
+RelativeElement.prototype.setX = function (x) {
+  this.x = x + this.dx;
+};
+module.exports = RelativeElement;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/separator.js":
+/*!**************************************************!*\
+  !*** ./src/write/creation/elements/separator.js ***!
+  \**************************************************/
+/***/ (function(module) {
+
+function Separator(spaceAbove, lineLength, spaceBelow) {
+  this.rows = [];
+  if (spaceAbove) this.rows.push({
+    move: spaceAbove
+  });
+  this.rows.push({
+    separator: lineLength,
+    absElemType: "separator"
+  });
+  if (spaceBelow) this.rows.push({
+    move: spaceBelow
+  });
+}
+module.exports = Separator;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/staff-group-element.js":
+/*!************************************************************!*\
+  !*** ./src/write/creation/elements/staff-group-element.js ***!
+  \************************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
+//    abc_staff_group_element.js: Definition of the StaffGroupElement class.
+
+// StaffGroupElement contains all the elements that go together to make one line of music.
+// That might be multiple staves that are tied together, and it might be multiple voices on one staff.
+//
+// Methods:
+// constructor: some basic initialization
+// addVoice(): Called once for each voice. May add a new staff if needed.
+// finished(): Called only internally by layout()
+// layout(): This does all the layout. It sets the following: spacingunits, startx, minspace, w, and the x-coordinate of each element in each voice.
+// draw(): Calls the underlying methods on the voice objects to do the drawing. Sets y and height.
+//
+// Members:
+// staffs: an array of all the staves in this group. Each staff contains the following elements:
+//    { top, bottom, highest, lowest, y }
+// voices: array of VoiceElement objects. This is mostly passed in, but the VoiceElement objects are modified here.
+//
+// spacingunits: number of relative x-units in the line. Used by the calling function to pass back in as the "spacing" input parameter.
+// TODO-PER: This should actually be passed back as a return value.
+// minspace: smallest space between two notes. Used by the calling function to pass back in as the "spacing" input parameter.
+// TODO-PER: This should actually be passed back as a return value.
+// startx: The left edge, taking the margin and the optional voice name. Used by the draw() method.
+// w: The width of the line. Used by calling function to pass back in as the "spacing" input parameter, and the draw() method.
+// TODO-PER: This should actually be passed back as a return value.  (TODO-PER: in pixels or spacing units?)
+// y: The top of the staff group, in pixels. This is set in the draw method.
+// TODO-PER: Where is that used? It looks like it might not be needed.
+// height: Set in the draw() method to the height actually used. Used by the calling function to know where to start the next staff group.
+// TODO-PER: This should actually be set in the layout method and passed back as a return value.
+var calcHeight = __webpack_require__(/*! ../calc-height */ "./src/write/creation/calc-height.js");
+var StaffGroupElement = function StaffGroupElement(getTextSize) {
+  this.getTextSize = getTextSize;
+  this.voices = [];
+  this.staffs = [];
+  this.brace = undefined; //tony
+  this.bracket = undefined;
+};
+StaffGroupElement.prototype.setLimit = function (member, voice) {
+  if (!voice.specialY[member]) return;
+  if (!voice.staff.specialY[member]) voice.staff.specialY[member] = voice.specialY[member];else voice.staff.specialY[member] = Math.max(voice.staff.specialY[member], voice.specialY[member]);
+};
+StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
+  var voiceNum = this.voices.length;
+  this.voices[voiceNum] = voice;
+  if (this.staffs[staffnumber]) this.staffs[staffnumber].voices.push(voiceNum);else {
+    // TODO-PER: how does the min/max change when stafflines is not 5?
+    this.staffs[this.staffs.length] = {
+      top: 10,
+      bottom: 2,
+      lines: stafflines,
+      voices: [voiceNum],
+      specialY: {
+        tempoHeightAbove: 0,
+        partHeightAbove: 0,
+        volumeHeightAbove: 0,
+        dynamicHeightAbove: 0,
+        endingHeightAbove: 0,
+        chordHeightAbove: 0,
+        lyricHeightAbove: 0,
+        lyricHeightBelow: 0,
+        chordHeightBelow: 0,
+        volumeHeightBelow: 0,
+        dynamicHeightBelow: 0
+      }
+    };
+  }
+  voice.staff = this.staffs[staffnumber];
+};
+StaffGroupElement.prototype.setHeight = function () {
+  this.height = calcHeight(this);
+};
+StaffGroupElement.prototype.setWidth = function (width) {
+  this.w = width;
+  for (var i = 0; i < this.voices.length; i++) {
+    this.voices[i].setWidth(width);
+  }
+};
+StaffGroupElement.prototype.setStaffLimits = function (voice) {
+  voice.staff.top = Math.max(voice.staff.top, voice.top);
+  voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
+  this.setLimit('tempoHeightAbove', voice);
+  this.setLimit('partHeightAbove', voice);
+  this.setLimit('volumeHeightAbove', voice);
+  this.setLimit('dynamicHeightAbove', voice);
+  this.setLimit('endingHeightAbove', voice);
+  this.setLimit('chordHeightAbove', voice);
+  this.setLimit('lyricHeightAbove', voice);
+  this.setLimit('lyricHeightBelow', voice);
+  this.setLimit('chordHeightBelow', voice);
+  this.setLimit('volumeHeightBelow', voice);
+  this.setLimit('dynamicHeightBelow', voice);
+};
+module.exports = StaffGroupElement;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/subtitle.js":
+/*!*************************************************!*\
+  !*** ./src/write/creation/elements/subtitle.js ***!
+  \*************************************************/
+/***/ (function(module) {
+
+function Subtitle(spaceAbove, formatting, info, center, paddingLeft, getTextSize) {
+  this.rows = [];
+  if (spaceAbove) this.rows.push({
+    move: spaceAbove
+  });
+  var tAnchor = formatting.titleleft ? 'start' : 'middle';
+  var tLeft = formatting.titleleft ? paddingLeft : center;
+  this.rows.push({
+    left: tLeft,
+    text: info.text,
+    font: 'subtitlefont',
+    klass: 'text subtitle',
+    anchor: tAnchor,
+    startChar: info.startChar,
+    endChar: info.endChar,
+    absElemType: "subtitle",
+    name: "subtitle"
+  });
+  var size = getTextSize.calc(info.text, 'subtitlefont', 'text subtitle');
+  this.rows.push({
+    move: size.height
+  });
+}
+module.exports = Subtitle;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/tempo-element.js":
+/*!******************************************************!*\
+  !*** ./src/write/creation/elements/tempo-element.js ***!
+  \******************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+//    abc_tempo_element.js: Definition of the TempoElement class.
+
+var AbsoluteElement = __webpack_require__(/*! ./absolute-element */ "./src/write/creation/elements/absolute-element.js");
+var RelativeElement = __webpack_require__(/*! ./relative-element */ "./src/write/creation/elements/relative-element.js");
+var TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
+  this.type = "TempoElement";
+  this.tempo = tempo;
+  this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
+  this.tuneNumber = tuneNumber;
+  // TODO: can these two properties be merged?
+  this.totalHeightInPitches = 6;
+  this.tempoHeightAbove = this.totalHeightInPitches;
+  this.pitch = undefined; // This will be set later
+  if (this.tempo.duration && !this.tempo.suppressBpm) {
+    this.note = this.createNote(createNoteHead, tempo, tuneNumber);
+  }
+};
+TempoElement.prototype.setX = function (x) {
+  this.x = x;
+};
+TempoElement.prototype.createNote = function (createNoteHead, tempo, tuneNumber) {
+  var temposcale = 0.75;
+  var duration = tempo.duration[0]; // TODO when multiple durations
+  var absElem = new AbsoluteElement(tempo, duration, 1, 'tempo', tuneNumber);
+  // There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
+  // merge all of the in between points.
+  var dot;
+  var flag;
+  var note;
+  if (duration <= 1 / 32) {
+    note = "noteheads.quarter";
+    flag = "flags.u32nd";
+    dot = 0;
+  } else if (duration <= 1 / 16) {
+    note = "noteheads.quarter";
+    flag = "flags.u16th";
+    dot = 0;
+  } else if (duration <= 3 / 32) {
+    note = "noteheads.quarter";
+    flag = "flags.u16nd";
+    dot = 1;
+  } else if (duration <= 1 / 8) {
+    note = "noteheads.quarter";
+    flag = "flags.u8th";
+    dot = 0;
+  } else if (duration <= 3 / 16) {
+    note = "noteheads.quarter";
+    flag = "flags.u8th";
+    dot = 1;
+  } else if (duration <= 1 / 4) {
+    note = "noteheads.quarter";
+    dot = 0;
+  } else if (duration <= 3 / 8) {
+    note = "noteheads.quarter";
+    dot = 1;
+  } else if (duration <= 1 / 2) {
+    note = "noteheads.half";
+    dot = 0;
+  } else if (duration <= 3 / 4) {
+    note = "noteheads.half";
+    dot = 1;
+  } else if (duration <= 1) {
+    note = "noteheads.whole";
+    dot = 0;
+  } else if (duration <= 1.5) {
+    note = "noteheads.whole";
+    dot = 1;
+  } else if (duration <= 2) {
+    note = "noteheads.dbl";
+    dot = 0;
+  } else {
+    note = "noteheads.dbl";
+    dot = 1;
+  }
+  var ret = createNoteHead(absElem, note, {
+    verticalPos: 0
+  },
+  // This is just temporary: we'll offset the vertical positioning when we get the actual vertical spot.
+  {
+    dir: "up",
+    flag: flag,
+    dot: dot,
+    scale: temposcale
+  });
+  var tempoNote = ret.notehead;
+  absElem.addHead(tempoNote);
+  var stem;
+  if (note !== "noteheads.whole" && note !== "noteheads.dbl") {
+    var p1 = 1 / 3 * temposcale;
+    var p2 = 5 * temposcale;
+    var dx = tempoNote.dx + tempoNote.w;
+    var width = -0.6;
+    stem = new RelativeElement(null, dx, 0, p1, {
+      "type": "stem",
+      "pitch2": p2,
+      linewidth: width
+    });
+    absElem.addRight(stem);
+  }
+  return absElem;
+};
+module.exports = TempoElement;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/tie-element.js":
+/*!****************************************************!*\
+  !*** ./src/write/creation/elements/tie-element.js ***!
+  \****************************************************/
+/***/ (function(module) {
+
+//    abc_tie_element.js: Definition of the TieElement class.
+
+var TieElem = function TieElem(options) {
+  this.type = "TieElem";
+  //	console.log("constructor", options.anchor1 ? options.anchor1.pitch : "N/A", options.anchor2 ? options.anchor2.pitch : "N/A", options.isTie, options.isGrace);
+  this.anchor1 = options.anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
+  this.anchor2 = options.anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
+  if (options.isGrace) this.isGrace = true;
+  if (options.fixedY) this.fixedY = true;
+  if (options.stemDir) this.stemDir = options.stemDir;
+  if (options.voiceNumber !== undefined) this.voiceNumber = options.voiceNumber;
+  if (options.style !== undefined) this.dotted = true;
+  this.internalNotes = [];
+};
+TieElem.prototype.addInternalNote = function (note) {
+  this.internalNotes.push(note);
+};
+TieElem.prototype.setEndAnchor = function (anchor2) {
+  //	console.log("end", this.anchor1 ? this.anchor1.pitch : "N/A", anchor2 ? anchor2.pitch : "N/A", this.isTie, this.isGrace);
+  this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
+
+  // we don't really have enough info to know what the vertical extent is yet and we won't until drawing. This will just give it enough
+  // room on either side (we don't even know if the slur will be above yet). We need to set this so that we can make sure the voice has
+  // at least enough room that the line doesn't get cut off if the tie or slur is the lowest thing.
+  if (this.anchor1) {
+    this.top = Math.max(this.anchor1.pitch, this.anchor2.pitch) + 4;
+    this.bottom = Math.min(this.anchor1.pitch, this.anchor2.pitch) - 4;
+  } else {
+    this.top = this.anchor2.pitch + 4;
+    this.bottom = this.anchor2.pitch - 4;
+  }
+};
+
+// If we encounter a repeat sign, then we don't want to extend either a tie or a slur past it, so these are called to be a limit.
+TieElem.prototype.setStartX = function (startLimitElem) {
+  this.startLimitX = startLimitElem;
+};
+TieElem.prototype.setEndX = function (endLimitElem) {
+  this.endLimitX = endLimitElem;
+};
+TieElem.prototype.setHint = function () {
+  this.hint = true;
+};
+TieElem.prototype.calcTieDirection = function () {
+  // The rules:
+  // 1) If it is in a grace note group, then the direction is always BELOW.
+  // 2) If it is in a single voice, then the direction is always OPPOSITE of the stem (or where the stem would have been in the case of whole notes.)
+  // 3) If the stem direction is forced (probably because there are two voices on the same line), then the direction is the SAME as the stem direction.
+
+  if (this.isGrace) this.above = false;else if (this.voiceNumber === 0) this.above = true;else if (this.voiceNumber > 0) this.above = false;else {
+    var referencePitch;
+    if (this.anchor1) referencePitch = this.anchor1.pitch;else if (this.anchor2) referencePitch = this.anchor2.pitch;else referencePitch = 14; // TODO-PER: this can't really happen normally. This would imply that a tie crossed over three lines, something like "C-\nz\nC"
+    // Put the arc in the opposite direction of the stem. That isn't always the pitch if one or both of the notes are beamed with something that affects its stem.
+    if (this.anchor1 && this.anchor1.stemDir === 'down' && this.anchor2 && this.anchor2.stemDir === "down") this.above = true;else if (this.anchor1 && this.anchor1.stemDir === 'up' && this.anchor2 && this.anchor2.stemDir === "up") this.above = false;else if (this.anchor1 && this.anchor2) this.above = referencePitch >= 6;else if (this.anchor1) this.above = this.anchor1.stemDir === "down";else if (this.anchor2) this.above = this.anchor2.stemDir === "down";else this.above = referencePitch >= 6;
+  }
+};
+
+// From "standard music notation practice" by Music Publishers’ Association:
+// 1) Slurs are placed under the note heads if all stems go up.
+// 2) Slurs are placed over the note heads if all stems go down.
+// 3) If there are both up stems and down stems, prefer placing the slur over.
+// 4) When the staff has opposite stemmed voices, all slurs should be on the stemmed side.
+
+TieElem.prototype.calcSlurDirection = function () {
+  if (this.isGrace) this.above = false;else if (this.voiceNumber === 0) this.above = true;else if (this.voiceNumber > 0) this.above = false;else {
+    var hasDownStem = false;
+    if (this.anchor1 && this.anchor1.stemDir === "down") hasDownStem = true;
+    if (this.anchor2 && this.anchor2.stemDir === "down") hasDownStem = true;
+    for (var i = 0; i < this.internalNotes.length; i++) {
+      var n = this.internalNotes[i];
+      if (n.stemDir === "down") hasDownStem = true;
+    }
+    this.above = hasDownStem;
+  }
+};
+TieElem.prototype.calcX = function (lineStartX, lineEndX) {
+  if (this.anchor1) {
+    this.startX = this.anchor1.x; // The normal case where there is a starting element to attach to.
+    if (this.anchor1.scalex < 1)
+      // this is a grace note - don't offset the tie as much.
+      this.startX -= 3;
+  } else if (this.startLimitX) this.startX = this.startLimitX.x + this.startLimitX.w; // if there is no start element, but there is a repeat mark before the start of the line.
+  else {
+    if (this.anchor2) this.startX = this.anchor2.x - 20; // There is no element and no repeat mark: make a small arc
+    else this.startX = lineStartX; // Don't have any guidance, so extend to beginning of line
+  }
+
+  if (!this.anchor1 && this.dotted) this.startX -= 3; // The arc needs to be long enough to tell that it is dotted.
+
+  if (this.anchor2) this.endX = this.anchor2.x; // The normal case where there is a starting element to attach to.
+  else if (this.endLimitX) this.endX = this.endLimitX.x; // if there is no start element, but there is a repeat mark before the start of the line.
+  else this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
+};
+
+TieElem.prototype.calcTieY = function () {
+  // If the tie comes from another line, then one or both anchors will be missing.
+  if (this.anchor1) this.startY = this.anchor1.pitch;else if (this.anchor2) this.startY = this.anchor2.pitch;else this.startY = this.above ? 14 : 0;
+  if (this.anchor2) this.endY = this.anchor2.pitch;else if (this.anchor1) this.endY = this.anchor1.pitch;else this.endY = this.above ? 14 : 0;
+};
+
+// From "standard music notation practice" by Music Publishers’ Association:
+// 1) If the anchor note is down stem, the slur points to the note head.
+// 2) If the anchor note is up stem, and the slur is over, then point to middle of stem.
+
+TieElem.prototype.calcSlurY = function () {
+  if (this.anchor1 && this.anchor2) {
+    if (this.above && this.anchor1.stemDir === "up" && !this.fixedY) {
+      this.startY = (this.anchor1.highestVert + this.anchor1.pitch) / 2;
+      this.startX += this.anchor1.w / 2; // When going to the middle of the stem, bump the line to the right a little bit to make it look right.
+    } else this.startY = this.anchor1.pitch;
+
+    // If the closing note has an up stem, and it is beamed, and it isn't the first note in the beam, then the beam will get in the way.
+    var beamInterferes = this.anchor2.parent.beam && this.anchor2.parent.beam.stemsUp && this.anchor2.parent.beam.elems[0] !== this.anchor2.parent;
+    var midPoint = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
+    if (this.above && this.anchor2.stemDir === "up" && !this.fixedY && !beamInterferes && midPoint < this.startY) {
+      this.endY = midPoint;
+      this.endX += Math.round(this.anchor2.w / 2); // When going to the middle of the stem, bump the line to the right a little bit to make it look right.
+    } else this.endY = this.above && beamInterferes ? this.anchor2.highestVert : this.anchor2.pitch;
+  } else if (this.anchor1) {
+    this.startY = this.endY = this.anchor1.pitch;
+  } else if (this.anchor2) {
+    this.startY = this.endY = this.anchor2.pitch;
+  } else {
+    // This is the case where the slur covers the entire line.
+    // TODO-PER: figure out where the real top and bottom of the line are.
+    this.startY = this.above ? 14 : 0;
+    this.endY = this.above ? 14 : 0;
+  }
+};
+TieElem.prototype.avoidCollisionAbove = function () {
+  // Double check that an interior note in the slur isn't so high that it interferes.
+  if (this.above) {
+    var maxInnerHeight = -50;
+    for (var i = 0; i < this.internalNotes.length; i++) {
+      if (this.internalNotes[i].highestVert > maxInnerHeight) maxInnerHeight = this.internalNotes[i].highestVert;
+    }
+    if (maxInnerHeight > this.startY && maxInnerHeight > this.endY) this.startY = this.endY = maxInnerHeight - 1;
+  }
+};
+module.exports = TieElem;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/top-text.js":
+/*!*************************************************!*\
+  !*** ./src/write/creation/elements/top-text.js ***!
+  \*************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var addTextIf = __webpack_require__(/*! ../add-text-if */ "./src/write/creation/add-text-if.js");
+function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
+  this.rows = [];
+  if (metaText.header && isPrint) {
+    // Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
+    // This text goes above the margin, so we'll temporarily move up.
+    var headerTextHeight = getTextSize.calc("X", "headerfont", 'abcjs-header abcjs-meta-top').height;
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft,
+      text: metaText.header.left,
+      font: 'headerfont',
+      klass: 'header meta-top',
+      marginTop: -headerTextHeight,
+      info: metaTextInfo.header,
+      name: "header"
+    }, getTextSize);
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft + width / 2,
+      text: metaText.header.center,
+      font: 'headerfont',
+      klass: 'header meta-top',
+      marginTop: -headerTextHeight,
+      anchor: 'middle',
+      info: metaTextInfo.header,
+      name: "header"
+    }, getTextSize);
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft + width,
+      text: metaText.header.right,
+      font: 'headerfont',
+      klass: 'header meta-top',
+      marginTop: -headerTextHeight,
+      anchor: 'end',
+      info: metaTextInfo.header,
+      name: "header"
+    }, getTextSize);
+
+    //		TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, noMove) {
+  }
+
+  if (isPrint) this.rows.push({
+    move: spacing.top
+  });
+  var tAnchor = formatting.titleleft ? 'start' : 'middle';
+  var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
+  if (metaText.title) {
+    addTextIf(this.rows, {
+      marginLeft: tLeft,
+      text: metaText.title,
+      font: 'titlefont',
+      klass: 'title meta-top',
+      marginTop: spacing.title,
+      anchor: tAnchor,
+      absElemType: "title",
+      info: metaTextInfo.title,
+      name: "title"
+    }, getTextSize);
+  }
+  if (lines.length) {
+    var index = 0;
+    while (index < lines.length && lines[index].subtitle) {
+      addTextIf(this.rows, {
+        marginLeft: tLeft,
+        text: lines[index].subtitle.text,
+        font: 'subtitlefont',
+        klass: 'text meta-top subtitle',
+        marginTop: spacing.subtitle,
+        anchor: tAnchor,
+        absElemType: "subtitle",
+        info: lines[index].subtitle,
+        name: "subtitle"
+      }, getTextSize);
+      index++;
+    }
+  }
+  if (metaText.rhythm || metaText.origin || metaText.composer) {
+    this.rows.push({
+      move: spacing.composer
+    });
+    if (metaText.rhythm && metaText.rhythm.length > 0) {
+      var noMove = !!(metaText.composer || metaText.origin);
+      addTextIf(this.rows, {
+        marginLeft: paddingLeft,
+        text: metaText.rhythm,
+        font: 'infofont',
+        klass: 'meta-top rhythm',
+        absElemType: "rhythm",
+        noMove: noMove,
+        info: metaTextInfo.rhythm,
+        name: "rhythm"
+      }, getTextSize);
+    }
+    var composerLine = "";
+    if (metaText.composer) composerLine += metaText.composer;
+    if (metaText.origin) composerLine += ' (' + metaText.origin + ')';
+    if (composerLine.length > 0) {
+      addTextIf(this.rows, {
+        marginLeft: paddingLeft + width,
+        text: composerLine,
+        font: 'composerfont',
+        klass: 'meta-top composer',
+        anchor: "end",
+        absElemType: "composer",
+        info: metaTextInfo.composer,
+        name: "composer"
+      }, getTextSize);
+    }
+  }
+  if (metaText.author && metaText.author.length > 0) {
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft + width,
+      text: metaText.author,
+      font: 'composerfont',
+      klass: 'meta-top author',
+      anchor: "end",
+      absElemType: "author",
+      info: metaTextInfo.author,
+      name: "author"
+    }, getTextSize);
+  }
+  if (metaText.partOrder && metaText.partOrder.length > 0) {
+    addTextIf(this.rows, {
+      marginLeft: paddingLeft,
+      text: metaText.partOrder,
+      font: 'partsfont',
+      klass: 'meta-top part-order',
+      absElemType: "partOrder",
+      info: metaTextInfo.partOrder,
+      name: "part-order"
+    }, getTextSize);
+  }
+}
+module.exports = TopText;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/triplet-element.js":
+/*!********************************************************!*\
+  !*** ./src/write/creation/elements/triplet-element.js ***!
+  \********************************************************/
+/***/ (function(module) {
+
+//    abc_triplet_element.js: Definition of the TripletElem class.
+
+var TripletElem = function TripletElem(number, anchor1, options) {
+  this.type = "TripletElem";
+  this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
+  this.number = number;
+  this.durationClass = ('d' + Math.round(anchor1.parent.durationClass * 1000) / 1000).replace(/\./, '-');
+  this.middleElems = []; // This is to calculate the highest interior pitch. It is used to make sure that the drawn bracket never crosses a really high middle note.
+  this.flatBeams = options.flatBeams;
+};
+TripletElem.prototype.isClosed = function () {
+  return !!this.anchor2;
+};
+TripletElem.prototype.middleNote = function (elem) {
+  this.middleElems.push(elem);
+};
+TripletElem.prototype.setCloseAnchor = function (anchor2) {
+  this.anchor2 = anchor2;
+  // TODO-PER: This used to be just for beamed triplets but it looks like bracketed triplets need extra room, too. The only one that doesn't is stem down and beamed
+  //if (this.anchor1.parent.beam)
+  if (!this.anchor1.parent.beam || this.anchor1.stemDir === 'up') this.endingHeightAbove = 4;
+};
+module.exports = TripletElem;
+
+/***/ }),
+
+/***/ "./src/write/creation/elements/voice-element.js":
+/*!******************************************************!*\
+  !*** ./src/write/creation/elements/voice-element.js ***!
+  \******************************************************/
+/***/ (function(module) {
+
+//    abc_voice_element.js: Definition of the VoiceElement class.
+
+var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
+  this.children = [];
+  this.beams = [];
+  this.otherchildren = []; // ties, slurs, triplets
+  this.w = 0;
+  this.duplicate = false;
+  this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
+  this.voicetotal = voicetotal;
+  this.bottom = 7;
+  this.top = 7;
+  this.specialY = {
+    tempoHeightAbove: 0,
+    partHeightAbove: 0,
+    volumeHeightAbove: 0,
+    dynamicHeightAbove: 0,
+    endingHeightAbove: 0,
+    chordHeightAbove: 0,
+    lyricHeightAbove: 0,
+    lyricHeightBelow: 0,
+    chordHeightBelow: 0,
+    volumeHeightBelow: 0,
+    dynamicHeightBelow: 0
+  };
+};
+VoiceElement.prototype.addChild = function (absElem) {
+  // This is always passed an AbsoluteElement
+  if (absElem.type === 'bar') {
+    var firstItem = true;
+    for (var i = 0; firstItem && i < this.children.length; i++) {
+      if (this.children[i].type.indexOf("staff-extra") < 0 && this.children[i].type !== "tempo") firstItem = false;
+    }
+    if (!firstItem) {
+      this.beams.push("bar");
+      this.otherchildren.push("bar");
+    }
+  }
+  this.children[this.children.length] = absElem;
+  this.setRange(absElem);
+};
+VoiceElement.prototype.setLimit = function (member, child) {
+  // Sometimes we get an absolute element in here and sometimes we get some type of relative element.
+  // If there is a "specialY" element, then assume it is an absolute element. If that doesn't exist, look for the
+  // same members at the top level, because that's where they are in relative elements.
+  var specialY = child.specialY;
+  if (!specialY) specialY = child;
+  if (!specialY[member]) return;
+  if (!this.specialY[member]) this.specialY[member] = specialY[member];else this.specialY[member] = Math.max(this.specialY[member], specialY[member]);
+};
+VoiceElement.prototype.adjustRange = function (child) {
+  if (child.bottom !== undefined) this.bottom = Math.min(this.bottom, child.bottom);
+  if (child.top !== undefined) this.top = Math.max(this.top, child.top);
+};
+VoiceElement.prototype.setRange = function (child) {
+  this.adjustRange(child);
+  this.setLimit('tempoHeightAbove', child);
+  this.setLimit('partHeightAbove', child);
+  this.setLimit('volumeHeightAbove', child);
+  this.setLimit('dynamicHeightAbove', child);
+  this.setLimit('endingHeightAbove', child);
+  this.setLimit('chordHeightAbove', child);
+  this.setLimit('lyricHeightAbove', child);
+  this.setLimit('lyricHeightBelow', child);
+  this.setLimit('chordHeightBelow', child);
+  this.setLimit('volumeHeightBelow', child);
+  this.setLimit('dynamicHeightBelow', child);
+};
+VoiceElement.prototype.addOther = function (child) {
+  this.otherchildren.push(child);
+  this.setRange(child);
+};
+VoiceElement.prototype.addBeam = function (child) {
+  this.beams.push(child);
+};
+VoiceElement.prototype.setWidth = function (width) {
+  this.w = width;
+};
+module.exports = VoiceElement;
+
+/***/ }),
+
+/***/ "./src/write/creation/glyphs.js":
+/*!**************************************!*\
+  !*** ./src/write/creation/glyphs.js ***!
+  \**************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
 
 /**
  * Glyphs and some methods to adjust for their x and y baseline
@@ -20102,1192 +20801,52 @@ module.exports = Glyphs; // we need the glyphs for layout information
 
 /***/ }),
 
-/***/ "./src/write/abc_relative_element.js":
-/*!*******************************************!*\
-  !*** ./src/write/abc_relative_element.js ***!
-  \*******************************************/
+/***/ "./src/write/creation/translate-chord.js":
+/*!***********************************************!*\
+  !*** ./src/write/creation/translate-chord.js ***!
+  \***********************************************/
 /***/ (function(module) {
 
-//    abc_relative_element.js: Definition of the RelativeElement class.
-
-var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
-  opt = opt || {};
-  this.x = 0;
-  this.c = c; // character or path or string
-  this.dx = dx; // relative x position
-  this.w = w; // minimum width taken up by this element (can include gratuitous space)
-  this.pitch = pitch; // relative y position by pitch
-  this.scalex = opt.scalex || 1; // should the character/path be scaled?
-  this.scaley = opt.scaley || 1; // should the character/path be scaled?
-  this.type = opt.type || "symbol"; // cheap types.
-  this.pitch2 = opt.pitch2;
-  this.linewidth = opt.linewidth;
-  this.klass = opt.klass;
-  this.anchor = opt.anchor ? opt.anchor : 'middle';
-  this.top = pitch;
-  if (this.pitch2 !== undefined && this.pitch2 > this.top) this.top = this.pitch2;
-  this.bottom = pitch;
-  if (this.pitch2 !== undefined && this.pitch2 < this.bottom) this.bottom = this.pitch2;
-  if (opt.thickness) {
-    this.top += opt.thickness / 2;
-    this.bottom -= opt.thickness / 2;
+function germanNote(note) {
+  switch (note) {
+    case "B#":
+      return "H#";
+    case "B♯":
+      return "H♯";
+    case "B":
+      return "H";
+    case "Bb":
+      return "B";
+    case "B♭":
+      return "B";
   }
-  if (opt.stemHeight) {
-    if (opt.stemHeight > 0) this.top += opt.stemHeight;else this.bottom += opt.stemHeight;
-  }
-  if (opt.dim) this.dim = opt.dim;
-  if (opt.position) this.position = opt.position;
-  this.height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
-  if (opt.top) this.top = opt.top;
-  if (opt.bottom) this.bottom = opt.bottom;
-  if (opt.name) this.name = opt.name;else if (this.c) this.name = this.c;else this.name = this.type;
-  if (opt.realWidth) this.realWidth = opt.realWidth;else this.realWidth = this.w;
-  this.centerVertically = false;
-  switch (this.type) {
-    case "debug":
-      this.chordHeightAbove = this.height;
-      break;
-    case "lyric":
-      if (opt.position && opt.position === 'below') this.lyricHeightBelow = this.height;else this.lyricHeightAbove = this.height;
-      break;
-    case "chord":
-      if (opt.position && opt.position === 'below') this.chordHeightBelow = this.height;else this.chordHeightAbove = this.height;
-      break;
-    case "text":
-      if (this.pitch === undefined) {
-        if (opt.position && opt.position === 'below') this.chordHeightBelow = this.height;else this.chordHeightAbove = this.height;
-      } else this.centerVertically = true;
-      break;
-    case "part":
-      this.partHeightAbove = this.height;
-      break;
-  }
-};
-RelativeElement.prototype.getChordDim = function () {
-  if (this.type === "debug") return null;
-  if (!this.chordHeightAbove && !this.chordHeightBelow) return null;
-  // Chords are centered, annotations are left justified.
-  // NOTE: the font reports extra space to the left and right anyway, so there is a built in margin.
-  // We add a little margin so that items can't touch - we use half the font size as the margin, so that is 1/4 on each side.
-  // if there is only one character that we're printing, use half of that margin.
-  // var margin = this.dim.font.size/4;
-  // if (this.c.length === 1)
-  // 	margin = margin / 2;
-  var margin = 0;
-  var offset = this.type === "chord" ? this.realWidth / 2 : 0;
-  var left = this.x - offset - margin;
-  var right = left + this.realWidth + margin;
-  return {
-    left: left,
-    right: right
-  };
-};
-RelativeElement.prototype.invertLane = function (total) {
-  if (this.lane === undefined) this.lane = 0;
-  this.lane = total - this.lane - 1;
-};
-RelativeElement.prototype.putChordInLane = function (i) {
-  this.lane = i;
-  // Add some extra space to account for the character's descenders.
-  if (this.chordHeightAbove) this.chordHeightAbove = this.height * 1.25 * this.lane;else this.chordHeightBelow = this.height * 1.25 * this.lane;
-};
-RelativeElement.prototype.getLane = function () {
-  if (this.lane === undefined) return 0;
-  return this.lane;
-};
-RelativeElement.prototype.setX = function (x) {
-  this.x = x + this.dx;
-};
-module.exports = RelativeElement;
-
-/***/ }),
-
-/***/ "./src/write/abc_renderer.js":
-/*!***********************************!*\
-  !*** ./src/write/abc_renderer.js ***!
-  \***********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-//    abc_renderer.js: API to render to SVG/Raphael/whatever rendering engine
-
-/*global Math */
-
-var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
-var Svg = __webpack_require__(/*! ./svg */ "./src/write/svg.js");
-
-/**
- * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
- * @param {Object} paper
- */
-var Renderer = function Renderer(paper) {
-  this.paper = new Svg(paper);
-  this.controller = null;
-  this.space = 3 * spacing.SPACE;
-  this.padding = {}; // renderer's padding is managed by the controller
-  this.reset();
-};
-Renderer.prototype.reset = function () {
-  this.paper.clear();
-  this.y = 0;
-  this.abctune = null;
-  this.path = null;
-  this.isPrint = false;
-  this.initVerticalSpace();
-};
-Renderer.prototype.newTune = function (abcTune) {
-  this.abctune = abcTune; // TODO-PER: this is just to get the font info.
-  this.setVerticalSpace(abcTune.formatting);
-  //this.measureNumber = null;
-  //this.noteNumber = null;
-  this.isPrint = abcTune.media === 'print';
-  this.setPadding(abcTune);
-};
-Renderer.prototype.setPaddingOverride = function (params) {
-  this.paddingOverride = {
-    top: params.paddingtop,
-    bottom: params.paddingbottom,
-    right: params.paddingright,
-    left: params.paddingleft
-  };
-};
-Renderer.prototype.setPadding = function (abctune) {
-  // If the padding is set in the tune, then use that.
-  // Otherwise, if the padding is set in the override, use that.
-  // Otherwise, use the defaults (there are a different set of defaults for screen and print.)
-  function setPaddingVariable(self, paddingKey, formattingKey, printDefault, screenDefault) {
-    if (abctune.formatting[formattingKey] !== undefined) self.padding[paddingKey] = abctune.formatting[formattingKey];else if (self.paddingOverride[paddingKey] !== undefined) self.padding[paddingKey] = self.paddingOverride[paddingKey];else if (self.isPrint) self.padding[paddingKey] = printDefault;else self.padding[paddingKey] = screenDefault;
-  }
-  // 1cm x 0.393701in/cm x 72pt/in x 1.33px/pt = 38px
-  // 1.8cm x 0.393701in/cm x 72pt/in x 1.33px/pt = 68px
-  setPaddingVariable(this, 'top', 'topmargin', 38, 15);
-  setPaddingVariable(this, 'bottom', 'botmargin', 38, 15);
-  setPaddingVariable(this, 'left', 'leftmargin', 68, 15);
-  setPaddingVariable(this, 'right', 'rightmargin', 68, 15);
-};
-
-/**
- * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
- * @param {float} scale
- */
-Renderer.prototype.adjustNonScaledItems = function (scale) {
-  this.padding.top /= scale;
-  this.padding.bottom /= scale;
-  this.padding.left /= scale;
-  this.padding.right /= scale;
-  this.abctune.formatting.headerfont.size /= scale;
-  this.abctune.formatting.footerfont.size /= scale;
-};
-
-/**
- * Set the the values for all the configurable vertical space options.
- */
-Renderer.prototype.initVerticalSpace = function () {
-  // conversion: 37.7953 = conversion factor for cm to px.
-  // All of the following values are in px.
-  this.spacing = {
-    composer: 7.56,
-    // Set the vertical space above the composer.
-    graceBefore: 8.67,
-    // Define the space before, inside and after the grace notes.
-    graceInside: 10.67,
-    graceAfter: 16,
-    info: 0,
-    // Set the vertical space above the infoline.
-    lineSkipFactor: 1.1,
-    // Set the factor for spacing between lines of text. (multiply this by the font size)
-    music: 7.56,
-    // Set the vertical space above the first staff.
-    paragraphSkipFactor: 0.4,
-    // Set the factor for spacing between text paragraphs. (multiply this by the font size)
-    parts: 11.33,
-    // Set the vertical space above a new part.
-    slurHeight: 1.0,
-    // Set the slur height factor.
-    staffSeparation: 61.33,
-    // Do not put a staff system closer than <unit> from the previous system.
-    stemHeight: 26.67 + 10,
-    // Set the stem height.
-    subtitle: 3.78,
-    // Set the vertical space above the subtitle.
-    systemStaffSeparation: 48,
-    // Do not place the staves closer than <unit> inside a system. * This values applies to all staves when in the tune header. Otherwise, it applies to the next staff
-    text: 18.9,
-    // Set the vertical space above the history.
-    title: 7.56,
-    // Set the vertical space above the title.
-    top: 30.24,
-    //Set the vertical space above the tunes and on the top of the continuation pages.
-    vocal: 0,
-    // Set the vertical space above the lyrics under the staves.
-    words: 0 // Set the vertical space above the lyrics at the end of the tune.
-  };
-  /*
-  TODO-PER: Handle the x-coordinate spacing items, too.
-  maxshrink <float>Default: 0.65
-  Set how much to compress horizontally when music line breaks
-  are automatic.
-  <float> must be between 0 (natural spacing)
-  and 1 (max shrinking).
-  // This next value is used to compute the natural spacing of
-  // the notes. The base spacing of the crotchet is always
-  // 40 pts. When the duration of a note type is twice the
-  // duration of an other note type, its spacing is multiplied
-  // by this factor.
-  // The default value causes the note spacing to be multiplied
-  // by 2 when its duration is multiplied by 4, i.e. the
-  // space of the semibreve is 80 pts and the space of the
-  // semiquaver is 20 pts.
-  // Setting this value to 1 sets all note spacing to 40 pts.
-  noteSpacingFactor: 1.414, // Set the note spacing factor to <float> (range 1..2).
-  scale <float> Default: 0.75 Set the page scale factor. Note that the header and footer are not scaled.
-  stretchlast <float>Default: 0.8
-  Stretch the last music line of a tune when it exceeds
-  the <float> fraction of the page width.
-  <float> range is 0.0 to 1.0.
-   */
-};
-
-Renderer.prototype.setVerticalSpace = function (formatting) {
-  // conversion from pts to px 4/3
-  if (formatting.staffsep !== undefined) this.spacing.staffSeparation = formatting.staffsep * 4 / 3;
-  if (formatting.composerspace !== undefined) this.spacing.composer = formatting.composerspace * 4 / 3;
-  if (formatting.partsspace !== undefined) this.spacing.parts = formatting.partsspace * 4 / 3;
-  if (formatting.textspace !== undefined) this.spacing.text = formatting.textspace * 4 / 3;
-  if (formatting.musicspace !== undefined) this.spacing.music = formatting.musicspace * 4 / 3;
-  if (formatting.titlespace !== undefined) this.spacing.title = formatting.titlespace * 4 / 3;
-  if (formatting.sysstaffsep !== undefined) this.spacing.systemStaffSeparation = formatting.sysstaffsep * 4 / 3;
-  if (formatting.subtitlespace !== undefined) this.spacing.subtitle = formatting.subtitlespace * 4 / 3;
-  if (formatting.topspace !== undefined) this.spacing.top = formatting.topspace * 4 / 3;
-  if (formatting.vocalspace !== undefined) this.spacing.vocal = formatting.vocalspace * 4 / 3;
-  if (formatting.wordsspace !== undefined) this.spacing.words = formatting.wordsspace * 4 / 3;
-};
-
-/**
- * Leave space before printing a staff system
- */
-
-/**
- * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
- * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
- */
-Renderer.prototype.calcY = function (ofs) {
-  return this.y - ofs * spacing.STEP;
-};
-Renderer.prototype.moveY = function (em, numLines) {
-  if (numLines === undefined) numLines = 1;
-  this.y += em * numLines;
-};
-Renderer.prototype.absolutemoveY = function (y) {
-  this.y = y;
-};
-module.exports = Renderer;
-
-/***/ }),
-
-/***/ "./src/write/abc_spacing.js":
-/*!**********************************!*\
-  !*** ./src/write/abc_spacing.js ***!
-  \**********************************/
-/***/ (function(module) {
-
-var spacing = {};
-spacing.FONTEM = 360;
-spacing.FONTSIZE = 30;
-spacing.STEP = spacing.FONTSIZE * 93 / 720;
-spacing.SPACE = 10;
-spacing.TOPNOTE = 15;
-spacing.STAVEHEIGHT = 100;
-spacing.INDENT = 50;
-module.exports = spacing;
-
-/***/ }),
-
-/***/ "./src/write/abc_staff_group_element.js":
-/*!**********************************************!*\
-  !*** ./src/write/abc_staff_group_element.js ***!
-  \**********************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-//    abc_staff_group_element.js: Definition of the StaffGroupElement class.
-
-// StaffGroupElement contains all the elements that go together to make one line of music.
-// That might be multiple staves that are tied together, and it might be multiple voices on one staff.
-//
-// Methods:
-// constructor: some basic initialization
-// addVoice(): Called once for each voice. May add a new staff if needed.
-// finished(): Called only internally by layout()
-// layout(): This does all the layout. It sets the following: spacingunits, startx, minspace, w, and the x-coordinate of each element in each voice.
-// draw(): Calls the underlying methods on the voice objects to do the drawing. Sets y and height.
-//
-// Members:
-// staffs: an array of all the staves in this group. Each staff contains the following elements:
-//    { top, bottom, highest, lowest, y }
-// voices: array of VoiceElement objects. This is mostly passed in, but the VoiceElement objects are modified here.
-//
-// spacingunits: number of relative x-units in the line. Used by the calling function to pass back in as the "spacing" input parameter.
-// TODO-PER: This should actually be passed back as a return value.
-// minspace: smallest space between two notes. Used by the calling function to pass back in as the "spacing" input parameter.
-// TODO-PER: This should actually be passed back as a return value.
-// startx: The left edge, taking the margin and the optional voice name. Used by the draw() method.
-// w: The width of the line. Used by calling function to pass back in as the "spacing" input parameter, and the draw() method.
-// TODO-PER: This should actually be passed back as a return value.  (TODO-PER: in pixels or spacing units?)
-// y: The top of the staff group, in pixels. This is set in the draw method.
-// TODO-PER: Where is that used? It looks like it might not be needed.
-// height: Set in the draw() method to the height actually used. Used by the calling function to know where to start the next staff group.
-// TODO-PER: This should actually be set in the layout method and passed back as a return value.
-var calcHeight = __webpack_require__(/*! ./calcHeight */ "./src/write/calcHeight.js");
-var StaffGroupElement = function StaffGroupElement(getTextSize) {
-  this.getTextSize = getTextSize;
-  this.voices = [];
-  this.staffs = [];
-  this.brace = undefined; //tony
-  this.bracket = undefined;
-};
-StaffGroupElement.prototype.setLimit = function (member, voice) {
-  if (!voice.specialY[member]) return;
-  if (!voice.staff.specialY[member]) voice.staff.specialY[member] = voice.specialY[member];else voice.staff.specialY[member] = Math.max(voice.staff.specialY[member], voice.specialY[member]);
-};
-StaffGroupElement.prototype.addVoice = function (voice, staffnumber, stafflines) {
-  var voiceNum = this.voices.length;
-  this.voices[voiceNum] = voice;
-  if (this.staffs[staffnumber]) this.staffs[staffnumber].voices.push(voiceNum);else {
-    // TODO-PER: how does the min/max change when stafflines is not 5?
-    this.staffs[this.staffs.length] = {
-      top: 10,
-      bottom: 2,
-      lines: stafflines,
-      voices: [voiceNum],
-      specialY: {
-        tempoHeightAbove: 0,
-        partHeightAbove: 0,
-        volumeHeightAbove: 0,
-        dynamicHeightAbove: 0,
-        endingHeightAbove: 0,
-        chordHeightAbove: 0,
-        lyricHeightAbove: 0,
-        lyricHeightBelow: 0,
-        chordHeightBelow: 0,
-        volumeHeightBelow: 0,
-        dynamicHeightBelow: 0
-      }
-    };
-  }
-  voice.staff = this.staffs[staffnumber];
-};
-StaffGroupElement.prototype.setHeight = function () {
-  this.height = calcHeight(this);
-};
-StaffGroupElement.prototype.setWidth = function (width) {
-  this.w = width;
-  for (var i = 0; i < this.voices.length; i++) {
-    this.voices[i].setWidth(width);
-  }
-};
-StaffGroupElement.prototype.setStaffLimits = function (voice) {
-  voice.staff.top = Math.max(voice.staff.top, voice.top);
-  voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
-  this.setLimit('tempoHeightAbove', voice);
-  this.setLimit('partHeightAbove', voice);
-  this.setLimit('volumeHeightAbove', voice);
-  this.setLimit('dynamicHeightAbove', voice);
-  this.setLimit('endingHeightAbove', voice);
-  this.setLimit('chordHeightAbove', voice);
-  this.setLimit('lyricHeightAbove', voice);
-  this.setLimit('lyricHeightBelow', voice);
-  this.setLimit('chordHeightBelow', voice);
-  this.setLimit('volumeHeightBelow', voice);
-  this.setLimit('dynamicHeightBelow', voice);
-};
-module.exports = StaffGroupElement;
-
-/***/ }),
-
-/***/ "./src/write/abc_tempo_element.js":
-/*!****************************************!*\
-  !*** ./src/write/abc_tempo_element.js ***!
-  \****************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-//    abc_tempo_element.js: Definition of the TempoElement class.
-
-var AbsoluteElement = __webpack_require__(/*! ./abc_absolute_element */ "./src/write/abc_absolute_element.js");
-var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
-var TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
-  this.type = "TempoElement";
-  this.tempo = tempo;
-  this.tempo.type = "tempo"; /// TODO-PER: this should be set earlier, in the parser, probably.
-  this.tuneNumber = tuneNumber;
-  // TODO: can these two properties be merged?
-  this.totalHeightInPitches = 6;
-  this.tempoHeightAbove = this.totalHeightInPitches;
-  this.pitch = undefined; // This will be set later
-  if (this.tempo.duration && !this.tempo.suppressBpm) {
-    this.note = this.createNote(createNoteHead, tempo, tuneNumber);
-  }
-};
-TempoElement.prototype.setX = function (x) {
-  this.x = x;
-};
-TempoElement.prototype.createNote = function (createNoteHead, tempo, tuneNumber) {
-  var temposcale = 0.75;
-  var duration = tempo.duration[0]; // TODO when multiple durations
-  var absElem = new AbsoluteElement(tempo, duration, 1, 'tempo', tuneNumber);
-  // There aren't an infinite number of note values, but we are passed a float, so just in case something is off upstream,
-  // merge all of the in between points.
-  var dot;
-  var flag;
-  var note;
-  if (duration <= 1 / 32) {
-    note = "noteheads.quarter";
-    flag = "flags.u32nd";
-    dot = 0;
-  } else if (duration <= 1 / 16) {
-    note = "noteheads.quarter";
-    flag = "flags.u16th";
-    dot = 0;
-  } else if (duration <= 3 / 32) {
-    note = "noteheads.quarter";
-    flag = "flags.u16nd";
-    dot = 1;
-  } else if (duration <= 1 / 8) {
-    note = "noteheads.quarter";
-    flag = "flags.u8th";
-    dot = 0;
-  } else if (duration <= 3 / 16) {
-    note = "noteheads.quarter";
-    flag = "flags.u8th";
-    dot = 1;
-  } else if (duration <= 1 / 4) {
-    note = "noteheads.quarter";
-    dot = 0;
-  } else if (duration <= 3 / 8) {
-    note = "noteheads.quarter";
-    dot = 1;
-  } else if (duration <= 1 / 2) {
-    note = "noteheads.half";
-    dot = 0;
-  } else if (duration <= 3 / 4) {
-    note = "noteheads.half";
-    dot = 1;
-  } else if (duration <= 1) {
-    note = "noteheads.whole";
-    dot = 0;
-  } else if (duration <= 1.5) {
-    note = "noteheads.whole";
-    dot = 1;
-  } else if (duration <= 2) {
-    note = "noteheads.dbl";
-    dot = 0;
-  } else {
-    note = "noteheads.dbl";
-    dot = 1;
-  }
-  var ret = createNoteHead(absElem, note, {
-    verticalPos: 0
-  },
-  // This is just temporary: we'll offset the vertical positioning when we get the actual vertical spot.
-  {
-    dir: "up",
-    flag: flag,
-    dot: dot,
-    scale: temposcale
-  });
-  var tempoNote = ret.notehead;
-  absElem.addHead(tempoNote);
-  var stem;
-  if (note !== "noteheads.whole" && note !== "noteheads.dbl") {
-    var p1 = 1 / 3 * temposcale;
-    var p2 = 5 * temposcale;
-    var dx = tempoNote.dx + tempoNote.w;
-    var width = -0.6;
-    stem = new RelativeElement(null, dx, 0, p1, {
-      "type": "stem",
-      "pitch2": p2,
-      linewidth: width
-    });
-    absElem.addRight(stem);
-  }
-  return absElem;
-};
-module.exports = TempoElement;
-
-/***/ }),
-
-/***/ "./src/write/abc_tie_element.js":
-/*!**************************************!*\
-  !*** ./src/write/abc_tie_element.js ***!
-  \**************************************/
-/***/ (function(module) {
-
-//    abc_tie_element.js: Definition of the TieElement class.
-
-var TieElem = function TieElem(options) {
-  this.type = "TieElem";
-  //	console.log("constructor", options.anchor1 ? options.anchor1.pitch : "N/A", options.anchor2 ? options.anchor2.pitch : "N/A", options.isTie, options.isGrace);
-  this.anchor1 = options.anchor1; // must have a .x and a .pitch, and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
-  this.anchor2 = options.anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
-  if (options.isGrace) this.isGrace = true;
-  if (options.fixedY) this.fixedY = true;
-  if (options.stemDir) this.stemDir = options.stemDir;
-  if (options.voiceNumber !== undefined) this.voiceNumber = options.voiceNumber;
-  if (options.style !== undefined) this.dotted = true;
-  this.internalNotes = [];
-};
-TieElem.prototype.addInternalNote = function (note) {
-  this.internalNotes.push(note);
-};
-TieElem.prototype.setEndAnchor = function (anchor2) {
-  //	console.log("end", this.anchor1 ? this.anchor1.pitch : "N/A", anchor2 ? anchor2.pitch : "N/A", this.isTie, this.isGrace);
-  this.anchor2 = anchor2; // must have a .x and a .pitch property or be null (means ends at the end of the line)
-
-  // we don't really have enough info to know what the vertical extent is yet and we won't until drawing. This will just give it enough
-  // room on either side (we don't even know if the slur will be above yet). We need to set this so that we can make sure the voice has
-  // at least enough room that the line doesn't get cut off if the tie or slur is the lowest thing.
-  if (this.anchor1) {
-    this.top = Math.max(this.anchor1.pitch, this.anchor2.pitch) + 4;
-    this.bottom = Math.min(this.anchor1.pitch, this.anchor2.pitch) - 4;
-  } else {
-    this.top = this.anchor2.pitch + 4;
-    this.bottom = this.anchor2.pitch - 4;
-  }
-};
-
-// If we encounter a repeat sign, then we don't want to extend either a tie or a slur past it, so these are called to be a limit.
-TieElem.prototype.setStartX = function (startLimitElem) {
-  this.startLimitX = startLimitElem;
-};
-TieElem.prototype.setEndX = function (endLimitElem) {
-  this.endLimitX = endLimitElem;
-};
-TieElem.prototype.setHint = function () {
-  this.hint = true;
-};
-TieElem.prototype.calcTieDirection = function () {
-  // The rules:
-  // 1) If it is in a grace note group, then the direction is always BELOW.
-  // 2) If it is in a single voice, then the direction is always OPPOSITE of the stem (or where the stem would have been in the case of whole notes.)
-  // 3) If the stem direction is forced (probably because there are two voices on the same line), then the direction is the SAME as the stem direction.
-
-  if (this.isGrace) this.above = false;else if (this.voiceNumber === 0) this.above = true;else if (this.voiceNumber > 0) this.above = false;else {
-    var referencePitch;
-    if (this.anchor1) referencePitch = this.anchor1.pitch;else if (this.anchor2) referencePitch = this.anchor2.pitch;else referencePitch = 14; // TODO-PER: this can't really happen normally. This would imply that a tie crossed over three lines, something like "C-\nz\nC"
-    // Put the arc in the opposite direction of the stem. That isn't always the pitch if one or both of the notes are beamed with something that affects its stem.
-    if (this.anchor1 && this.anchor1.stemDir === 'down' && this.anchor2 && this.anchor2.stemDir === "down") this.above = true;else if (this.anchor1 && this.anchor1.stemDir === 'up' && this.anchor2 && this.anchor2.stemDir === "up") this.above = false;else if (this.anchor1 && this.anchor2) this.above = referencePitch >= 6;else if (this.anchor1) this.above = this.anchor1.stemDir === "down";else if (this.anchor2) this.above = this.anchor2.stemDir === "down";else this.above = referencePitch >= 6;
-  }
-};
-
-// From "standard music notation practice" by Music Publishers’ Association:
-// 1) Slurs are placed under the note heads if all stems go up.
-// 2) Slurs are placed over the note heads if all stems go down.
-// 3) If there are both up stems and down stems, prefer placing the slur over.
-// 4) When the staff has opposite stemmed voices, all slurs should be on the stemmed side.
-
-TieElem.prototype.calcSlurDirection = function () {
-  if (this.isGrace) this.above = false;else if (this.voiceNumber === 0) this.above = true;else if (this.voiceNumber > 0) this.above = false;else {
-    var hasDownStem = false;
-    if (this.anchor1 && this.anchor1.stemDir === "down") hasDownStem = true;
-    if (this.anchor2 && this.anchor2.stemDir === "down") hasDownStem = true;
-    for (var i = 0; i < this.internalNotes.length; i++) {
-      var n = this.internalNotes[i];
-      if (n.stemDir === "down") hasDownStem = true;
-    }
-    this.above = hasDownStem;
-  }
-};
-TieElem.prototype.calcX = function (lineStartX, lineEndX) {
-  if (this.anchor1) {
-    this.startX = this.anchor1.x; // The normal case where there is a starting element to attach to.
-    if (this.anchor1.scalex < 1)
-      // this is a grace note - don't offset the tie as much.
-      this.startX -= 3;
-  } else if (this.startLimitX) this.startX = this.startLimitX.x + this.startLimitX.w; // if there is no start element, but there is a repeat mark before the start of the line.
-  else {
-    if (this.anchor2) this.startX = this.anchor2.x - 20; // There is no element and no repeat mark: make a small arc
-    else this.startX = lineStartX; // Don't have any guidance, so extend to beginning of line
-  }
-
-  if (!this.anchor1 && this.dotted) this.startX -= 3; // The arc needs to be long enough to tell that it is dotted.
-
-  if (this.anchor2) this.endX = this.anchor2.x; // The normal case where there is a starting element to attach to.
-  else if (this.endLimitX) this.endX = this.endLimitX.x; // if there is no start element, but there is a repeat mark before the start of the line.
-  else this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
-};
-
-TieElem.prototype.calcTieY = function () {
-  // If the tie comes from another line, then one or both anchors will be missing.
-  if (this.anchor1) this.startY = this.anchor1.pitch;else if (this.anchor2) this.startY = this.anchor2.pitch;else this.startY = this.above ? 14 : 0;
-  if (this.anchor2) this.endY = this.anchor2.pitch;else if (this.anchor1) this.endY = this.anchor1.pitch;else this.endY = this.above ? 14 : 0;
-};
-
-// From "standard music notation practice" by Music Publishers’ Association:
-// 1) If the anchor note is down stem, the slur points to the note head.
-// 2) If the anchor note is up stem, and the slur is over, then point to middle of stem.
-
-TieElem.prototype.calcSlurY = function () {
-  if (this.anchor1 && this.anchor2) {
-    if (this.above && this.anchor1.stemDir === "up" && !this.fixedY) {
-      this.startY = (this.anchor1.highestVert + this.anchor1.pitch) / 2;
-      this.startX += this.anchor1.w / 2; // When going to the middle of the stem, bump the line to the right a little bit to make it look right.
-    } else this.startY = this.anchor1.pitch;
-
-    // If the closing note has an up stem, and it is beamed, and it isn't the first note in the beam, then the beam will get in the way.
-    var beamInterferes = this.anchor2.parent.beam && this.anchor2.parent.beam.stemsUp && this.anchor2.parent.beam.elems[0] !== this.anchor2.parent;
-    var midPoint = (this.anchor2.highestVert + this.anchor2.pitch) / 2;
-    if (this.above && this.anchor2.stemDir === "up" && !this.fixedY && !beamInterferes && midPoint < this.startY) {
-      this.endY = midPoint;
-      this.endX += Math.round(this.anchor2.w / 2); // When going to the middle of the stem, bump the line to the right a little bit to make it look right.
-    } else this.endY = this.above && beamInterferes ? this.anchor2.highestVert : this.anchor2.pitch;
-  } else if (this.anchor1) {
-    this.startY = this.endY = this.anchor1.pitch;
-  } else if (this.anchor2) {
-    this.startY = this.endY = this.anchor2.pitch;
-  } else {
-    // This is the case where the slur covers the entire line.
-    // TODO-PER: figure out where the real top and bottom of the line are.
-    this.startY = this.above ? 14 : 0;
-    this.endY = this.above ? 14 : 0;
-  }
-};
-TieElem.prototype.avoidCollisionAbove = function () {
-  // Double check that an interior note in the slur isn't so high that it interferes.
-  if (this.above) {
-    var maxInnerHeight = -50;
-    for (var i = 0; i < this.internalNotes.length; i++) {
-      if (this.internalNotes[i].highestVert > maxInnerHeight) maxInnerHeight = this.internalNotes[i].highestVert;
-    }
-    if (maxInnerHeight > this.startY && maxInnerHeight > this.endY) this.startY = this.endY = maxInnerHeight - 1;
-  }
-};
-module.exports = TieElem;
-
-/***/ }),
-
-/***/ "./src/write/abc_triplet_element.js":
-/*!******************************************!*\
-  !*** ./src/write/abc_triplet_element.js ***!
-  \******************************************/
-/***/ (function(module) {
-
-//    abc_triplet_element.js: Definition of the TripletElem class.
-
-var TripletElem = function TripletElem(number, anchor1, options) {
-  this.type = "TripletElem";
-  this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after key signature)
-  this.number = number;
-  this.durationClass = ('d' + Math.round(anchor1.parent.durationClass * 1000) / 1000).replace(/\./, '-');
-  this.middleElems = []; // This is to calculate the highest interior pitch. It is used to make sure that the drawn bracket never crosses a really high middle note.
-  this.flatBeams = options.flatBeams;
-};
-TripletElem.prototype.isClosed = function () {
-  return !!this.anchor2;
-};
-TripletElem.prototype.middleNote = function (elem) {
-  this.middleElems.push(elem);
-};
-TripletElem.prototype.setCloseAnchor = function (anchor2) {
-  this.anchor2 = anchor2;
-  // TODO-PER: This used to be just for beamed triplets but it looks like bracketed triplets need extra room, too. The only one that doesn't is stem down and beamed
-  //if (this.anchor1.parent.beam)
-  if (!this.anchor1.parent.beam || this.anchor1.stemDir === 'up') this.endingHeightAbove = 4;
-};
-module.exports = TripletElem;
-
-/***/ }),
-
-/***/ "./src/write/abc_voice_element.js":
-/*!****************************************!*\
-  !*** ./src/write/abc_voice_element.js ***!
-  \****************************************/
-/***/ (function(module) {
-
-//    abc_voice_element.js: Definition of the VoiceElement class.
-
-var VoiceElement = function VoiceElement(voicenumber, voicetotal) {
-  this.children = [];
-  this.beams = [];
-  this.otherchildren = []; // ties, slurs, triplets
-  this.w = 0;
-  this.duplicate = false;
-  this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
-  this.voicetotal = voicetotal;
-  this.bottom = 7;
-  this.top = 7;
-  this.specialY = {
-    tempoHeightAbove: 0,
-    partHeightAbove: 0,
-    volumeHeightAbove: 0,
-    dynamicHeightAbove: 0,
-    endingHeightAbove: 0,
-    chordHeightAbove: 0,
-    lyricHeightAbove: 0,
-    lyricHeightBelow: 0,
-    chordHeightBelow: 0,
-    volumeHeightBelow: 0,
-    dynamicHeightBelow: 0
-  };
-};
-VoiceElement.prototype.addChild = function (absElem) {
-  // This is always passed an AbsoluteElement
-  if (absElem.type === 'bar') {
-    var firstItem = true;
-    for (var i = 0; firstItem && i < this.children.length; i++) {
-      if (this.children[i].type.indexOf("staff-extra") < 0 && this.children[i].type !== "tempo") firstItem = false;
-    }
-    if (!firstItem) {
-      this.beams.push("bar");
-      this.otherchildren.push("bar");
-    }
-  }
-  this.children[this.children.length] = absElem;
-  this.setRange(absElem);
-};
-VoiceElement.prototype.setLimit = function (member, child) {
-  // Sometimes we get an absolute element in here and sometimes we get some type of relative element.
-  // If there is a "specialY" element, then assume it is an absolute element. If that doesn't exist, look for the
-  // same members at the top level, because that's where they are in relative elements.
-  var specialY = child.specialY;
-  if (!specialY) specialY = child;
-  if (!specialY[member]) return;
-  if (!this.specialY[member]) this.specialY[member] = specialY[member];else this.specialY[member] = Math.max(this.specialY[member], specialY[member]);
-};
-VoiceElement.prototype.adjustRange = function (child) {
-  if (child.bottom !== undefined) this.bottom = Math.min(this.bottom, child.bottom);
-  if (child.top !== undefined) this.top = Math.max(this.top, child.top);
-};
-VoiceElement.prototype.setRange = function (child) {
-  this.adjustRange(child);
-  this.setLimit('tempoHeightAbove', child);
-  this.setLimit('partHeightAbove', child);
-  this.setLimit('volumeHeightAbove', child);
-  this.setLimit('dynamicHeightAbove', child);
-  this.setLimit('endingHeightAbove', child);
-  this.setLimit('chordHeightAbove', child);
-  this.setLimit('lyricHeightAbove', child);
-  this.setLimit('lyricHeightBelow', child);
-  this.setLimit('chordHeightBelow', child);
-  this.setLimit('volumeHeightBelow', child);
-  this.setLimit('dynamicHeightBelow', child);
-};
-VoiceElement.prototype.addOther = function (child) {
-  this.otherchildren.push(child);
-  this.setRange(child);
-};
-VoiceElement.prototype.addBeam = function (child) {
-  this.beams.push(child);
-};
-VoiceElement.prototype.setWidth = function (width) {
-  this.w = width;
-};
-module.exports = VoiceElement;
-
-/***/ }),
-
-/***/ "./src/write/add-chord.js":
-/*!********************************!*\
-  !*** ./src/write/add-chord.js ***!
-  \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var RelativeElement = __webpack_require__(/*! ./abc_relative_element */ "./src/write/abc_relative_element.js");
-var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
-var translateChord = __webpack_require__(/*! ./translate-chord */ "./src/write/translate-chord.js");
-var addChord = function addChord(getTextSize, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords, germanAlphabet) {
-  for (var i = 0; i < elem.chord.length; i++) {
-    var pos = elem.chord[i].position;
-    var rel_position = elem.chord[i].rel_position;
-    var chords = elem.chord[i].name.split("\n");
-    for (var j = chords.length - 1; j >= 0; j--) {
-      // parse these in opposite order because we place them from bottom to top.
-      var chord = chords[j];
-      var x = 0;
-      var y;
-      var font;
-      var klass;
-      if (pos === "left" || pos === "right" || pos === "below" || pos === "above" || !!rel_position) {
-        font = 'annotationfont';
-        klass = "annotation";
-      } else {
-        font = 'gchordfont';
-        klass = "chord";
-        chord = translateChord(chord, jazzchords, germanAlphabet);
-      }
-      var attr = getTextSize.attr(font, klass);
-      var dim = getTextSize.calc(chord, font, klass);
-      var chordWidth = dim.width;
-      var chordHeight = dim.height / spacing.STEP;
-      switch (pos) {
-        case "left":
-          roomTaken += chordWidth + 7;
-          x = -roomTaken; // TODO-PER: This is just a guess from trial and error
-          y = elem.averagepitch;
-          abselem.addExtra(new RelativeElement(chord, x, chordWidth + 4, y, {
-            type: "text",
-            height: chordHeight,
-            dim: attr,
-            position: "left"
-          }));
-          break;
-        case "right":
-          roomTakenRight += 4;
-          x = roomTakenRight; // TODO-PER: This is just a guess from trial and error
-          y = elem.averagepitch;
-          abselem.addRight(new RelativeElement(chord, x, chordWidth + 4, y, {
-            type: "text",
-            height: chordHeight,
-            dim: attr,
-            position: "right"
-          }));
-          break;
-        case "below":
-          // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-          abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
-            type: "text",
-            position: "below",
-            height: chordHeight,
-            dim: attr,
-            realWidth: chordWidth
-          }));
-          break;
-        case "above":
-          // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-          abselem.addRight(new RelativeElement(chord, 0, 0, undefined, {
-            type: "text",
-            position: "above",
-            height: chordHeight,
-            dim: attr,
-            realWidth: chordWidth
-          }));
-          break;
-        default:
-          if (rel_position) {
-            var relPositionY = rel_position.y + 3 * spacing.STEP; // TODO-PER: this is a fudge factor to make it line up with abcm2ps
-            abselem.addRight(new RelativeElement(chord, x + rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
-              position: "relative",
-              type: "text",
-              height: chordHeight,
-              dim: attr
-            }));
-          } else {
-            // setting the y-coordinate to undefined for now: it will be overwritten later on, after we figure out what the highest element on the line is.
-            var pos2 = 'above';
-            if (elem.positioning && elem.positioning.chordPosition) pos2 = elem.positioning.chordPosition;
-            if (pos2 !== 'hidden') {
-              abselem.addCentered(new RelativeElement(chord, noteheadWidth / 2, chordWidth, undefined, {
-                type: "chord",
-                position: pos2,
-                height: chordHeight,
-                dim: attr,
-                realWidth: chordWidth
-              }));
-            }
-          }
-      }
-    }
-  }
-  return {
-    roomTaken: roomTaken,
-    roomTakenRight: roomTakenRight
-  };
-};
-module.exports = addChord;
-
-/***/ }),
-
-/***/ "./src/write/add-text-if.js":
-/*!**********************************!*\
-  !*** ./src/write/add-text-if.js ***!
-  \**********************************/
-/***/ (function(module) {
-
-function addTextIf(rows, params, getTextSize) {
-  if (!params.text) return;
-  if (!params.marginLeft) params.marginLeft = 0;
-  if (!params.klass) params.klass = '';
-  if (!params.anchor) params.anchor = 'start';
-  if (!params.info) params.info = {
-    startChar: -2,
-    endChar: -2
-  };
-  if (params.marginTop) rows.push({
-    move: params.marginTop
-  });
-  var attr = {
-    left: params.marginLeft,
-    text: params.text,
-    font: params.font,
-    anchor: params.anchor,
-    startChar: params.info.startChar,
-    endChar: params.info.endChar
-  };
-  if (params.absElemType) attr.absElemType = params.absElemType;
-  if (!params.inGroup) attr.klass = params.klass;
-  if (params.name) attr.name = params.name;
-  rows.push(attr);
-  // If there are blank lines they won't be counted by getTextSize, so just get the height of one line and multiply
-  var size = getTextSize.calc("A", params.font, params.klass);
-  var numLines = params.text.split("\n").length;
-  if (params.text[params.text.length - 1] === '\n') numLines--; // If there is a new line at the end of the string, then an extra line will be counted.
-  if (!params.noMove) {
-    var h = size.height * 1.1 * numLines;
-    rows.push({
-      move: Math.round(h)
-    });
-    if (params.marginBottom) rows.push({
-      move: params.marginBottom
-    });
-  }
+  return note;
 }
-module.exports = addTextIf;
-
-/***/ }),
-
-/***/ "./src/write/bottom-text.js":
-/*!**********************************!*\
-  !*** ./src/write/bottom-text.js ***!
-  \**********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var addTextIf = __webpack_require__(/*! ./add-text-if */ "./src/write/add-text-if.js");
-function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize) {
-  this.rows = [];
-  if (metaText.unalignedWords && metaText.unalignedWords.length > 0) this.unalignedWords(metaText.unalignedWords, paddingLeft, spacing, getTextSize);
-  this.extraText(metaText, paddingLeft, spacing, getTextSize);
-  if (metaText.footer && isPrint) this.footer(metaText.footer, width, paddingLeft, getTextSize);
+function translateChord(chordString, jazzchords, germanAlphabet) {
+  var lines = chordString.split("\n");
+  for (var i = 0; i < lines.length; i++) {
+    var chord = lines[i];
+    // If the chord isn't in a recognizable format then just skip it.
+    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/([ABCDEFG][#b♯♭]?))?/);
+    if (!reg) {
+      continue;
+    }
+    var baseChord = reg[1] || "";
+    var modifier = reg[2] || "";
+    var bassNote = reg[4] || "";
+    if (germanAlphabet) {
+      baseChord = germanNote(baseChord);
+      bassNote = germanNote(bassNote);
+    }
+    // This puts markers in the pieces of the chord that are read by the svg creator.
+    // After the main part of the chord (the letter, a sharp or flat, and "m") a marker is added. Before a slash a marker is added.
+    var marker = jazzchords ? "\x03" : "";
+    var bass = bassNote ? "/" + bassNote : "";
+    lines[i] = [baseChord, modifier, bass].join(marker);
+  }
+  return lines.join("\n");
 }
-BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spacing, getTextSize) {
-  var klass = 'meta-bottom unaligned-words';
-  var defFont = 'wordsfont';
-  this.rows.push({
-    startGroup: "unalignedWords",
-    klass: 'abcjs-meta-bottom abcjs-unaligned-words',
-    name: "words"
-  });
-  var space = getTextSize.calc("i", defFont, klass);
-  this.rows.push({
-    move: spacing.words
-  });
-  for (var j = 0; j < unalignedWords.length; j++) {
-    if (unalignedWords[j] === '') this.rows.push({
-      move: space.height
-    });else if (typeof unalignedWords[j] === 'string') {
-      addTextIf(this.rows, {
-        marginLeft: paddingLeft,
-        text: unalignedWords[j],
-        font: defFont,
-        klass: klass,
-        inGroup: true,
-        name: "words"
-      }, getTextSize);
-    } else {
-      var largestY = 0;
-      var offsetX = 0;
-      for (var k = 0; k < unalignedWords[j].length; k++) {
-        var thisWord = unalignedWords[j][k];
-        var font = thisWord.font ? thisWord.font : defFont;
-        this.rows.push({
-          left: paddingLeft + offsetX,
-          text: thisWord.text,
-          font: font,
-          anchor: 'start'
-        });
-        var size = getTextSize.calc(thisWord.text, defFont, klass);
-        largestY = Math.max(largestY, size.height);
-        offsetX += size.width;
-        // If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
-        if (thisWord.text[thisWord.text.length - 1] === ' ') {
-          offsetX += space.width;
-        }
-      }
-      this.rows.push({
-        move: largestY
-      });
-    }
-  }
-  this.rows.push({
-    move: space.height * 2
-  });
-  this.rows.push({
-    endGroup: "unalignedWords",
-    absElemType: "unalignedWords",
-    startChar: -1,
-    endChar: -1,
-    name: "unalignedWords"
-  });
-};
-BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTextSize) {
-  var extraText = "";
-  if (metaText.book) extraText += "Book: " + metaText.book + "\n";
-  if (metaText.source) extraText += "Source: " + metaText.source + "\n";
-  if (metaText.discography) extraText += "Discography: " + metaText.discography + "\n";
-  if (metaText.notes) extraText += "Notes: " + metaText.notes + "\n";
-  if (metaText.transcription) extraText += "Transcription: " + metaText.transcription + "\n";
-  if (metaText.history) extraText += "History: " + metaText.history + "\n";
-  if (metaText['abc-copyright']) extraText += "Copyright: " + metaText['abc-copyright'] + "\n";
-  if (metaText['abc-creator']) extraText += "Creator: " + metaText['abc-creator'] + "\n";
-  if (metaText['abc-edited-by']) extraText += "Edited By: " + metaText['abc-edited-by'] + "\n";
-  if (extraText.length > 0) {
-    addTextIf(this.rows, {
-      marginLeft: marginLeft,
-      text: extraText,
-      font: 'historyfont',
-      klass: 'meta-bottom extra-text',
-      marginTop: spacing.info,
-      absElemType: "extraText",
-      name: "description"
-    }, getTextSize);
-  }
-};
-BottomText.prototype.footer = function (footer, width, paddingLeft, getTextSize) {
-  var klass = 'header meta-bottom';
-  var font = "footerfont";
-  this.rows.push({
-    startGroup: "footer",
-    klass: klass
-  });
-  // Note: whether there is a footer or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
-  addTextIf(this.rows, {
-    marginLeft: paddingLeft,
-    text: footer.left,
-    font: font,
-    klass: klass,
-    name: "footer"
-  }, getTextSize);
-  addTextIf(this.rows, {
-    marginLeft: paddingLeft + width / 2,
-    text: footer.center,
-    font: font,
-    klass: klass,
-    anchor: 'middle',
-    name: "footer"
-  }, getTextSize);
-  addTextIf(this.rows, {
-    marginLeft: paddingLeft + width,
-    text: footer.right,
-    font: font,
-    klass: klass,
-    anchor: 'end',
-    name: "footer"
-  }, getTextSize);
-};
-module.exports = BottomText;
-
-/***/ }),
-
-/***/ "./src/write/calcHeight.js":
-/*!*********************************!*\
-  !*** ./src/write/calcHeight.js ***!
-  \*********************************/
-/***/ (function(module) {
-
-var calcHeight = function calcHeight(staffGroup) {
-  // the height is calculated here in a parallel way to the drawing below in hopes that both of these functions will be modified together.
-  // TODO-PER: also add the space between staves. (That's systemStaffSeparation, which is the minimum distance between the staff LINES.)
-  var height = 0;
-  for (var i = 0; i < staffGroup.voices.length; i++) {
-    var staff = staffGroup.voices[i].staff;
-    if (!staffGroup.voices[i].duplicate) {
-      height += staff.top;
-      //if (staff.bottom < 0)
-      height += -staff.bottom;
-    }
-  }
-  return height;
-};
-module.exports = calcHeight;
-
-/***/ }),
-
-/***/ "./src/write/classes.js":
-/*!******************************!*\
-  !*** ./src/write/classes.js ***!
-  \******************************/
-/***/ (function(module) {
-
-var Classes = function Classes(options) {
-  this.shouldAddClasses = options.shouldAddClasses;
-  this.reset();
-};
-Classes.prototype.reset = function () {
-  this.lineNumber = null;
-  this.voiceNumber = null;
-  this.measureNumber = null;
-  this.measureTotalPerLine = [];
-  this.noteNumber = null;
-};
-Classes.prototype.incrLine = function () {
-  if (this.lineNumber === null) this.lineNumber = 0;else this.lineNumber++;
-  this.voiceNumber = null;
-  this.measureNumber = null;
-  this.noteNumber = null;
-};
-Classes.prototype.incrVoice = function () {
-  if (this.voiceNumber === null) this.voiceNumber = 0;else this.voiceNumber++;
-  this.measureNumber = null;
-  this.noteNumber = null;
-};
-Classes.prototype.isInMeasure = function () {
-  return this.measureNumber !== null;
-};
-Classes.prototype.newMeasure = function () {
-  if (this.measureNumber) this.measureTotalPerLine[this.lineNumber] = this.measureNumber;
-  this.measureNumber = null;
-  this.noteNumber = null;
-};
-Classes.prototype.startMeasure = function () {
-  this.measureNumber = 0;
-  this.noteNumber = 0;
-};
-Classes.prototype.incrMeasure = function () {
-  this.measureNumber++;
-  this.noteNumber = 0;
-};
-Classes.prototype.incrNote = function () {
-  this.noteNumber++;
-};
-Classes.prototype.measureTotal = function () {
-  var total = 0;
-  for (var i = 0; i < this.lineNumber; i++) {
-    total += this.measureTotalPerLine[i] ? this.measureTotalPerLine[i] : 0;
-  } // This can be null when non-music things are present.
-  if (this.measureNumber) total += this.measureNumber;
-  return total;
-};
-Classes.prototype.getCurrent = function (c) {
-  return {
-    line: this.lineNumber,
-    measure: this.measureNumber,
-    measureTotal: this.measureTotal(),
-    voice: this.voiceNumber,
-    note: this.noteNumber
-  };
-};
-Classes.prototype.generate = function (c) {
-  if (!this.shouldAddClasses) return "";
-  var ret = [];
-  if (c && c.length > 0) ret.push(c);
-  if (c === "tab-number")
-    // TODO-PER-HACK! straighten out the tablature
-    return ret.join(' ');
-  if (c === "text instrument-name") return "abcjs-text abcjs-instrument-name";
-  if (this.lineNumber !== null) ret.push("l" + this.lineNumber);
-  if (this.measureNumber !== null) ret.push("m" + this.measureNumber);
-  if (this.measureNumber !== null) ret.push("mm" + this.measureTotal()); // measureNumber is null between measures so this is still the test for measureTotal
-  if (this.voiceNumber !== null) ret.push("v" + this.voiceNumber);
-  if (c && (c.indexOf('note') >= 0 || c.indexOf('rest') >= 0 || c.indexOf('lyric') >= 0) && this.noteNumber !== null) ret.push("n" + this.noteNumber);
-  // add a prefix to all classes that abcjs adds.
-  if (ret.length > 0) {
-    ret = ret.join(' '); // Some strings are compound classes - that is, specify more than one class in a string.
-    ret = ret.split(' ');
-    for (var i = 0; i < ret.length; i++) {
-      if (ret[i].indexOf('abcjs-') !== 0 && ret[i].length > 0)
-        // if the prefix doesn't already exist and the class is not blank.
-        ret[i] = 'abcjs-' + ret[i];
-    }
-  }
-  return ret.join(' ');
-};
-module.exports = Classes;
+module.exports = translateChord;
 
 /***/ }),
 
@@ -21299,8 +20858,8 @@ module.exports = Classes;
 
 var drawTempo = __webpack_require__(/*! ./tempo */ "./src/write/draw/tempo.js");
 var drawRelativeElement = __webpack_require__(/*! ./relative */ "./src/write/draw/relative.js");
-var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
-var setClass = __webpack_require__(/*! ../set-class */ "./src/write/set-class.js");
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
+var setClass = __webpack_require__(/*! ../helpers/set-class */ "./src/write/helpers/set-class.js");
 var elementGroup = __webpack_require__(/*! ./group-elements */ "./src/write/draw/group-elements.js");
 function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
   if (params.invisible) return;
@@ -21434,7 +20993,7 @@ module.exports = drawBeam;
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
-var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
 var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
 function drawBrace(renderer, params, selectables) {
   // The absoluteY number is the spot where the note on the first ledger line is drawn (i.e. middle C if treble clef)
@@ -21613,7 +21172,7 @@ module.exports = printDebugBox;
 var drawStaffGroup = __webpack_require__(/*! ./staff-group */ "./src/write/draw/staff-group.js");
 var setPaperSize = __webpack_require__(/*! ./set-paper-size */ "./src/write/draw/set-paper-size.js");
 var nonMusic = __webpack_require__(/*! ./non-music */ "./src/write/draw/non-music.js");
-var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
 var Selectables = __webpack_require__(/*! ./selectables */ "./src/write/draw/selectables.js");
 function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset) {
   var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
@@ -21981,7 +21540,6 @@ module.exports = nonMusic;
 var sprintf = __webpack_require__(/*! ./sprintf */ "./src/write/draw/sprintf.js");
 var roundNumber = __webpack_require__(/*! ./round-number */ "./src/write/draw/round-number.js");
 function printLine(renderer, x1, x2, y, klass, name, dy) {
-  if (!dy) dy = 0.35;
   var fill = renderer.foregroundColor;
   x1 = roundNumber(x1);
   x2 = roundNumber(x2);
@@ -22062,7 +21620,7 @@ module.exports = printStem;
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var renderText = __webpack_require__(/*! ./text */ "./src/write/draw/text.js");
-var glyphs = __webpack_require__(/*! ../abc_glyphs */ "./src/write/abc_glyphs.js");
+var glyphs = __webpack_require__(/*! ../creation/glyphs */ "./src/write/creation/glyphs.js");
 var elementGroup = __webpack_require__(/*! ./group-elements */ "./src/write/draw/group-elements.js");
 
 /**
@@ -22293,14 +21851,15 @@ function drawRelativeElement(renderer, params, bartop) {
       }, true);
       break;
     case "bar":
-      params.graphelem = printStem(renderer, params.x, params.linewidth, y, bartop ? bartop : renderer.calcY(params.pitch2), null, "bar");
+      params.graphelem = printStem(renderer, params.x, params.linewidth + renderer.lineThickness, y, bartop ? bartop : renderer.calcY(params.pitch2), null, "bar");
       break;
     // bartop can't be 0
     case "stem":
-      params.graphelem = printStem(renderer, params.x, params.linewidth, y, renderer.calcY(params.pitch2), 'abcjs-stem', 'stem');
+      var stemWidth = params.linewidth > 0 ? params.linewidth + renderer.lineThickness : params.linewidth - renderer.lineThickness;
+      params.graphelem = printStem(renderer, params.x, stemWidth, y, renderer.calcY(params.pitch2), 'abcjs-stem', 'stem');
       break;
     case "ledger":
-      params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger");
+      params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger", 0.35 + renderer.lineThickness);
       break;
   }
   if (params.scalex !== 1 && params.graphelem) {
@@ -22336,8 +21895,8 @@ module.exports = roundNumber;
   \***************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var highlight = __webpack_require__(/*! ../highlight */ "./src/write/highlight.js");
-var unhighlight = __webpack_require__(/*! ../unhighlight */ "./src/write/unhighlight.js");
+var highlight = __webpack_require__(/*! ../interactive/highlight */ "./src/write/interactive/highlight.js");
+var unhighlight = __webpack_require__(/*! ../interactive/unhighlight */ "./src/write/interactive/unhighlight.js");
 function Selectables(paper, selectTypes, tuneNumber) {
   this.elements = [];
   this.paper = paper;
@@ -22567,7 +22126,7 @@ module.exports = sprintf;
   \***************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
 var drawBrace = __webpack_require__(/*! ./brace */ "./src/write/draw/brace.js");
 var drawVoice = __webpack_require__(/*! ./voice */ "./src/write/draw/voice.js");
 var printStaff = __webpack_require__(/*! ./staff */ "./src/write/draw/staff.js");
@@ -22661,7 +22220,7 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
           linePitch = staff.linePitch;
         }
         renderer.controller.classes.newMeasure();
-        var lines = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, staff.dy);
+        var lines = printStaff(renderer, params.startx, params.w, staff.lines, staff.linePitch, 0.35);
         bottomLine = lines[1];
         staff.bottomLine = bottomLine;
         staff.topLine = lines[0];
@@ -22841,7 +22400,7 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
   var firstYLine = 0;
   var lastYLine = 0;
   if (numLines === 1) {
-    printStaffLine(renderer, startx, endx, 6, klass);
+    printStaffLine(renderer, startx, endx, 6, klass, null, dy + renderer.lineThickness);
     firstYLine = renderer.calcY(10);
     lastYLine = renderer.calcY(2);
   } else {
@@ -22851,7 +22410,7 @@ function printStaff(renderer, startx, endx, numLines, linePitch, dy) {
       if (firstYLine === 0) {
         firstYLine = lastYLine;
       }
-      printStaffLine(renderer, startx, endx, curpitch, klass, null, dy);
+      printStaffLine(renderer, startx, endx, curpitch, klass, null, dy + renderer.lineThickness);
       klass = undefined;
     }
   }
@@ -23305,100 +22864,429 @@ module.exports = drawVoice;
 
 /***/ }),
 
-/***/ "./src/write/free-text.js":
-/*!********************************!*\
-  !*** ./src/write/free-text.js ***!
-  \********************************/
-/***/ (function(module) {
+/***/ "./src/write/engraver-controller.js":
+/*!******************************************!*\
+  !*** ./src/write/engraver-controller.js ***!
+  \******************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-function FreeText(info, vskip, getFontAndAttr, paddingLeft, width, getTextSize) {
-  var text = info.text;
-  this.rows = [];
-  var size;
-  if (vskip) this.rows.push({
-    move: vskip
+//    abc_engraver_controller.js: Controls the engraving process of an ABCJS abstract syntax tree as produced by ABCJS/parse
+
+/*global Math */
+
+var spacing = __webpack_require__(/*! ./helpers/spacing */ "./src/write/helpers/spacing.js");
+var AbstractEngraver = __webpack_require__(/*! ./creation/abstract-engraver */ "./src/write/creation/abstract-engraver.js");
+var Renderer = __webpack_require__(/*! ./renderer */ "./src/write/renderer.js");
+var FreeText = __webpack_require__(/*! ./creation/elements/free-text */ "./src/write/creation/elements/free-text.js");
+var Separator = __webpack_require__(/*! ./creation/elements/separator */ "./src/write/creation/elements/separator.js");
+var Subtitle = __webpack_require__(/*! ./creation/elements/subtitle */ "./src/write/creation/elements/subtitle.js");
+var TopText = __webpack_require__(/*! ./creation/elements/top-text */ "./src/write/creation/elements/top-text.js");
+var BottomText = __webpack_require__(/*! ./creation/elements/bottom-text */ "./src/write/creation/elements/bottom-text.js");
+var setupSelection = __webpack_require__(/*! ./interactive/selection */ "./src/write/interactive/selection.js");
+var layout = __webpack_require__(/*! ./layout/layout */ "./src/write/layout/layout.js");
+var Classes = __webpack_require__(/*! ./helpers/classes */ "./src/write/helpers/classes.js");
+var GetFontAndAttr = __webpack_require__(/*! ./helpers/get-font-and-attr */ "./src/write/helpers/get-font-and-attr.js");
+var GetTextSize = __webpack_require__(/*! ./helpers/get-text-size */ "./src/write/helpers/get-text-size.js");
+var draw = __webpack_require__(/*! ./draw/draw */ "./src/write/draw/draw.js");
+var tablatures = __webpack_require__(/*! ../api/abc_tablatures */ "./src/api/abc_tablatures.js");
+
+/**
+ * @class
+ * Controls the engraving process, from ABCJS Abstract Syntax Tree (ABCJS AST) to rendered score sheet
+ *
+ * Call engraveABC to run the process. This creates a graphelems ABCJS Abstract Engraving Structure (ABCJS AES) that can be accessed through this.staffgroups
+ * this data structure is first laid out (giving the graphelems x and y coordinates) and then drawn onto the renderer
+ * each ABCJS AES represents a single staffgroup - all elements that are not in a staffgroup are rendered directly by the controller
+ *
+ * elements in ABCJS AES know their "source data" in the ABCJS AST, and their "target shape"
+ * in the renderer for highlighting purposes
+ *
+ */
+var EngraverController = function EngraverController(paper, params) {
+  params = params || {};
+  this.oneSvgPerLine = params.oneSvgPerLine;
+  this.selectionColor = params.selectionColor;
+  this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;
+  this.dragging = !!params.dragging;
+  this.selectTypes = params.selectTypes;
+  this.responsive = params.responsive;
+  this.space = 3 * spacing.SPACE;
+  this.initialClef = params.initialClef;
+  this.scale = params.scale ? parseFloat(params.scale) : 0;
+  this.classes = new Classes({
+    shouldAddClasses: params.add_classes
   });
-  var hash = getFontAndAttr.calc('textfont', 'defined-text');
-  if (text === "") {
-    // we do want to print out blank lines if they have been specified.
-    this.rows.push({
-      move: hash.attr['font-size'] * 2
-    }); // move the distance of the line, plus the distance of the margin, which is also one line.
-  } else if (typeof text === 'string') {
-    this.rows.push({
-      move: hash.attr['font-size'] / 2
-    }); // TODO-PER: move down some - the y location should be the top of the text, but we output text specifying the center line.
-    this.rows.push({
-      left: paddingLeft,
-      text: text,
-      font: 'textfont',
-      klass: 'defined-text',
-      anchor: "start",
-      startChar: info.startChar,
-      endChar: info.endChar,
-      absElemType: "freeText",
-      name: "free-text"
-    });
-    size = getTextSize.calc(text, 'textfont', 'defined-text');
-    this.rows.push({
-      move: size.height
-    });
-  } else if (text) {
-    var maxHeight = 0;
-    var leftSide = paddingLeft;
-    var currentFont = 'textfont';
-    for (var i = 0; i < text.length; i++) {
-      if (text[i].font) {
-        currentFont = text[i].font;
-      } else currentFont = 'textfont';
-      this.rows.push({
-        left: leftSide,
-        text: text[i].text,
-        font: currentFont,
-        klass: 'defined-text',
-        anchor: 'start',
-        startChar: info.startChar,
-        endChar: info.endChar,
-        absElemType: "freeText",
-        name: "free-text"
-      });
-      size = getTextSize.calc(text[i].text, getFontAndAttr.calc(currentFont, 'defined-text').font, 'defined-text');
-      leftSide += size.width + size.height / 2; // add a little padding to the right side. The height of the font is probably a close enough approximation.
-      maxHeight = Math.max(maxHeight, size.height);
-    }
-    this.rows.push({
-      move: maxHeight
-    });
+  if (!(this.scale > 0.1)) this.scale = undefined;
+  if (params.staffwidth) {
+    // Note: Normally all measurements to the engraver are in POINTS. However, if a person is formatting for the
+    // screen and directly inputting the width, then it is more logical to have the measurement in pixels.
+    this.staffwidthScreen = params.staffwidth;
+    this.staffwidthPrint = params.staffwidth;
   } else {
-    // The structure is wrong here: it requires an array to do centering, but it shouldn't have.
-    if (info.length === 1) {
-      var x = width / 2;
-      this.rows.push({
-        left: x,
-        text: info[0].text,
-        font: 'textfont',
-        klass: 'defined-text',
-        anchor: 'middle',
-        startChar: info.startChar,
-        endChar: info.endChar,
-        absElemType: "freeText",
-        name: "free-text"
-      });
-      size = getTextSize.calc(info[0].text, 'textfont', 'defined-text');
-      this.rows.push({
-        move: size.height
-      });
+    this.staffwidthScreen = 740; // TODO-PER: Not sure where this number comes from, but this is how it's always been.
+    this.staffwidthPrint = 680; // The number of pixels in 8.5", after 1cm of margin has been removed.
+  }
+
+  this.listeners = [];
+  if (params.clickListener) this.addSelectListener(params.clickListener);
+  this.renderer = new Renderer(paper);
+  this.renderer.setPaddingOverride(params);
+  if (params.showDebug) this.renderer.showDebug = params.showDebug;
+  if (params.jazzchords) this.jazzchords = params.jazzchords;
+  if (params.germanAlphabet) this.germanAlphabet = params.germanAlphabet;
+  if (params.lineThickness) this.lineThickness = params.lineThickness;
+  this.renderer.controller = this; // TODO-GD needed for highlighting
+  this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
+  if (params.ariaLabel !== undefined) this.renderer.ariaLabel = params.ariaLabel;
+  this.renderer.minPadding = params.minPadding ? params.minPadding : 0;
+  this.reset();
+};
+EngraverController.prototype.reset = function () {
+  this.selected = [];
+  this.staffgroups = [];
+  if (this.engraver) this.engraver.reset();
+  this.engraver = null;
+  this.renderer.reset();
+  this.dragTarget = null;
+  this.dragIndex = -1;
+  this.dragMouseStart = {
+    x: -1,
+    y: -1
+  };
+  this.dragYStep = 0;
+  if (this.lineThickness) this.renderer.setLineThickness(this.lineThickness);
+};
+
+/**
+ * run the engraving process
+ */
+EngraverController.prototype.engraveABC = function (abctunes, tuneNumber, lineOffset) {
+  if (abctunes[0] === undefined) {
+    abctunes = [abctunes];
+  }
+  this.reset();
+  for (var i = 0; i < abctunes.length; i++) {
+    if (tuneNumber === undefined) tuneNumber = i;
+    this.getFontAndAttr = new GetFontAndAttr(abctunes[i].formatting, this.classes);
+    this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
+    this.engraveTune(abctunes[i], tuneNumber, lineOffset);
+  }
+};
+
+/**
+ * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
+ */
+EngraverController.prototype.adjustNonScaledItems = function (scale) {
+  this.width /= scale;
+  this.renderer.adjustNonScaledItems(scale);
+};
+EngraverController.prototype.getMeasureWidths = function (abcTune) {
+  this.reset();
+  this.getFontAndAttr = new GetFontAndAttr(abcTune.formatting, this.classes);
+  this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
+  this.setupTune(abcTune, 0);
+  this.constructTuneElements(abcTune);
+  // layout() sets the x-coordinate of the abcTune element here:
+  // abcTune.lines[0].staffGroup.voices[0].children[0].x
+  layout(this.renderer, abcTune, 0, this.space);
+  var ret = [];
+  var section;
+  var needNewSection = true;
+  for (var i = 0; i < abcTune.lines.length; i++) {
+    var abcLine = abcTune.lines[i];
+    if (abcLine.staff) {
+      if (needNewSection) {
+        section = {
+          left: 0,
+          measureWidths: [],
+          //height: this.renderer.padding.top + this.renderer.spacing.music + this.renderer.padding.bottom + 24, // the 24 is the empirical value added to the bottom of all tunes.
+          total: 0
+        };
+        ret.push(section);
+        needNewSection = false;
+      }
+      // At this point, the voices are laid out so that the bar lines are even with each other. So we just need to get the placement of the first voice.
+      if (abcLine.staffGroup.voices.length > 0) {
+        var voice = abcLine.staffGroup.voices[0];
+        var foundNotStaffExtra = false;
+        var lastXPosition = 0;
+        for (var k = 0; k < voice.children.length; k++) {
+          var child = voice.children[k];
+          if (!foundNotStaffExtra && !child.isClef && !child.isKeySig) {
+            foundNotStaffExtra = true;
+            section.left = child.x;
+            lastXPosition = child.x;
+          }
+          if (child.type === 'bar') {
+            section.measureWidths.push(child.x - lastXPosition);
+            section.total += child.x - lastXPosition;
+            lastXPosition = child.x;
+          }
+        }
+      }
+      //section.height += calcHeight(abcLine.staffGroup) * spacing.STEP;
+    } else needNewSection = true;
+  }
+  return ret;
+};
+EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
+  this.classes.reset();
+  if (abcTune.formatting.jazzchords !== undefined) this.jazzchords = abcTune.formatting.jazzchords;
+  this.renderer.newTune(abcTune);
+  this.engraver = new AbstractEngraver(this.getTextSize, tuneNumber, {
+    bagpipes: abcTune.formatting.bagpipes,
+    flatbeams: abcTune.formatting.flatbeams,
+    graceSlurs: abcTune.formatting.graceSlurs !== false,
+    // undefined is the default, which is true
+    percmap: abcTune.formatting.percmap,
+    initialClef: this.initialClef,
+    jazzchords: this.jazzchords,
+    germanAlphabet: this.germanAlphabet
+  });
+  this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
+  this.engraver.measureLength = abcTune.getMeterFraction().num / abcTune.getMeterFraction().den;
+  if (abcTune.formatting.staffwidth) {
+    this.width = abcTune.formatting.staffwidth * 1.33; // The width is expressed in pt; convert to px.
+  } else {
+    this.width = this.renderer.isPrint ? this.staffwidthPrint : this.staffwidthScreen;
+  }
+  var scale = abcTune.formatting.scale ? abcTune.formatting.scale : this.scale;
+  if (this.responsive === "resize")
+    // The resizing will mess with the scaling, so just don't do it explicitly.
+    scale = undefined;
+  if (scale === undefined) scale = this.renderer.isPrint ? 0.75 : 1;
+  this.adjustNonScaledItems(scale);
+  return scale;
+};
+EngraverController.prototype.constructTuneElements = function (abcTune) {
+  abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+
+  // Generate the raw staff line data
+  var i;
+  var abcLine;
+  var hasPrintedTempo = false;
+  var hasSeenNonSubtitle = false;
+  for (i = 0; i < abcTune.lines.length; i++) {
+    abcLine = abcTune.lines[i];
+    if (abcLine.staff) {
+      hasSeenNonSubtitle = true;
+      abcLine.staffGroup = this.engraver.createABCLine(abcLine.staff, !hasPrintedTempo ? abcTune.metaText.tempo : null, i);
+      hasPrintedTempo = true;
+    } else if (abcLine.subtitle) {
+      // If the subtitle is at the top, then it was already accounted for. So skip all subtitles until the first non-subtitle line.
+      if (hasSeenNonSubtitle) {
+        var center = this.width / 2 + this.renderer.padding.left;
+        abcLine.nonMusic = new Subtitle(this.renderer.spacing.subtitle, abcTune.formatting, abcLine.subtitle, center, this.renderer.padding.left, this.getTextSize);
+      }
+    } else if (abcLine.text !== undefined) {
+      hasSeenNonSubtitle = true;
+      abcLine.nonMusic = new FreeText(abcLine.text, abcLine.vskip, this.getFontAndAttr, this.renderer.padding.left, this.width, this.getTextSize);
+    } else if (abcLine.separator !== undefined && abcLine.separator.lineLength) {
+      hasSeenNonSubtitle = true;
+      abcLine.nonMusic = new Separator(abcLine.separator.spaceAbove, abcLine.separator.lineLength, abcLine.separator.spaceBelow);
     }
   }
+  abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+};
+EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOffset) {
+  var scale = this.setupTune(abcTune, tuneNumber);
+
+  // Create all of the element objects that will appear on the page.
+  this.constructTuneElements(abcTune);
+
+  // Do all the positioning, both horizontally and vertically
+  var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
+
+  // Deal with tablature for staff
+  if (abcTune.tablatures) {
+    tablatures.layoutTablatures(this.renderer, abcTune);
+  }
+
+  // Do all the writing to the SVG
+  var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset);
+  this.staffgroups = ret.staffgroups;
+  this.selectables = ret.selectables;
+  if (this.oneSvgPerLine) {
+    var div = this.renderer.paper.svg.parentNode;
+    this.svgs = splitSvgIntoLines(div, abcTune.metaText.title, this.responsive);
+  } else {
+    this.svgs = [this.renderer.paper.svg];
+  }
+  setupSelection(this, this.svgs);
+};
+function splitSvgIntoLines(output, title, responsive) {
+  // Each line is a top level <g> in the svg. To split it into separate
+  // svgs iterate through each of those and put them in a new svg. Since
+  // they are placed absolutely, the viewBox needs to be manipulated to
+  // get the correct vertical positioning.
+  // We copy all the attributes from the original svg except for the aria-label
+  // since we want that to include a count. And the height is now a fraction of the original svg.
+  if (!title) title = "Untitled";
+  var source = output.querySelector("svg");
+  if (responsive === 'resize') output.style.paddingBottom = '';
+  var style = source.querySelector("style");
+  var width = responsive === 'resize' ? source.viewBox.baseVal.width : source.getAttribute("width");
+  var sections = output.querySelectorAll("svg > g"); // each section is a line, or the top matter or the bottom matter, or text that has been inserted.
+  var nextTop = 0; // There are often gaps between the elements for spacing, so the actual top and height needs to be inferred.
+  var wrappers = []; // Create all the elements and place them at once because we use the current svg to get data. It would disappear after placing the first line.
+  var svgs = [];
+  for (var i = 0; i < sections.length; i++) {
+    var section = sections[i];
+    var box = section.getBBox();
+    var gapBetweenLines = box.y - nextTop; // take the margin into account
+    var height = box.height + gapBetweenLines;
+    var wrapper = document.createElement("div");
+    var divStyles = "overflow: hidden;";
+    if (responsive !== 'resize') divStyles += "height:" + height + "px;";
+    wrapper.setAttribute("style", divStyles);
+    var svg = duplicateSvg(source);
+    var fullTitle = "Sheet Music for \"" + title + "\" section " + (i + 1);
+    svg.setAttribute("aria-label", fullTitle);
+    if (responsive !== 'resize') svg.setAttribute("height", height);
+    if (responsive === 'resize') svg.style.position = '';
+    svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + height);
+    svg.appendChild(style.cloneNode(true));
+    var titleEl = document.createElement("title");
+    titleEl.innerText = fullTitle;
+    svg.appendChild(titleEl);
+    svg.appendChild(section);
+    wrapper.appendChild(svg);
+    svgs.push(svg);
+    output.appendChild(wrapper);
+    //wrappers.push(wrapper)
+    nextTop = box.y + box.height;
+  }
+  // for (i = 0; i < wrappers.length; i++)
+  // 	output.appendChild(wrappers[i])
+  output.removeChild(source);
+  return svgs;
 }
-module.exports = FreeText;
+function duplicateSvg(source) {
+  var svgNS = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(svgNS, "svg");
+  for (var i = 0; i < source.attributes.length; i++) {
+    var attr = source.attributes[i];
+    if (attr.name !== "height" && attr.name != "aria-label") svg.setAttribute(attr.name, attr.value);
+  }
+  return svg;
+}
+EngraverController.prototype.getDim = function (historyEl) {
+  // Get the dimensions on demand because the getBBox call is expensive.
+  if (!historyEl.dim) {
+    var box = historyEl.svgEl.getBBox();
+    historyEl.dim = {
+      left: Math.round(box.x),
+      top: Math.round(box.y),
+      right: Math.round(box.x + box.width),
+      bottom: Math.round(box.y + box.height)
+    };
+  }
+  return historyEl.dim;
+};
+EngraverController.prototype.addSelectListener = function (clickListener) {
+  this.listeners[this.listeners.length] = clickListener;
+};
+module.exports = EngraverController;
 
 /***/ }),
 
-/***/ "./src/write/get-font-and-attr.js":
-/*!****************************************!*\
-  !*** ./src/write/get-font-and-attr.js ***!
-  \****************************************/
+/***/ "./src/write/helpers/classes.js":
+/*!**************************************!*\
+  !*** ./src/write/helpers/classes.js ***!
+  \**************************************/
+/***/ (function(module) {
+
+var Classes = function Classes(options) {
+  this.shouldAddClasses = options.shouldAddClasses;
+  this.reset();
+};
+Classes.prototype.reset = function () {
+  this.lineNumber = null;
+  this.voiceNumber = null;
+  this.measureNumber = null;
+  this.measureTotalPerLine = [];
+  this.noteNumber = null;
+};
+Classes.prototype.incrLine = function () {
+  if (this.lineNumber === null) this.lineNumber = 0;else this.lineNumber++;
+  this.voiceNumber = null;
+  this.measureNumber = null;
+  this.noteNumber = null;
+};
+Classes.prototype.incrVoice = function () {
+  if (this.voiceNumber === null) this.voiceNumber = 0;else this.voiceNumber++;
+  this.measureNumber = null;
+  this.noteNumber = null;
+};
+Classes.prototype.isInMeasure = function () {
+  return this.measureNumber !== null;
+};
+Classes.prototype.newMeasure = function () {
+  if (this.measureNumber) this.measureTotalPerLine[this.lineNumber] = this.measureNumber;
+  this.measureNumber = null;
+  this.noteNumber = null;
+};
+Classes.prototype.startMeasure = function () {
+  this.measureNumber = 0;
+  this.noteNumber = 0;
+};
+Classes.prototype.incrMeasure = function () {
+  this.measureNumber++;
+  this.noteNumber = 0;
+};
+Classes.prototype.incrNote = function () {
+  this.noteNumber++;
+};
+Classes.prototype.measureTotal = function () {
+  var total = 0;
+  for (var i = 0; i < this.lineNumber; i++) {
+    total += this.measureTotalPerLine[i] ? this.measureTotalPerLine[i] : 0;
+  } // This can be null when non-music things are present.
+  if (this.measureNumber) total += this.measureNumber;
+  return total;
+};
+Classes.prototype.getCurrent = function (c) {
+  return {
+    line: this.lineNumber,
+    measure: this.measureNumber,
+    measureTotal: this.measureTotal(),
+    voice: this.voiceNumber,
+    note: this.noteNumber
+  };
+};
+Classes.prototype.generate = function (c) {
+  if (!this.shouldAddClasses) return "";
+  var ret = [];
+  if (c && c.length > 0) ret.push(c);
+  if (c === "tab-number")
+    // TODO-PER-HACK! straighten out the tablature
+    return ret.join(' ');
+  if (c === "text instrument-name") return "abcjs-text abcjs-instrument-name";
+  if (this.lineNumber !== null) ret.push("l" + this.lineNumber);
+  if (this.measureNumber !== null) ret.push("m" + this.measureNumber);
+  if (this.measureNumber !== null) ret.push("mm" + this.measureTotal()); // measureNumber is null between measures so this is still the test for measureTotal
+  if (this.voiceNumber !== null) ret.push("v" + this.voiceNumber);
+  if (c && (c.indexOf('note') >= 0 || c.indexOf('rest') >= 0 || c.indexOf('lyric') >= 0) && this.noteNumber !== null) ret.push("n" + this.noteNumber);
+  // add a prefix to all classes that abcjs adds.
+  if (ret.length > 0) {
+    ret = ret.join(' '); // Some strings are compound classes - that is, specify more than one class in a string.
+    ret = ret.split(' ');
+    for (var i = 0; i < ret.length; i++) {
+      if (ret[i].indexOf('abcjs-') !== 0 && ret[i].length > 0)
+        // if the prefix doesn't already exist and the class is not blank.
+        ret[i] = 'abcjs-' + ret[i];
+    }
+  }
+  return ret.join(' ');
+};
+module.exports = Classes;
+
+/***/ }),
+
+/***/ "./src/write/helpers/get-font-and-attr.js":
+/*!************************************************!*\
+  !*** ./src/write/helpers/get-font-and-attr.js ***!
+  \************************************************/
 /***/ (function(module) {
 
 var GetFontAndAttr = function GetFontAndAttr(formatting, classes) {
@@ -23457,10 +23345,10 @@ module.exports = GetFontAndAttr;
 
 /***/ }),
 
-/***/ "./src/write/get-text-size.js":
-/*!************************************!*\
-  !*** ./src/write/get-text-size.js ***!
-  \************************************/
+/***/ "./src/write/helpers/get-text-size.js":
+/*!********************************************!*\
+  !*** ./src/write/helpers/get-text-size.js ***!
+  \********************************************/
 /***/ (function(module) {
 
 var GetTextSize = function GetTextSize(getFontAndAttr, svg) {
@@ -23516,13 +23404,59 @@ module.exports = GetTextSize;
 
 /***/ }),
 
-/***/ "./src/write/highlight.js":
-/*!********************************!*\
-  !*** ./src/write/highlight.js ***!
-  \********************************/
+/***/ "./src/write/helpers/set-class.js":
+/*!****************************************!*\
+  !*** ./src/write/helpers/set-class.js ***!
+  \****************************************/
+/***/ (function(module) {
+
+var setClass = function setClass(elemset, addClass, removeClass, color) {
+  if (!elemset) return;
+  for (var i = 0; i < elemset.length; i++) {
+    var el = elemset[i];
+    var attr = el.getAttribute("highlight");
+    if (!attr) attr = "fill";
+    el.setAttribute(attr, color);
+    var kls = el.getAttribute("class");
+    if (!kls) kls = "";
+    kls = kls.replace(removeClass, "");
+    kls = kls.replace(addClass, "");
+    if (addClass.length > 0) {
+      if (kls.length > 0 && kls[kls.length - 1] !== ' ') kls += " ";
+      kls += addClass;
+    }
+    el.setAttribute("class", kls);
+  }
+};
+module.exports = setClass;
+
+/***/ }),
+
+/***/ "./src/write/helpers/spacing.js":
+/*!**************************************!*\
+  !*** ./src/write/helpers/spacing.js ***!
+  \**************************************/
+/***/ (function(module) {
+
+var spacing = {};
+spacing.FONTEM = 360;
+spacing.FONTSIZE = 30;
+spacing.STEP = spacing.FONTSIZE * 93 / 720;
+spacing.SPACE = 10;
+spacing.TOPNOTE = 15;
+spacing.STAVEHEIGHT = 100;
+spacing.INDENT = 50;
+module.exports = spacing;
+
+/***/ }),
+
+/***/ "./src/write/interactive/highlight.js":
+/*!********************************************!*\
+  !*** ./src/write/interactive/highlight.js ***!
+  \********************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
+var setClass = __webpack_require__(/*! ../helpers/set-class */ "./src/write/helpers/set-class.js");
 var highlight = function highlight(klass, color) {
   if (klass === undefined) klass = "abcjs-note_selected";
   if (color === undefined) color = "#ff0000";
@@ -23532,1078 +23466,13 @@ module.exports = highlight;
 
 /***/ }),
 
-/***/ "./src/write/layout/VoiceElements.js":
-/*!*******************************************!*\
-  !*** ./src/write/layout/VoiceElements.js ***!
-  \*******************************************/
-/***/ (function(module) {
-
-var VoiceElement = function VoiceElements() {};
-VoiceElement.beginLayout = function (startx, voice) {
-  voice.i = 0;
-  voice.durationindex = 0;
-  //this.ii=this.children.length;
-  voice.startx = startx;
-  voice.minx = startx; // furthest left to where negatively positioned elements are allowed to go
-  voice.nextx = startx; // x position where the next element of this voice should be placed assuming no other voices and no fixed width constraints
-  voice.spacingduration = 0; // duration left to be laid out in current iteration (omitting additional spacing due to other aspects, such as bars, dots, sharps and flats)
-};
-
-VoiceElement.layoutEnded = function (voice) {
-  return voice.i >= voice.children.length;
-};
-VoiceElement.getNextX = function (voice) {
-  return Math.max(voice.minx, voice.nextx);
-};
-
-// number of spacing units expected for next positioning
-VoiceElement.getSpacingUnits = function (voice) {
-  return Math.sqrt(voice.spacingduration * 8);
-};
-
-// Try to layout the element at index this.i
-// x - position to try to layout the element at
-// spacing - base spacing
-// can't call this function more than once per iteration
-VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding, firstVoice) {
-  var child = voice.children[voice.i];
-  if (!child) return 0;
-  var er = x - voice.minx; // available extrawidth to the left
-  var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
-  // See if this item overlaps the item in the first voice. If firstVoice is undefined then there's nothing to compare.
-  if (child.abcelem.el_type === "note" && !child.abcelem.rest && voice.voicenumber !== 0 && firstVoice) {
-    var firstChild = firstVoice.children[firstVoice.i];
-    // It overlaps if the either the child's top or bottom is inside the firstChild's or at least within 1
-    // A special case is if the element is on the same line then it can share a note head, if the notehead is the same
-    var overlaps = firstChild && (child.abcelem.maxpitch <= firstChild.abcelem.maxpitch + 1 && child.abcelem.maxpitch >= firstChild.abcelem.minpitch - 1 || child.abcelem.minpitch <= firstChild.abcelem.maxpitch + 1 && child.abcelem.minpitch >= firstChild.abcelem.minpitch - 1);
-    // See if they can share a note head
-    if (overlaps && child.abcelem.minpitch === firstChild.abcelem.minpitch && child.abcelem.maxpitch === firstChild.abcelem.maxpitch && firstChild.heads && firstChild.heads.length > 0 && child.heads && child.heads.length > 0 && firstChild.heads[0].c === child.heads[0].c) overlaps = false;
-    // If this note overlaps the note in the first voice and we haven't moved the note yet (this can be called multiple times)
-    if (overlaps) {
-      // I think that firstChild should always have at least one note head, but defensively make sure.
-      // There was a problem with this being called more than once so if a value is adjusted then it is saved so it is only adjusted once.
-      var firstChildNoteWidth = firstChild.heads && firstChild.heads.length > 0 ? firstChild.heads[0].realWidth : firstChild.fixed.w;
-      if (!child.adjustedWidth) child.adjustedWidth = firstChildNoteWidth + child.w;
-      child.w = child.adjustedWidth;
-      for (var j = 0; j < child.children.length; j++) {
-        var relativeChild = child.children[j];
-        if (relativeChild.name.indexOf("accidental") < 0) {
-          if (!relativeChild.adjustedWidth) relativeChild.adjustedWidth = relativeChild.dx + firstChildNoteWidth;
-          relativeChild.dx = relativeChild.adjustedWidth;
-        }
-      }
-    }
-  }
-  var extraWidth = getExtraWidth(child, pad);
-  if (er < extraWidth) {
-    // shift right by needed amount
-    // There's an exception if a bar element is after a Part element, there is no shift.
-    if (voice.i === 0 || child.type !== 'bar' || voice.children[voice.i - 1].type !== 'part' && voice.children[voice.i - 1].type !== 'tempo') x += extraWidth - er;
-  }
-  child.setX(x);
-  voice.spacingduration = child.duration;
-  //update minx
-  voice.minx = x + getMinWidth(child); // add necessary layout space
-  if (voice.i !== voice.children.length - 1) voice.minx += child.minspacing; // add minimumspacing except on last elem
-
-  this.updateNextX(x, spacing, voice);
-
-  // contribute to staff y position
-  //this.staff.top = Math.max(child.top,this.staff.top);
-  //this.staff.bottom = Math.min(child.bottom,this.staff.bottom);
-
-  return x; // where we end up having placed the child
-};
-
-VoiceElement.shiftRight = function (dx, voice) {
-  var child = voice.children[voice.i];
-  if (!child) return;
-  child.setX(child.x + dx);
-  voice.minx += dx;
-  voice.nextx += dx;
-};
-
-// call when spacingduration has been updated
-VoiceElement.updateNextX = function (x, spacing, voice) {
-  voice.nextx = x + spacing * Math.sqrt(voice.spacingduration * 8);
-};
-VoiceElement.updateIndices = function (voice) {
-  if (!this.layoutEnded(voice)) {
-    voice.durationindex += voice.children[voice.i].duration;
-    if (voice.children[voice.i].type === 'bar') voice.durationindex = Math.round(voice.durationindex * 64) / 64; // everytime we meet a barline, do rounding to nearest 64th
-    voice.i++;
-  }
-};
-function getExtraWidth(child, minPadding) {
-  // space needed to the left of the note
-  var padding = 0;
-  if (child.type === 'note' || child.type === 'bar') padding = minPadding;
-  return -child.extraw + padding;
-}
-function getMinWidth(child) {
-  // absolute space taken to the right of the note
-  return child.w;
-}
-module.exports = VoiceElement;
-
-/***/ }),
-
-/***/ "./src/write/layout/beam.js":
-/*!**********************************!*\
-  !*** ./src/write/layout/beam.js ***!
-  \**********************************/
+/***/ "./src/write/interactive/selection.js":
+/*!********************************************!*\
+  !*** ./src/write/interactive/selection.js ***!
+  \********************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var RelativeElement = __webpack_require__(/*! ../abc_relative_element */ "./src/write/abc_relative_element.js");
-var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
-var getBarYAt = __webpack_require__(/*! ./getBarYAt */ "./src/write/layout/getBarYAt.js");
-var layoutBeam = function layoutBeam(beam) {
-  if (beam.elems.length === 0 || beam.allrests) return;
-  var dy = calcDy(beam.stemsUp, beam.isgrace); // This is the width of the beam line.
-
-  // create the main beam
-  var firstElement = beam.elems[0];
-  var lastElement = beam.elems[beam.elems.length - 1];
-  var minStemHeight = 0; // The following is to leave space for "!///!" marks.
-  var referencePitch = beam.stemsUp ? firstElement.abcelem.maxpitch : firstElement.abcelem.minpitch;
-  minStemHeight = minStem(firstElement, beam.stemsUp, referencePitch, minStemHeight);
-  minStemHeight = minStem(lastElement, beam.stemsUp, referencePitch, minStemHeight);
-  minStemHeight = Math.max(beam.stemHeight, minStemHeight + 3); // TODO-PER: The 3 is the width of a 16th beam. The actual height of the beam should be used instead.
-  var yPos = calcYPos(beam.average, beam.elems.length, minStemHeight, beam.stemsUp, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, beam.isflat, beam.min, beam.max, beam.isgrace);
-  var xPos = calcXPos(beam.stemsUp, firstElement, lastElement);
-  beam.addBeam({
-    startX: xPos[0],
-    endX: xPos[1],
-    startY: yPos[0],
-    endY: yPos[1],
-    dy: dy
-  });
-
-  // create the rest of the beams (in the case of 1/16th notes, etc.
-  var beams = createAdditionalBeams(beam.elems, beam.stemsUp, beam.beams[0], beam.isgrace, dy);
-  for (var i = 0; i < beams.length; i++) {
-    beam.addBeam(beams[i]);
-  }
-
-  // Now that the main beam is defined, we know how tall the stems should be, so create them and attach them to the original notes.
-  createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote);
-};
-var getDurlog = function getDurlog(duration) {
-  // TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
-  // but there's definitely a case where it isn't. [Probably something to do with triplets.]
-  if (duration === undefined) {
-    return 0;
-  }
-  //        console.log("getDurlog: " + duration);
-  return Math.floor(Math.log(duration) / Math.log(2));
-};
-
-//
-// private functions
-//
-function minStem(element, stemsUp, referencePitch, minStemHeight) {
-  if (!element.children) return minStemHeight;
-  for (var i = 0; i < element.children.length; i++) {
-    var elem = element.children[i];
-    if (stemsUp && elem.top !== undefined && elem.c === "flags.ugrace") minStemHeight = Math.max(minStemHeight, elem.top - referencePitch);else if (!stemsUp && elem.bottom !== undefined && elem.c === "flags.ugrace") minStemHeight = Math.max(minStemHeight, referencePitch - elem.bottom + 7); // The extra 7 is because we are measuring the slash from the top.
-  }
-
-  return minStemHeight;
-}
-function calcSlant(leftAveragePitch, rightAveragePitch, numStems, isFlat) {
-  if (isFlat) return 0;
-  var slant = leftAveragePitch - rightAveragePitch;
-  var maxSlant = numStems / 2;
-  if (slant > maxSlant) slant = maxSlant;
-  if (slant < -maxSlant) slant = -maxSlant;
-  return slant;
-}
-function calcDy(asc, isGrace) {
-  var dy = asc ? spacing.STEP : -spacing.STEP;
-  if (isGrace) dy = dy * 0.4;
-  return dy;
-}
-function calcXPos(asc, firstElement, lastElement) {
-  var starthead = firstElement.heads[asc ? 0 : firstElement.heads.length - 1];
-  var endhead = lastElement.heads[asc ? 0 : lastElement.heads.length - 1];
-  var startX = starthead.x;
-  if (asc) startX += starthead.w - 0.6;
-  var endX = endhead.x;
-  endX += asc ? endhead.w : 0.6;
-  return [startX, endX];
-}
-function calcYPos(average, numElements, stemHeight, asc, firstAveragePitch, lastAveragePitch, isFlat, minPitch, maxPitch, isGrace) {
-  var barpos = stemHeight - 2; // (isGrace)? 5:7;
-  var barminpos = stemHeight - 2;
-  var pos = Math.round(asc ? Math.max(average + barpos, maxPitch + barminpos) : Math.min(average - barpos, minPitch - barminpos));
-  var slant = calcSlant(firstAveragePitch, lastAveragePitch, numElements, isFlat);
-  var startY = pos + Math.floor(slant / 2);
-  var endY = pos + Math.floor(-slant / 2);
-
-  // If the notes are too high or too low, make the beam go down to the middle
-  if (!isGrace) {
-    if (asc && pos < 6) {
-      startY = 6;
-      endY = 6;
-    } else if (!asc && pos > 6) {
-      startY = 6;
-      endY = 6;
-    }
-  }
-  return [startY, endY];
-}
-function createStems(elems, asc, beam, dy, mainNote) {
-  for (var i = 0; i < elems.length; i++) {
-    var elem = elems[i];
-    if (elem.abcelem.rest) continue;
-    // TODO-PER: This is odd. If it is a regular beam then elems is an array of AbsoluteElements, if it is a grace beam then it is an array of objects , so we directly attach the element to the parent. We tell it if is a grace note because they are passed in as a generic object instead of an AbsoluteElement.
-    var isGrace = elem.addExtra ? false : true;
-    var parent = isGrace ? mainNote : elem;
-    var furthestHead = elem.heads[asc ? 0 : elem.heads.length - 1];
-    var ovalDelta = 1 / 5; //(isGrace)?1/3:1/5;
-    var pitch = furthestHead.pitch + (asc ? ovalDelta : -ovalDelta);
-    var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
-    if (!isGrace) dx += furthestHead.dx;
-    var x = furthestHead.x + dx; // this is now the actual x location in pixels.
-    var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
-    var lineWidth = asc ? -0.6 : 0.6;
-    if (!asc) bary -= dy / 2 / spacing.STEP; // TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
-    if (isGrace) dx += elem.heads[0].dx;
-    // TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
-    if (furthestHead.c === 'noteheads.slash.quarter') {
-      if (asc) pitch += 1;else pitch -= 1;
-    }
-    var stem = new RelativeElement(null, dx, 0, pitch, {
-      "type": "stem",
-      "pitch2": bary,
-      linewidth: lineWidth
-    });
-    stem.setX(parent.x); // This is after the x coordinates were set, so we have to set it directly.
-    parent.addRight(stem);
-  }
-}
-function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
-  var beams = [];
-  var auxBeams = []; // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
-  for (var i = 0; i < elems.length; i++) {
-    var elem = elems[i];
-    if (elem.abcelem.rest) continue;
-    var furthestHead = elem.heads[asc ? 0 : elem.heads.length - 1];
-    var x = furthestHead.x + (asc ? furthestHead.w : 0);
-    var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
-    var sy = asc ? -1.5 : 1.5;
-    if (isGrace) sy = sy * 2 / 3; // This makes the second beam on grace notes closer to the first one.
-    var duration = elem.abcelem.duration; // get the duration via abcelem because of triplets
-    if (duration === 0) duration = 0.25; // if this is stemless, then we use quarter note as the duration.
-    for (var durlog = getDurlog(duration); durlog < -3; durlog++) {
-      var index = -4 - durlog;
-      if (auxBeams[index]) {
-        auxBeams[index].single = false;
-      } else {
-        auxBeams[index] = {
-          x: x + (asc ? -0.6 : 0),
-          y: bary + sy * (index + 1),
-          durlog: durlog,
-          single: true
-        };
-      }
-      if (i > 0 && elem.abcelem.beambr && elem.abcelem.beambr <= index + 1) {
-        if (!auxBeams[index].split) auxBeams[index].split = [auxBeams[index].x];
-        var xPos = calcXPos(asc, elems[i - 1], elem);
-        if (auxBeams[index].split[auxBeams[index].split.length - 1] >= xPos[0]) {
-          // the reduction in beams leaves a note unattached so create a small flag for it.
-          xPos[0] += elem.w;
-        }
-        auxBeams[index].split.push(xPos[0]);
-        auxBeams[index].split.push(xPos[1]);
-      }
-    }
-    for (var j = auxBeams.length - 1; j >= 0; j--) {
-      if (i === elems.length - 1 || getDurlog(elems[i + 1].abcelem.duration) > -j - 4) {
-        var auxBeamEndX = x;
-        var auxBeamEndY = bary + sy * (j + 1);
-        if (auxBeams[j].single) {
-          auxBeamEndX = i === 0 ? x + 5 : x - 5;
-          auxBeamEndY = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, auxBeamEndX) + sy * (j + 1);
-        }
-        var b = {
-          startX: auxBeams[j].x,
-          endX: auxBeamEndX,
-          startY: auxBeams[j].y,
-          endY: auxBeamEndY,
-          dy: dy
-        };
-        if (auxBeams[j].split !== undefined) {
-          var split = auxBeams[j].split;
-          if (b.endX <= split[split.length - 1]) {
-            // the reduction in beams leaves the last note by itself, so create a little flag for it
-            split[split.length - 1] -= elem.w;
-          }
-          split.push(b.endX);
-          b.split = auxBeams[j].split;
-        }
-        beams.push(b);
-        auxBeams = auxBeams.slice(0, j);
-      }
-    }
-  }
-  return beams;
-}
-module.exports = layoutBeam;
-
-/***/ }),
-
-/***/ "./src/write/layout/get-left-edge-of-staff.js":
-/*!****************************************************!*\
-  !*** ./src/write/layout/get-left-edge-of-staff.js ***!
-  \****************************************************/
-/***/ (function(module) {
-
-function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
-  var x = renderer.padding.left;
-
-  // find out how much space will be taken up by voice headers
-  var voiceheaderw = 0;
-  var i;
-  var size;
-  for (i = 0; i < voices.length; i++) {
-    if (voices[i].header) {
-      size = getTextSize.calc(voices[i].header, 'voicefont', '');
-      voiceheaderw = Math.max(voiceheaderw, size.width);
-    }
-  }
-  voiceheaderw = addBraceSize(voiceheaderw, brace, getTextSize);
-  voiceheaderw = addBraceSize(voiceheaderw, bracket, getTextSize);
-  if (voiceheaderw) {
-    // Give enough spacing to the right - we use the width of an A for the amount of spacing.
-    var sizeW = getTextSize.calc("A", 'voicefont', '');
-    voiceheaderw += sizeW.width;
-  }
-  x += voiceheaderw;
-  var ofs = 0;
-  ofs = setBraceLocation(brace, x, ofs);
-  ofs = setBraceLocation(bracket, x, ofs);
-  return x + ofs;
-}
-function addBraceSize(voiceheaderw, brace, getTextSize) {
-  if (brace) {
-    for (var i = 0; i < brace.length; i++) {
-      if (brace[i].header) {
-        var size = getTextSize.calc(brace[i].header, 'voicefont', '');
-        voiceheaderw = Math.max(voiceheaderw, size.width);
-      }
-    }
-  }
-  return voiceheaderw;
-}
-function setBraceLocation(brace, x, ofs) {
-  if (brace) {
-    for (var i = 0; i < brace.length; i++) {
-      setLocation(x, brace[i]);
-      ofs = Math.max(ofs, brace[i].getWidth());
-    }
-  }
-  return ofs;
-}
-function setLocation(x, element) {
-  element.x = x;
-}
-module.exports = getLeftEdgeOfStaff;
-
-/***/ }),
-
-/***/ "./src/write/layout/getBarYAt.js":
-/*!***************************************!*\
-  !*** ./src/write/layout/getBarYAt.js ***!
-  \***************************************/
-/***/ (function(module) {
-
-function getBarYAt(startx, starty, endx, endy, x) {
-  return starty + (endy - starty) / (endx - startx) * (x - startx);
-}
-module.exports = getBarYAt;
-
-/***/ }),
-
-/***/ "./src/write/layout/layout.js":
-/*!************************************!*\
-  !*** ./src/write/layout/layout.js ***!
-  \************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var layoutVoice = __webpack_require__(/*! ./voice */ "./src/write/layout/voice.js");
-var setUpperAndLowerElements = __webpack_require__(/*! ./setUpperAndLowerElements */ "./src/write/layout/setUpperAndLowerElements.js");
-var layoutStaffGroup = __webpack_require__(/*! ./staffGroup */ "./src/write/layout/staffGroup.js");
-var getLeftEdgeOfStaff = __webpack_require__(/*! ./get-left-edge-of-staff */ "./src/write/layout/get-left-edge-of-staff.js");
-var layout = function layout(renderer, abctune, width, space) {
-  var i;
-  var abcLine;
-  // Adjust the x-coordinates to their absolute positions
-  var maxWidth = width;
-  for (i = 0; i < abctune.lines.length; i++) {
-    abcLine = abctune.lines[i];
-    if (abcLine.staff) {
-      setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
-      if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
-    }
-  }
-
-  // Layout the beams and add the stems to the beamed notes.
-  for (i = 0; i < abctune.lines.length; i++) {
-    abcLine = abctune.lines[i];
-    if (abcLine.staffGroup && abcLine.staffGroup.voices) {
-      for (var j = 0; j < abcLine.staffGroup.voices.length; j++) {
-        layoutVoice(abcLine.staffGroup.voices[j]);
-      }
-      setUpperAndLowerElements(renderer, abcLine.staffGroup);
-    }
-  }
-
-  // Set the staff spacing
-  // TODO-PER: we should have been able to do this by the time we called setUpperAndLowerElements, but for some reason the "bottom" element seems to be set as a side effect of setting the X spacing.
-  for (i = 0; i < abctune.lines.length; i++) {
-    abcLine = abctune.lines[i];
-    if (abcLine.staffGroup) {
-      abcLine.staffGroup.setHeight();
-    }
-  }
-  return maxWidth;
-};
-// Do the x-axis positioning for a single line (a group of related staffs)
-var setXSpacing = function setXSpacing(renderer, width, space, staffGroup, formatting, isLastLine, debug) {
-  var leftEdge = getLeftEdgeOfStaff(renderer, staffGroup.getTextSize, staffGroup.voices, staffGroup.brace, staffGroup.bracket);
-  var newspace = space;
-  for (var it = 0; it < 8; it++) {
-    // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
-    var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
-    newspace = calcHorizontalSpacing(isLastLine, formatting.stretchlast, width + renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace, renderer.padding.left + renderer.padding.right);
-    if (debug) console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
-    if (newspace === null) break;
-  }
-  centerWholeRests(staffGroup.voices);
-};
-function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace, padding) {
-  if (isLastLine) {
-    if (stretchLast === undefined) {
-      if (lineWidth / targetWidth < 0.66) return null; // keep this for backward compatibility. The break isn't quite the same for some reason.
-    } else {
-      // "Stretch the last music line of a tune when it lacks less than the float fraction of the page width."
-      var lack = 1 - (lineWidth + padding) / targetWidth;
-      var stretch = lack < stretchLast;
-      if (!stretch) return null; // don't stretch last line too much
-    }
-  }
-
-  if (Math.abs(targetWidth - lineWidth) < 2) return null; // if we are already near the target width, we're done.
-  var relSpace = spacingUnits * spacing;
-  var constSpace = lineWidth - relSpace;
-  if (spacingUnits > 0) {
-    spacing = (targetWidth - constSpace) / spacingUnits;
-    if (spacing * minSpace > 50) {
-      spacing = 50 / minSpace;
-    }
-    return spacing;
-  }
-  return null;
-}
-function centerWholeRests(voices) {
-  // whole rests are a special case: if they are by themselves in a measure, then they should be centered.
-  // (If they are not by themselves, that is probably a user error, but we'll just center it between the two items to either side of it.)
-  for (var i = 0; i < voices.length; i++) {
-    var voice = voices[i];
-    // Look through all of the elements except for the first and last. If the whole note appears there then there isn't anything to center it between anyway.
-    for (var j = 1; j < voice.children.length - 1; j++) {
-      var absElem = voice.children[j];
-      if (absElem.abcelem.rest && (absElem.abcelem.rest.type === 'whole' || absElem.abcelem.rest.type === 'multimeasure')) {
-        var before = voice.children[j - 1];
-        var after = voice.children[j + 1];
-        absElem.center(before, after);
-      }
-    }
-  }
-}
-module.exports = layout;
-
-/***/ }),
-
-/***/ "./src/write/layout/setUpperAndLowerElements.js":
-/*!******************************************************!*\
-  !*** ./src/write/layout/setUpperAndLowerElements.js ***!
-  \******************************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var spacing = __webpack_require__(/*! ../abc_spacing */ "./src/write/abc_spacing.js");
-var setUpperAndLowerElements = function setUpperAndLowerElements(renderer, staffGroup) {
-  // Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
-  // Also, get the overall height of all the staves in this group.
-  var lastStaffBottom;
-  for (var i = 0; i < staffGroup.staffs.length; i++) {
-    var staff = staffGroup.staffs[i];
-    // the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
-    // the vertical order of elements that are below is: lyric, chord, volume/dynamic
-    var positionY = {
-      tempoHeightAbove: 0,
-      partHeightAbove: 0,
-      volumeHeightAbove: 0,
-      dynamicHeightAbove: 0,
-      endingHeightAbove: 0,
-      chordHeightAbove: 0,
-      lyricHeightAbove: 0,
-      lyricHeightBelow: 0,
-      chordHeightBelow: 0,
-      volumeHeightBelow: 0,
-      dynamicHeightBelow: 0
-    };
-    if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0) {
-      staff.originalTop = staff.top; // This is just being stored for debugging purposes.
-      staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
-    }
-
-    incTop(staff, positionY, 'lyricHeightAbove');
-    incTop(staff, positionY, 'chordHeightAbove', staff.specialY.chordLines.above);
-    if (staff.specialY.endingHeightAbove) {
-      if (staff.specialY.chordHeightAbove) staff.top += 2;else staff.top += staff.specialY.endingHeightAbove + margin;
-      positionY.endingHeightAbove = staff.top;
-    }
-    if (staff.specialY.dynamicHeightAbove && staff.specialY.volumeHeightAbove) {
-      staff.top += Math.max(staff.specialY.dynamicHeightAbove, staff.specialY.volumeHeightAbove) + margin;
-      positionY.dynamicHeightAbove = staff.top;
-      positionY.volumeHeightAbove = staff.top;
-    } else {
-      incTop(staff, positionY, 'dynamicHeightAbove');
-      incTop(staff, positionY, 'volumeHeightAbove');
-    }
-    incTop(staff, positionY, 'partHeightAbove');
-    incTop(staff, positionY, 'tempoHeightAbove');
-    if (staff.specialY.lyricHeightBelow) {
-      staff.specialY.lyricHeightBelow += renderer.spacing.vocal / spacing.STEP;
-      positionY.lyricHeightBelow = staff.bottom;
-      staff.bottom -= staff.specialY.lyricHeightBelow + margin;
-    }
-    if (staff.specialY.chordHeightBelow) {
-      positionY.chordHeightBelow = staff.bottom;
-      var hgt = staff.specialY.chordHeightBelow;
-      if (staff.specialY.chordLines.below) hgt *= staff.specialY.chordLines.below;
-      staff.bottom -= hgt + margin;
-    }
-    if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
-      positionY.volumeHeightBelow = staff.bottom;
-      positionY.dynamicHeightBelow = staff.bottom;
-      staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow) + margin;
-    } else if (staff.specialY.volumeHeightBelow) {
-      positionY.volumeHeightBelow = staff.bottom;
-      staff.bottom -= staff.specialY.volumeHeightBelow + margin;
-    } else if (staff.specialY.dynamicHeightBelow) {
-      positionY.dynamicHeightBelow = staff.bottom;
-      staff.bottom -= staff.specialY.dynamicHeightBelow + margin;
-    }
-    if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0) staff.positionY = positionY; // This is just being stored for debugging purposes.
-
-    for (var j = 0; j < staff.voices.length; j++) {
-      var voice = staffGroup.voices[staff.voices[j]];
-      setUpperAndLowerVoiceElements(positionY, voice, renderer.spacing);
-    }
-    // We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
-    // Only try to put in extra space if this isn't the top staff.
-    if (lastStaffBottom !== undefined) {
-      var thisStaffTop = staff.top - 10;
-      var forcedSpacingBetween = lastStaffBottom + thisStaffTop;
-      var minSpacingInPitches = renderer.spacing.systemStaffSeparation / spacing.STEP;
-      var addedSpace = minSpacingInPitches - forcedSpacingBetween;
-      if (addedSpace > 0) staff.top += addedSpace;
-    }
-    lastStaffBottom = 2 - staff.bottom; // the staff starts at position 2 and the bottom variable is negative. Therefore to find out how large the bottom is, we reverse the sign of the bottom, and add the 2 in.
-
-    // Now we need a little margin on the top, so we'll just throw that in.
-    //staff.top += 4;
-    //console.log("Staff Y: ",i,heightInPitches,staff.top,staff.bottom);
-  }
-  //console.log("Staff Height: ",heightInPitches,this.height);
-};
-
-var margin = 1;
-function incTop(staff, positionY, item, count) {
-  if (staff.specialY[item]) {
-    var height = staff.specialY[item];
-    if (count) height *= count;
-    staff.top += height + margin;
-    positionY[item] = staff.top;
-  }
-}
-function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
-  var i;
-  var abselem;
-  for (i = 0; i < voice.children.length; i++) {
-    abselem = voice.children[i];
-    setUpperAndLowerAbsoluteElements(positionY, abselem, spacing);
-  }
-  for (i = 0; i < voice.otherchildren.length; i++) {
-    abselem = voice.otherchildren[i];
-    switch (abselem.type) {
-      case 'CrescendoElem':
-        setUpperAndLowerCrescendoElements(positionY, abselem);
-        break;
-      case 'DynamicDecoration':
-        setUpperAndLowerDynamicElements(positionY, abselem);
-        break;
-      case 'EndingElem':
-        setUpperAndLowerEndingElements(positionY, abselem);
-        break;
-    }
-  }
-}
-
-// For each of the relative elements that can't be placed in advance (because their vertical placement depends on everything
-// else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
-// hash with the vertical placement (in pitch units) for each type.
-// TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
-function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
-  // specialYResolved contains the actual pitch for each of the classes of elements.
-  for (var i = 0; i < element.children.length; i++) {
-    var child = element.children[i];
-    for (var key in element.specialY) {
-      // for each class of element that needs to be placed vertically
-      if (element.specialY.hasOwnProperty(key)) {
-        if (child[key]) {
-          // If this relative element has defined a height for this class of element
-          child.pitch = specialYResolved[key];
-          if (child.top === undefined) {
-            // TODO-PER: HACK! Not sure this is the right place to do this.
-            if (child.type === 'TempoElement') {
-              setUpperAndLowerTempoElement(specialYResolved, child);
-            } else {
-              setUpperAndLowerRelativeElements(specialYResolved, child, spacing);
-            }
-            element.pushTop(child.top);
-            element.pushBottom(child.bottom);
-          }
-        }
-      }
-    }
-  }
-}
-function setUpperAndLowerCrescendoElements(positionY, element) {
-  if (element.dynamicHeightAbove) element.pitch = positionY.dynamicHeightAbove;else element.pitch = positionY.dynamicHeightBelow;
-}
-function setUpperAndLowerDynamicElements(positionY, element) {
-  if (element.volumeHeightAbove) element.pitch = positionY.volumeHeightAbove;else element.pitch = positionY.volumeHeightBelow;
-}
-function setUpperAndLowerEndingElements(positionY, element) {
-  element.pitch = positionY.endingHeightAbove - 2;
-}
-function setUpperAndLowerTempoElement(positionY, element) {
-  element.pitch = positionY.tempoHeightAbove;
-  element.top = positionY.tempoHeightAbove;
-  element.bottom = positionY.tempoHeightAbove;
-  if (element.note) {
-    var tempoPitch = element.pitch - element.totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
-    element.note.top = tempoPitch;
-    element.note.bottom = tempoPitch;
-    for (var i = 0; i < element.note.children.length; i++) {
-      var child = element.note.children[i];
-      child.top += tempoPitch;
-      child.bottom += tempoPitch;
-      child.pitch += tempoPitch;
-      if (child.pitch2 !== undefined) child.pitch2 += tempoPitch;
-    }
-  }
-}
-function setUpperAndLowerRelativeElements(positionY, element, renderSpacing) {
-  switch (element.type) {
-    case "part":
-      element.top = positionY.partHeightAbove + element.height;
-      element.bottom = positionY.partHeightAbove;
-      break;
-    case "text":
-    case "chord":
-      if (element.chordHeightAbove) {
-        element.top = positionY.chordHeightAbove;
-        element.bottom = positionY.chordHeightAbove;
-      } else {
-        element.top = positionY.chordHeightBelow;
-        element.bottom = positionY.chordHeightBelow;
-      }
-      break;
-    case "lyric":
-      if (element.lyricHeightAbove) {
-        element.top = positionY.lyricHeightAbove;
-        element.bottom = positionY.lyricHeightAbove;
-      } else {
-        element.top = positionY.lyricHeightBelow + renderSpacing.vocal / spacing.STEP;
-        element.bottom = positionY.lyricHeightBelow + renderSpacing.vocal / spacing.STEP;
-        element.pitch -= renderSpacing.vocal / spacing.STEP;
-      }
-      break;
-    case "debug":
-      element.top = positionY.chordHeightAbove;
-      element.bottom = positionY.chordHeightAbove;
-      break;
-  }
-  if (element.pitch === undefined || element.top === undefined) console.error("RelativeElement position not set.", element.type, element.pitch, element.top, positionY);
-}
-module.exports = setUpperAndLowerElements;
-
-/***/ }),
-
-/***/ "./src/write/layout/staffGroup.js":
-/*!****************************************!*\
-  !*** ./src/write/layout/staffGroup.js ***!
-  \****************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var layoutVoiceElements = __webpack_require__(/*! ./VoiceElements */ "./src/write/layout/VoiceElements.js");
-function checkLastBarX(voices) {
-  var maxX = 0;
-  for (var i = 0; i < voices.length; i++) {
-    var curVoice = voices[i];
-    if (curVoice.children.length > 0) {
-      var lastChild = curVoice.children.length - 1;
-      var maxChild = curVoice.children[lastChild];
-      if (maxChild.abcelem.el_type === 'bar') {
-        var barX = maxChild.children[0].x;
-        if (barX > maxX) {
-          maxX = barX;
-        } else {
-          maxChild.children[0].x = maxX;
-        }
-      }
-    }
-  }
-}
-var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staffGroup, leftEdge) {
-  var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
-  var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
-  var minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
-
-  var x = leftEdge;
-  staffGroup.startx = x;
-  var i;
-  var currentduration = 0;
-  if (debug) console.log("init layout", spacing);
-  for (i = 0; i < staffGroup.voices.length; i++) {
-    layoutVoiceElements.beginLayout(x, staffGroup.voices[i]);
-  }
-  var spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
-  while (!finished(staffGroup.voices)) {
-    // find first duration level to be laid out among candidates across voices
-    currentduration = null; // candidate smallest duration level
-    for (i = 0; i < staffGroup.voices.length; i++) {
-      if (!layoutVoiceElements.layoutEnded(staffGroup.voices[i]) && (!currentduration || getDurationIndex(staffGroup.voices[i]) < currentduration)) currentduration = getDurationIndex(staffGroup.voices[i]);
-    }
-
-    // isolate voices at current duration level
-    var currentvoices = [];
-    var othervoices = [];
-    for (i = 0; i < staffGroup.voices.length; i++) {
-      var durationIndex = getDurationIndex(staffGroup.voices[i]);
-      // PER: Because of the inexactness of JS floating point math, we just get close.
-      if (durationIndex - currentduration > epsilon) {
-        othervoices.push(staffGroup.voices[i]);
-        //console.log("out: voice ",i);
-      } else {
-        currentvoices.push(staffGroup.voices[i]);
-        //if (debug) console.log("in: voice ",i);
-      }
-    }
-
-    // among the current duration level find the one which needs starting furthest right
-    spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
-    var spacingduration = 0;
-    for (i = 0; i < currentvoices.length; i++) {
-      //console.log("greatest spacing unit", x, layoutVoiceElements.getNextX(currentvoices[i]), layoutVoiceElements.getSpacingUnits(currentvoices[i]), currentvoices[i].spacingduration);
-      if (layoutVoiceElements.getNextX(currentvoices[i]) > x) {
-        x = layoutVoiceElements.getNextX(currentvoices[i]);
-        spacingunit = layoutVoiceElements.getSpacingUnits(currentvoices[i]);
-        spacingduration = currentvoices[i].spacingduration;
-      }
-    }
-    spacingunits += spacingunit;
-    minspace = Math.min(minspace, spacingunit);
-    if (debug) console.log("currentduration: ", currentduration, spacingunits, minspace);
-    var lastTopVoice = undefined;
-    for (i = 0; i < currentvoices.length; i++) {
-      var v = currentvoices[i];
-      if (v.voicenumber === 0) lastTopVoice = i;
-      var topVoice = lastTopVoice !== undefined && currentvoices[lastTopVoice].voicenumber !== v.voicenumber ? currentvoices[lastTopVoice] : undefined;
-      if (!isSameStaff(v, topVoice)) topVoice = undefined;
-      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, v, renderer.minPadding, topVoice);
-      var dx = voicechildx - x;
-      if (dx > 0) {
-        x = voicechildx; //update x
-        for (var j = 0; j < i; j++) {
-          // shift over all previously laid out elements
-          layoutVoiceElements.shiftRight(dx, currentvoices[j]);
-        }
-      }
-    }
-
-    // remove the value of already counted spacing units in other voices (e.g. if a voice had planned to use up 5 spacing units but is not in line to be laid out at this duration level - where we've used 2 spacing units - then we must use up 3 spacing units, not 5)
-    for (i = 0; i < othervoices.length; i++) {
-      othervoices[i].spacingduration -= spacingduration;
-      layoutVoiceElements.updateNextX(x, spacing, othervoices[i]); // adjust other voices expectations
-    }
-
-    // update indexes of currently laid out elems
-    for (i = 0; i < currentvoices.length; i++) {
-      var voice = currentvoices[i];
-      layoutVoiceElements.updateIndices(voice);
-    }
-  } // finished laying out
-
-  // find the greatest remaining x as a base for the width
-  for (i = 0; i < staffGroup.voices.length; i++) {
-    if (layoutVoiceElements.getNextX(staffGroup.voices[i]) > x) {
-      x = layoutVoiceElements.getNextX(staffGroup.voices[i]);
-      spacingunit = layoutVoiceElements.getSpacingUnits(staffGroup.voices[i]);
-    }
-  }
-
-  // adjust lastBar when needed (multi staves)
-  checkLastBarX(staffGroup.voices);
-  //console.log("greatest remaining",spacingunit,x);
-  spacingunits += spacingunit;
-  staffGroup.setWidth(x);
-  return {
-    spacingUnits: spacingunits,
-    minSpace: minspace
-  };
-};
-function finished(voices) {
-  for (var i = 0; i < voices.length; i++) {
-    if (!layoutVoiceElements.layoutEnded(voices[i])) return false;
-  }
-  return true;
-}
-function getDurationIndex(element) {
-  return element.durationindex - (element.children[element.i] && element.children[element.i].duration > 0 ? 0 : 0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
-}
-
-function isSameStaff(voice1, voice2) {
-  if (!voice1 || !voice1.staff || !voice1.staff.voices || voice1.staff.voices.length === 0) return false;
-  if (!voice2 || !voice2.staff || !voice2.staff.voices || voice2.staff.voices.length === 0) return false;
-  return voice1.staff.voices[0] === voice2.staff.voices[0];
-}
-module.exports = layoutStaffGroup;
-
-/***/ }),
-
-/***/ "./src/write/layout/triplet.js":
-/*!*************************************!*\
-  !*** ./src/write/layout/triplet.js ***!
-  \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var getBarYAt = __webpack_require__(/*! ./getBarYAt */ "./src/write/layout/getBarYAt.js");
-function layoutTriplet(element) {
-  // TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
-  if (element.anchor1 && element.anchor2) {
-    element.hasBeam = !!element.anchor1.parent.beam && element.anchor1.parent.beam === element.anchor2.parent.beam;
-    var beam = element.anchor1.parent.beam;
-    // if hasBeam is true, then the first and last element in the triplet have the same beam.
-    // We also need to check if the beam doesn't contain other notes so that `(3 dcdcc` will do a bracket.
-    if (element.hasBeam && (beam.elems[0] !== element.anchor1.parent || beam.elems[beam.elems.length - 1] !== element.anchor2.parent)) element.hasBeam = false;
-    if (element.hasBeam) {
-      // If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
-      var left = isAbove(beam) ? element.anchor1.x + element.anchor1.w : element.anchor1.x;
-      element.yTextPos = heightAtMidpoint(left, element.anchor2.x, beam);
-      element.yTextPos += isAbove(beam) ? 3 : -2; // This creates some space between the beam and the number.
-      element.xTextPos = xAtMidpoint(left, element.anchor2.x);
-      element.top = element.yTextPos + 1;
-      element.bottom = element.yTextPos - 2;
-      if (isAbove(beam)) element.endingHeightAbove = 4;
-    } else {
-      // If there isn't a beam, then we need to draw the bracket and the text. The bracket is always above.
-      // The bracket is never lower than the 'a' line, but is 4 pitches above the first and last notes. If there is
-      // a tall note in the middle, the bracket is horizontal and above the highest note.
-      element.startNote = Math.max(element.anchor1.parent.top, 9) + 4;
-      element.endNote = Math.max(element.anchor2.parent.top, 9) + 4;
-      // If it starts or ends on a rest, make the beam horizontal
-      if (element.anchor1.parent.type === "rest" && element.anchor2.parent.type !== "rest") element.startNote = element.endNote;else if (element.anchor2.parent.type === "rest" && element.anchor1.parent.type !== "rest") element.endNote = element.startNote;
-      // See if the middle note is really high.
-      var max = 0;
-      for (var i = 0; i < element.middleElems.length; i++) {
-        max = Math.max(max, element.middleElems[i].top);
-      }
-      max += 4;
-      if (max > element.startNote || max > element.endNote) {
-        element.startNote = max;
-        element.endNote = max;
-      }
-      if (element.flatBeams) {
-        element.startNote = Math.max(element.startNote, element.endNote);
-        element.endNote = Math.max(element.startNote, element.endNote);
-      }
-      element.yTextPos = element.startNote + (element.endNote - element.startNote) / 2;
-      element.xTextPos = element.anchor1.x + (element.anchor2.x + element.anchor2.w - element.anchor1.x) / 2;
-      element.top = element.yTextPos + 1;
-    }
-  }
-  delete element.middleElems;
-  delete element.flatBeams;
-}
-function isAbove(beam) {
-  return beam.stemsUp;
-}
-
-// We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16
-function heightAtMidpoint(startX, endX, beam) {
-  if (beam.beams.length === 0) return 0;
-  beam = beam.beams[0];
-  var midPoint = startX + (endX - startX) / 2;
-  return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
-}
-function xAtMidpoint(startX, endX) {
-  return startX + (endX - startX) / 2;
-}
-module.exports = layoutTriplet;
-
-/***/ }),
-
-/***/ "./src/write/layout/voice.js":
-/*!***********************************!*\
-  !*** ./src/write/layout/voice.js ***!
-  \***********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var layoutBeam = __webpack_require__(/*! ./beam */ "./src/write/layout/beam.js");
-var getBarYAt = __webpack_require__(/*! ./getBarYAt */ "./src/write/layout/getBarYAt.js");
-var layoutTriplet = __webpack_require__(/*! ./triplet */ "./src/write/layout/triplet.js");
-var layoutVoice = function layoutVoice(voice) {
-  for (var i = 0; i < voice.beams.length; i++) {
-    if (voice.beams[i].type === 'BeamElem') {
-      layoutBeam(voice.beams[i]);
-      moveDecorations(voice.beams[i]);
-      // The above will change the top and bottom of the abselem children, so see if we need to expand our range.
-      for (var j = 0; j < voice.beams[i].elems.length; j++) {
-        voice.adjustRange(voice.beams[i].elems[j]);
-      }
-    }
-  }
-  voice.staff.specialY.chordLines = setLaneForChord(voice.children);
-
-  // Now we can layout the triplets
-  for (i = 0; i < voice.otherchildren.length; i++) {
-    var child = voice.otherchildren[i];
-    if (child.type === 'TripletElem') {
-      layoutTriplet(child);
-      voice.adjustRange(child);
-    }
-  }
-  voice.staff.top = Math.max(voice.staff.top, voice.top);
-  voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
-};
-function moveDecorations(beam) {
-  var padding = 1.5; // This is the vertical padding between elements, in pitches.
-  for (var ch = 0; ch < beam.elems.length; ch++) {
-    var child = beam.elems[ch];
-    if (child.top) {
-      // We now know where the ornaments should have been placed, so move them if they would overlap.
-      var top = yAtNote(child, beam);
-      for (var i = 0; i < child.children.length; i++) {
-        var el = child.children[i];
-        if (el.klass === 'ornament') {
-          if (el.bottom - padding < top) {
-            var distance = top - el.bottom + padding; // Find the distance that it needs to move and add a little margin so the element doesn't touch the beam.
-            el.bottom += distance;
-            el.top += distance;
-            el.pitch += distance;
-            top = child.top = el.top;
-          }
-        }
-      }
-    }
-  }
-}
-function placeInLane(rightMost, relElem) {
-  // These items are centered so figure the coordinates accordingly.
-  // The font reports some extra space so the margin is built in.
-  var xCoords = relElem.getChordDim();
-  if (xCoords) {
-    for (var i = 0; i < rightMost.length; i++) {
-      var fits = rightMost[i] < xCoords.left;
-      if (fits) {
-        if (i > 0) relElem.putChordInLane(i);
-        rightMost[i] = xCoords.right;
-        return;
-      }
-    }
-    // If we didn't return early, then we need a new row
-    rightMost.push(xCoords.right);
-    relElem.putChordInLane(rightMost.length - 1);
-  }
-}
-function setLaneForChord(absElems) {
-  // Criteria:
-  // 1) lane numbers start from the bottom so that as many items as possible are in lane 0, closest to the music.
-  // 2) a chord can have more than one line (for instance "C\nD") each line is a lane.
-  // 3) if two adjoining items would touch then push the second one to the next lane.
-  // 4) use as many lanes as is necessary to get everything to not touch.
-  // 5) leave a margin between items, so use another lane if the chords would have less than a character's width.
-  // 6) if the chord only has one character, allow it to be closer than if the chord has more than one character.
-  var rightMostAbove = [0];
-  var rightMostBelow = [0];
-  var i;
-  var j;
-  var relElem;
-  for (i = 0; i < absElems.length; i++) {
-    for (j = 0; j < absElems[i].children.length; j++) {
-      relElem = absElems[i].children[j];
-      if (relElem.chordHeightAbove) {
-        placeInLane(rightMostAbove, relElem);
-      }
-    }
-    for (j = absElems[i].children.length - 1; j >= 0; j--) {
-      relElem = absElems[i].children[j];
-      if (relElem.chordHeightBelow) {
-        placeInLane(rightMostBelow, relElem);
-      }
-    }
-  }
-  // If we used a second line, then we need to go back and set the first lines.
-  // Also we need to flip the indexes of the names so that we can count from the top line.
-  if (rightMostAbove.length > 1 || rightMostBelow.length > 1) setLane(absElems, rightMostAbove.length, rightMostBelow.length);
-  return {
-    above: rightMostAbove.length,
-    below: rightMostBelow.length
-  };
-}
-function numAnnotationsBelow(absElem) {
-  var count = 0;
-  for (var j = 0; j < absElem.children.length; j++) {
-    var relElem = absElem.children[j];
-    if (relElem.chordHeightBelow) count++;
-  }
-  return count;
-}
-function setLane(absElems, numLanesAbove, numLanesBelow) {
-  for (var i = 0; i < absElems.length; i++) {
-    var below = numAnnotationsBelow(absElems[i]);
-    for (var j = 0; j < absElems[i].children.length; j++) {
-      var relElem = absElems[i].children[j];
-      if (relElem.chordHeightAbove) {
-        relElem.invertLane(numLanesAbove);
-        // } else if (relElem.chordHeightBelow) {
-        // 	relElem.invertLane(below);
-      }
-    }
-  }
-}
-
-function yAtNote(element, beam) {
-  beam = beam.beams[0];
-  return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
-}
-module.exports = layoutVoice;
-
-/***/ }),
-
-/***/ "./src/write/selection.js":
-/*!********************************!*\
-  !*** ./src/write/selection.js ***!
-  \********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var spacing = __webpack_require__(/*! ./abc_spacing */ "./src/write/abc_spacing.js");
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
 function setupSelection(engraver, svgs) {
   engraver.rangeHighlight = rangeHighlight;
   if (engraver.dragging) {
@@ -25019,87 +23888,1266 @@ module.exports = setupSelection;
 
 /***/ }),
 
-/***/ "./src/write/separator.js":
-/*!********************************!*\
-  !*** ./src/write/separator.js ***!
-  \********************************/
-/***/ (function(module) {
+/***/ "./src/write/interactive/unhighlight.js":
+/*!**********************************************!*\
+  !*** ./src/write/interactive/unhighlight.js ***!
+  \**********************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-function Separator(spaceAbove, lineLength, spaceBelow) {
-  this.rows = [];
-  if (spaceAbove) this.rows.push({
-    move: spaceAbove
-  });
-  this.rows.push({
-    separator: lineLength,
-    absElemType: "separator"
-  });
-  if (spaceBelow) this.rows.push({
-    move: spaceBelow
-  });
-}
-module.exports = Separator;
+var setClass = __webpack_require__(/*! ../helpers/set-class */ "./src/write/helpers/set-class.js");
+var unhighlight = function unhighlight(klass, color) {
+  if (klass === undefined) klass = "abcjs-note_selected";
+  if (color === undefined) color = "#000000";
+  setClass(this.elemset, "", klass, color);
+};
+module.exports = unhighlight;
 
 /***/ }),
 
-/***/ "./src/write/set-class.js":
-/*!********************************!*\
-  !*** ./src/write/set-class.js ***!
-  \********************************/
+/***/ "./src/write/layout/beam.js":
+/*!**********************************!*\
+  !*** ./src/write/layout/beam.js ***!
+  \**********************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var RelativeElement = __webpack_require__(/*! ../creation/elements/relative-element */ "./src/write/creation/elements/relative-element.js");
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
+var getBarYAt = __webpack_require__(/*! ./get-bar-y-at */ "./src/write/layout/get-bar-y-at.js");
+var layoutBeam = function layoutBeam(beam) {
+  if (beam.elems.length === 0 || beam.allrests) return;
+  var dy = calcDy(beam.stemsUp, beam.isgrace); // This is the width of the beam line.
+
+  // create the main beam
+  var firstElement = beam.elems[0];
+  var lastElement = beam.elems[beam.elems.length - 1];
+  var minStemHeight = 0; // The following is to leave space for "!///!" marks.
+  var referencePitch = beam.stemsUp ? firstElement.abcelem.maxpitch : firstElement.abcelem.minpitch;
+  minStemHeight = minStem(firstElement, beam.stemsUp, referencePitch, minStemHeight);
+  minStemHeight = minStem(lastElement, beam.stemsUp, referencePitch, minStemHeight);
+  minStemHeight = Math.max(beam.stemHeight, minStemHeight + 3); // TODO-PER: The 3 is the width of a 16th beam. The actual height of the beam should be used instead.
+  var yPos = calcYPos(beam.average, beam.elems.length, minStemHeight, beam.stemsUp, firstElement.abcelem.averagepitch, lastElement.abcelem.averagepitch, beam.isflat, beam.min, beam.max, beam.isgrace);
+  var xPos = calcXPos(beam.stemsUp, firstElement, lastElement);
+  beam.addBeam({
+    startX: xPos[0],
+    endX: xPos[1],
+    startY: yPos[0],
+    endY: yPos[1],
+    dy: dy
+  });
+
+  // create the rest of the beams (in the case of 1/16th notes, etc.
+  var beams = createAdditionalBeams(beam.elems, beam.stemsUp, beam.beams[0], beam.isgrace, dy);
+  for (var i = 0; i < beams.length; i++) {
+    beam.addBeam(beams[i]);
+  }
+
+  // Now that the main beam is defined, we know how tall the stems should be, so create them and attach them to the original notes.
+  createStems(beam.elems, beam.stemsUp, beam.beams[0], dy, beam.mainNote);
+};
+var getDurlog = function getDurlog(duration) {
+  // TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
+  // but there's definitely a case where it isn't. [Probably something to do with triplets.]
+  if (duration === undefined) {
+    return 0;
+  }
+  //        console.log("getDurlog: " + duration);
+  return Math.floor(Math.log(duration) / Math.log(2));
+};
+
+//
+// private functions
+//
+function minStem(element, stemsUp, referencePitch, minStemHeight) {
+  if (!element.children) return minStemHeight;
+  for (var i = 0; i < element.children.length; i++) {
+    var elem = element.children[i];
+    if (stemsUp && elem.top !== undefined && elem.c === "flags.ugrace") minStemHeight = Math.max(minStemHeight, elem.top - referencePitch);else if (!stemsUp && elem.bottom !== undefined && elem.c === "flags.ugrace") minStemHeight = Math.max(minStemHeight, referencePitch - elem.bottom + 7); // The extra 7 is because we are measuring the slash from the top.
+  }
+
+  return minStemHeight;
+}
+function calcSlant(leftAveragePitch, rightAveragePitch, numStems, isFlat) {
+  if (isFlat) return 0;
+  var slant = leftAveragePitch - rightAveragePitch;
+  var maxSlant = numStems / 2;
+  if (slant > maxSlant) slant = maxSlant;
+  if (slant < -maxSlant) slant = -maxSlant;
+  return slant;
+}
+function calcDy(asc, isGrace) {
+  var dy = asc ? spacing.STEP : -spacing.STEP;
+  if (isGrace) dy = dy * 0.4;
+  return dy;
+}
+function calcXPos(asc, firstElement, lastElement) {
+  var starthead = firstElement.heads[asc ? 0 : firstElement.heads.length - 1];
+  var endhead = lastElement.heads[asc ? 0 : lastElement.heads.length - 1];
+  var startX = starthead.x;
+  if (asc) startX += starthead.w - 0.6;
+  var endX = endhead.x;
+  endX += asc ? endhead.w : 0.6;
+  return [startX, endX];
+}
+function calcYPos(average, numElements, stemHeight, asc, firstAveragePitch, lastAveragePitch, isFlat, minPitch, maxPitch, isGrace) {
+  var barpos = stemHeight - 2; // (isGrace)? 5:7;
+  var barminpos = stemHeight - 2;
+  var pos = Math.round(asc ? Math.max(average + barpos, maxPitch + barminpos) : Math.min(average - barpos, minPitch - barminpos));
+  var slant = calcSlant(firstAveragePitch, lastAveragePitch, numElements, isFlat);
+  var startY = pos + Math.floor(slant / 2);
+  var endY = pos + Math.floor(-slant / 2);
+
+  // If the notes are too high or too low, make the beam go down to the middle
+  if (!isGrace) {
+    if (asc && pos < 6) {
+      startY = 6;
+      endY = 6;
+    } else if (!asc && pos > 6) {
+      startY = 6;
+      endY = 6;
+    }
+  }
+  return [startY, endY];
+}
+function createStems(elems, asc, beam, dy, mainNote) {
+  for (var i = 0; i < elems.length; i++) {
+    var elem = elems[i];
+    if (elem.abcelem.rest) continue;
+    // TODO-PER: This is odd. If it is a regular beam then elems is an array of AbsoluteElements, if it is a grace beam then it is an array of objects , so we directly attach the element to the parent. We tell it if is a grace note because they are passed in as a generic object instead of an AbsoluteElement.
+    var isGrace = elem.addExtra ? false : true;
+    var parent = isGrace ? mainNote : elem;
+    var furthestHead = elem.heads[asc ? 0 : elem.heads.length - 1];
+    var ovalDelta = 1 / 5; //(isGrace)?1/3:1/5;
+    var pitch = furthestHead.pitch + (asc ? ovalDelta : -ovalDelta);
+    var dx = asc ? furthestHead.w : 0; // down-pointing stems start on the left side of the note, up-pointing stems start on the right side, so we offset by the note width.
+    if (!isGrace) dx += furthestHead.dx;
+    var x = furthestHead.x + dx; // this is now the actual x location in pixels.
+    var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
+    var lineWidth = asc ? -0.6 : 0.6;
+    if (!asc) bary -= dy / 2 / spacing.STEP; // TODO-PER: This is just a fudge factor so the down-pointing stems don't overlap.
+    if (isGrace) dx += elem.heads[0].dx;
+    // TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
+    if (furthestHead.c === 'noteheads.slash.quarter') {
+      if (asc) pitch += 1;else pitch -= 1;
+    }
+    var stem = new RelativeElement(null, dx, 0, pitch, {
+      "type": "stem",
+      "pitch2": bary,
+      linewidth: lineWidth
+    });
+    stem.setX(parent.x); // This is after the x coordinates were set, so we have to set it directly.
+    parent.addRight(stem);
+  }
+}
+function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
+  var beams = [];
+  var auxBeams = []; // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
+  for (var i = 0; i < elems.length; i++) {
+    var elem = elems[i];
+    if (elem.abcelem.rest) continue;
+    var furthestHead = elem.heads[asc ? 0 : elem.heads.length - 1];
+    var x = furthestHead.x + (asc ? furthestHead.w : 0);
+    var bary = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, x);
+    var sy = asc ? -1.5 : 1.5;
+    if (isGrace) sy = sy * 2 / 3; // This makes the second beam on grace notes closer to the first one.
+    var duration = elem.abcelem.duration; // get the duration via abcelem because of triplets
+    if (duration === 0) duration = 0.25; // if this is stemless, then we use quarter note as the duration.
+    for (var durlog = getDurlog(duration); durlog < -3; durlog++) {
+      var index = -4 - durlog;
+      if (auxBeams[index]) {
+        auxBeams[index].single = false;
+      } else {
+        auxBeams[index] = {
+          x: x + (asc ? -0.6 : 0),
+          y: bary + sy * (index + 1),
+          durlog: durlog,
+          single: true
+        };
+      }
+      if (i > 0 && elem.abcelem.beambr && elem.abcelem.beambr <= index + 1) {
+        if (!auxBeams[index].split) auxBeams[index].split = [auxBeams[index].x];
+        var xPos = calcXPos(asc, elems[i - 1], elem);
+        if (auxBeams[index].split[auxBeams[index].split.length - 1] >= xPos[0]) {
+          // the reduction in beams leaves a note unattached so create a small flag for it.
+          xPos[0] += elem.w;
+        }
+        auxBeams[index].split.push(xPos[0]);
+        auxBeams[index].split.push(xPos[1]);
+      }
+    }
+    for (var j = auxBeams.length - 1; j >= 0; j--) {
+      if (i === elems.length - 1 || getDurlog(elems[i + 1].abcelem.duration) > -j - 4) {
+        var auxBeamEndX = x;
+        var auxBeamEndY = bary + sy * (j + 1);
+        if (auxBeams[j].single) {
+          auxBeamEndX = i === 0 ? x + 5 : x - 5;
+          auxBeamEndY = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, auxBeamEndX) + sy * (j + 1);
+        }
+        var b = {
+          startX: auxBeams[j].x,
+          endX: auxBeamEndX,
+          startY: auxBeams[j].y,
+          endY: auxBeamEndY,
+          dy: dy
+        };
+        if (auxBeams[j].split !== undefined) {
+          var split = auxBeams[j].split;
+          if (b.endX <= split[split.length - 1]) {
+            // the reduction in beams leaves the last note by itself, so create a little flag for it
+            split[split.length - 1] -= elem.w;
+          }
+          split.push(b.endX);
+          b.split = auxBeams[j].split;
+        }
+        beams.push(b);
+        auxBeams = auxBeams.slice(0, j);
+      }
+    }
+  }
+  return beams;
+}
+module.exports = layoutBeam;
+
+/***/ }),
+
+/***/ "./src/write/layout/get-bar-y-at.js":
+/*!******************************************!*\
+  !*** ./src/write/layout/get-bar-y-at.js ***!
+  \******************************************/
 /***/ (function(module) {
 
-var setClass = function setClass(elemset, addClass, removeClass, color) {
-  if (!elemset) return;
-  for (var i = 0; i < elemset.length; i++) {
-    var el = elemset[i];
-    var attr = el.getAttribute("highlight");
-    if (!attr) attr = "fill";
-    el.setAttribute(attr, color);
-    var kls = el.getAttribute("class");
-    if (!kls) kls = "";
-    kls = kls.replace(removeClass, "");
-    kls = kls.replace(addClass, "");
-    if (addClass.length > 0) {
-      if (kls.length > 0 && kls[kls.length - 1] !== ' ') kls += " ";
-      kls += addClass;
+function getBarYAt(startx, starty, endx, endy, x) {
+  return starty + (endy - starty) / (endx - startx) * (x - startx);
+}
+module.exports = getBarYAt;
+
+/***/ }),
+
+/***/ "./src/write/layout/get-left-edge-of-staff.js":
+/*!****************************************************!*\
+  !*** ./src/write/layout/get-left-edge-of-staff.js ***!
+  \****************************************************/
+/***/ (function(module) {
+
+function getLeftEdgeOfStaff(renderer, getTextSize, voices, brace, bracket) {
+  var x = renderer.padding.left;
+
+  // find out how much space will be taken up by voice headers
+  var voiceheaderw = 0;
+  var i;
+  var size;
+  for (i = 0; i < voices.length; i++) {
+    if (voices[i].header) {
+      size = getTextSize.calc(voices[i].header, 'voicefont', '');
+      voiceheaderw = Math.max(voiceheaderw, size.width);
     }
-    el.setAttribute("class", kls);
+  }
+  voiceheaderw = addBraceSize(voiceheaderw, brace, getTextSize);
+  voiceheaderw = addBraceSize(voiceheaderw, bracket, getTextSize);
+  if (voiceheaderw) {
+    // Give enough spacing to the right - we use the width of an A for the amount of spacing.
+    var sizeW = getTextSize.calc("A", 'voicefont', '');
+    voiceheaderw += sizeW.width;
+  }
+  x += voiceheaderw;
+  var ofs = 0;
+  ofs = setBraceLocation(brace, x, ofs);
+  ofs = setBraceLocation(bracket, x, ofs);
+  return x + ofs;
+}
+function addBraceSize(voiceheaderw, brace, getTextSize) {
+  if (brace) {
+    for (var i = 0; i < brace.length; i++) {
+      if (brace[i].header) {
+        var size = getTextSize.calc(brace[i].header, 'voicefont', '');
+        voiceheaderw = Math.max(voiceheaderw, size.width);
+      }
+    }
+  }
+  return voiceheaderw;
+}
+function setBraceLocation(brace, x, ofs) {
+  if (brace) {
+    for (var i = 0; i < brace.length; i++) {
+      setLocation(x, brace[i]);
+      ofs = Math.max(ofs, brace[i].getWidth());
+    }
+  }
+  return ofs;
+}
+function setLocation(x, element) {
+  element.x = x;
+}
+module.exports = getLeftEdgeOfStaff;
+
+/***/ }),
+
+/***/ "./src/write/layout/layout.js":
+/*!************************************!*\
+  !*** ./src/write/layout/layout.js ***!
+  \************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var layoutVoice = __webpack_require__(/*! ./voice */ "./src/write/layout/voice.js");
+var setUpperAndLowerElements = __webpack_require__(/*! ./set-upper-and-lower-elements */ "./src/write/layout/set-upper-and-lower-elements.js");
+var layoutStaffGroup = __webpack_require__(/*! ./staff-group */ "./src/write/layout/staff-group.js");
+var getLeftEdgeOfStaff = __webpack_require__(/*! ./get-left-edge-of-staff */ "./src/write/layout/get-left-edge-of-staff.js");
+var layout = function layout(renderer, abctune, width, space) {
+  var i;
+  var abcLine;
+  // Adjust the x-coordinates to their absolute positions
+  var maxWidth = width;
+  for (i = 0; i < abctune.lines.length; i++) {
+    abcLine = abctune.lines[i];
+    if (abcLine.staff) {
+      setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
+      if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
+    }
+  }
+
+  // Layout the beams and add the stems to the beamed notes.
+  for (i = 0; i < abctune.lines.length; i++) {
+    abcLine = abctune.lines[i];
+    if (abcLine.staffGroup && abcLine.staffGroup.voices) {
+      for (var j = 0; j < abcLine.staffGroup.voices.length; j++) {
+        layoutVoice(abcLine.staffGroup.voices[j]);
+      }
+      setUpperAndLowerElements(renderer, abcLine.staffGroup);
+    }
+  }
+
+  // Set the staff spacing
+  // TODO-PER: we should have been able to do this by the time we called setUpperAndLowerElements, but for some reason the "bottom" element seems to be set as a side effect of setting the X spacing.
+  for (i = 0; i < abctune.lines.length; i++) {
+    abcLine = abctune.lines[i];
+    if (abcLine.staffGroup) {
+      abcLine.staffGroup.setHeight();
+    }
+  }
+  return maxWidth;
+};
+// Do the x-axis positioning for a single line (a group of related staffs)
+var setXSpacing = function setXSpacing(renderer, width, space, staffGroup, formatting, isLastLine, debug) {
+  var leftEdge = getLeftEdgeOfStaff(renderer, staffGroup.getTextSize, staffGroup.voices, staffGroup.brace, staffGroup.bracket);
+  var newspace = space;
+  for (var it = 0; it < 8; it++) {
+    // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
+    var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
+    newspace = calcHorizontalSpacing(isLastLine, formatting.stretchlast, width + renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace, renderer.padding.left + renderer.padding.right);
+    if (debug) console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
+    if (newspace === null) break;
+  }
+  centerWholeRests(staffGroup.voices);
+};
+function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace, padding) {
+  if (isLastLine) {
+    if (stretchLast === undefined) {
+      if (lineWidth / targetWidth < 0.66) return null; // keep this for backward compatibility. The break isn't quite the same for some reason.
+    } else {
+      // "Stretch the last music line of a tune when it lacks less than the float fraction of the page width."
+      var lack = 1 - (lineWidth + padding) / targetWidth;
+      var stretch = lack < stretchLast;
+      if (!stretch) return null; // don't stretch last line too much
+    }
+  }
+
+  if (Math.abs(targetWidth - lineWidth) < 2) return null; // if we are already near the target width, we're done.
+  var relSpace = spacingUnits * spacing;
+  var constSpace = lineWidth - relSpace;
+  if (spacingUnits > 0) {
+    spacing = (targetWidth - constSpace) / spacingUnits;
+    if (spacing * minSpace > 50) {
+      spacing = 50 / minSpace;
+    }
+    return spacing;
+  }
+  return null;
+}
+function centerWholeRests(voices) {
+  // whole rests are a special case: if they are by themselves in a measure, then they should be centered.
+  // (If they are not by themselves, that is probably a user error, but we'll just center it between the two items to either side of it.)
+  for (var i = 0; i < voices.length; i++) {
+    var voice = voices[i];
+    // Look through all of the elements except for the first and last. If the whole note appears there then there isn't anything to center it between anyway.
+    for (var j = 1; j < voice.children.length - 1; j++) {
+      var absElem = voice.children[j];
+      if (absElem.abcelem.rest && (absElem.abcelem.rest.type === 'whole' || absElem.abcelem.rest.type === 'multimeasure')) {
+        var before = voice.children[j - 1];
+        var after = voice.children[j + 1];
+        absElem.center(before, after);
+      }
+    }
+  }
+}
+module.exports = layout;
+
+/***/ }),
+
+/***/ "./src/write/layout/set-upper-and-lower-elements.js":
+/*!**********************************************************!*\
+  !*** ./src/write/layout/set-upper-and-lower-elements.js ***!
+  \**********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
+var setUpperAndLowerElements = function setUpperAndLowerElements(renderer, staffGroup) {
+  // Each staff already has the top and bottom set, now we see if there are elements that are always on top and bottom, and resolve their pitch.
+  // Also, get the overall height of all the staves in this group.
+  var lastStaffBottom;
+  for (var i = 0; i < staffGroup.staffs.length; i++) {
+    var staff = staffGroup.staffs[i];
+    // the vertical order of elements that are above is: tempo, part, volume/dynamic, ending/chord, lyric
+    // the vertical order of elements that are below is: lyric, chord, volume/dynamic
+    var positionY = {
+      tempoHeightAbove: 0,
+      partHeightAbove: 0,
+      volumeHeightAbove: 0,
+      dynamicHeightAbove: 0,
+      endingHeightAbove: 0,
+      chordHeightAbove: 0,
+      lyricHeightAbove: 0,
+      lyricHeightBelow: 0,
+      chordHeightBelow: 0,
+      volumeHeightBelow: 0,
+      dynamicHeightBelow: 0
+    };
+    if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0) {
+      staff.originalTop = staff.top; // This is just being stored for debugging purposes.
+      staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
+    }
+
+    incTop(staff, positionY, 'lyricHeightAbove');
+    incTop(staff, positionY, 'chordHeightAbove', staff.specialY.chordLines.above);
+    if (staff.specialY.endingHeightAbove) {
+      if (staff.specialY.chordHeightAbove) staff.top += 2;else staff.top += staff.specialY.endingHeightAbove + margin;
+      positionY.endingHeightAbove = staff.top;
+    }
+    if (staff.specialY.dynamicHeightAbove && staff.specialY.volumeHeightAbove) {
+      staff.top += Math.max(staff.specialY.dynamicHeightAbove, staff.specialY.volumeHeightAbove) + margin;
+      positionY.dynamicHeightAbove = staff.top;
+      positionY.volumeHeightAbove = staff.top;
+    } else {
+      incTop(staff, positionY, 'dynamicHeightAbove');
+      incTop(staff, positionY, 'volumeHeightAbove');
+    }
+    incTop(staff, positionY, 'partHeightAbove');
+    incTop(staff, positionY, 'tempoHeightAbove');
+    if (staff.specialY.lyricHeightBelow) {
+      staff.specialY.lyricHeightBelow += renderer.spacing.vocal / spacing.STEP;
+      positionY.lyricHeightBelow = staff.bottom;
+      staff.bottom -= staff.specialY.lyricHeightBelow + margin;
+    }
+    if (staff.specialY.chordHeightBelow) {
+      positionY.chordHeightBelow = staff.bottom;
+      var hgt = staff.specialY.chordHeightBelow;
+      if (staff.specialY.chordLines.below) hgt *= staff.specialY.chordLines.below;
+      staff.bottom -= hgt + margin;
+    }
+    if (staff.specialY.volumeHeightBelow && staff.specialY.dynamicHeightBelow) {
+      positionY.volumeHeightBelow = staff.bottom;
+      positionY.dynamicHeightBelow = staff.bottom;
+      staff.bottom -= Math.max(staff.specialY.volumeHeightBelow, staff.specialY.dynamicHeightBelow) + margin;
+    } else if (staff.specialY.volumeHeightBelow) {
+      positionY.volumeHeightBelow = staff.bottom;
+      staff.bottom -= staff.specialY.volumeHeightBelow + margin;
+    } else if (staff.specialY.dynamicHeightBelow) {
+      positionY.dynamicHeightBelow = staff.bottom;
+      staff.bottom -= staff.specialY.dynamicHeightBelow + margin;
+    }
+    if (renderer.showDebug && renderer.showDebug.indexOf("box") >= 0) staff.positionY = positionY; // This is just being stored for debugging purposes.
+
+    for (var j = 0; j < staff.voices.length; j++) {
+      var voice = staffGroup.voices[staff.voices[j]];
+      setUpperAndLowerVoiceElements(positionY, voice, renderer.spacing);
+    }
+    // We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
+    // Only try to put in extra space if this isn't the top staff.
+    if (lastStaffBottom !== undefined) {
+      var thisStaffTop = staff.top - 10;
+      var forcedSpacingBetween = lastStaffBottom + thisStaffTop;
+      var minSpacingInPitches = renderer.spacing.systemStaffSeparation / spacing.STEP;
+      var addedSpace = minSpacingInPitches - forcedSpacingBetween;
+      if (addedSpace > 0) staff.top += addedSpace;
+    }
+    lastStaffBottom = 2 - staff.bottom; // the staff starts at position 2 and the bottom variable is negative. Therefore to find out how large the bottom is, we reverse the sign of the bottom, and add the 2 in.
+
+    // Now we need a little margin on the top, so we'll just throw that in.
+    //staff.top += 4;
+    //console.log("Staff Y: ",i,heightInPitches,staff.top,staff.bottom);
+  }
+  //console.log("Staff Height: ",heightInPitches,this.height);
+};
+
+var margin = 1;
+function incTop(staff, positionY, item, count) {
+  if (staff.specialY[item]) {
+    var height = staff.specialY[item];
+    if (count) height *= count;
+    staff.top += height + margin;
+    positionY[item] = staff.top;
+  }
+}
+function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
+  var i;
+  var abselem;
+  for (i = 0; i < voice.children.length; i++) {
+    abselem = voice.children[i];
+    setUpperAndLowerAbsoluteElements(positionY, abselem, spacing);
+  }
+  for (i = 0; i < voice.otherchildren.length; i++) {
+    abselem = voice.otherchildren[i];
+    switch (abselem.type) {
+      case 'CrescendoElem':
+        setUpperAndLowerCrescendoElements(positionY, abselem);
+        break;
+      case 'DynamicDecoration':
+        setUpperAndLowerDynamicElements(positionY, abselem);
+        break;
+      case 'EndingElem':
+        setUpperAndLowerEndingElements(positionY, abselem);
+        break;
+    }
+  }
+}
+
+// For each of the relative elements that can't be placed in advance (because their vertical placement depends on everything
+// else on the line), this iterates through them and sets their pitch. By the time this is called, specialYResolved contains a
+// hash with the vertical placement (in pitch units) for each type.
+// TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
+function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
+  // specialYResolved contains the actual pitch for each of the classes of elements.
+  for (var i = 0; i < element.children.length; i++) {
+    var child = element.children[i];
+    for (var key in element.specialY) {
+      // for each class of element that needs to be placed vertically
+      if (element.specialY.hasOwnProperty(key)) {
+        if (child[key]) {
+          // If this relative element has defined a height for this class of element
+          child.pitch = specialYResolved[key];
+          if (child.top === undefined) {
+            // TODO-PER: HACK! Not sure this is the right place to do this.
+            if (child.type === 'TempoElement') {
+              setUpperAndLowerTempoElement(specialYResolved, child);
+            } else {
+              setUpperAndLowerRelativeElements(specialYResolved, child, spacing);
+            }
+            element.pushTop(child.top);
+            element.pushBottom(child.bottom);
+          }
+        }
+      }
+    }
+  }
+}
+function setUpperAndLowerCrescendoElements(positionY, element) {
+  if (element.dynamicHeightAbove) element.pitch = positionY.dynamicHeightAbove;else element.pitch = positionY.dynamicHeightBelow;
+}
+function setUpperAndLowerDynamicElements(positionY, element) {
+  if (element.volumeHeightAbove) element.pitch = positionY.volumeHeightAbove;else element.pitch = positionY.volumeHeightBelow;
+}
+function setUpperAndLowerEndingElements(positionY, element) {
+  element.pitch = positionY.endingHeightAbove - 2;
+}
+function setUpperAndLowerTempoElement(positionY, element) {
+  element.pitch = positionY.tempoHeightAbove;
+  element.top = positionY.tempoHeightAbove;
+  element.bottom = positionY.tempoHeightAbove;
+  if (element.note) {
+    var tempoPitch = element.pitch - element.totalHeightInPitches + 1; // The pitch we receive is the top of the allotted area: change that to practically the bottom.
+    element.note.top = tempoPitch;
+    element.note.bottom = tempoPitch;
+    for (var i = 0; i < element.note.children.length; i++) {
+      var child = element.note.children[i];
+      child.top += tempoPitch;
+      child.bottom += tempoPitch;
+      child.pitch += tempoPitch;
+      if (child.pitch2 !== undefined) child.pitch2 += tempoPitch;
+    }
+  }
+}
+function setUpperAndLowerRelativeElements(positionY, element, renderSpacing) {
+  switch (element.type) {
+    case "part":
+      element.top = positionY.partHeightAbove + element.height;
+      element.bottom = positionY.partHeightAbove;
+      break;
+    case "text":
+    case "chord":
+      if (element.chordHeightAbove) {
+        element.top = positionY.chordHeightAbove;
+        element.bottom = positionY.chordHeightAbove;
+      } else {
+        element.top = positionY.chordHeightBelow;
+        element.bottom = positionY.chordHeightBelow;
+      }
+      break;
+    case "lyric":
+      if (element.lyricHeightAbove) {
+        element.top = positionY.lyricHeightAbove;
+        element.bottom = positionY.lyricHeightAbove;
+      } else {
+        element.top = positionY.lyricHeightBelow + renderSpacing.vocal / spacing.STEP;
+        element.bottom = positionY.lyricHeightBelow + renderSpacing.vocal / spacing.STEP;
+        element.pitch -= renderSpacing.vocal / spacing.STEP;
+      }
+      break;
+    case "debug":
+      element.top = positionY.chordHeightAbove;
+      element.bottom = positionY.chordHeightAbove;
+      break;
+  }
+  if (element.pitch === undefined || element.top === undefined) console.error("RelativeElement position not set.", element.type, element.pitch, element.top, positionY);
+}
+module.exports = setUpperAndLowerElements;
+
+/***/ }),
+
+/***/ "./src/write/layout/staff-group.js":
+/*!*****************************************!*\
+  !*** ./src/write/layout/staff-group.js ***!
+  \*****************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var layoutVoiceElements = __webpack_require__(/*! ./voice-elements */ "./src/write/layout/voice-elements.js");
+function checkLastBarX(voices) {
+  var maxX = 0;
+  for (var i = 0; i < voices.length; i++) {
+    var curVoice = voices[i];
+    if (curVoice.children.length > 0) {
+      var lastChild = curVoice.children.length - 1;
+      var maxChild = curVoice.children[lastChild];
+      if (maxChild.abcelem.el_type === 'bar') {
+        var barX = maxChild.children[0].x;
+        if (barX > maxX) {
+          maxX = barX;
+        } else {
+          maxChild.children[0].x = maxX;
+        }
+      }
+    }
+  }
+}
+var layoutStaffGroup = function layoutStaffGroup(spacing, renderer, debug, staffGroup, leftEdge) {
+  var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
+  var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
+  var minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
+
+  var x = leftEdge;
+  staffGroup.startx = x;
+  var i;
+  var currentduration = 0;
+  if (debug) console.log("init layout", spacing);
+  for (i = 0; i < staffGroup.voices.length; i++) {
+    layoutVoiceElements.beginLayout(x, staffGroup.voices[i]);
+  }
+  var spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
+  while (!finished(staffGroup.voices)) {
+    // find first duration level to be laid out among candidates across voices
+    currentduration = null; // candidate smallest duration level
+    for (i = 0; i < staffGroup.voices.length; i++) {
+      if (!layoutVoiceElements.layoutEnded(staffGroup.voices[i]) && (!currentduration || getDurationIndex(staffGroup.voices[i]) < currentduration)) currentduration = getDurationIndex(staffGroup.voices[i]);
+    }
+
+    // isolate voices at current duration level
+    var currentvoices = [];
+    var othervoices = [];
+    for (i = 0; i < staffGroup.voices.length; i++) {
+      var durationIndex = getDurationIndex(staffGroup.voices[i]);
+      // PER: Because of the inexactness of JS floating point math, we just get close.
+      if (durationIndex - currentduration > epsilon) {
+        othervoices.push(staffGroup.voices[i]);
+        //console.log("out: voice ",i);
+      } else {
+        currentvoices.push(staffGroup.voices[i]);
+        //if (debug) console.log("in: voice ",i);
+      }
+    }
+
+    // among the current duration level find the one which needs starting furthest right
+    spacingunit = 0; // number of spacingunits coming from the previously laid out element to this one
+    var spacingduration = 0;
+    for (i = 0; i < currentvoices.length; i++) {
+      //console.log("greatest spacing unit", x, layoutVoiceElements.getNextX(currentvoices[i]), layoutVoiceElements.getSpacingUnits(currentvoices[i]), currentvoices[i].spacingduration);
+      if (layoutVoiceElements.getNextX(currentvoices[i]) > x) {
+        x = layoutVoiceElements.getNextX(currentvoices[i]);
+        spacingunit = layoutVoiceElements.getSpacingUnits(currentvoices[i]);
+        spacingduration = currentvoices[i].spacingduration;
+      }
+    }
+    spacingunits += spacingunit;
+    minspace = Math.min(minspace, spacingunit);
+    if (debug) console.log("currentduration: ", currentduration, spacingunits, minspace);
+    var lastTopVoice = undefined;
+    for (i = 0; i < currentvoices.length; i++) {
+      var v = currentvoices[i];
+      if (v.voicenumber === 0) lastTopVoice = i;
+      var topVoice = lastTopVoice !== undefined && currentvoices[lastTopVoice].voicenumber !== v.voicenumber ? currentvoices[lastTopVoice] : undefined;
+      if (!isSameStaff(v, topVoice)) topVoice = undefined;
+      var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, v, renderer.minPadding, topVoice);
+      var dx = voicechildx - x;
+      if (dx > 0) {
+        x = voicechildx; //update x
+        for (var j = 0; j < i; j++) {
+          // shift over all previously laid out elements
+          layoutVoiceElements.shiftRight(dx, currentvoices[j]);
+        }
+      }
+    }
+
+    // remove the value of already counted spacing units in other voices (e.g. if a voice had planned to use up 5 spacing units but is not in line to be laid out at this duration level - where we've used 2 spacing units - then we must use up 3 spacing units, not 5)
+    for (i = 0; i < othervoices.length; i++) {
+      othervoices[i].spacingduration -= spacingduration;
+      layoutVoiceElements.updateNextX(x, spacing, othervoices[i]); // adjust other voices expectations
+    }
+
+    // update indexes of currently laid out elems
+    for (i = 0; i < currentvoices.length; i++) {
+      var voice = currentvoices[i];
+      layoutVoiceElements.updateIndices(voice);
+    }
+  } // finished laying out
+
+  // find the greatest remaining x as a base for the width
+  for (i = 0; i < staffGroup.voices.length; i++) {
+    if (layoutVoiceElements.getNextX(staffGroup.voices[i]) > x) {
+      x = layoutVoiceElements.getNextX(staffGroup.voices[i]);
+      spacingunit = layoutVoiceElements.getSpacingUnits(staffGroup.voices[i]);
+    }
+  }
+
+  // adjust lastBar when needed (multi staves)
+  checkLastBarX(staffGroup.voices);
+  //console.log("greatest remaining",spacingunit,x);
+  spacingunits += spacingunit;
+  staffGroup.setWidth(x);
+  return {
+    spacingUnits: spacingunits,
+    minSpace: minspace
+  };
+};
+function finished(voices) {
+  for (var i = 0; i < voices.length; i++) {
+    if (!layoutVoiceElements.layoutEnded(voices[i])) return false;
+  }
+  return true;
+}
+function getDurationIndex(element) {
+  return element.durationindex - (element.children[element.i] && element.children[element.i].duration > 0 ? 0 : 0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
+}
+
+function isSameStaff(voice1, voice2) {
+  if (!voice1 || !voice1.staff || !voice1.staff.voices || voice1.staff.voices.length === 0) return false;
+  if (!voice2 || !voice2.staff || !voice2.staff.voices || voice2.staff.voices.length === 0) return false;
+  return voice1.staff.voices[0] === voice2.staff.voices[0];
+}
+module.exports = layoutStaffGroup;
+
+/***/ }),
+
+/***/ "./src/write/layout/triplet.js":
+/*!*************************************!*\
+  !*** ./src/write/layout/triplet.js ***!
+  \*************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var getBarYAt = __webpack_require__(/*! ./get-bar-y-at */ "./src/write/layout/get-bar-y-at.js");
+function layoutTriplet(element) {
+  // TODO end and beginning of line (PER: P.S. I'm not sure this can happen: I think the parser will always specify both the start and end points.)
+  if (element.anchor1 && element.anchor2) {
+    element.hasBeam = !!element.anchor1.parent.beam && element.anchor1.parent.beam === element.anchor2.parent.beam;
+    var beam = element.anchor1.parent.beam;
+    // if hasBeam is true, then the first and last element in the triplet have the same beam.
+    // We also need to check if the beam doesn't contain other notes so that `(3 dcdcc` will do a bracket.
+    if (element.hasBeam && (beam.elems[0] !== element.anchor1.parent || beam.elems[beam.elems.length - 1] !== element.anchor2.parent)) element.hasBeam = false;
+    if (element.hasBeam) {
+      // If there is a beam then we don't need to draw anything except the text. The beam could either be above or below.
+      var left = isAbove(beam) ? element.anchor1.x + element.anchor1.w : element.anchor1.x;
+      element.yTextPos = heightAtMidpoint(left, element.anchor2.x, beam);
+      element.yTextPos += isAbove(beam) ? 3 : -2; // This creates some space between the beam and the number.
+      element.xTextPos = xAtMidpoint(left, element.anchor2.x);
+      element.top = element.yTextPos + 1;
+      element.bottom = element.yTextPos - 2;
+      if (isAbove(beam)) element.endingHeightAbove = 4;
+    } else {
+      // If there isn't a beam, then we need to draw the bracket and the text. The bracket is always above.
+      // The bracket is never lower than the 'a' line, but is 4 pitches above the first and last notes. If there is
+      // a tall note in the middle, the bracket is horizontal and above the highest note.
+      element.startNote = Math.max(element.anchor1.parent.top, 9) + 4;
+      element.endNote = Math.max(element.anchor2.parent.top, 9) + 4;
+      // If it starts or ends on a rest, make the beam horizontal
+      if (element.anchor1.parent.type === "rest" && element.anchor2.parent.type !== "rest") element.startNote = element.endNote;else if (element.anchor2.parent.type === "rest" && element.anchor1.parent.type !== "rest") element.endNote = element.startNote;
+      // See if the middle note is really high.
+      var max = 0;
+      for (var i = 0; i < element.middleElems.length; i++) {
+        max = Math.max(max, element.middleElems[i].top);
+      }
+      max += 4;
+      if (max > element.startNote || max > element.endNote) {
+        element.startNote = max;
+        element.endNote = max;
+      }
+      if (element.flatBeams) {
+        element.startNote = Math.max(element.startNote, element.endNote);
+        element.endNote = Math.max(element.startNote, element.endNote);
+      }
+      element.yTextPos = element.startNote + (element.endNote - element.startNote) / 2;
+      element.xTextPos = element.anchor1.x + (element.anchor2.x + element.anchor2.w - element.anchor1.x) / 2;
+      element.top = element.yTextPos + 1;
+    }
+  }
+  delete element.middleElems;
+  delete element.flatBeams;
+}
+function isAbove(beam) {
+  return beam.stemsUp;
+}
+
+// We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16
+function heightAtMidpoint(startX, endX, beam) {
+  if (beam.beams.length === 0) return 0;
+  beam = beam.beams[0];
+  var midPoint = startX + (endX - startX) / 2;
+  return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, midPoint);
+}
+function xAtMidpoint(startX, endX) {
+  return startX + (endX - startX) / 2;
+}
+module.exports = layoutTriplet;
+
+/***/ }),
+
+/***/ "./src/write/layout/voice-elements.js":
+/*!********************************************!*\
+  !*** ./src/write/layout/voice-elements.js ***!
+  \********************************************/
+/***/ (function(module) {
+
+var VoiceElement = function VoiceElements() {};
+VoiceElement.beginLayout = function (startx, voice) {
+  voice.i = 0;
+  voice.durationindex = 0;
+  //this.ii=this.children.length;
+  voice.startx = startx;
+  voice.minx = startx; // furthest left to where negatively positioned elements are allowed to go
+  voice.nextx = startx; // x position where the next element of this voice should be placed assuming no other voices and no fixed width constraints
+  voice.spacingduration = 0; // duration left to be laid out in current iteration (omitting additional spacing due to other aspects, such as bars, dots, sharps and flats)
+};
+
+VoiceElement.layoutEnded = function (voice) {
+  return voice.i >= voice.children.length;
+};
+VoiceElement.getNextX = function (voice) {
+  return Math.max(voice.minx, voice.nextx);
+};
+
+// number of spacing units expected for next positioning
+VoiceElement.getSpacingUnits = function (voice) {
+  return Math.sqrt(voice.spacingduration * 8);
+};
+
+// Try to layout the element at index this.i
+// x - position to try to layout the element at
+// spacing - base spacing
+// can't call this function more than once per iteration
+VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding, firstVoice) {
+  var child = voice.children[voice.i];
+  if (!child) return 0;
+  var er = x - voice.minx; // available extrawidth to the left
+  var pad = voice.durationindex + child.duration > 0 ? minPadding : 0; // only add padding to the items that aren't fixed to the left edge.
+  // See if this item overlaps the item in the first voice. If firstVoice is undefined then there's nothing to compare.
+  if (child.abcelem.el_type === "note" && !child.abcelem.rest && voice.voicenumber !== 0 && firstVoice) {
+    var firstChild = firstVoice.children[firstVoice.i];
+    // It overlaps if the either the child's top or bottom is inside the firstChild's or at least within 1
+    // A special case is if the element is on the same line then it can share a note head, if the notehead is the same
+    var overlaps = firstChild && (child.abcelem.maxpitch <= firstChild.abcelem.maxpitch + 1 && child.abcelem.maxpitch >= firstChild.abcelem.minpitch - 1 || child.abcelem.minpitch <= firstChild.abcelem.maxpitch + 1 && child.abcelem.minpitch >= firstChild.abcelem.minpitch - 1);
+    // See if they can share a note head
+    if (overlaps && child.abcelem.minpitch === firstChild.abcelem.minpitch && child.abcelem.maxpitch === firstChild.abcelem.maxpitch && firstChild.heads && firstChild.heads.length > 0 && child.heads && child.heads.length > 0 && firstChild.heads[0].c === child.heads[0].c) overlaps = false;
+    // If this note overlaps the note in the first voice and we haven't moved the note yet (this can be called multiple times)
+    if (overlaps) {
+      // I think that firstChild should always have at least one note head, but defensively make sure.
+      // There was a problem with this being called more than once so if a value is adjusted then it is saved so it is only adjusted once.
+      var firstChildNoteWidth = firstChild.heads && firstChild.heads.length > 0 ? firstChild.heads[0].realWidth : firstChild.fixed.w;
+      if (!child.adjustedWidth) child.adjustedWidth = firstChildNoteWidth + child.w;
+      child.w = child.adjustedWidth;
+      for (var j = 0; j < child.children.length; j++) {
+        var relativeChild = child.children[j];
+        if (relativeChild.name.indexOf("accidental") < 0) {
+          if (!relativeChild.adjustedWidth) relativeChild.adjustedWidth = relativeChild.dx + firstChildNoteWidth;
+          relativeChild.dx = relativeChild.adjustedWidth;
+        }
+      }
+    }
+  }
+  var extraWidth = getExtraWidth(child, pad);
+  if (er < extraWidth) {
+    // shift right by needed amount
+    // There's an exception if a bar element is after a Part element, there is no shift.
+    if (voice.i === 0 || child.type !== 'bar' || voice.children[voice.i - 1].type !== 'part' && voice.children[voice.i - 1].type !== 'tempo') x += extraWidth - er;
+  }
+  child.setX(x);
+  voice.spacingduration = child.duration;
+  //update minx
+  voice.minx = x + getMinWidth(child); // add necessary layout space
+  if (voice.i !== voice.children.length - 1) voice.minx += child.minspacing; // add minimumspacing except on last elem
+
+  this.updateNextX(x, spacing, voice);
+
+  // contribute to staff y position
+  //this.staff.top = Math.max(child.top,this.staff.top);
+  //this.staff.bottom = Math.min(child.bottom,this.staff.bottom);
+
+  return x; // where we end up having placed the child
+};
+
+VoiceElement.shiftRight = function (dx, voice) {
+  var child = voice.children[voice.i];
+  if (!child) return;
+  child.setX(child.x + dx);
+  voice.minx += dx;
+  voice.nextx += dx;
+};
+
+// call when spacingduration has been updated
+VoiceElement.updateNextX = function (x, spacing, voice) {
+  voice.nextx = x + spacing * Math.sqrt(voice.spacingduration * 8);
+};
+VoiceElement.updateIndices = function (voice) {
+  if (!this.layoutEnded(voice)) {
+    voice.durationindex += voice.children[voice.i].duration;
+    if (voice.children[voice.i].type === 'bar') voice.durationindex = Math.round(voice.durationindex * 64) / 64; // everytime we meet a barline, do rounding to nearest 64th
+    voice.i++;
   }
 };
-module.exports = setClass;
+function getExtraWidth(child, minPadding) {
+  // space needed to the left of the note
+  var padding = 0;
+  if (child.type === 'note' || child.type === 'bar') padding = minPadding;
+  return -child.extraw + padding;
+}
+function getMinWidth(child) {
+  // absolute space taken to the right of the note
+  return child.w;
+}
+module.exports = VoiceElement;
 
 /***/ }),
 
-/***/ "./src/write/subtitle.js":
-/*!*******************************!*\
-  !*** ./src/write/subtitle.js ***!
-  \*******************************/
-/***/ (function(module) {
+/***/ "./src/write/layout/voice.js":
+/*!***********************************!*\
+  !*** ./src/write/layout/voice.js ***!
+  \***********************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-function Subtitle(spaceAbove, formatting, info, center, paddingLeft, getTextSize) {
-  this.rows = [];
-  if (spaceAbove) this.rows.push({
-    move: spaceAbove
-  });
-  var tAnchor = formatting.titleleft ? 'start' : 'middle';
-  var tLeft = formatting.titleleft ? paddingLeft : center;
-  this.rows.push({
-    left: tLeft,
-    text: info.text,
-    font: 'subtitlefont',
-    klass: 'text subtitle',
-    anchor: tAnchor,
-    startChar: info.startChar,
-    endChar: info.endChar,
-    absElemType: "subtitle",
-    name: "subtitle"
-  });
-  var size = getTextSize.calc(info.text, 'subtitlefont', 'text subtitle');
-  this.rows.push({
-    move: size.height
-  });
+var layoutBeam = __webpack_require__(/*! ./beam */ "./src/write/layout/beam.js");
+var getBarYAt = __webpack_require__(/*! ./get-bar-y-at */ "./src/write/layout/get-bar-y-at.js");
+var layoutTriplet = __webpack_require__(/*! ./triplet */ "./src/write/layout/triplet.js");
+var layoutVoice = function layoutVoice(voice) {
+  for (var i = 0; i < voice.beams.length; i++) {
+    if (voice.beams[i].type === 'BeamElem') {
+      layoutBeam(voice.beams[i]);
+      moveDecorations(voice.beams[i]);
+      // The above will change the top and bottom of the abselem children, so see if we need to expand our range.
+      for (var j = 0; j < voice.beams[i].elems.length; j++) {
+        voice.adjustRange(voice.beams[i].elems[j]);
+      }
+    }
+  }
+  voice.staff.specialY.chordLines = setLaneForChord(voice.children);
+
+  // Now we can layout the triplets
+  for (i = 0; i < voice.otherchildren.length; i++) {
+    var child = voice.otherchildren[i];
+    if (child.type === 'TripletElem') {
+      layoutTriplet(child);
+      voice.adjustRange(child);
+    }
+  }
+  voice.staff.top = Math.max(voice.staff.top, voice.top);
+  voice.staff.bottom = Math.min(voice.staff.bottom, voice.bottom);
+};
+function moveDecorations(beam) {
+  var padding = 1.5; // This is the vertical padding between elements, in pitches.
+  for (var ch = 0; ch < beam.elems.length; ch++) {
+    var child = beam.elems[ch];
+    if (child.top) {
+      // We now know where the ornaments should have been placed, so move them if they would overlap.
+      var top = yAtNote(child, beam);
+      for (var i = 0; i < child.children.length; i++) {
+        var el = child.children[i];
+        if (el.klass === 'ornament') {
+          if (el.bottom - padding < top) {
+            var distance = top - el.bottom + padding; // Find the distance that it needs to move and add a little margin so the element doesn't touch the beam.
+            el.bottom += distance;
+            el.top += distance;
+            el.pitch += distance;
+            top = child.top = el.top;
+          }
+        }
+      }
+    }
+  }
 }
-module.exports = Subtitle;
+function placeInLane(rightMost, relElem) {
+  // These items are centered so figure the coordinates accordingly.
+  // The font reports some extra space so the margin is built in.
+  var xCoords = relElem.getChordDim();
+  if (xCoords) {
+    for (var i = 0; i < rightMost.length; i++) {
+      var fits = rightMost[i] < xCoords.left;
+      if (fits) {
+        if (i > 0) relElem.putChordInLane(i);
+        rightMost[i] = xCoords.right;
+        return;
+      }
+    }
+    // If we didn't return early, then we need a new row
+    rightMost.push(xCoords.right);
+    relElem.putChordInLane(rightMost.length - 1);
+  }
+}
+function setLaneForChord(absElems) {
+  // Criteria:
+  // 1) lane numbers start from the bottom so that as many items as possible are in lane 0, closest to the music.
+  // 2) a chord can have more than one line (for instance "C\nD") each line is a lane.
+  // 3) if two adjoining items would touch then push the second one to the next lane.
+  // 4) use as many lanes as is necessary to get everything to not touch.
+  // 5) leave a margin between items, so use another lane if the chords would have less than a character's width.
+  // 6) if the chord only has one character, allow it to be closer than if the chord has more than one character.
+  var rightMostAbove = [0];
+  var rightMostBelow = [0];
+  var i;
+  var j;
+  var relElem;
+  for (i = 0; i < absElems.length; i++) {
+    for (j = 0; j < absElems[i].children.length; j++) {
+      relElem = absElems[i].children[j];
+      if (relElem.chordHeightAbove) {
+        placeInLane(rightMostAbove, relElem);
+      }
+    }
+    for (j = absElems[i].children.length - 1; j >= 0; j--) {
+      relElem = absElems[i].children[j];
+      if (relElem.chordHeightBelow) {
+        placeInLane(rightMostBelow, relElem);
+      }
+    }
+  }
+  // If we used a second line, then we need to go back and set the first lines.
+  // Also we need to flip the indexes of the names so that we can count from the top line.
+  if (rightMostAbove.length > 1 || rightMostBelow.length > 1) setLane(absElems, rightMostAbove.length, rightMostBelow.length);
+  return {
+    above: rightMostAbove.length,
+    below: rightMostBelow.length
+  };
+}
+function numAnnotationsBelow(absElem) {
+  var count = 0;
+  for (var j = 0; j < absElem.children.length; j++) {
+    var relElem = absElem.children[j];
+    if (relElem.chordHeightBelow) count++;
+  }
+  return count;
+}
+function setLane(absElems, numLanesAbove, numLanesBelow) {
+  for (var i = 0; i < absElems.length; i++) {
+    var below = numAnnotationsBelow(absElems[i]);
+    for (var j = 0; j < absElems[i].children.length; j++) {
+      var relElem = absElems[i].children[j];
+      if (relElem.chordHeightAbove) {
+        relElem.invertLane(numLanesAbove);
+        // } else if (relElem.chordHeightBelow) {
+        // 	relElem.invertLane(below);
+      }
+    }
+  }
+}
+
+function yAtNote(element, beam) {
+  beam = beam.beams[0];
+  return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
+}
+module.exports = layoutVoice;
+
+/***/ }),
+
+/***/ "./src/write/renderer.js":
+/*!*******************************!*\
+  !*** ./src/write/renderer.js ***!
+  \*******************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+//    abc_renderer.js: API to render to SVG/Raphael/whatever rendering engine
+
+/*global Math */
+
+var spacing = __webpack_require__(/*! ./helpers/spacing */ "./src/write/helpers/spacing.js");
+var Svg = __webpack_require__(/*! ./svg */ "./src/write/svg.js");
+
+/**
+ * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
+ * @param {Object} paper
+ */
+var Renderer = function Renderer(paper) {
+  this.paper = new Svg(paper);
+  this.controller = null;
+  this.space = 3 * spacing.SPACE;
+  this.padding = {}; // renderer's padding is managed by the controller
+  this.reset();
+};
+Renderer.prototype.reset = function () {
+  this.paper.clear();
+  this.y = 0;
+  this.abctune = null;
+  this.path = null;
+  this.isPrint = false;
+  this.lineThickness = 0;
+  this.initVerticalSpace();
+};
+Renderer.prototype.newTune = function (abcTune) {
+  this.abctune = abcTune; // TODO-PER: this is just to get the font info.
+  this.setVerticalSpace(abcTune.formatting);
+  //this.measureNumber = null;
+  //this.noteNumber = null;
+  this.isPrint = abcTune.media === 'print';
+  this.setPadding(abcTune);
+};
+Renderer.prototype.setLineThickness = function (lineThickness) {
+  this.lineThickness = lineThickness;
+};
+Renderer.prototype.setPaddingOverride = function (params) {
+  this.paddingOverride = {
+    top: params.paddingtop,
+    bottom: params.paddingbottom,
+    right: params.paddingright,
+    left: params.paddingleft
+  };
+};
+Renderer.prototype.setPadding = function (abctune) {
+  // If the padding is set in the tune, then use that.
+  // Otherwise, if the padding is set in the override, use that.
+  // Otherwise, use the defaults (there are a different set of defaults for screen and print.)
+  function setPaddingVariable(self, paddingKey, formattingKey, printDefault, screenDefault) {
+    if (abctune.formatting[formattingKey] !== undefined) self.padding[paddingKey] = abctune.formatting[formattingKey];else if (self.paddingOverride[paddingKey] !== undefined) self.padding[paddingKey] = self.paddingOverride[paddingKey];else if (self.isPrint) self.padding[paddingKey] = printDefault;else self.padding[paddingKey] = screenDefault;
+  }
+  // 1cm x 0.393701in/cm x 72pt/in x 1.33px/pt = 38px
+  // 1.8cm x 0.393701in/cm x 72pt/in x 1.33px/pt = 68px
+  setPaddingVariable(this, 'top', 'topmargin', 38, 15);
+  setPaddingVariable(this, 'bottom', 'botmargin', 38, 15);
+  setPaddingVariable(this, 'left', 'leftmargin', 68, 15);
+  setPaddingVariable(this, 'right', 'rightmargin', 68, 15);
+};
+
+/**
+ * Some of the items on the page are not scaled, so adjust them in the opposite direction of scaling to cancel out the scaling.
+ * @param {float} scale
+ */
+Renderer.prototype.adjustNonScaledItems = function (scale) {
+  this.padding.top /= scale;
+  this.padding.bottom /= scale;
+  this.padding.left /= scale;
+  this.padding.right /= scale;
+  this.abctune.formatting.headerfont.size /= scale;
+  this.abctune.formatting.footerfont.size /= scale;
+};
+
+/**
+ * Set the the values for all the configurable vertical space options.
+ */
+Renderer.prototype.initVerticalSpace = function () {
+  // conversion: 37.7953 = conversion factor for cm to px.
+  // All of the following values are in px.
+  this.spacing = {
+    composer: 7.56,
+    // Set the vertical space above the composer.
+    graceBefore: 8.67,
+    // Define the space before, inside and after the grace notes.
+    graceInside: 10.67,
+    graceAfter: 16,
+    info: 0,
+    // Set the vertical space above the infoline.
+    lineSkipFactor: 1.1,
+    // Set the factor for spacing between lines of text. (multiply this by the font size)
+    music: 7.56,
+    // Set the vertical space above the first staff.
+    paragraphSkipFactor: 0.4,
+    // Set the factor for spacing between text paragraphs. (multiply this by the font size)
+    parts: 11.33,
+    // Set the vertical space above a new part.
+    slurHeight: 1.0,
+    // Set the slur height factor.
+    staffSeparation: 61.33,
+    // Do not put a staff system closer than <unit> from the previous system.
+    stemHeight: 26.67 + 10,
+    // Set the stem height.
+    subtitle: 3.78,
+    // Set the vertical space above the subtitle.
+    systemStaffSeparation: 48,
+    // Do not place the staves closer than <unit> inside a system. * This values applies to all staves when in the tune header. Otherwise, it applies to the next staff
+    text: 18.9,
+    // Set the vertical space above the history.
+    title: 7.56,
+    // Set the vertical space above the title.
+    top: 30.24,
+    //Set the vertical space above the tunes and on the top of the continuation pages.
+    vocal: 0,
+    // Set the vertical space above the lyrics under the staves.
+    words: 0 // Set the vertical space above the lyrics at the end of the tune.
+  };
+  /*
+  TODO-PER: Handle the x-coordinate spacing items, too.
+  maxshrink <float>Default: 0.65
+  Set how much to compress horizontally when music line breaks
+  are automatic.
+  <float> must be between 0 (natural spacing)
+  and 1 (max shrinking).
+  // This next value is used to compute the natural spacing of
+  // the notes. The base spacing of the crotchet is always
+  // 40 pts. When the duration of a note type is twice the
+  // duration of an other note type, its spacing is multiplied
+  // by this factor.
+  // The default value causes the note spacing to be multiplied
+  // by 2 when its duration is multiplied by 4, i.e. the
+  // space of the semibreve is 80 pts and the space of the
+  // semiquaver is 20 pts.
+  // Setting this value to 1 sets all note spacing to 40 pts.
+  noteSpacingFactor: 1.414, // Set the note spacing factor to <float> (range 1..2).
+  scale <float> Default: 0.75 Set the page scale factor. Note that the header and footer are not scaled.
+  stretchlast <float>Default: 0.8
+  Stretch the last music line of a tune when it exceeds
+  the <float> fraction of the page width.
+  <float> range is 0.0 to 1.0.
+   */
+};
+
+Renderer.prototype.setVerticalSpace = function (formatting) {
+  // conversion from pts to px 4/3
+  if (formatting.staffsep !== undefined) this.spacing.staffSeparation = formatting.staffsep * 4 / 3;
+  if (formatting.composerspace !== undefined) this.spacing.composer = formatting.composerspace * 4 / 3;
+  if (formatting.partsspace !== undefined) this.spacing.parts = formatting.partsspace * 4 / 3;
+  if (formatting.textspace !== undefined) this.spacing.text = formatting.textspace * 4 / 3;
+  if (formatting.musicspace !== undefined) this.spacing.music = formatting.musicspace * 4 / 3;
+  if (formatting.titlespace !== undefined) this.spacing.title = formatting.titlespace * 4 / 3;
+  if (formatting.sysstaffsep !== undefined) this.spacing.systemStaffSeparation = formatting.sysstaffsep * 4 / 3;
+  if (formatting.subtitlespace !== undefined) this.spacing.subtitle = formatting.subtitlespace * 4 / 3;
+  if (formatting.topspace !== undefined) this.spacing.top = formatting.topspace * 4 / 3;
+  if (formatting.vocalspace !== undefined) this.spacing.vocal = formatting.vocalspace * 4 / 3;
+  if (formatting.wordsspace !== undefined) this.spacing.words = formatting.wordsspace * 4 / 3;
+};
+
+/**
+ * Calculates the y for a given pitch value (relative to the stave the renderer is currently printing)
+ * @param {number} ofs pitch value (bottom C on a G clef = 0, D=1, etc.)
+ */
+Renderer.prototype.calcY = function (ofs) {
+  return this.y - ofs * spacing.STEP;
+};
+Renderer.prototype.moveY = function (em, numLines) {
+  if (numLines === undefined) numLines = 1;
+  this.y += em * numLines;
+};
+Renderer.prototype.absolutemoveY = function (y) {
+  this.y = y;
+};
+module.exports = Renderer;
 
 /***/ }),
 
@@ -25422,213 +25470,6 @@ function createSvg() {
   return svg;
 }
 module.exports = Svg;
-
-/***/ }),
-
-/***/ "./src/write/top-text.js":
-/*!*******************************!*\
-  !*** ./src/write/top-text.js ***!
-  \*******************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var addTextIf = __webpack_require__(/*! ./add-text-if */ "./src/write/add-text-if.js");
-function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
-  this.rows = [];
-  if (metaText.header && isPrint) {
-    // Note: whether there is a header or not doesn't change any other positioning, so this doesn't change the Y-coordinate.
-    // This text goes above the margin, so we'll temporarily move up.
-    var headerTextHeight = getTextSize.calc("X", "headerfont", 'abcjs-header abcjs-meta-top').height;
-    addTextIf(this.rows, {
-      marginLeft: paddingLeft,
-      text: metaText.header.left,
-      font: 'headerfont',
-      klass: 'header meta-top',
-      marginTop: -headerTextHeight,
-      info: metaTextInfo.header,
-      name: "header"
-    }, getTextSize);
-    addTextIf(this.rows, {
-      marginLeft: paddingLeft + width / 2,
-      text: metaText.header.center,
-      font: 'headerfont',
-      klass: 'header meta-top',
-      marginTop: -headerTextHeight,
-      anchor: 'middle',
-      info: metaTextInfo.header,
-      name: "header"
-    }, getTextSize);
-    addTextIf(this.rows, {
-      marginLeft: paddingLeft + width,
-      text: metaText.header.right,
-      font: 'headerfont',
-      klass: 'header meta-top',
-      marginTop: -headerTextHeight,
-      anchor: 'end',
-      info: metaTextInfo.header,
-      name: "header"
-    }, getTextSize);
-
-    //		TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, noMove) {
-  }
-
-  if (isPrint) this.rows.push({
-    move: spacing.top
-  });
-  var tAnchor = formatting.titleleft ? 'start' : 'middle';
-  var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
-  if (metaText.title) {
-    addTextIf(this.rows, {
-      marginLeft: tLeft,
-      text: metaText.title,
-      font: 'titlefont',
-      klass: 'title meta-top',
-      marginTop: spacing.title,
-      anchor: tAnchor,
-      absElemType: "title",
-      info: metaTextInfo.title,
-      name: "title"
-    }, getTextSize);
-  }
-  if (lines.length) {
-    var index = 0;
-    while (index < lines.length && lines[index].subtitle) {
-      addTextIf(this.rows, {
-        marginLeft: tLeft,
-        text: lines[index].subtitle.text,
-        font: 'subtitlefont',
-        klass: 'text meta-top subtitle',
-        marginTop: spacing.subtitle,
-        anchor: tAnchor,
-        absElemType: "subtitle",
-        info: lines[index].subtitle,
-        name: "subtitle"
-      }, getTextSize);
-      index++;
-    }
-  }
-  if (metaText.rhythm || metaText.origin || metaText.composer) {
-    this.rows.push({
-      move: spacing.composer
-    });
-    if (metaText.rhythm && metaText.rhythm.length > 0) {
-      var noMove = !!(metaText.composer || metaText.origin);
-      addTextIf(this.rows, {
-        marginLeft: paddingLeft,
-        text: metaText.rhythm,
-        font: 'infofont',
-        klass: 'meta-top rhythm',
-        absElemType: "rhythm",
-        noMove: noMove,
-        info: metaTextInfo.rhythm,
-        name: "rhythm"
-      }, getTextSize);
-    }
-    var composerLine = "";
-    if (metaText.composer) composerLine += metaText.composer;
-    if (metaText.origin) composerLine += ' (' + metaText.origin + ')';
-    if (composerLine.length > 0) {
-      addTextIf(this.rows, {
-        marginLeft: paddingLeft + width,
-        text: composerLine,
-        font: 'composerfont',
-        klass: 'meta-top composer',
-        anchor: "end",
-        absElemType: "composer",
-        info: metaTextInfo.composer,
-        name: "composer"
-      }, getTextSize);
-    }
-  }
-  if (metaText.author && metaText.author.length > 0) {
-    addTextIf(this.rows, {
-      marginLeft: paddingLeft + width,
-      text: metaText.author,
-      font: 'composerfont',
-      klass: 'meta-top author',
-      anchor: "end",
-      absElemType: "author",
-      info: metaTextInfo.author,
-      name: "author"
-    }, getTextSize);
-  }
-  if (metaText.partOrder && metaText.partOrder.length > 0) {
-    addTextIf(this.rows, {
-      marginLeft: paddingLeft,
-      text: metaText.partOrder,
-      font: 'partsfont',
-      klass: 'meta-top part-order',
-      absElemType: "partOrder",
-      info: metaTextInfo.partOrder,
-      name: "part-order"
-    }, getTextSize);
-  }
-}
-module.exports = TopText;
-
-/***/ }),
-
-/***/ "./src/write/translate-chord.js":
-/*!**************************************!*\
-  !*** ./src/write/translate-chord.js ***!
-  \**************************************/
-/***/ (function(module) {
-
-function germanNote(note) {
-  switch (note) {
-    case "B#":
-      return "H#";
-    case "B♯":
-      return "H♯";
-    case "B":
-      return "H";
-    case "Bb":
-      return "B";
-    case "B♭":
-      return "B";
-  }
-  return note;
-}
-function translateChord(chordString, jazzchords, germanAlphabet) {
-  var lines = chordString.split("\n");
-  for (var i = 0; i < lines.length; i++) {
-    var chord = lines[i];
-    // If the chord isn't in a recognizable format then just skip it.
-    var reg = chord.match(/^([ABCDEFG][♯♭]?)?([^\/]+)?(\/([ABCDEFG][#b♯♭]?))?/);
-    if (!reg) {
-      continue;
-    }
-    var baseChord = reg[1] || "";
-    var modifier = reg[2] || "";
-    var bassNote = reg[4] || "";
-    if (germanAlphabet) {
-      baseChord = germanNote(baseChord);
-      bassNote = germanNote(bassNote);
-    }
-    // This puts markers in the pieces of the chord that are read by the svg creator.
-    // After the main part of the chord (the letter, a sharp or flat, and "m") a marker is added. Before a slash a marker is added.
-    var marker = jazzchords ? "\x03" : "";
-    var bass = bassNote ? "/" + bassNote : "";
-    lines[i] = [baseChord, modifier, bass].join(marker);
-  }
-  return lines.join("\n");
-}
-module.exports = translateChord;
-
-/***/ }),
-
-/***/ "./src/write/unhighlight.js":
-/*!**********************************!*\
-  !*** ./src/write/unhighlight.js ***!
-  \**********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var setClass = __webpack_require__(/*! ./set-class */ "./src/write/set-class.js");
-var unhighlight = function unhighlight(klass, color) {
-  if (klass === undefined) klass = "abcjs-note_selected";
-  if (color === undefined) color = "#000000";
-  setClass(this.elemset, "", klass, color);
-};
-module.exports = unhighlight;
 
 /***/ }),
 

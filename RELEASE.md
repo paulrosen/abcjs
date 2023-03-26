@@ -28,9 +28,17 @@
 
 * don't indent unaligned words
 
+* fix handling of accidentals in tablature
+
 ## Documentation
 
 * Improved the typescript types somewhat.
+
+## Refactoring
+
+* Changed the names and moved a number of files in the engraver in anticipation of further refactoring.
+
+* Did some simplification in tablatures.
 
 # Version 6.1.9
 
