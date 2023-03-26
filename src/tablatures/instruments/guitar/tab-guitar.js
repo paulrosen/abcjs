@@ -5,7 +5,6 @@ var StringTablature = require('../string-tablature');
 var TabCommon = require('../../tab-common');
 var TabRenderer = require('../../tab-renderer');
 var GuitarPatterns = require('./guitar-patterns');
-var setGuitarFonts = require('./guitar-fonts');
 
 /**
 * upon init mainly store provided instances for later usage
@@ -32,7 +31,6 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
   if (this.tablature.bypass(line)) return;
-  setGuitarFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
   rndrer.doLayout();
 };

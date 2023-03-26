@@ -3,7 +3,6 @@ var StringTablature = require('../string-tablature');
 var TabCommon = require('../../tab-common');
 var TabRenderer = require('../../tab-renderer');
 var ViolinPatterns = require('./violin-patterns');
-var setViolinFonts = require('./violin-fonts');
 
 
 /**
@@ -30,7 +29,6 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 Plugin.prototype.render = function (renderer, line, staffIndex) {
   if (this._super.inError) return;
   if (this.tablature.bypass(line)) return;
-  setViolinFonts(this.abcTune);
   var rndrer = new TabRenderer(this, renderer, line, staffIndex);
   rndrer.doLayout();
 };

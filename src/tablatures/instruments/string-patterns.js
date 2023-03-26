@@ -1,3 +1,4 @@
+const {noteToMidi} = require('../../synth/note-to-midi');
 var TabNote = require('./tab-note');
 var TabNotes = require('./tab-notes');
 
@@ -93,7 +94,10 @@ function sameString(self, chord) {
 function handleChordNotes(self, notes) {
   var retNotes = [];
   for (var iiii = 0; iiii < notes.length; iiii++) {
-    var note = new TabNote.TabNote(notes[iiii].name);
+    if (notes[iiii].endTie)
+      continue;
+    var note = new TabNote.TabNote(notes[iiii].name, self.clefTranspose);
+    note.checkKeyAccidentals(self.accidentals, self.measureAccidentals)
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
   }
@@ -147,26 +151,23 @@ function toNumber(self, note) {
       acc = "="
     self.measureAccidentals[note.name.toUpperCase()] = acc  
   }
-  var num = null;
-  var str = 0;
-  var lowestString = self.strings[self.strings.length - 1];
-  var lowestNote = new TabNote.TabNote(lowestString[0]);
-  if (note.isLowerThan(lowestNote) ) {
-    return {
-      num: "?",
-      str: self.strings.length - 1,
-      note: note,
-      error: note.emit() + ': unexpected note for instrument' 
-    };
-  }
-  while (str < self.strings.length) {
-    num = noteToNumber(self, note, str);
-    if (num) {
-      return num;
+  for (var i = self.stringPitches.length-1; i >= 0; i--) {
+    if (note.pitch + note.pitchAltered >= self.stringPitches[i]) {
+      var num = note.pitch + note.pitchAltered - self.stringPitches[i]
+      if (note.quarter === '^') num -= 0.5
+      else if (note.quarter === "v") num += 0.5
+      return {
+        num: Math.round(num),
+        str: self.stringPitches.length-1-i, // reverse the strings because string 0 is on the bottom
+        note: note
+      }
     }
-    str++;
   }
-  return null; // not found
+  return {
+    num: "?",
+    str: self.stringPitches.length-1,
+    note: note,
+  };
 }
 
 StringPatterns.prototype.stringToPitch = function (stringNumber) {
@@ -198,13 +199,16 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
         error = retNotes.error;
       }
     } else {
-      note = new TabNote.TabNote(notes[0].name);
-      number = toNumber(this, note);
-      if (number) {
-        retNotes.push(number);
-      } else {
-        invalidNumber(retNotes, note);
-        error = retNotes.error;
+      if (!notes[0].endTie) {
+        note = new TabNote.TabNote(notes[0].name, this.clefTranspose);
+        note.checkKeyAccidentals(this.accidentals, this.measureAccidentals)
+        number = toNumber(this, note);
+        if (number) {
+          retNotes.push(number);
+        } else {
+          invalidNumber(retNotes, note);
+          error = retNotes.error;
+        }
       }
     }
   }  
@@ -213,7 +217,8 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   if (graces) {
     retGraces = [];
     for (var iiii = 0; iiii < graces.length; iiii++) {
-      note = new TabNote.TabNote(graces[iiii].name);
+      note = new TabNote.TabNote(graces[iiii].name, this.clefTranspose);
+      note.checkKeyAccidentals(this.accidentals, this.measureAccidentals)
       number = toNumber(this, note);
       if (number) {
         retGraces.push(number);
@@ -232,7 +237,14 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
 };
 
 StringPatterns.prototype.toString = function () {
-  return this.tuning.join('').replaceAll(',', '').toUpperCase();
+  var arr = []
+  for (var i = 0; i < this.tuning.length; i++) {
+    var str = this.tuning[i].replaceAll(',', '').replaceAll("'", '').toUpperCase();
+    if (str[0] === '_') str = str[1] + 'b '
+    else if (str[0] === '^') str = str[1] + "# "
+    arr.push(str)
+  }
+  return arr.join('');
 };
 
 StringPatterns.prototype.tabInfos = function (plugin) {
@@ -275,7 +287,13 @@ function StringPatterns(plugin) {
   if (capo) {
     this.capo = capo;
   }
+  this.transpose = plugin.transpose ? plugin.transpose : 0
   this.tuning = tuning;
+  this.stringPitches = []
+  for (var i = 0; i < this.tuning.length; i++) {
+    var pitch = noteToMidi(this.tuning[i]) + this.capo
+    this.stringPitches.push(pitch)
+  }
   if (this.capo > 0) {
     this.capoTuning = buildCapo(this);
   }

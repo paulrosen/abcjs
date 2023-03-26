@@ -114,7 +114,7 @@ describe("Tablature", function () {
 			{ "el_type": "note", "startChar": 12, "endChar": 14, "notes": [{ "num": "?", "str": 3, "pitch": "F," }] },
 			{ "el_type": "note", "startChar": 14, "endChar": 17, "notes": [{ "num": "?", "str": 3, "pitch": "^F," }] },
 			{ "el_type": "note", "startChar": 17, "endChar": 19, "notes": [{ "num": 0, "str": 3, "pitch": "G," }] },
-			{ "el_type": "note", "startChar": 19, "endChar": 23, "notes": [{ "num": "?", "str": 0, "pitch": "e'''" }] },
+			{ "el_type": "note", "startChar": 19, "endChar": 23, "notes": [{ "num": 36, "str": 0, "pitch": "e'''" }] },
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 24, "startChar": 23 }
 		]
 	];
@@ -199,7 +199,7 @@ describe("Tablature", function () {
 				{ "num": 4, "str": 2, "pitch": "^G" }]
 			},
 			{
-				"el_type": "note", "startChar": 37, "endChar": 43, "notes": [{ "num": 9, "str": 3, "pitch": "^F" },
+				"el_type": "note", "startChar": 37, "endChar": 43, "notes": [{ "num": 9, "str": 3, "pitch": "F" },
 				{ "num": 4, "str": 2, "pitch": "^G" }]
 			},
 			{
@@ -207,7 +207,7 @@ describe("Tablature", function () {
 				{ "num": 4, "str": 1, "pitch": "^c" }]
 			},
 			{
-				"el_type": "note", "startChar": 48, "endChar": 53, "notes": [{ "num": 11, "str": 1, "pitch": "^g" },
+				"el_type": "note", "startChar": 48, "endChar": 53, "notes": [{ "num": 11, "str": 1, "pitch": "g" },
 				{ "num": 7, "str": 0, "pitch": "b" }]
 			},
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 54, "startChar": 53 }
@@ -237,7 +237,7 @@ describe("Tablature", function () {
 				{ "num": 1, "str": 1, "pitch": "^A" }]
 			},
 			{
-				"el_type": "note", "startChar": 37, "endChar": 43, "notes": [{ "num": 4, "str": 2, "pitch": "^G" },
+				"el_type": "note", "startChar": 37, "endChar": 43, "notes": [{ "num": 4, "str": 2, "pitch": "G" },
 				{ "num": 1, "str": 1, "pitch": "^A" }]
 			},
 			{
@@ -245,7 +245,7 @@ describe("Tablature", function () {
 				{ "num": 6, "str": 1, "pitch": "^d" }]
 			},
 			{
-				"el_type": "note", "startChar": 48, "endChar": 53, "notes": [{ "num": 13, "str": 1, "pitch": "^a" },
+				"el_type": "note", "startChar": 48, "endChar": 53, "notes": [{ "num": 13, "str": 1, "pitch": "a" },
 				{ "num": 9, "str": 0, "pitch": "^c'" }]
 			},
 			{ "el_type": "bar", "type": "bar_thin", "endChar": 54, "startChar": 53 }
@@ -365,6 +365,7 @@ describe("Tablature", function () {
 	var accidentalParams = [
 		{
 			instrument: 'guitar',
+			label : 'Accidentals (%T)',
 			tuning: ['^D,', '_A,', '_D', '^G', '_B', '^d'],
 		}
 	];
@@ -604,11 +605,11 @@ describe("Tablature", function () {
 
 	var octaveClefOutput = [
 		[
-			{"el_type":"note","startChar":20,"endChar":23,"notes":[{"num":"?","str":3,"pitch":"G,"}]},
-			{"el_type":"note","startChar":23,"endChar":25,"notes":[{"num":0,"str":3,"pitch":"G"}]},
+			{"el_type":"note","startChar":20,"endChar":23,"notes":[{"num":"?","str":3,"pitch":"G,,"}]},
+			{"el_type":"note","startChar":23,"endChar":25,"notes":[{"num":0,"str":3,"pitch":"G,"}]},
 			{"el_type":"bar","type":"bar_thin","endChar":26,"startChar":25},
-			{"el_type":"note","startChar":26,"endChar":29,"notes":[{"num":5,"str":2,"pitch":"g"}]},
-			{"el_type":"note","startChar":29,"endChar":32,"notes":[{"num":3,"str":0,"pitch":"g'"}]},
+			{"el_type":"note","startChar":26,"endChar":29,"notes":[{"num":5,"str":2,"pitch":"G"}]},
+			{"el_type":"note","startChar":29,"endChar":32,"notes":[{"num":3,"str":0,"pitch":"g"}]},
 			{"el_type":"bar","type":"bar_thin","endChar":33,"startChar":32}
 		]
 	]
@@ -648,8 +649,8 @@ describe("Tablature", function () {
 
 	var weirdNoteConstructionOutput = [
 		[
-			{"el_type":"note","startChar":8,"endChar":10,"notes":[{"num":0,"str":1,"pitch":"A"}]},
-			{"el_type":"note","startChar":10,"endChar":11,"notes":[{"num":7,"str":0,"pitch":"b"}]}
+			{"el_type":"note","startChar":8,"endChar":11,"notes":[{"num":0,"str":1,"pitch":"A"}]},
+			{"el_type":"note","startChar":11,"endChar":13,"notes":[{"num":7,"str":0,"pitch":"b"}]}
 		]
 	]
 
@@ -726,16 +727,15 @@ describe("Tablature", function () {
 			{"el_type":"note","startChar":24,"endChar":26,"notes":[{"num":4,"str":5,"pitch":"G,"}]},
 			{"el_type":"note","startChar":26,"endChar":27,"notes":[{"num":4,"str":4,"pitch":"C"}]},
 			{"el_type":"note","startChar":27,"endChar":28,"notes":[{"num":3,"str":3,"pitch":"E"}]},
-			{"el_type":"note","startChar":28,"endChar":29,"notes":[{"num":2,"str":3,"pitch":"G"}]},
+			{"el_type":"note","startChar":28,"endChar":29,"notes":[{"num":6,"str":3,"pitch":"G"}]},
 			{"el_type":"note","startChar":29,"endChar":30,"notes":[{"num":4,"str":1,"pitch":"d"}]},
 			{"el_type":"note","startChar":30,"endChar":31,"notes":[{"num":6,"str":0,"pitch":"a"}]},
 		]
 	]
 
-	// TODO-PER: This test causes an infinite loop
-	// it("accidentals-in-def", function () {
-	// 	doStaffTest(accidentalsInDef, accidentalsInDefOutput, accidentalParams);
-	// });
+	it("accidentals-in-def", function () {
+		doStaffTest(accidentalsInDef, accidentalsInDefOutput, accidentalParams);
+	});
 
 	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);

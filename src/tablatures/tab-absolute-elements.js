@@ -3,7 +3,6 @@
  */
 var AbsoluteElement = require('../write/creation/elements/absolute-element');
 var RelativeElement = require('../write/creation/elements/relative-element');
-var Transposer = require('./transposer');
 
 function isObject(a) { return a != null && a.constructor === Object; }
 function cloneObject(dest, src) {
@@ -144,20 +143,6 @@ function graceInRest( absElem ) {
   return null;
 }
 
-function checkTransposition(plugin, transposer ,pitches, graceNotes) {
-  if (plugin.transpose) {
-    //transposer.transpose(plugin.transpose);
-    for (var jj = 0; jj < pitches.length; jj++) {
-      pitches[jj] = transposer.transposeNote(pitches[jj]);
-    }
-    if (graceNotes) {
-      for (var kk = 0; kk < graceNotes.length; kk++) {
-        graceNotes[kk] = transposer.transposeNote(graceNotes[kk]);
-      }
-    }
-  }
-}
-
 function convertToNumber(plugin, pitches, graceNotes) {
   var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
   if (tabPos.error) {
@@ -196,7 +181,6 @@ TabAbsoluteElements.prototype.build = function (plugin,
   var staffSize = getInitialStaffSize(staffAbsolute);
   var source = staffAbsolute[staffIndex+voiceIndex];
   var dest = staffAbsolute[staffSize+staffIndex+voiceIndex];
-  var transposer = null;
   var tabPos = null;
   var defNote = null;
   if (source.children[0].abcelem.el_type != 'clef') {
@@ -214,18 +198,14 @@ TabAbsoluteElements.prototype.build = function (plugin,
     // }
     if ( (absChild.isClef) ) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
+      if (absChild.abcelem.type.indexOf('-8') >= 0) plugin.semantics.strings.clefTranspose = -12
+      if (absChild.abcelem.type.indexOf('+8') >= 0) plugin.semantics.strings.clefTranspose = 12
     }
     switch (absChild.type) {
       case 'staff-extra key-signature':
         // refresh key accidentals
         this.accidentals = absChild.abcelem.accidentals;
         plugin.semantics.strings.accidentals = this.accidentals;
-        if (plugin.transpose) {
-          transposer = new Transposer(
-            absChild.abcelem.accidentals,
-            plugin.transpose 
-          );
-        }
         break;
       case 'bar':
         plugin.semantics.strings.measureAccidentals = {}
@@ -258,8 +238,6 @@ TabAbsoluteElements.prototype.build = function (plugin,
       case 'rest':
         var restGraces = graceInRest(absChild);
         if (restGraces) {
-          // check transpose
-          checkTransposition(plugin, transposer, null, restGraces);
           // to number conversion 
           tabPos = convertToNumber(plugin, null, restGraces);
           if (tabPos.error) return;
@@ -274,9 +252,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         abs.lyricDim = lyricsDim(absChild);
         var pitches = absChild.abcelem.pitches;
         var graceNotes = absChild.abcelem.gracenotes;
-        // check transpose
         abs.type = 'tabNumber';
-        checkTransposition(plugin, transposer, pitches, graceNotes);
         // to number conversion 
         tabPos = convertToNumber(plugin, pitches, graceNotes);   
         if (tabPos.error) return;
@@ -302,9 +278,11 @@ TabAbsoluteElements.prototype.build = function (plugin,
           var tabNoteRelative = buildRelativeTabNote(plugin, abs.x+absChild.heads[ll].dx, defNote, curNote, false);
           abs.children.push(tabNoteRelative);
         }
-        defNote.abselem = abs;
-        tabVoice.push(defNote);
-        dest.children.push(abs);
+        if (defNote.notes.length > 0) {
+          defNote.abselem = abs;
+          tabVoice.push(defNote);
+          dest.children.push(abs);
+        }
         break;
     }
   }
