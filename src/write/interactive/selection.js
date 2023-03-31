@@ -362,10 +362,13 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
 	var parent = ev.target;
 	while (parent && parent.dataset && !parent.dataset.index && parent.tagName.toLowerCase() !== 'svg')
 		parent = parent.parentNode;
-	analysis.name = parent.dataset.name;
-	analysis.clickedName = closest.dataset.name;
-	analysis.parentClasses = parent.classList;
-	analysis.clickedClasses = closest.classList;
+	if (parent && parent.dataset) {
+		analysis.name = parent.dataset.name;
+		analysis.clickedName = closest.dataset.name;
+		analysis.parentClasses = parent.classList;
+	}
+	if (closest && closest.classList)
+		analysis.clickedClasses = closest.classList;
 	analysis.selectableElement = target.svgEl;
 
 	for (var i = 0; i < this.listeners.length; i++) {
