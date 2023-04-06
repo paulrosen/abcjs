@@ -1142,7 +1142,7 @@ declare module 'abcjs' {
 
 	export interface MidiBuffer {
 		init(params?: MidiBufferOptions): Promise<MidiBufferPromise>
-		prime(): Promise<void>
+		prime(): Promise<{ status: string, duration: number}>
 		start(): void
 		pause(): number
 		resume(): void
