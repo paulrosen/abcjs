@@ -165,6 +165,9 @@ function CreateSynth() {
 				notes.push({ instrument: instrument, note: note });
 			});
 		});
+		if (self.debugCallback)
+			self.debugCallback("notes "+JSON.stringify(notes));
+
 		// If there are lots of notes, load them in batches
 		var batches = [];
 		var CHUNK = 256;
@@ -181,8 +184,13 @@ function CreateSynth() {
 
 			var index = 0;
 			var next = function() {
+				if (self.debugCallback)
+					self.debugCallback("loadBatch idx="+index+ " len="+batches.length);
+	
 				if (index < batches.length) {
 					self._loadBatch(batches[index], self.soundFontUrl, startTime).then(function(data) {
+						if (self.debugCallback)
+							self.debugCallback("loadBatch then");
 						startTime = activeAudioContext().currentTime;
 						if (data) {
 							if (data.error)
@@ -194,6 +202,9 @@ function CreateSynth() {
 						next();
 					}, reject);
 				} else {
+					if (self.debugCallback)
+						self.debugCallback("resolve init");
+		
 					resolve(results);
 				}
 			};
@@ -205,6 +216,8 @@ function CreateSynth() {
 		// This is called recursively to see if the sounds have loaded. The "delay" parameter is how long it has been since the original call.
 		var promises = [];
 		batch.forEach(function(item) {
+			if (self.debugCallback)
+				self.debugCallback("getNote " + item.instrument+':'+item.note);
 			promises.push(getNote(soundFontUrl, item.instrument, item.note, activeAudioContext()));
 		});
 		return Promise.all(promises).then(function(response) {
@@ -227,6 +240,8 @@ function CreateSynth() {
 					error.push(which + ' ' + oneResponse.message);
 			}
 			if (pending.length > 0) {
+				if (self.debugCallback)
+					self.debugCallback("pending " + JSON.stringify(pending));
 				// There was probably a second call for notes before the first one finished, so just retry a few times to see if they stop being pending.
 				// Retry quickly at first so that there isn't an unnecessary delay, but increase the delay each time.
 				if (!delay)
@@ -241,7 +256,9 @@ function CreateSynth() {
 								which = pending[i].split(":");
 								newBatch.push({instrument: which[0], note: which[1]});
 							}
-							self._loadBatch(newBatch, soundFontUrl, startTime, delay).then(function (response) {
+							if (self.debugCallback)
+								self.debugCallback("retry " + JSON.stringify(newBatch));
+									self._loadBatch(newBatch, soundFontUrl, startTime, delay).then(function (response) {
 								resolve(response);
 							}).catch(function (error) {
 								reject(error);
@@ -252,11 +269,18 @@ function CreateSynth() {
 					var list = [];
 					for (var j = 0; j < batch.length; j++)
 						list.push(batch[j].instrument+'/'+batch[j].note)
-					return Promise.reject(new Error("timeout attempting to load: " + list.join(", ")));
+						if (self.debugCallback)
+							self.debugCallback("loadBatch timeout")
+						return Promise.reject(new Error("timeout attempting to load: " + list.join(", ")));
 				}
-			} else
+			} else {
+				if (self.debugCallback)
+					self.debugCallback("loadBatch resolve")
 				return Promise.resolve({loaded: loaded, cached: cached, error: error});
+			}
 		}).catch(function (error) {
+			if (self.debugCallback)
+				self.debugCallback("loadBatch catch "+error.message)
 		});
 	});
 
