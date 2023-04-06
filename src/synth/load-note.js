@@ -16,7 +16,7 @@ var getNote = function (url, instrument, name, audioContext) {
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function () {
 				if (xhr.status !== 200) {
-					reject(Error("Can't load sound at " + noteUrl));
+					reject(Error("Can't load sound at " + noteUrl + ' status=' + xhr.status));
 					return
 				}
 				var noteDecoded = function(audioBuffer) {

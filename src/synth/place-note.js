@@ -85,7 +85,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 				}
 				if (debugCallback)
 					debugCallback('placeNote: '+sound.instrument+':'+noteName)
-					fnResolve();
+				fnResolve();
 			};
 			offlineCtx.startRendering();
 			return new Promise(function(resolve) {
@@ -94,8 +94,8 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 		})
 		.catch(function (error) {
 			debugCallback('placeNote catch: '+error.message)
-			fnResolve();
-});
+			return Promise.resolve()
+		});
 }
 
 var copyToChannel = function(toBuffer, fromBuffer, start) {
