@@ -2,7 +2,7 @@ var soundsCache = require('./sounds-cache');
 var pitchToNoteName = require('./pitch-to-note-name');
 var centsToFactor = require("./cents-to-factor");
 
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec, noteEndSec) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec, noteEndSec, debugCallback) {
 	// sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
 	// len is in whole notes. Multiply by tempoMultiplier to get seconds.
 	// ofsMs is an offset to subtract from the note to line up programs that have different length onsets.
@@ -21,6 +21,8 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 
 	if (!noteBufferPromise) {
 		// if the note isn't present then just skip it - it will leave a blank spot in the audio.
+		if (debugCallback)
+			debugCallback('placeNote skipped: '+sound.instrument+':'+noteName)
 		return Promise.resolve();
 	}
 
@@ -81,14 +83,19 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 						copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
 					}
 				}
-				fnResolve();
+				if (debugCallback)
+					debugCallback('placeNote: '+sound.instrument+':'+noteName)
+					fnResolve();
 			};
 			offlineCtx.startRendering();
 			return new Promise(function(resolve) {
 				fnResolve = resolve;
 			});
 		})
-		.catch(function () {});
+		.catch(function (error) {
+			debugCallback('placeNote catch: '+error.message)
+			fnResolve();
+});
 }
 
 var copyToChannel = function(toBuffer, fromBuffer, start) {
