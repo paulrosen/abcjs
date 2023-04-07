@@ -93,7 +93,8 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 			});
 		})
 		.catch(function (error) {
-			debugCallback('placeNote catch: '+error.message)
+			if (debugCallback)
+				debugCallback('placeNote catch: '+error.message)
 			return Promise.resolve()
 		});
 }
