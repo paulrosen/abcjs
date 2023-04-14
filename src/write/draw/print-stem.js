@@ -12,6 +12,16 @@ function printStem(renderer, x, dx, y1, y2, klass, name) {
 	}
 	x = roundNumber(x);
 	var x2 = roundNumber(x + dx);
+	// TODO-PER: This fixes a firefox bug where a path needs to go over the 0.5 mark or it isn't displayed
+	if (renderer.firefox112 && Math.abs(dx) < 1) {
+		var higher = Math.max(x,x2)
+		var int = Math.floor(higher)
+		var distToHalf = 0.52 - (higher - int)
+		if (distToHalf > 0) {
+			x += distToHalf
+			x2 += distToHalf
+		}
+	}
 	var pathArray = [["M", x, y1], ["L", x, y2], ["L", x2, y2], ["L", x2, y1], ["z"]];
 	var attr = { path: "" };
 	for (var i = 0; i < pathArray.length; i++)

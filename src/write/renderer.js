@@ -16,6 +16,7 @@ var Renderer = function (paper) {
 	this.space = 3 * spacing.SPACE;
 	this.padding = {}; // renderer's padding is managed by the controller
 	this.reset();
+	this.firefox112 = navigator.userAgent.indexOf('Firefox/112.0') >= 0
 };
 
 Renderer.prototype.reset = function () {
