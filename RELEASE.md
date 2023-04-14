@@ -1,3 +1,19 @@
+# Version 6.2.1
+
+## Bugs
+
+* don't crash if "capo" is passed in to tablature as a string
+
+* fix possible crash if setTiming is called before engraving
+
+* Fix bug in Firefox 112 that causes lines to be missing.
+
+* Add more debug messages when creating synth
+
+* Fix type of prime return
+
+* Protect against crash when selecting an element if the element selected is somehow outside of the music svg.
+
 # Version 6.2.0
 
 ## Features

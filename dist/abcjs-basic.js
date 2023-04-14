@@ -18,7 +18,7 @@ return /******/ (function() { // webpackBootstrap
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /**!
-Copyright (c) 2009-2022 Paul Rosen and Gregory Dyke
+Copyright (c) 2009-2023 Paul Rosen and Gregory Dyke
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -352,7 +352,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
   self.joggerTimer = null;
   self.replaceTarget = function (newTarget) {
     self.noteTimings = newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
-    if (newTarget.noteTimings.length === 0) newTarget.setTiming(0, 0);
+    if (newTarget.noteTimings.length === 0) self.noteTimings = newTarget.setTiming(0, 0);
     if (self.lineEndCallback) {
       self.lineEndTimings = getLineEndTimings(newTarget.noteTimings, self.lineEndAnticipation);
     }
@@ -1797,7 +1797,7 @@ var Tune = function Tune() {
     if (!this.engraver || !this.engraver.staffgroups) {
       console.log("setTiming cannot be called before the tune is drawn.");
       this.noteTimings = [];
-      return;
+      return this.noteTimings;
     }
     var tempo = this.metaText ? this.metaText.tempo : null;
     var naturalBpm = this.getBpm(tempo);
@@ -13881,6 +13881,8 @@ function CreateSynth() {
         });
       });
     });
+    if (self.debugCallback) self.debugCallback("notes " + JSON.stringify(notes));
+
     // If there are lots of notes, load them in batches
     var batches = [];
     var CHUNK = 256;
@@ -13895,8 +13897,10 @@ function CreateSynth() {
       };
       var index = 0;
       var next = function next() {
+        if (self.debugCallback) self.debugCallback("loadBatch idx=" + index + " len=" + batches.length);
         if (index < batches.length) {
           self._loadBatch(batches[index], self.soundFontUrl, startTime).then(function (data) {
+            if (self.debugCallback) self.debugCallback("loadBatch then");
             startTime = activeAudioContext().currentTime;
             if (data) {
               if (data.error) results.error = results.error.concat(data.error);
@@ -13906,6 +13910,7 @@ function CreateSynth() {
             next();
           }, reject);
         } else {
+          if (self.debugCallback) self.debugCallback("resolve init");
           resolve(results);
         }
       };
@@ -13916,6 +13921,7 @@ function CreateSynth() {
     // This is called recursively to see if the sounds have loaded. The "delay" parameter is how long it has been since the original call.
     var promises = [];
     batch.forEach(function (item) {
+      if (self.debugCallback) self.debugCallback("getNote " + item.instrument + ':' + item.note);
       promises.push(getNote(soundFontUrl, item.instrument, item.note, activeAudioContext()));
     });
     return Promise.all(promises).then(function (response) {
@@ -13930,6 +13936,7 @@ function CreateSynth() {
         if (oneResponse.status === "loaded") loaded.push(which);else if (oneResponse.status === "pending") pending.push(which);else if (oneResponse.status === "cached") cached.push(which);else error.push(which + ' ' + oneResponse.message);
       }
       if (pending.length > 0) {
+        if (self.debugCallback) self.debugCallback("pending " + JSON.stringify(pending));
         // There was probably a second call for notes before the first one finished, so just retry a few times to see if they stop being pending.
         // Retry quickly at first so that there isn't an unnecessary delay, but increase the delay each time.
         if (!delay) delay = 50;else delay = delay * 2;
@@ -13944,6 +13951,7 @@ function CreateSynth() {
                   note: which[1]
                 });
               }
+              if (self.debugCallback) self.debugCallback("retry " + JSON.stringify(newBatch));
               self._loadBatch(newBatch, soundFontUrl, startTime, delay).then(function (response) {
                 resolve(response);
               })["catch"](function (error) {
@@ -13956,14 +13964,20 @@ function CreateSynth() {
           for (var j = 0; j < batch.length; j++) {
             list.push(batch[j].instrument + '/' + batch[j].note);
           }
+          if (self.debugCallback) self.debugCallback("loadBatch timeout");
           return Promise.reject(new Error("timeout attempting to load: " + list.join(", ")));
         }
-      } else return Promise.resolve({
-        loaded: loaded,
-        cached: cached,
-        error: error
-      });
-    })["catch"](function (error) {});
+      } else {
+        if (self.debugCallback) self.debugCallback("loadBatch resolve");
+        return Promise.resolve({
+          loaded: loaded,
+          cached: cached,
+          error: error
+        });
+      }
+    })["catch"](function (error) {
+      if (self.debugCallback) self.debugCallback("loadBatch catch " + error.message);
+    });
   };
   self.prime = function () {
     // At this point all of the notes are loaded. This function writes them into the output buffer.
@@ -14002,6 +14016,7 @@ function CreateSynth() {
         var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
         noteMap.forEach(function (note) {
           var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + (note.cents ? note.cents : 0);
+          if (self.debugCallback) self.debugCallback("noteMapTrack " + key);
           if (!uniqueSounds[key]) uniqueSounds[key] = [];
           uniqueSounds[key].push(note.start);
         });
@@ -14023,7 +14038,7 @@ function CreateSynth() {
           tempoMultiplier: parseFloat(parts[5]),
           cents: cents
         };
-        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd / 1000));
+        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd / 1000, self.debugCallback));
       }
       self.audioBuffers = [audioBuffer];
       if (self.debugCallback) {
@@ -14462,7 +14477,7 @@ var getNote = function getNote(url, instrument, name, audioContext) {
     xhr.responseType = "arraybuffer";
     xhr.onload = function () {
       if (xhr.status !== 200) {
-        reject(Error("Can't load sound at " + noteUrl));
+        reject(Error("Can't load sound at " + noteUrl + ' status=' + xhr.status));
         return;
       }
       var noteDecoded = function noteDecoded(audioBuffer) {
@@ -14756,7 +14771,7 @@ module.exports = pitchesToPerc;
 var soundsCache = __webpack_require__(/*! ./sounds-cache */ "./src/synth/sounds-cache.js");
 var pitchToNoteName = __webpack_require__(/*! ./pitch-to-note-name */ "./src/synth/pitch-to-note-name.js");
 var centsToFactor = __webpack_require__(/*! ./cents-to-factor */ "./src/synth/cents-to-factor.js");
-function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec, noteEndSec) {
+function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMultiplier, ofsMs, fadeTimeSec, noteEndSec, debugCallback) {
   // sound contains { instrument, pitch, volume, len, pan, tempoMultiplier
   // len is in whole notes. Multiply by tempoMultiplier to get seconds.
   // ofsMs is an offset to subtract from the note to line up programs that have different length onsets.
@@ -14770,6 +14785,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   var noteBufferPromise = soundsCache[sound.instrument][noteName];
   if (!noteBufferPromise) {
     // if the note isn't present then just skip it - it will leave a blank spot in the audio.
+    if (debugCallback) debugCallback('placeNote skipped: ' + sound.instrument + ':' + noteName);
     return Promise.resolve();
   }
   return noteBufferPromise.then(function (response) {
@@ -14825,13 +14841,17 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
           copyToChannel(outputAudioBuffer, e.renderedBuffer, start);
         }
       }
+      if (debugCallback) debugCallback('placeNote: ' + sound.instrument + ':' + noteName);
       fnResolve();
     };
     offlineCtx.startRendering();
     return new Promise(function (resolve) {
       fnResolve = resolve;
     });
-  })["catch"](function () {});
+  })["catch"](function (error) {
+    if (debugCallback) debugCallback('placeNote catch: ' + error.message);
+    return Promise.resolve();
+  });
 }
 var copyToChannel = function copyToChannel(toBuffer, fromBuffer, start) {
   for (var ch = 0; ch < 2; ch++) {
@@ -15618,7 +15638,7 @@ function StringPatterns(plugin) {
   this.measureAccidentals = {};
   this.capo = 0;
   if (capo) {
-    this.capo = capo;
+    this.capo = parseInt(capo, 10);
   }
   this.transpose = plugin.transpose ? plugin.transpose : 0;
   this.tuning = tuning;
@@ -21545,6 +21565,15 @@ function printLine(renderer, x1, x2, y, klass, name, dy) {
   x2 = roundNumber(x2);
   var y1 = roundNumber(y - dy);
   var y2 = roundNumber(y + dy);
+  // TODO-PER: This fixes a firefox bug where a path needs to go over the 0.5 mark or it isn't displayed
+  if (renderer.firefox112 && dy < 1) {
+    var _int = Math.floor(y2);
+    var distToHalf = 0.52 - (y2 - _int);
+    if (distToHalf > 0) {
+      y1 += distToHalf;
+      y2 += distToHalf;
+    }
+  }
   var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
   var options = {
     path: pathString,
@@ -21594,6 +21623,16 @@ function printStem(renderer, x, dx, y1, y2, klass, name) {
   }
   x = roundNumber(x);
   var x2 = roundNumber(x + dx);
+  // TODO-PER: This fixes a firefox bug where a path needs to go over the 0.5 mark or it isn't displayed
+  if (renderer.firefox112 && Math.abs(dx) < 1) {
+    var higher = Math.max(x, x2);
+    var _int = Math.floor(higher);
+    var distToHalf = 0.52 - (higher - _int);
+    if (distToHalf > 0) {
+      x += distToHalf;
+      x2 += distToHalf;
+    }
+  }
   var pathArray = [["M", x, y1], ["L", x, y2], ["L", x2, y2], ["L", x2, y1], ["z"]];
   var attr = {
     path: ""
@@ -23806,10 +23845,12 @@ function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
   while (parent && parent.dataset && !parent.dataset.index && parent.tagName.toLowerCase() !== 'svg') {
     parent = parent.parentNode;
   }
-  analysis.name = parent.dataset.name;
-  analysis.clickedName = closest.dataset.name;
-  analysis.parentClasses = parent.classList;
-  analysis.clickedClasses = closest.classList;
+  if (parent && parent.dataset) {
+    analysis.name = parent.dataset.name;
+    analysis.clickedName = closest.dataset.name;
+    analysis.parentClasses = parent.classList;
+  }
+  if (closest && closest.classList) analysis.clickedClasses = closest.classList;
   analysis.selectableElement = target.svgEl;
   for (var i = 0; i < this.listeners.length; i++) {
     this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, {
@@ -24992,6 +25033,7 @@ var Renderer = function Renderer(paper) {
   this.space = 3 * spacing.SPACE;
   this.padding = {}; // renderer's padding is managed by the controller
   this.reset();
+  this.firefox112 = navigator.userAgent.indexOf('Firefox/112.0') >= 0;
 };
 Renderer.prototype.reset = function () {
   this.paper.clear();
@@ -25479,7 +25521,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.2.0';
+var version = '6.2.1';
 module.exports = version;
 
 /***/ })
