@@ -285,7 +285,7 @@ function StringPatterns(plugin) {
   this.measureAccidentals = {}
   this.capo = 0;
   if (capo) {
-    this.capo = capo;
+    this.capo = parseInt(capo,10);
   }
   this.transpose = plugin.transpose ? plugin.transpose : 0
   this.tuning = tuning;
