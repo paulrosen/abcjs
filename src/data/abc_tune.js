@@ -572,7 +572,7 @@ var Tune = function() {
 		if (!this.engraver || !this.engraver.staffgroups) {
 			console.log("setTiming cannot be called before the tune is drawn.");
 			this.noteTimings = [];
-			return;
+			return this.noteTimings;
 		}
 
 		var tempo = this.metaText ? this.metaText.tempo : null;
