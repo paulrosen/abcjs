@@ -17,7 +17,7 @@ var TimingCallbacks = function(target, params) {
 	self.replaceTarget = function(newTarget) {
 		self.noteTimings = newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
 		if (newTarget.noteTimings.length === 0)
-			newTarget.setTiming(0,0);
+			self.noteTimings = newTarget.setTiming(0,0);
 		if (self.lineEndCallback) {
 			self.lineEndTimings = getLineEndTimings(newTarget.noteTimings, self.lineEndAnticipation);
 		}
