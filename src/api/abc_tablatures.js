@@ -6,6 +6,7 @@
  * 
  */
 var ViolinTablature = require('../tablatures/instruments/violin/tab-violin');
+var MandolinTablature = require('../tablatures/instruments/mandolin/tab-mandolin');
 var GuitarTablature = require('../tablatures/instruments/guitar/tab-guitar');
 
 /* extend the table below when adding a new instrument plugin */
@@ -13,6 +14,7 @@ var GuitarTablature = require('../tablatures/instruments/guitar/tab-guitar');
 // Existing tab classes 
 var pluginTab = {
   'violin': 'ViolinTab',
+  'mandolin': 'MandolinTab',
   'guitar': 'GuitarTab'
 };
 
@@ -134,6 +136,7 @@ var abcTablatures = {
     // just register plugin hosted by abcjs 
     if (!this.inited) {
       this.register(new ViolinTablature());
+      this.register(new MandolinTablature());
       this.register(new GuitarTablature());
       this.inited = true;
     }

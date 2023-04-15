@@ -107,6 +107,9 @@ describe("Tablature", function () {
 		],
 	];
 
+	const mandolinAllNotes = violinAllNotes;
+	const mandolinAllNotesOutput = [...violinAllNotesOutput]; // shallow copy
+
 	var violinOutOfRange = "L:1/4\nM:4/4\nF,^F,G,e'''|\n";
 
 	var violinOutOfRangeOutput = [
@@ -383,6 +386,14 @@ describe("Tablature", function () {
 			instrument: 'violin',
 			label: 'Violin',
 			tuning: ['G,', 'D', 'A', 'e']
+		}
+	];
+
+	const mandolinParams = [
+		{
+			instrument: 'mandolin',
+			label: 'Mandolin',
+			tuning: violinParams[0].tuning,
 		}
 	];
 
@@ -739,6 +750,10 @@ describe("Tablature", function () {
 
 	it("accidentals", function () {
 		doStaffTest(violinAllNotes, violinAllNotesOutput, violinParams);
+	});
+
+	it("mandolin accidentals", function () {
+		doStaffTest(mandolinAllNotes, mandolinAllNotesOutput, mandolinParams);
 	});
 
 	it("accidentals2", function () {

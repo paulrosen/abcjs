@@ -6,7 +6,7 @@ var bookParser = function(book) {
 	"use strict";
 
 	var directives = "";
-	var initialWhiteSpace = book.match(/(\s*)/)
+	var initialWhiteSpace = book.match(/(\s*)/);
 	book = parseCommon.strip(book);
 	var tuneStrings = book.split("\nX:");
 	// Put back the X: that we lost when splitting the tunes.

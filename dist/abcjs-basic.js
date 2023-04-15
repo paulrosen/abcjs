@@ -204,6 +204,7 @@ module.exports = animation;
  * 
  */
 var ViolinTablature = __webpack_require__(/*! ../tablatures/instruments/violin/tab-violin */ "./src/tablatures/instruments/violin/tab-violin.js");
+var MandolinTablature = __webpack_require__(/*! ../tablatures/instruments/mandolin/tab-mandolin */ "./src/tablatures/instruments/mandolin/tab-mandolin.js");
 var GuitarTablature = __webpack_require__(/*! ../tablatures/instruments/guitar/tab-guitar */ "./src/tablatures/instruments/guitar/tab-guitar.js");
 
 /* extend the table below when adding a new instrument plugin */
@@ -211,6 +212,7 @@ var GuitarTablature = __webpack_require__(/*! ../tablatures/instruments/guitar/t
 // Existing tab classes 
 var pluginTab = {
   'violin': 'ViolinTab',
+  'mandolin': 'MandolinTab',
   'guitar': 'GuitarTab'
 };
 var abcTablatures = {
@@ -320,6 +322,7 @@ var abcTablatures = {
     // just register plugin hosted by abcjs 
     if (!this.inited) {
       this.register(new ViolinTablature());
+      this.register(new MandolinTablature());
       this.register(new GuitarTablature());
       this.inited = true;
     }
@@ -15375,6 +15378,27 @@ var AbcGuitarTab = function AbcGuitarTab() {
   };
 };
 module.exports = AbcGuitarTab;
+
+/***/ }),
+
+/***/ "./src/tablatures/instruments/mandolin/tab-mandolin.js":
+/*!*************************************************************!*\
+  !*** ./src/tablatures/instruments/mandolin/tab-mandolin.js ***!
+  \*************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var AbcViolinTab = __webpack_require__(/*! ../violin/tab-violin */ "./src/tablatures/instruments/violin/tab-violin.js");
+var ViolinPlugin = AbcViolinTab().tablature;
+
+//
+// Tablature plugin definition
+//
+module.exports = function MandolinTab() {
+  return {
+    name: 'MandolinTab',
+    tablature: ViolinPlugin
+  };
+};
 
 /***/ }),
 
