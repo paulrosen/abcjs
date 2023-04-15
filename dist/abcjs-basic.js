@@ -21565,14 +21565,20 @@ function printLine(renderer, x1, x2, y, klass, name, dy) {
   x2 = roundNumber(x2);
   var y1 = roundNumber(y - dy);
   var y2 = roundNumber(y + dy);
-  // TODO-PER: This fixes a firefox bug where a path needs to go over the 0.5 mark or it isn't displayed
-  if (renderer.firefox112 && dy < 1) {
-    var _int = Math.floor(y2);
-    var distToHalf = 0.52 - (y2 - _int);
-    if (distToHalf > 0) {
-      y1 += distToHalf;
-      y2 += distToHalf;
-    }
+  // TODO-PER: This fixes a firefox bug where it isn't displayed
+  if (renderer.firefox112) {
+    y += dy / 2; // Because the y coordinate is the edge of where the line goes but the width widens from the middle.
+    var attr = {
+      x1: x1,
+      x2: x2,
+      y1: y,
+      y2: y,
+      stroke: renderer.foregroundColor,
+      'stroke-width': Math.abs(dy)
+    };
+    if (klass) attr['class'] = klass;
+    if (name) attr['data-name'] = name;
+    return renderer.paper.lineToBack(attr);
   }
   var pathString = sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y1, x2, y1, x2, y2, x1, y2);
   var options = {
@@ -21623,15 +21629,20 @@ function printStem(renderer, x, dx, y1, y2, klass, name) {
   }
   x = roundNumber(x);
   var x2 = roundNumber(x + dx);
-  // TODO-PER: This fixes a firefox bug where a path needs to go over the 0.5 mark or it isn't displayed
-  if (renderer.firefox112 && Math.abs(dx) < 1) {
-    var higher = Math.max(x, x2);
-    var _int = Math.floor(higher);
-    var distToHalf = 0.52 - (higher - _int);
-    if (distToHalf > 0) {
-      x += distToHalf;
-      x2 += distToHalf;
-    }
+  // TODO-PER: This fixes a firefox bug where it isn't displayed
+  if (renderer.firefox112) {
+    x += dx / 2; // Because the x coordinate is the edge of where the line goes but the width widens from the middle.
+    var attr = {
+      x1: x,
+      x2: x,
+      y1: y1,
+      y2: y2,
+      stroke: renderer.foregroundColor,
+      'stroke-width': Math.abs(dx)
+    };
+    if (klass) attr['class'] = klass;
+    if (name) attr['data-name'] = name;
+    return renderer.paper.lineToBack(attr);
   }
   var pathArray = [["M", x, y1], ["L", x, y2], ["L", x2, y2], ["L", x2, y1], ["z"]];
   var attr = {
@@ -25482,6 +25493,15 @@ Svg.prototype.pathToBack = function (attr) {
     if (attr.hasOwnProperty(key)) {
       if (key === 'path') el.setAttributeNS(null, 'd', attr.path);else if (key === 'klass') el.setAttributeNS(null, "class", attr[key]);else el.setAttributeNS(null, key, attr[key]);
     }
+  }
+  this.prepend(el);
+  return el;
+};
+Svg.prototype.lineToBack = function (attr) {
+  var el = document.createElementNS(svgNS, 'line');
+  var keys = Object.keys(attr);
+  for (var i = 0; i < keys.length; i++) {
+    el.setAttribute(keys[i], attr[keys[i]]);
   }
   this.prepend(el);
   return el;
