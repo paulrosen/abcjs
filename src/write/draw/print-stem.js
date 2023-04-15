@@ -12,15 +12,23 @@ function printStem(renderer, x, dx, y1, y2, klass, name) {
 	}
 	x = roundNumber(x);
 	var x2 = roundNumber(x + dx);
-	// TODO-PER: This fixes a firefox bug where a path needs to go over the 0.5 mark or it isn't displayed
-	if (renderer.firefox112 && Math.abs(dx) < 1) {
-		var higher = Math.max(x,x2)
-		var int = Math.floor(higher)
-		var distToHalf = 0.52 - (higher - int)
-		if (distToHalf > 0) {
-			x += distToHalf
-			x2 += distToHalf
+	// TODO-PER: This fixes a firefox bug where it isn't displayed
+	if (renderer.firefox112) {
+		x += dx / 2; // Because the x coordinate is the edge of where the line goes but the width widens from the middle.
+		var attr = {
+			x1: x,
+			x2: x,
+			y1: y1,
+			y2: y2,
+			stroke: renderer.foregroundColor,
+			'stroke-width': Math.abs(dx)
 		}
+		if (klass)
+			attr['class'] = klass;
+		if (name)
+			attr['data-name'] = name;
+		
+		return renderer.paper.lineToBack(attr);
 	}
 	var pathArray = [["M", x, y1], ["L", x, y2], ["L", x2, y2], ["L", x2, y1], ["z"]];
 	var attr = { path: "" };

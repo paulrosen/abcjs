@@ -345,6 +345,16 @@ Svg.prototype.pathToBack = function (attr) {
 	return el;
 };
 
+Svg.prototype.lineToBack = function (attr) {
+	var el = document.createElementNS(svgNS, 'line');
+	var keys = Object.keys(attr)
+	for (var i = 0; i < keys.length; i++)
+		el.setAttribute(keys[i], attr[keys[i]]);
+	this.prepend(el);
+	return el;
+};
+
+
 Svg.prototype.append = function (el) {
 	if (this.currentGroup.length > 0)
 		this.currentGroup[0].appendChild(el);
