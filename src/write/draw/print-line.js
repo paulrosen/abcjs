@@ -16,7 +16,7 @@ function printLine(renderer, x1, x2, y, klass, name, dy) {
 			y1: y,
 			y2: y,
 			stroke: renderer.foregroundColor,
-			'stroke-width': Math.abs(dy)
+			'stroke-width': Math.abs(dy*2)
 		}
 		if (klass)
 			attr['class'] = klass;
