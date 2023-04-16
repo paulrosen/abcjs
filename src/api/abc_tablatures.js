@@ -13,6 +13,8 @@ var GuitarTablature = require('../tablatures/instruments/guitar/tab-guitar');
 // Existing tab classes 
 var pluginTab = {
   'violin': 'ViolinTab',
+  'fiddle': 'ViolinTab',
+  'mandolin': 'ViolinTab',
   'guitar': 'GuitarTab'
 };
 
