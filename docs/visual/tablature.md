@@ -48,10 +48,12 @@ If there are more voices in the music than are in the above array, the extra voi
 
 default: undefined
 
-Options: "violin" | "guitar" | ""
+Options: "violin" | "mandolin" | "fiddle" | "guitar" | ""
 
 This is one of the predefined tablature types. If it is an empty string then that voice is skipped.
 If it is an unrecognized instrument type, then the voice is skipped and a warning is added.
+
+(Note that violin, mandolin, and fiddle are synonyms and produce the same output.)
 
 ### label
 
