@@ -1,3 +1,18 @@
+# Version 6.2.2
+
+## Features
+
+* Make "mandolin" and "fiddle" synonyms for "violin" in tablature.
+
+## Bugs
+
+* Don't draw staff line for tabs twice if there are two voices on it.
+
+* make the staff line the correct width in Firefox.
+
+* Fix bug in Firefox that causes staff lines, bar lines, and stems to be missing.
+
+* Fix bug in Firefox that cuts off the last line of the SVG.
 # Version 6.2.1
 
 ## Bugs

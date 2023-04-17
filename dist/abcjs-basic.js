@@ -211,6 +211,8 @@ var GuitarTablature = __webpack_require__(/*! ../tablatures/instruments/guitar/t
 // Existing tab classes 
 var pluginTab = {
   'violin': 'ViolinTab',
+  'fiddle': 'ViolinTab',
+  'mandolin': 'ViolinTab',
   'guitar': 'GuitarTab'
 };
 var abcTablatures = {
@@ -23159,13 +23161,13 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
   this.selectables = ret.selectables;
   if (this.oneSvgPerLine) {
     var div = this.renderer.paper.svg.parentNode;
-    this.svgs = splitSvgIntoLines(div, abcTune.metaText.title, this.responsive);
+    this.svgs = splitSvgIntoLines(this.renderer, div, abcTune.metaText.title, this.responsive);
   } else {
     this.svgs = [this.renderer.paper.svg];
   }
   setupSelection(this, this.svgs);
 };
-function splitSvgIntoLines(output, title, responsive) {
+function splitSvgIntoLines(renderer, output, title, responsive) {
   // Each line is a top level <g> in the svg. To split it into separate
   // svgs iterate through each of those and put them in a new svg. Since
   // they are placed absolutely, the viewBox needs to be manipulated to
@@ -23195,7 +23197,9 @@ function splitSvgIntoLines(output, title, responsive) {
     svg.setAttribute("aria-label", fullTitle);
     if (responsive !== 'resize') svg.setAttribute("height", height);
     if (responsive === 'resize') svg.style.position = '';
-    svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + height);
+    // TODO-PER: Hack! Not sure why this is needed.
+    var viewBoxHeight = renderer.firefox112 ? height + 1 : height;
+    svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + viewBoxHeight);
     svg.appendChild(style.cloneNode(true));
     var titleEl = document.createElement("title");
     titleEl.innerText = fullTitle;
