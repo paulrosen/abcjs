@@ -1,6 +1,6 @@
 {
   "name": "abcjs",
-  "version": "6.2.2",
+  "version": "6.2.3",
   "description": "Renderer for abc music notation",
   "main": "index.js",
   "types": "types/index.d.ts",
