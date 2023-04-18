@@ -40,6 +40,7 @@ var EngraverController = function (paper, params) {
 	this.responsive = params.responsive;
 	this.space = 3 * spacing.SPACE;
 	this.initialClef = params.initialClef;
+	this.expandToWidest = !!params.expandToWidest;
 	this.scale = params.scale ? parseFloat(params.scale) : 0;
 	this.classes = new Classes({ shouldAddClasses: params.add_classes });
 	if (!(this.scale > 0.1))
@@ -242,7 +243,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 	this.constructTuneElements(abcTune);
 
 	// Do all the positioning, both horizontally and vertically
-	var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
+	var maxWidth = layout(this.renderer, abcTune, this.width, this.space, this.expandToWidest);
 
 	// Deal with tablature for staff
 	if (abcTune.tablatures) {

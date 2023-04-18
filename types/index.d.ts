@@ -258,6 +258,7 @@ declare module 'abcjs' {
 		clickListener?: ClickListener;
 		dragColor?: string;
 		dragging?: boolean;
+		expandToWidest?: boolean;
 		foregroundColor?: string;
 		format?: { [attr in FormatAttributes]?: any };
 		header_only?: boolean;

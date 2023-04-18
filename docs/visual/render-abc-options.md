@@ -52,6 +52,11 @@ This is the color of the elements currently being dragged.
 
 See the [dragging page](./dragging.md) for more information.
 
+## expandToWidest
+Default: false
+
+If you have a line of music that contains too many notes to fit in the `staffwidth`, then abcjs will do the best that it can and make that line as long as it needs to be. However, that will create a jagged edge on the right side because that line will push out farther than the others. To avoid that, you could set `%%staffwidth 900` or whatever it takes, but then you would need to experiment to figure out the widest point. Instead, set this parameter and abcjs will find the widest then re-layout the other lines to that size.
+
 ## foregroundColor
 Default: currentColor
 
