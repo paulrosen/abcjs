@@ -245,6 +245,11 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 	// Do all the positioning, both horizontally and vertically
 	var maxWidth = layout(this.renderer, abcTune, this.width, this.space, this.expandToWidest);
 
+	//Set the top text now that we know the width
+	if (this.expandToWidest && maxWidth > this.width+1) {
+		abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, maxWidth, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+	}
+
 	// Deal with tablature for staff
 	if (abcTune.tablatures) {
 		tablatures.layoutTablatures(this.renderer, abcTune);

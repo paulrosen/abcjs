@@ -113,6 +113,9 @@ describe("Layout", function() {
 	var expectedRhythmPlacement = [{ x: 20, y: 53 }]
 
 	var lineTooWide = 
+		"T:The title should be centered\n" +
+		"R:Left\n" +
+		"C:Right\n" +
 		"L:1/4\n" +
 		"K:B\n" +
 		"c2c2|cccc|c2c2|cccc|\n" +
@@ -125,7 +128,15 @@ describe("Layout", function() {
 	]
 
 	it("line-too-wide", function() {
-		doLayoutTest(lineTooWide, {staffwidth: 500, expandToWidest: true }, expectedLineTooWide, 'staffwidth=500');
+		var visualObj = doLayoutTest(lineTooWide, {staffwidth: 500, expandToWidest: true }, expectedLineTooWide, 'staffwidth=500');
+		var expected = ['', 313, '', '', 15, 611, '']
+		var results = []
+		console.log(visualObj[0].topText)
+		for (var i = 0; i < visualObj[0].topText.rows.length; i++) {
+			var left = visualObj[0].topText.rows[i].left
+			results.push(left ? Math.round(left) : '')
+		}
+		chai.assert.deepStrictEqual(results, expected, "top text");
 	})
 
 	it("min-spacing", function() {
@@ -244,6 +255,7 @@ function doLayoutTest(abc, params, expected, comment) {
 	}
 
 	console.log(result)
+	return visualObj
 }
 
 function verticalLine(selector, x) {
