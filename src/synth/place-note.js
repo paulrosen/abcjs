@@ -17,6 +17,12 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 		len = 0.005; // Have some small audible length no matter how short the note is.
 	var offlineCtx = new OfflineAC(2,Math.floor((len+fadeTimeSec)*sampleRate),sampleRate);
 	var noteName = pitchToNoteName[sound.pitch];
+	if (!soundsCache[sound.instrument]) {
+		// It shouldn't happen that the entire instrument cache wasn't created, but this has been seen in practice, so guard against it.
+		if (debugCallback)
+			debugCallback('placeNote skipped (instrument empty): '+sound.instrument+':'+noteName)
+		return Promise.resolve();
+	}
 	var noteBufferPromise = soundsCache[sound.instrument][noteName];
 
 	if (!noteBufferPromise) {
