@@ -1193,7 +1193,7 @@ declare module 'abcjs' {
 		export function activeAudioContext(): AudioContext
 		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl
 		export function getMidiFile(source: string | TuneObject, options?: MidiFileOptions): MidiFile;
-		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches | undefined, milliSecondsPerMeasure: number): Promise<void>;
+		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches | undefined, milliSecondsPerMeasure: number, soundFontUrl? : string, debugCallback?: (message: string) => void): Promise<void>;
 		export function sequence(visualObj: TuneObject, options: AbcVisualParams): AudioSequence
 	}
 

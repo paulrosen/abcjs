@@ -2,7 +2,7 @@ var SynthSequence = require('./synth-sequence');
 var CreateSynth = require('./create-synth');
 var activeAudioContext = require("./active-audio-context");
 
-function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
+function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure, soundFontUrl, debugCallback) {
 	var sequence = new SynthSequence();
 
 	for (var i = 0; i < midiPitches.length; i++) {
@@ -21,18 +21,20 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
 	var ac = activeAudioContext();
 	if (ac.state === "suspended") {
 		return ac.resume().then(function () {
-			return doPlay(sequence, millisecondsPerMeasure);
+			return doPlay(sequence, millisecondsPerMeasure, soundFontUrl, debugCallback);
 		});
 	} else {
-		return doPlay(sequence, millisecondsPerMeasure);
+		return doPlay(sequence, millisecondsPerMeasure, soundFontUrl, debugCallback);
 	}
 }
 
-function doPlay(sequence, millisecondsPerMeasure) {
+function doPlay(sequence, millisecondsPerMeasure, soundFontUrl, debugCallback) {
 	var buffer = new CreateSynth();
 	return buffer.init({
 		sequence: sequence,
-		millisecondsPerMeasure: millisecondsPerMeasure
+		millisecondsPerMeasure: millisecondsPerMeasure,
+		options: { soundFontUrl: soundFontUrl },
+		debugCallback: debugCallback,
 	}).then(function () {
 		return buffer.prime();
 	}).then(function () {
