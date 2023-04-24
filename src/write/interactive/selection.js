@@ -127,6 +127,8 @@ function keyboardSelection(ev) {
 }
 
 function findElementInHistory(selectables, el) {
+	if (!el)
+		return -1;
 	for (var i = 0; i < selectables.length; i++) {
 		if (el.dataset.index === selectables[i].svgEl.dataset.index)
 			return i;
@@ -195,9 +197,13 @@ function getBestMatchCoordinates(dim, ev, scale) {
 
 function getTarget(target) {
 	// This searches up the dom for the first item containing the attribute "selectable", or stopping at the SVG.
+	if (!target)
+		return null;
 	if (target.tagName === "svg")
 		return target;
 
+	if (!target.getAttribute)
+		return null;	
 	var found = target.getAttribute("selectable");
 	while (!found) {
 		if (!target.parentElement)
