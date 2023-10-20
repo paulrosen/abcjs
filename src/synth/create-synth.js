@@ -511,6 +511,10 @@ function CreateSynth() {
 		return self.audioBuffers[0];
 	};
 
+	self.getIsRunning = function() {
+		return self.isRunning;
+	}
+
 	/////////////// Private functions //////////////
 
 	self._deviceCapable = function() {

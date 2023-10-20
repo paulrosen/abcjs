@@ -1153,6 +1153,7 @@ declare module 'abcjs' {
 		seek(position: number, units?: ProgressUnit): void
 		stop(): number
 		download(): string // returns audio buffer in wav format as a reference to a blob
+		getIsRunning(): boolean
 	}
 
 	export interface SynthInitResponse {
