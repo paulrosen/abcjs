@@ -117,12 +117,12 @@ var renderAbc = function(output, abc, parserParams, engraverParams, renderParams
             div.setAttribute("style", "visibility: hidden;");
             document.body.appendChild(div);
         }
-    	if (params.afterParsing)
-    		params.afterParsing(tune, tuneNumber, abcString);
         if (!removeDiv && params.wrap && params.staffwidth) {
-	        tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
+            tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
 	        return tune;
         }
+        if (params.afterParsing)
+            params.afterParsing(tune, tuneNumber, abcString);
         renderOne(div, tune, params, tuneNumber, 0);
         if (removeDiv)
             div.parentNode.removeChild(div);
@@ -145,6 +145,8 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
         if (warnings)
             tune.warnings = warnings;
     }
+    if (params.afterParsing)
+        params.afterParsing(tune, tuneNumber, abcString);
     renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
 	tune.explanation = ret.explanation;
 	return tune;
