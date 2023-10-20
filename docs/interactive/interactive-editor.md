@@ -54,6 +54,7 @@ This is the object that is passed into the editor in the `synth` property. If th
 | `setReadOnly(bool)` | adds or removes the class `abc_textarea_readonly`, and adds or removes the attribute `readonly`. |
 | `updateSelection()` | Called when the user has changed the selection. This calls the engraver_controller to show the selection. |
 | `fireSelectionChanged()` | Called by the textarea object when the user has changed the selection. |
+| `fireChanged() | Can be called if the textarea is changed programmatically but the editor doesn't detect it. (For instance, useful in Vue when using `modelValue`) |
 | `paramChanged(abcjsParams)` | Called to set the abcjsParams after the editor has been created. The music is re-rendered immediately. |
 | `setNotDirty()` | Called by the client app to reset the dirty flag. (For instance, when the user saves their work.) |
 | `isDirty()` | Returns true or false, whether the textarea contains the same text that it started with. |

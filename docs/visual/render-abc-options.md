@@ -36,6 +36,10 @@ Zero-based number of the tune. Useful if the abcstring contains more than one tu
 - abcString: 
 The original string that was passed in.
  
+## ariaLabel
+Default: "Sheet Music" if no T: or "Sheet Music for %T"
+This is the text that is put in the `<title>` attribute of the svg.
+
 ## clickListener
 Default: null
  
