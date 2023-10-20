@@ -680,6 +680,7 @@ declare module 'abcjs' {
 
 	export interface VoiceItemBar {
 		el_type: "bar";
+		type: 'bar_dbl_repeat' | 'bar_right_repeat' | 'bar_left_repeat' |'bar_invisible' | 'bar_thick_thin' | 'bar_thin_thin' | 'bar_thin' | 'bar_thin_thick';
 		barNumber?: number;
 		chord?: Array<ChordProperties>;
 		decoration: Array<Decorations>;
@@ -830,6 +831,7 @@ declare module 'abcjs' {
 		setTiming: (bpm?: number, measuresOfDelay? : number) => void;
 		setUpAudio: (options: SynthOptions) => AudioTracks;
 		makeVoicesArray: () => Array<Selectable[]>
+		deline: () => Array<TuneLine>;
 		lineBreaks?: Array<number>;
 		visualTranspose?: number;
 	}
@@ -1126,6 +1128,7 @@ declare module 'abcjs' {
 		pause(shouldPause: boolean): void;
 		millisecondsPerMeasure(): number;
 		pauseMidi(shouldPause: boolean): void;
+		fireChanged():void;
 	}
 
 	//
