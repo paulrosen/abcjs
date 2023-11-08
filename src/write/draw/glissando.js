@@ -11,6 +11,17 @@ function drawGlissando(renderer, params, selectables) {
 	var rightY = renderer.calcY(params.anchor2.heads[0].pitch)
 	var leftX = params.anchor1.x + params.anchor1.w / 2
 	var rightX = params.anchor2.x + params.anchor2.w / 2
+	
+    // MCW: Check for grace note on anchor2
+    // If it exists then move the terminus of the glissando over to the grace note
+    var graceNotePitch = rightY
+    var graceNote = params.anchor2.abcelem || {}
+    if (graceNote.gracenotes && graceNote.gracenotes.length > 0) {
+		graceNotePitch = graceNote.gracenotes[0].pitch
+		rightX -= 10
+    	rightY = renderer.calcY(graceNotePitch) + 8
+  	}
+	
 	var len = lineLength(leftX, leftY, rightX, rightY)
 	var marginLeft = params.anchor1.w / 2 + margin
 	var marginRight = params.anchor2.w / 2 + margin
