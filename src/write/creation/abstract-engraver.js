@@ -747,6 +747,12 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
 			else
 				p1 += 1;
 		}
+		if (noteHead && noteHead.c === 'noteheads.triangle.quarter') {
+			if (dir === 'down')
+				p2 -= 0.7;
+			else
+				p1 -= 1.2;
+		}
 		abselem.addRight(new RelativeElement(null, dx, 0, p1, { "type": "stem", "pitch2": p2, linewidth: width, bottom: p1 - 1 }));
 		//var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 		min = Math.min(p1, p2);
