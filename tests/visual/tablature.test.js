@@ -353,6 +353,35 @@ describe("Tablature", function () {
 		],
 	];
 
+	var skipStaff = "%%score 1|2|3\n" +
+		"M: 4/4\n" +
+		"L: 1/8\n" +
+		"K: Em\n" +
+		"V:1\n" +
+		"d|BGDg|\n" +
+		"V:2\n" +
+		"G|ABAB|\n" +
+		"V:3\n" +
+		"G,|A,B,CD|";
+
+	var skipStaffOutput = [
+		[
+			{ "el_type": "note", "startChar": 50, "endChar": 51, "notes": [{ "num": 5, "str": 2, "pitch": "G" }] },
+			{ "el_type": "bar", "type": "bar_thin", "endChar": 52, "startChar": 51 },
+			{ "el_type": "note", "startChar": 52, "endChar": 53, "notes": [{ "num": 0, "str": 1, "pitch": "A" }] },
+			{ "el_type": "note", "startChar": 53, "endChar": 54, "notes": [{ "num": 2, "str": 1, "pitch": "B" }] },
+			{ "el_type": "note", "startChar": 54, "endChar": 55, "notes": [{ "num": 0, "str": 1, "pitch": "A" }] },
+			{ "el_type": "note", "startChar": 55, "endChar": 56, "notes": [{ "num": 2, "str": 1, "pitch": "B" }] },
+			{ "el_type": "bar", "type": "bar_thin", "endChar": 57, "startChar": 56 },
+		],
+	];
+	var skipStaffParams = [
+		{ instrument: ""},
+		{
+			instrument: 'violin',
+		}
+	];
+
 	var guitarParams = [
 		{
 			instrument: 'guitar',
@@ -775,6 +804,10 @@ describe("Tablature", function () {
 
 	it("two staves", function () {
 		doStaffTest(twoStaves, twoStavesOutput, violinGuitarParams);
+	});
+
+	it("skip staff", function () {
+		doStaffTest(skipStaff, skipStaffOutput, skipStaffParams);
 	});
 
 	it("transpose", function () {

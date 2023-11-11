@@ -233,10 +233,11 @@ TabRenderer.prototype.doLayout = function () {
     staffGroup.staffs[this.staffIndex].top += nameHeight;
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
+    var tabVoiceIndex = voices.length
     voices.splice(voices.length, 0, tabVoice);
     var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
     this.tabStaff.voices[ii] = [];
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii , this.staffIndex ,keySig);
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii , this.staffIndex ,keySig, tabVoiceIndex);
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };

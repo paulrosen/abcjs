@@ -84,6 +84,9 @@ var abcTablatures = {
           // plugin.init(tune, tuneNumber, args, ii);
           returned.push(pluginInstance);
           nbPlugins++;
+        } else if (instrument === '') {
+          // create a placeholder - there is no tab for this staff
+          returned.push(null)
         } else {
           // unknown tab plugin 
           //this.emit_error('Undefined tablature plugin: ' + tabName)

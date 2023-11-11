@@ -177,10 +177,11 @@ TabAbsoluteElements.prototype.build = function (plugin,
   tabVoice,
   voiceIndex,
   staffIndex,
-  keySig ) {
+  keySig,
+  tabVoiceIndex ) {
   var staffSize = getInitialStaffSize(staffAbsolute);
   var source = staffAbsolute[staffIndex+voiceIndex];
-  var dest = staffAbsolute[staffSize+staffIndex+voiceIndex];
+  var dest = staffAbsolute[tabVoiceIndex];
   var tabPos = null;
   var defNote = null;
   if (source.children[0].abcelem.el_type != 'clef') {
