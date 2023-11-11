@@ -17,7 +17,15 @@ function drawTie(renderer, params, linestartx, lineendx, selectables) {
 		klass = "abcjs-hint";
 	var fudgeY = params.fixedY ? 1.5 : 0; // TODO-PER: This just compensates for drawArc, which contains too much knowledge of ties and slurs.
 	var el = drawArc(renderer, params.startX, params.endX, params.startY + fudgeY, params.endY + fudgeY, params.above, klass, params.isTie, params.dotted);
-	selectables.wrapSvgEl({ el_type: "slur", startChar: -1, endChar: -1 }, el);
+	var startChar = -1
+	// This gets the start and end points of the contents of the slur. We assume that the parenthesis are just to the outside of that.
+	if (params.anchor1 && !params.isTie)
+		startChar = params.anchor1.parent.abcelem.startChar - 1
+	var endChar = -1
+	if (params.anchor2 && !params.isTie)
+		endChar = params.anchor2.parent.abcelem.endChar + 1
+
+	selectables.wrapSvgEl({ el_type: "slur", startChar: startChar, endChar: endChar }, el);
 	return [el];
 }
 
