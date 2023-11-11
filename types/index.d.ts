@@ -71,6 +71,8 @@ declare module 'abcjs' {
 		"mark" | "marcato" | "umarcato" |
 		"D.C.alcoda" | "D.C.alfine" | "D.S.alcoda" | "D.S.alfine" | "editorial" | "courtesy"
 
+	export type TablatureInstrument = 'guitar' | 'mandolin' | 'fiddle' | 'violin' | '';
+
 	//
 	// Basic types
 	//
@@ -251,6 +253,14 @@ declare module 'abcjs' {
 		minSpacingLimit?: number;
 	}
 
+	export interface Tablature {
+		instrument?: TablatureInstrument,
+		capo?: number
+		label?: string,
+		tuning?: Array<string>,
+		highestNote?: string,
+	}
+
 	export interface AbcVisualParams {
 		add_classes?: boolean;
 		afterParsing?: AfterParsing;
@@ -283,6 +293,7 @@ declare module 'abcjs' {
 		staffwidth?: number;
 		startingTune?: number;
 		stop_on_warning?: boolean;
+		tablature?: Array<Tablature>;
 		textboxpadding?: number;
 		viewportHorizontal?: boolean;
 		viewportVertical?: boolean;
