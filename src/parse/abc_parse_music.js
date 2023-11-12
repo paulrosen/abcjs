@@ -9,6 +9,20 @@ var tune;
 var tuneBuilder;
 var header;
 
+var {
+  legalAccents,
+  volumeDecorations,
+  dynamicDecorations,
+  accentPseudonyms,
+  accentDynamicPseudonyms,
+  nonDecorations,
+  durations,
+  pitches,
+  rests,
+  accMap,
+  tripletQ
+} = require('./abc_parse_settings')
+
 var MusicParser = function(_tokenizer, _warn, _multilineVars, _tune, _tuneBuilder, _header) {
 	tokenizer = _tokenizer;
 	warn = _warn;
@@ -76,7 +90,6 @@ var MusicParser = function(_tokenizer, _warn, _multilineVars, _tune, _tuneBuilde
 // double-quote: chord symbol
 // less-than, greater-than, slash: duration
 // back-tick, space, tab: space
-var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{";	// use this to prescreen so we don't have to look for a decoration at every note.
 
 var isInTie = function(multilineVars, overlayLevel, el) {
 	if (multilineVars.inTie[overlayLevel] === undefined)
@@ -540,15 +553,8 @@ MusicParser.prototype.parseMusic = function(line) {
 						// Create a warning if this is not a displayable duration.
 						// The first item on a line is a regular note value, each item after that represents a dot placed after the previous note.
 						// Only durations less than a whole note are tested because whole note durations have some tricky rules.
-						var durations = [
-							0.5, 0.75, 0.875, 0.9375, 0.96875, 0.984375,
-							0.25, 0.375, 0.4375, 0.46875, 0.484375, 0.4921875,
-							0.125, 0.1875, 0.21875, 0.234375, 0.2421875, 0.24609375,
-							0.0625, 0.09375, 0.109375, 0.1171875, 0.12109375, 0.123046875,
-							0.03125, 0.046875, 0.0546875, 0.05859375, 0.060546875, 0.0615234375,
-							0.015625, 0.0234375, 0.02734375, 0.029296875, 0.0302734375, 0.03076171875,
-						];
-						if (el.duration < 1 && durations.indexOf(el.duration) === -1 && el.duration !== 0) {
+
+            if (el.duration < 1 && durations.indexOf(el.duration) === -1 && el.duration !== 0) {
 							if (!el.rest || el.rest.type !== 'spacer')
 								warn("Duration not representable: " + line.substring(startI, i), line, i);
 						}
@@ -717,35 +723,8 @@ function durationOfMeasure(multilineVars) {
 	return parseInt(meter.value[0].num, 10) / parseInt(meter.value[0].den, 10);
 }
 
-var legalAccents = [
-	"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
-	"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
-	"open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
-	"segno", "coda", "D.S.", "D.C.", "fine", "beambr1", "beambr2",
-	"slide", "marcato",
-	"upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
-	"turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",
-	"style=normal", "style=harmonic", "style=rhythm", "style=x", "style=triangle", "D.C.alcoda", "D.C.alfine", "D.S.alcoda", "D.S.alfine", "editorial", "courtesy"
-];
 
-var volumeDecorations = [
-	"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz"
-];
 
-var dynamicDecorations = [
-	"crescendo(", "crescendo)", "diminuendo(", "diminuendo)", "glissando(", "glissando)"
-];
-
-var accentPseudonyms = [
-	["<", "accent"], [">", "accent"], ["tr", "trill"],
-	["plus", "+"], [ "emphasis", "accent"],
-	[ "^", "umarcato" ], [ "marcato", "umarcato" ]
-];
-
-var accentDynamicPseudonyms = [
-	["<(", "crescendo("], ["<)", "crescendo)"],
-	[">(", "diminuendo("], [">)", "diminuendo)"]
-];
 
 var letter_to_accent = function(line, i) {
 	var macro = multilineVars.macros[line[i]];
@@ -875,17 +854,6 @@ var letter_to_bar = function(line, curr_pos) {
 		return [orig_bar_len, ret.token];
 
 	return [ret.len+retRep.len, ret.token, retRep.token];
-};
-
-var tripletQ = {
-	2: 3,
-	3: 2,
-	4: 3,
-	5: 2, // TODO-PER: not handling 6/8 rhythm yet
-	6: 2,
-	7: 2, // TODO-PER: not handling 6/8 rhythm yet
-	8: 3,
-	9: 2 // TODO-PER: not handling 6/8 rhythm yet
 };
 
 var letter_to_open_slurs_and_triplets =  function(line, i) {
@@ -1050,9 +1018,6 @@ var addEndBeam = function(el) {
 	return el;
 };
 
-var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
-var rests = {x: 'invisible', X: 'invisible-multimeasure', y: 'spacer', z: 'rest', Z: 'multimeasure' };
-var accMap = { 'dblflat': '__', 'flat': '_', 'natural': '=', 'sharp': '^', 'dblsharp': '^^', 'quarterflat': '_/', 'quartersharp': '^/'};
 var getCoreNote = function(line, index, el, canHaveBrokenRhythm) {
 	//var el = { startChar: index };
 	var isComplete = function(state) {

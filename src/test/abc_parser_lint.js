@@ -51,18 +51,18 @@
 var parseCommon = require('../parse/abc_common');
 var JSONSchema = require('./jsonschema-b4');
 
-var ParserLint = function() {
-	"use strict";
-	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
-		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
-		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
-		"open", "thumb", "snap", "turn", "roll", "irishroll", "breath", "shortphrase", "mediumphrase", "longphrase",
-		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)", "glissando(", "glissando)",
-		"p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp",  "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
-		"upbow", "downbow", "staccato", "trem1", "trem2", "trem3", "trem4",
-		"/", "//", "///", "////", "turnx", "invertedturn", "invertedturnx", "arpeggio", "trill(", "trill)", "xstem",
-		"mark", "marcato", "umarcato", "D.C.alcoda", "D.C.alfine", "D.S.alcoda", "D.S.alfine", "editorial", "courtesy"
-	] } };
+var { legalAccents } = require('../parse/abc_parse_settings');
+
+var ParserLint = function () {
+  'use strict';
+  var decorationList = {
+    type: 'array',
+    optional: true,
+    items: {
+      type: 'string',
+      Enum: legalAccents
+    }
+  };
 
 	var tempoProperties =  {
 		duration: { type: "array", optional: true, output: "join", requires: [ 'bpm'], items: { type: "number"} },

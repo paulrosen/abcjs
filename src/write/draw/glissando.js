@@ -11,6 +11,7 @@ function drawGlissando(renderer, params, selectables) {
 	var rightY = renderer.calcY(params.anchor2.heads[0].pitch)
 	var leftX = params.anchor1.x + params.anchor1.w / 2
 	var rightX = params.anchor2.x + params.anchor2.w / 2
+	
 	var len = lineLength(leftX, leftY, rightX, rightY)
 	var marginLeft = params.anchor1.w / 2 + margin
 	var marginRight = params.anchor2.w / 2 + margin

@@ -313,10 +313,12 @@ Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, p
 				crescendo = { start: this.startCrescendoX, stop: abselem };
 				this.startCrescendoX = undefined;
 				break;
+			case '~(':
 			case "glissando(":
 				this.startGlissandoX = abselem;
 				glissando = undefined;
 				break;
+			case '~)':
 			case "glissando)":
 				glissando = { start: this.startGlissandoX, stop: abselem };
 				this.startGlissandoX = undefined;

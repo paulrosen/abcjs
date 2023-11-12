@@ -2,6 +2,10 @@
 
 ## Features
 
+* Added synonyms for glissando: ~( and ~)
+
+* Extracted arrays in parse/abc_parse_music to parse/abc_parse_settings
+
 * Make "mandolin" and "fiddle" synonyms for "violin" in tablature.
 
 ## Bugs
