@@ -1066,7 +1066,9 @@ declare module 'abcjs' {
 	// TimingCallbacks
 	export type BeatCallback = (beatNumber: number, totalBeats: number, totalTime: number, position: TimingCallbacksPosition, debugInfo: TimingCallbacksDebug) => void;
 
-	export type EventCallback = (event: NoteTimingEvent) => void;
+	type EventCallbackReturn = "continue" | Promise<"continue"> | undefined
+
+	export type EventCallback = (event: NoteTimingEvent) => EventCallbackReturn;
 
 	export type LineEndCallback = (info : LineEndInfo, event: NoteTimingEvent, details: LineEndDetails) => void;
 
