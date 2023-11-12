@@ -927,22 +927,6 @@ declare module 'abcjs' {
 		endTimings: Array<LineEndInfo>;
 	}
 
-	export interface TimingEvent {
-		type: "event";
-		milliseconds: number;
-		millisecondsPerMeasure: number;
-		line: number;
-		measureNumber: number;
-		top: number;
-		height: number;
-		left: number;
-		width: number;
-		elements: Array< HTMLElement>;
-		startCharArray: Array<number>;
-		endCharArray: Array<number>;
-		midiPitches: MidiPitches
-	}
-
 	export interface TimingCallbacksPosition {
 		top: number;
 		left: number;
@@ -1082,9 +1066,9 @@ declare module 'abcjs' {
 	// TimingCallbacks
 	export type BeatCallback = (beatNumber: number, totalBeats: number, totalTime: number, position: TimingCallbacksPosition, debugInfo: TimingCallbacksDebug) => void;
 
-	export type EventCallback = (event: TimingEvent) => void;
+	export type EventCallback = (event: NoteTimingEvent) => void;
 
-	export type LineEndCallback = (info : LineEndInfo, event: TimingEvent, details: LineEndDetails) => void;
+	export type LineEndCallback = (info : LineEndInfo, event: NoteTimingEvent, details: LineEndDetails) => void;
 
 	// Editor
 	export type OnChange = (editor: Editor) => void;
