@@ -21,7 +21,7 @@ var {
   rests,
   accMap,
   tripletQ
-} = require('../const/parse-music')
+} = require('./abc_parse_settings')
 
 var MusicParser = function(_tokenizer, _warn, _multilineVars, _tune, _tuneBuilder, _header) {
 	tokenizer = _tokenizer;

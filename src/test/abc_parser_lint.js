@@ -51,7 +51,7 @@
 var parseCommon = require('../parse/abc_common');
 var JSONSchema = require('./jsonschema-b4');
 
-var { legalAccents } = require('../../const/parse-music');
+var { legalAccents } = require('../parse/abc_parse_settings');
 
 var ParserLint = function () {
   'use strict';
