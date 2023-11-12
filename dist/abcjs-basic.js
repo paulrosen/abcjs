@@ -276,6 +276,9 @@ var abcTablatures = {
           // plugin.init(tune, tuneNumber, args, ii);
           returned.push(pluginInstance);
           nbPlugins++;
+        } else if (instrument === '') {
+          // create a placeholder - there is no tab for this staff
+          returned.push(null);
         } else {
           // unknown tab plugin 
           //this.emit_error('Undefined tablature plugin: ' + tabName)
@@ -997,11 +1000,11 @@ var renderAbc = function renderAbc(output, abc, parserParams, engraverParams, re
       div.setAttribute("style", "visibility: hidden;");
       document.body.appendChild(div);
     }
-    if (params.afterParsing) params.afterParsing(tune, tuneNumber, abcString);
     if (!removeDiv && params.wrap && params.staffwidth) {
       tune = doLineWrapping(div, tune, tuneNumber, abcString, params);
       return tune;
     }
+    if (params.afterParsing) params.afterParsing(tune, tuneNumber, abcString);
     renderOne(div, tune, params, tuneNumber, 0);
     if (removeDiv) div.parentNode.removeChild(div);
     return null;
@@ -1019,6 +1022,7 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
     var warnings = abcParser.getWarnings();
     if (warnings) tune.warnings = warnings;
   }
+  if (params.afterParsing) params.afterParsing(tune, tuneNumber, abcString);
   renderOne(div, tune, ret.revisedParams, tuneNumber, 0);
   tune.explanation = ret.explanation;
   return tune;
@@ -14188,6 +14192,9 @@ function CreateSynth() {
   self.getAudioBuffer = function () {
     return self.audioBuffers[0];
   };
+  self.getIsRunning = function () {
+    return self.isRunning;
+  };
 
   /////////////// Private functions //////////////
 
@@ -14784,6 +14791,11 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
   if (len < 0) len = 0.005; // Have some small audible length no matter how short the note is.
   var offlineCtx = new OfflineAC(2, Math.floor((len + fadeTimeSec) * sampleRate), sampleRate);
   var noteName = pitchToNoteName[sound.pitch];
+  if (!soundsCache[sound.instrument]) {
+    // It shouldn't happen that the entire instrument cache wasn't created, but this has been seen in practice, so guard against it.
+    if (debugCallback) debugCallback('placeNote skipped (instrument empty): ' + sound.instrument + ':' + noteName);
+    return Promise.resolve();
+  }
   var noteBufferPromise = soundsCache[sound.instrument][noteName];
   if (!noteBufferPromise) {
     // if the note isn't present then just skip it - it will leave a blank spot in the audio.
@@ -14879,7 +14891,7 @@ module.exports = placeNote;
 var SynthSequence = __webpack_require__(/*! ./synth-sequence */ "./src/synth/synth-sequence.js");
 var CreateSynth = __webpack_require__(/*! ./create-synth */ "./src/synth/create-synth.js");
 var activeAudioContext = __webpack_require__(/*! ./active-audio-context */ "./src/synth/active-audio-context.js");
-function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
+function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure, soundFontUrl, debugCallback) {
   var sequence = new SynthSequence();
   for (var i = 0; i < midiPitches.length; i++) {
     var note = midiPitches[i];
@@ -14896,17 +14908,21 @@ function playEvent(midiPitches, midiGracePitches, millisecondsPerMeasure) {
   var ac = activeAudioContext();
   if (ac.state === "suspended") {
     return ac.resume().then(function () {
-      return doPlay(sequence, millisecondsPerMeasure);
+      return doPlay(sequence, millisecondsPerMeasure, soundFontUrl, debugCallback);
     });
   } else {
-    return doPlay(sequence, millisecondsPerMeasure);
+    return doPlay(sequence, millisecondsPerMeasure, soundFontUrl, debugCallback);
   }
 }
-function doPlay(sequence, millisecondsPerMeasure) {
+function doPlay(sequence, millisecondsPerMeasure, soundFontUrl, debugCallback) {
   var buffer = new CreateSynth();
   return buffer.init({
     sequence: sequence,
-    millisecondsPerMeasure: millisecondsPerMeasure
+    millisecondsPerMeasure: millisecondsPerMeasure,
+    options: {
+      soundFontUrl: soundFontUrl
+    },
+    debugCallback: debugCallback
   }).then(function () {
     return buffer.prime();
   }).then(function () {
@@ -16252,10 +16268,10 @@ function buildGraceRelativesForRest(plugin, abs, absChild, graceNotes, tabVoice)
  * Build tab absolutes by scanning current staff line absolute array
  * @param {*} staffAbsolute
  */
-TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, voiceIndex, staffIndex, keySig) {
+TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, voiceIndex, staffIndex, keySig, tabVoiceIndex) {
   var staffSize = getInitialStaffSize(staffAbsolute);
   var source = staffAbsolute[staffIndex + voiceIndex];
-  var dest = staffAbsolute[staffSize + staffIndex + voiceIndex];
+  var dest = staffAbsolute[tabVoiceIndex];
   var tabPos = null;
   var defNote = null;
   if (source.children[0].abcelem.el_type != 'clef') {
@@ -16640,10 +16656,11 @@ TabRenderer.prototype.doLayout = function () {
     staffGroup.staffs[this.staffIndex].top += nameHeight;
     staffGroup.height += nameHeight * spacing.STEP;
     tabVoice.staff = staffGroupInfos;
+    var tabVoiceIndex = voices.length;
     voices.splice(voices.length, 0, tabVoice);
     var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
     this.tabStaff.voices[ii] = [];
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii, this.staffIndex, keySig);
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii, this.staffIndex, keySig, tabVoiceIndex);
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };
@@ -17486,6 +17503,9 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
     // TODO-PER-HACK: One type of note head has a different placement of the stem. This should be more generically calculated:
     if (noteHead && noteHead.c === 'noteheads.slash.quarter') {
       if (dir === 'down') p2 -= 1;else p1 += 1;
+    }
+    if (noteHead && noteHead.c === 'noteheads.triangle.quarter') {
+      if (dir === 'down') p2 -= 0.7;else p1 -= 1.2;
     }
     abselem.addRight(new RelativeElement(null, dx, 0, p1, {
       "type": "stem",
@@ -20695,7 +20715,7 @@ glyphs['noteheads.harmonic.quarter'] = {
   h: 8.165
 };
 glyphs['noteheads.triangle.quarter'] = {
-  d: [['M', 0, 0], ['l', 9, 0], ['l', -4.5, -9], ['z']],
+  d: [['M', 0, 4], ['l', 9, 0], ['l', -4.5, -9], ['z']],
   w: 9,
   h: 9
 };
@@ -22039,7 +22059,7 @@ module.exports = drawSeparator;
 /***/ (function(module) {
 
 function setPaperSize(renderer, maxwidth, scale, responsive) {
-  var w = (maxwidth + renderer.padding.right) * scale;
+  var w = (maxwidth + renderer.padding.left + renderer.padding.right) * scale;
   var h = (renderer.y + renderer.padding.bottom) * scale;
   if (renderer.isPrint) h = Math.max(h, 1056); // 11in x 72pt/in x 1.33px/pt
   // TODO-PER: We are letting the page get as long as it needs now, but eventually that should go to a second page.
@@ -22652,10 +22672,15 @@ function drawTie(renderer, params, linestartx, lineendx, selectables) {
   if (params.hint) klass = "abcjs-hint";
   var fudgeY = params.fixedY ? 1.5 : 0; // TODO-PER: This just compensates for drawArc, which contains too much knowledge of ties and slurs.
   var el = drawArc(renderer, params.startX, params.endX, params.startY + fudgeY, params.endY + fudgeY, params.above, klass, params.isTie, params.dotted);
+  var startChar = -1;
+  // This gets the start and end points of the contents of the slur. We assume that the parenthesis are just to the outside of that.
+  if (params.anchor1 && !params.isTie) startChar = params.anchor1.parent.abcelem.startChar - 1;
+  var endChar = -1;
+  if (params.anchor2 && !params.isTie) endChar = params.anchor2.parent.abcelem.endChar + 1;
   selectables.wrapSvgEl({
     el_type: "slur",
-    startChar: -1,
-    endChar: -1
+    startChar: startChar,
+    endChar: endChar
   }, el);
   return [el];
 }
@@ -22965,6 +22990,7 @@ var EngraverController = function EngraverController(paper, params) {
   this.responsive = params.responsive;
   this.space = 3 * spacing.SPACE;
   this.initialClef = params.initialClef;
+  this.expandToWidest = !!params.expandToWidest;
   this.scale = params.scale ? parseFloat(params.scale) : 0;
   this.classes = new Classes({
     shouldAddClasses: params.add_classes
@@ -23148,7 +23174,12 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
   this.constructTuneElements(abcTune);
 
   // Do all the positioning, both horizontally and vertically
-  var maxWidth = layout(this.renderer, abcTune, this.width, this.space);
+  var maxWidth = layout(this.renderer, abcTune, this.width, this.space, this.expandToWidest);
+
+  //Set the top text now that we know the width
+  if (this.expandToWidest && maxWidth > this.width + 1) {
+    abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, maxWidth, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+  }
 
   // Deal with tablature for staff
   if (abcTune.tablatures) {
@@ -23651,6 +23682,7 @@ function keyboardSelection(ev) {
   if (handled) ev.preventDefault();
 }
 function findElementInHistory(selectables, el) {
+  if (!el) return -1;
   for (var i = 0; i < selectables.length; i++) {
     if (el.dataset.index === selectables[i].svgEl.dataset.index) return i;
   }
@@ -23709,7 +23741,9 @@ function getBestMatchCoordinates(dim, ev, scale) {
 }
 function getTarget(target) {
   // This searches up the dom for the first item containing the attribute "selectable", or stopping at the SVG.
+  if (!target) return null;
   if (target.tagName === "svg") return target;
+  if (!target.getAttribute) return null;
   var found = target.getAttribute("selectable");
   while (!found) {
     if (!target.parentElement) found = true;else {
@@ -24248,7 +24282,7 @@ var layoutVoice = __webpack_require__(/*! ./voice */ "./src/write/layout/voice.j
 var setUpperAndLowerElements = __webpack_require__(/*! ./set-upper-and-lower-elements */ "./src/write/layout/set-upper-and-lower-elements.js");
 var layoutStaffGroup = __webpack_require__(/*! ./staff-group */ "./src/write/layout/staff-group.js");
 var getLeftEdgeOfStaff = __webpack_require__(/*! ./get-left-edge-of-staff */ "./src/write/layout/get-left-edge-of-staff.js");
-var layout = function layout(renderer, abctune, width, space) {
+var layout = function layout(renderer, abctune, width, space, expandToWidest) {
   var i;
   var abcLine;
   // Adjust the x-coordinates to their absolute positions
@@ -24256,8 +24290,14 @@ var layout = function layout(renderer, abctune, width, space) {
   for (i = 0; i < abctune.lines.length; i++) {
     abcLine = abctune.lines[i];
     if (abcLine.staff) {
-      setXSpacing(renderer, width, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
-      if (abcLine.staffGroup.w > maxWidth) maxWidth = abcLine.staffGroup.w;
+      // console.log("=== line", i)
+      var thisWidth = setXSpacing(renderer, maxWidth, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
+      // console.log(thisWidth, maxWidth)
+      if (Math.round(thisWidth) > Math.round(maxWidth)) {
+        // to take care of floating point weirdness
+        maxWidth = thisWidth;
+        if (expandToWidest) i = -1; // do the calculations over with the new width
+      }
     }
   }
 
@@ -24288,13 +24328,38 @@ var setXSpacing = function setXSpacing(renderer, width, space, staffGroup, forma
   var newspace = space;
   for (var it = 0; it < 8; it++) {
     // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
+    // console.log("iteration", it)
+    // dumpGroup("before", staffGroup)
     var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
+    // dumpGroup("after",staffGroup)
     newspace = calcHorizontalSpacing(isLastLine, formatting.stretchlast, width + renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace, renderer.padding.left + renderer.padding.right);
     if (debug) console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
     if (newspace === null) break;
   }
   centerWholeRests(staffGroup.voices);
+  return staffGroup.w - leftEdge;
 };
+
+// function dumpGroup(label, staffGroup) {
+// 	var output = {
+// 		line: staffGroup.line,
+// 		w: staffGroup.w,
+// 		voice: {
+// 			i: staffGroup.voices[0].i,
+// 			minx: staffGroup.voices[0].minx,
+// 			nextx: staffGroup.voices[0].nextx,
+// 			spacingduration: staffGroup.voices[0].spacingduration,
+// 			w: staffGroup.voices[0].w,
+// 			children: [],
+// 		}
+// 	}
+// 	for (var i = 0; i < staffGroup.voices[0].children.length; i++) {
+// 		var child = staffGroup.voices[0].children[i]
+// 		output.voice.children.push({ fixedW: child.fixed.w, w: child.w, x: child.x, type: child.type })
+// 	}
+// 	console.log(label,output)
+// }
+
 function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace, padding) {
   if (isLastLine) {
     if (stretchLast === undefined) {
@@ -25546,7 +25611,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.2.2';
+var version = '6.2.3';
 module.exports = version;
 
 /***/ })
