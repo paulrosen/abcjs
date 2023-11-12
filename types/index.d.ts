@@ -411,7 +411,7 @@ declare module 'abcjs' {
 	//
 
 	// renderAbc
-	interface NoteTimingEvent {
+	export interface NoteTimingEvent {
 		milliseconds: number;
 		millisecondsPerMeasure: number;
 		type: NoteTimingEventType;
@@ -431,6 +431,11 @@ declare module 'abcjs' {
 		top?: number;
 		width?: number;
 		measureStart?: boolean;
+	}
+
+	// make an alias for backwards compatibility
+	export interface TimingEvent extends NoteTimingEvent {
+
 	}
 
 	export interface PercMapElement {
@@ -583,6 +588,7 @@ declare module 'abcjs' {
 		wordsfont: Font;
 	}
 
+	// Caution: The contents of this object may change at any time. If you reference this, be sure you retest for each abcjs release.
 	export interface EngraverController {
 		classes: any;
 		dragColor: string;
@@ -1068,7 +1074,7 @@ declare module 'abcjs' {
 
 	type EventCallbackReturn = "continue" | Promise<"continue"> | undefined
 
-	export type EventCallback = (event: NoteTimingEvent) => EventCallbackReturn;
+	export type EventCallback = (event: NoteTimingEvent | null) => EventCallbackReturn;
 
 	export type LineEndCallback = (info : LineEndInfo, event: NoteTimingEvent, details: LineEndDetails) => void;
 
