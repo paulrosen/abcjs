@@ -1,10 +1,44 @@
-# Version 6.2.2
+# Version 6.2.3
 
 ## Features
 
+* Add expandToWidest option
+
 * Added synonyms for glissando: ~( and ~)
 
-* Extracted arrays in parse/abc_parse_music to parse/abc_parse_settings
+* allow passing in soundfont and debug callback when playing an event directly.
+
+* Add a `getIsRunning()` function to enable play/pause
+
+## Bugs
+
+* fix placement of triangle notehead
+
+* Guard against crash when the synth note wasn't loaded.
+
+* fix crash when skipping a staff when creating tablature
+
+* protect against spurious mouse click in selection
+
+* Add paddingleft to the size of the SVG - it was cut off if the padding was larger than the default.
+
+* various typescript fixes
+
+* afterParsing now works with line wrapping.
+
+* Put start and end char on slurs so they can be selected.
+
+* fixed type of timing callback: TimingEvent is now NoteTimingEvent
+
+## Documentation
+
+* Add tablature to typescript types
+
+* add missing items to documentation
+
+# Version 6.2.2
+
+## Features
 
 * Make "mandolin" and "fiddle" synonyms for "violin" in tablature.
 
@@ -17,6 +51,7 @@
 * Fix bug in Firefox that causes staff lines, bar lines, and stems to be missing.
 
 * Fix bug in Firefox that cuts off the last line of the SVG.
+
 # Version 6.2.1
 
 ## Bugs
