@@ -166,6 +166,7 @@ var stackedDecoration = function (decoration, width, abselem, yPos, positioning,
 	}
 
     // MAE START OF CHANGE 24 Nov 2023
+	// Draws breath mark symbol slightly to the right of the target note
 	function symbolDecorationBreath(symbol, placement) {
 		var deltaX = width*1.5;
 		var height = glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
