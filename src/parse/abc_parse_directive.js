@@ -979,6 +979,10 @@ var parseDirective = {};
 			case "voicefont":
 			case "footerfont":
 			case "headerfont":
+			// MAE START OF CHANGE - Make the tab name and number fonts available for change by users in the ABC
+			case "tablabelfont": 
+			case "tabnumberfont": 
+			// MAE END OF CHANGE
 				return getGlobalFont(cmd, tokens, str);
 			case "barlabelfont":
 			case "barnumberfont":
