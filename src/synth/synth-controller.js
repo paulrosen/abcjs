@@ -195,7 +195,7 @@ function SynthController() {
 
 	self._randomAccess = function (ev) {
 		var background = (ev.target.classList.contains('abcjs-midi-progress-indicator')) ? ev.target.parentNode : ev.target;
-		var percent = (ev.x - background.offsetLeft) / background.offsetWidth;
+		var percent = (ev.x - background.getBoundingClientRect().left) / background.offsetWidth;
 		if (percent < 0)
 			percent = 0;
 		if (percent > 1)
