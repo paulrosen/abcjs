@@ -979,6 +979,9 @@ var parseDirective = {};
 			case "voicefont":
 			case "footerfont":
 			case "headerfont":
+			case "tablabelfont": 
+			case "tabnumberfont": 
+			case "tabgracefont":		  
 				return getGlobalFont(cmd, tokens, str);
 			case "barlabelfont":
 			case "barnumberfont":

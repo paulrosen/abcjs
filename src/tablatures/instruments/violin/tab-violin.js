@@ -24,6 +24,8 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
     this.linePitch);
   var semantics = new ViolinPatterns(this);
   this.semantics = semantics;
+  this.isFirstStaff = true;
+  this.firstTabNameHeight = 1;
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {

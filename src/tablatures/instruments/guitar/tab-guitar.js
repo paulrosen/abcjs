@@ -26,6 +26,8 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
 
   var semantics = new GuitarPatterns(this);
   this.semantics = semantics;
+  this.isFirstStaff = true;
+  this.firstTabNameHeight = 1;
 };
 
 Plugin.prototype.render = function (renderer, line, staffIndex) {

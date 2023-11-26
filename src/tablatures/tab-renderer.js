@@ -180,17 +180,13 @@ TabRenderer.prototype.doLayout = function () {
       if (firstStaff.clef) {
         if (firstStaff.clef.stafflines == 0) {
           this.plugin._super.setError("No tablatures when stafflines=0");
-          return; 
+          return;
         }
       }
     }
-    staffs.splice(
-      staffs.length, 0,
-      this.tabStaff
-    );
+    staffs.splice(staffs.length, 0, this.tabStaff);
   }
   var staffGroup = this.line.staffGroup;
-
   var voices = staffGroup.voices;
   var firstVoice = voices[0];
   // take lyrics into account if any
@@ -209,37 +205,82 @@ TabRenderer.prototype.doLayout = function () {
     lines: this.plugin.nbLines,
     linePitch: this.plugin.linePitch,
     dy: 0.15,
-    top: tabTop,
+    top: tabTop
   };
-  var nextTabPos = getNextTabPos(this,staffGroup.staffs);
-  if (nextTabPos === -1)
-    return;
+  var nextTabPos = getNextTabPos(this, staffGroup.staffs);
+  if (nextTabPos === -1) return;
   staffGroupInfos.parentIndex = nextTabPos - 1;
   staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
   staffGroup.height += this.tabSize + padd;
-  var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos); 
+  var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos);
   var nbVoices = 1;
-  if (isMultiVoiceSingleStaff(staffGroup.staffs,parentStaff)) {
+  if (isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff)) {
     nbVoices = parentStaff.voices.length;
-  }  
+  }
+  
   // build from staff
   this.tabStaff.voices = [];
+
   for (var ii = 0; ii < nbVoices; ii++) {
+
     var tabVoice = new VoiceElement(0, 0);
+    
     if (ii > 0) tabVoice.duplicate = true;
-    var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
-    nameHeight = Math.max(nameHeight, 1) // If there is no label for the tab line, then there needs to be a little padding
-    staffGroup.staffs[this.staffIndex].top += nameHeight;
-    staffGroup.height += nameHeight * spacing.STEP;
+
+    var nameHeight;
+
+    // First staff with a tab name gets special treatment
+    if (this.plugin.isFirstStaff){
+    
+      var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+
+      nameHeight = Math.max(nameHeight, 1); // If there is no label for the tab line, then there needs to be a little padding
+      
+      staffGroup.staffs[this.staffIndex].top += 1;
+   
+      if (nameHeight == 1){
+
+        staffGroup.height += spacing.STEP;
+
+      }
+      else{
+
+        staffGroup.height += nameHeight;
+
+      }
+
+      this.plugin.firstTabNameHeight = nameHeight;
+
+      this.plugin.isFirstStaff = false;
+
+    }
+    else{
+
+      // Padding
+      staffGroup.height += spacing.STEP;
+
+      staffGroup.staffs[this.staffIndex].top += this.plugin.firstTabNameHeight;
+
+
+    }
+  
     tabVoice.staff = staffGroupInfos;
-    var tabVoiceIndex = voices.length
+    
+    var tabVoiceIndex = voices.length;
+    
     voices.splice(voices.length, 0, tabVoice);
+    
     var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
+    
     this.tabStaff.voices[ii] = [];
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii , this.staffIndex ,keySig, tabVoiceIndex);
+    
+    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii, this.staffIndex, keySig, tabVoiceIndex);
+  
   }
+
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
+
 };
 
 
