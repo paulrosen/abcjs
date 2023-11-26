@@ -103,15 +103,16 @@ var abcTablatures = {
    * @param {*} renderer 
    * @param {*} abcTune 
    */
-  layoutTablatures: function (renderer, abcTune) {
+   layoutTablatures: function (renderer, abcTune) {
     var tabs = abcTune.tablatures;
     // chack tabs request for each staffs
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
       var line = abcTune.lines[ii];
       var curStaff = line.staff;
       if (curStaff) {
+        var maxStaves = curStaff.length
         for (var jj = 0; jj < curStaff.length; jj++) {
-          if (tabs[jj]) {
+          if (tabs[jj] && jj < maxStaves) {
             // tablature requested for staff
             var tabPlugin = tabs[jj];
             if (tabPlugin.instance == null) {
