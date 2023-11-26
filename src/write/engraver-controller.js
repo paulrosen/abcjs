@@ -237,37 +237,89 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 };
 
 EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOffset) {
-	var scale = this.setupTune(abcTune, tuneNumber);
 
+	var scale = this.setupTune(abcTune, tuneNumber);
+  
 	// Create all of the element objects that will appear on the page.
 	this.constructTuneElements(abcTune);
-
+  
+	//Set the top text now that we know the width
+  
 	// Do all the positioning, both horizontally and vertically
 	var maxWidth = layout(this.renderer, abcTune, this.width, this.space, this.expandToWidest);
-
+  
 	//Set the top text now that we know the width
-	if (this.expandToWidest && maxWidth > this.width+1) {
-		abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, maxWidth, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+	if (this.expandToWidest && maxWidth > this.width + 1) {
+  
+	  abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, maxWidth, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+  
+	  if ((abcTune.lines)&&(abcTune.lines.length > 0)){
+  
+		var nlines = abcTune.lines.length;
+  
+		for (var i=0;i<nlines;++i){
+  
+		  var entry = abcTune.lines[i];
+  
+		  if (entry.nonMusic){
+  
+			if ((entry.nonMusic.rows) && (entry.nonMusic.rows.length > 0)){
+  
+			  var nRows = entry.nonMusic.rows.length;
+  
+			  for (var j=0;j<nRows;++j){
+  
+				var thisRow = entry.nonMusic.rows[j];
+  
+				// Recenter the element if it's a subtitle or centered text 
+				if (thisRow.left){
+  
+				  if (entry.subtitle){
+  
+					//console.log("Got centered subtitle: "+entry.subtitle.text);
+  
+					thisRow.left = (maxWidth/2) + this.renderer.padding.left;
+  
+				  }
+				  else
+				  if ((entry.text)&&(entry.text.length>0)){
+  
+					if (entry.text[0].center){
+  
+					  //debugger;
+  
+					  //console.log("Got centered text element: "+entry.text[0].text);
+  
+					  thisRow.left = (maxWidth/2) + this.renderer.padding.left;
+  
+					}
+				  }
+				}
+			  }
+			}
+		  }
+		}
+	  }
 	}
 
 	// Deal with tablature for staff
 	if (abcTune.tablatures) {
-		tablatures.layoutTablatures(this.renderer, abcTune);
+	  tablatures.layoutTablatures(this.renderer, abcTune);
 	}
-
+  
 	// Do all the writing to the SVG
 	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset);
 	this.staffgroups = ret.staffgroups;
 	this.selectables = ret.selectables;
-
 	if (this.oneSvgPerLine) {
-		var div = this.renderer.paper.svg.parentNode
-		this.svgs = splitSvgIntoLines(this.renderer, div, abcTune.metaText.title, this.responsive)
+	  var div = this.renderer.paper.svg.parentNode;
+	  this.svgs = splitSvgIntoLines(this.renderer, div, abcTune.metaText.title, this.responsive);
 	} else {
-		this.svgs = [this.renderer.paper.svg];
+	  this.svgs = [this.renderer.paper.svg];
 	}
 	setupSelection(this, this.svgs);
-};
+	
+  };
 
 function splitSvgIntoLines(renderer, output, title, responsive) {
 	// Each line is a top level <g> in the svg. To split it into separate
