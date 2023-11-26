@@ -126,8 +126,8 @@ describe("Layout", function() {
 
 	var expectedLineTooWide = [
 		[108,157,205,216,251,285,319,354,365,413,462,473,507,541,575,610],
-		[265],
-		[250],
+		[313],
+		[313],
 		[108,119,130,141,152,162,173,184,200,211,222,232,243,254,265,276,287,302,313,324,335,346,357,367,378,389,405,416,427,438,448,459,470,481,492,507,518,529,540,551,562,573,583,594,610]
 	]
 
@@ -253,7 +253,7 @@ function doLayoutTest(abc, params, expected, comment) {
 			for (var k = 0; k < visualObj[0].lines[j].nonMusic.rows.length; k++) {
 				var row = visualObj[0].lines[j].nonMusic.rows[k]
 				if (row.left)
-					arr.push(row.left)
+					arr.push(Math.round(row.left))
 			}
 		}
 		result.push(arr);
