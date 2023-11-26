@@ -417,18 +417,41 @@ describe("Tablature", function () {
 
 	var violinGuitarParams = [
 		// first 
-   	{
-	  	instrument: 'violin',
-	  	label: 'Violin',
-	  	tuning: ['G,', 'D', 'A', 'e']
-	  },
+   		{
+			instrument: 'violin',
+			label: 'Violin',
+			tuning: ['G,', 'D', 'A', 'e']
+		},
 		// second
 		{
 			instrument: 'guitar',
 			label: 'Guitar (%T)',
 			tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
 			capo: 2
-		}
+		},
+		// additional lines to be ignored
+		{
+			instrument: 'violin',
+			label: 'Violin2',
+			tuning: ['G,', 'D', 'A', 'e']
+		},
+		{
+			instrument: 'guitar',
+			label: 'Guitar (%T)2',
+			tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
+			capo: 2
+		},
+		{
+			instrument: 'violin',
+			label: 'Violin3',
+			tuning: ['G,', 'D', 'A', 'e']
+		},
+		{
+			instrument: 'guitar',
+			label: 'Guitar (%T)3',
+			tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
+			capo: 2
+		},
 	];
 
 	var violinCrossTuneParams = [
