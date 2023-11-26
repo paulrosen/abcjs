@@ -8,3 +8,5 @@ docs/.vuepress/.temp/*
 docs/.vuepress/.dist/*
 dist/report.html
 .eslintrc.json
+src/.DS_Store
+.gitignore
