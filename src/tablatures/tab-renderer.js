@@ -214,11 +214,16 @@ TabRenderer.prototype.doLayout = function () {
   // staffGroup.staffs.push(staffGroupInfos);
   staffGroup.height += this.tabSize + padd;
   var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos);
+
   var nbVoices = 1;
-  if (isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff)) {
+  var isMultiVoice = isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff);
+  if (isMultiVoice) {
     nbVoices = parentStaff.voices.length;
   }
   
+  // Don't allow tab labels on multi-voice tunes
+  var allowTabLabels = (staffGroup.voices.length == 1);
+
   // build from staff
   this.tabStaff.voices = [];
 
@@ -230,10 +235,19 @@ TabRenderer.prototype.doLayout = function () {
 
     var nameHeight;
 
+    // MAE START OF CHANGE
+
     // First staff with a tab name gets special treatment
     if (this.plugin.isFirstStaff){
     
-      var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+      var nameHeight = 0;
+
+      // Don't allow tab labels on multi-voice
+      if (allowTabLabels){
+
+        nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+
+      }
 
       nameHeight = Math.max(nameHeight, 1); // If there is no label for the tab line, then there needs to be a little padding
       
@@ -250,9 +264,12 @@ TabRenderer.prototype.doLayout = function () {
 
       }
 
-      this.plugin.firstTabNameHeight = nameHeight;
+      if (allowTabLabels){
 
-      this.plugin.isFirstStaff = false;
+        this.plugin.firstTabNameHeight = nameHeight;
+        
+        this.plugin.isFirstStaff = false;
+      }
 
     }
     else{
@@ -262,9 +279,9 @@ TabRenderer.prototype.doLayout = function () {
 
       staffGroup.staffs[this.staffIndex].top += this.plugin.firstTabNameHeight;
 
-
     }
-  
+    // MAE END OF CHANGE
+
     tabVoice.staff = staffGroupInfos;
     
     var tabVoiceIndex = voices.length;
@@ -282,6 +299,7 @@ TabRenderer.prototype.doLayout = function () {
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 
 };
+
 
 
 module.exports = TabRenderer;
