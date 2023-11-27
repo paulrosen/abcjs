@@ -37,12 +37,24 @@ function buildTabName(self, dest) {
   var controller = self.renderer.controller;
   var textSize = controller.getTextSize;
   var tabName = stringSemantics.tabInfos(self.plugin);
-  var size = textSize.calc(tabName, 'tablabelfont', 'text instrumentname');
-  dest.tabNameInfos = {
-    textSize: size,
-    name: tabName
-  };
+  var suppress = stringSemantics.suppress(self.plugin);
+  var doDraw = true;
+
+  if (suppress){
+    doDraw = false
+  }
+
+  var size = textSize.calc(tabName, 'tablabelfont', 'text instrumentname'); 
+
+  if (doDraw){
+    dest.tabNameInfos = {
+      textSize: {height:size.height,width:size.width},
+      name: tabName
+    };
+  }
+  
   return size.height;
+
 }
 
 /**
@@ -230,8 +242,10 @@ TabRenderer.prototype.doLayout = function () {
     if (ii > 0) tabVoice.duplicate = true;
     var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
     nameHeight = Math.max(nameHeight, 1) // If there is no label for the tab line, then there needs to be a little padding
-    staffGroup.staffs[this.staffIndex].top += nameHeight;
-    staffGroup.height += nameHeight * spacing.STEP;
+    // This was pushing down the top staff by the tab label height
+    //staffGroup.staffs[this.staffIndex].top += nameHeight;
+    staffGroup.staffs[this.staffIndex].top += 1;
+    staffGroup.height += nameHeight;
     tabVoice.staff = staffGroupInfos;
     var tabVoiceIndex = voices.length
     voices.splice(voices.length, 0, tabVoice);
@@ -241,6 +255,5 @@ TabRenderer.prototype.doLayout = function () {
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 };
-
 
 module.exports = TabRenderer;
