@@ -231,7 +231,9 @@ TabRenderer.prototype.doLayout = function () {
     var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
     nameHeight = Math.max(nameHeight, 1) // If there is no label for the tab line, then there needs to be a little padding
     staffGroup.staffs[this.staffIndex].top += nameHeight;
-    staffGroup.height += nameHeight * spacing.STEP;
+    // MAE Wrong coordinate system
+    //staffGroup.height += nameHeight * spacing.STEP;
+    staffGroup.height += nameHeight;
     tabVoice.staff = staffGroupInfos;
     var tabVoiceIndex = voices.length
     voices.splice(voices.length, 0, tabVoice);
