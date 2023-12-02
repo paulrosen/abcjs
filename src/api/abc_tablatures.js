@@ -113,7 +113,7 @@ var abcTablatures = {
     if (tabs && (tabs.length > 0)){
       var nTabs = tabs.length;
       for (var kk=0;kk<nTabs;++kk){
-        if (tabs[kk].params.firstStaffOnly){
+        if (tabs[kk] && tabs[kk].params.firstStaffOnly){
           tabs[kk].params.suppress = false;
         }
       }
