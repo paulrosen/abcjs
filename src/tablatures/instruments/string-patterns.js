@@ -265,6 +265,17 @@ StringPatterns.prototype.tabInfos = function (plugin) {
   return '';
 };
 
+// MAE 27 Nov 2023
+StringPatterns.prototype.suppress = function (plugin) {
+  var _super = plugin._super;
+  var suppress = _super.params.suppress;
+  if (suppress){
+    return true;
+  }
+  return false;
+};
+// MAE 27 Nov 2023 End
+
 /**
  * Common patterns for all string instruments
  * @param {} plugin

@@ -103,17 +103,50 @@ var abcTablatures = {
    * @param {*} renderer 
    * @param {*} abcTune 
    */
-   layoutTablatures: function (renderer, abcTune) {
+  layoutTablatures: function layoutTablatures(renderer, abcTune) {
     var tabs = abcTune.tablatures;
+
     // chack tabs request for each staffs
+    var staffLineCount = 0;
+    
+    // Clear the suppression flag
+    if (tabs && (tabs.length > 0)){
+      var nTabs = tabs.length;
+      for (var kk=0;kk<nTabs;++kk){
+        if (tabs[kk] && tabs[kk].params.firstStaffOnly){
+          tabs[kk].params.suppress = false;
+        }
+      }
+    }
+
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
       var line = abcTune.lines[ii];
+
+      if (line.staff){
+        staffLineCount++;
+      }
+      
+      // MAE 27Nov2023
+      // If tab param "firstStaffOnly", remove the tab label after the first staff
+      if (staffLineCount > 1){
+        if (tabs && (tabs.length > 0)){
+          var nTabs = tabs.length;
+          for (var kk=0;kk<nTabs;++kk){
+            if (tabs[kk].params.firstStaffOnly){
+              // Set the staff draw suppression flag
+              tabs[kk].params.suppress = true;
+            }
+          }
+        }
+      }
+
       var curStaff = line.staff;
       if (curStaff) {
         var maxStaves = curStaff.length
         for (var jj = 0; jj < curStaff.length; jj++) {
+
           if (tabs[jj] && jj < maxStaves) {
-            // tablature requested for staff
+             // tablature requested for staff
             var tabPlugin = tabs[jj];
             if (tabPlugin.instance == null) {
               tabPlugin.instance = new tabPlugin.classz();

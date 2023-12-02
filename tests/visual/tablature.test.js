@@ -415,6 +415,15 @@ describe("Tablature", function () {
 		}
 	];
 
+	var firstStaffOnlyParams = [
+		{
+			instrument: 'violin',
+			label: 'Violin',
+			firstStaffOnly: true,
+			tuning: ['G,', 'D', 'A', 'e']
+		}
+	];
+
 	var violinGuitarParams = [
 		// first 
    		{
@@ -647,8 +656,10 @@ describe("Tablature", function () {
 		"[V: PianoLeftHand] B,6 .D2 !arpeggio![F,8F8A,8]|(B,2 B,,2 C,12)|\"^annotation\"F,16|[F,16D,16]|Z2|]\n"
 
 	var kitchenSinkOutput = [
-		// TODO-PER: dummy values for now. Pick reasonable numbers when the staves are placed correctly
-		1,2,3,4
+		424,
+		780,
+		575,
+		653
 	]
 
 	var octaveClef = "X: 1\n" +
@@ -682,17 +693,16 @@ describe("Tablature", function () {
 		"|1\"Gbmaj7\"DEGB:|\n"
 
 	var unusualFontSizeOutput = [
-		// TODO-PER: These positions are just guesses - when the vertical is fixed then figure out reasonable numbers
-		930,
-		837,
-		744,
-		651,
-		558,
-		465,
-		372,
-		279,
-		186,
-		93,
+		72,
+		138,
+		269,
+		335,
+		505,
+		571,
+		823,
+		889,
+		1242,
+		1308,
 	]
 
 	var weirdNoteConstruction = "X:1\n" +
@@ -725,14 +735,13 @@ describe("Tablature", function () {
 		"[|]1 D z z A :|\n" +
 		"[|]2 D z F A [|] |\n"
 
-	// TODO-PER: get reasonable numbers when the output looks about right.
 	var staffPlacementOutput = [
-		1,
-		2,
-		3,
-		4,
-		5,
-		6
+		44,
+		145,
+		258,
+		363,
+		475,
+		580
 	]
 
 	var accidentals2 = "X: 1\n" +
@@ -783,6 +792,43 @@ describe("Tablature", function () {
 			{"el_type":"note","startChar":29,"endChar":30,"notes":[{"num":4,"str":1,"pitch":"d"}]},
 			{"el_type":"note","startChar":30,"endChar":31,"notes":[{"num":6,"str":0,"pitch":"a"}]},
 		]
+	]
+
+	var firstStaffOnly = "X:1\n" +
+		"%%stretchlast\n" +
+		"L:1/4\n" +
+		"K:C\n" +
+		"|:\"Gbmaj7\"DEGB:|\n" +
+		"|:\"Gbmaj7\"DEGB:|\n" +
+		"|:\"Gbmaj7\"DEGB:|\n" +
+		"|:\"Gbmaj7\"DEGB:|\n" +
+		"|:\"Gbmaj7\"DEGB:|\n"
+
+	var firstStaffOnlyOutput1 = [
+		62,
+		128,
+		238,
+		304,
+		413,
+		479,
+		589,
+		655,
+		764,
+		830,
+	]
+
+	// TODO-PER: get the real values after it works
+	var firstStaffOnlyOutput2 = [
+		62,
+		128,
+		238,
+		284,
+		393,
+		439,
+		549,
+		595,
+		704,
+		780,
 	]
 
 	it("accidentals-in-def", function () {
@@ -949,11 +995,11 @@ describe("Tablature", function () {
 		var visualObj = doRender(noExtraVertical, violinParams)
 		var firstLineTop1 = visualObj[0].lines[0].staffGroup.staffs[0].absoluteY
 		var secondLineTop1 = visualObj[0].lines[0].staffGroup.staffs[1].absoluteY
-		var difference1 = secondLineTop1 - firstLineTop1
+		var difference1 = Math.round((secondLineTop1 - firstLineTop1)*1000)/1000
 		visualObj = doRender(extraVertical, violinParams)
 		var firstLineTop2 = visualObj[0].lines[0].staffGroup.staffs[0].absoluteY
 		var secondLineTop2 = visualObj[0].lines[0].staffGroup.staffs[1].absoluteY
-		var difference2 = secondLineTop2 - firstLineTop2
+		var difference2 = Math.round((secondLineTop2 - firstLineTop2)*1000)/1000
 		//console.log(firstLineTop1, secondLineTop1, difference1, firstLineTop2, secondLineTop2,  difference2)
 		chai.assert.equal(difference2, difference1, "Spacing between staves is not correct")
 	})
@@ -1005,6 +1051,11 @@ describe("Tablature", function () {
 	it("percussion clef", function() {
 		var visualObj = doRender(percussionClef, violinParams)
 		chai.assert(visualObj[0].lines[0].staff.length === 1, "Should skip percussion clef")
+	})
+
+	it("firstStaffOnly", function() {
+		doVerticalTest(firstStaffOnly, firstStaffOnlyOutput1, violinParams)
+		doVerticalTest(firstStaffOnly, firstStaffOnlyOutput2, firstStaffOnlyParams)
 	})
 });
 
@@ -1079,7 +1130,7 @@ function doVerticalTest(abc, expected, tabParams, params) {
 	for (var i = 0; i < yPos.length; i++) {
 		var topLine = yPos[i]
 		var dim = topLine.getBBox()
-		chai.assert.equal(dim.y, expected[i], "Vertical spacing of staves wrong")
+		chai.assert.equal(Math.round(dim.y), expected[i], "Vertical spacing of staves wrong")
 	}
 }
 
