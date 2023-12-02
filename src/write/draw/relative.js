@@ -27,7 +27,7 @@ function drawRelativeElement(renderer, params, bartop) {
 		case "tabNumber":
 			var hAnchor = "middle";
 			var tabFont = "tabnumberfont";
-			var tabClass = 'tab-number';
+			var tabClass = 'abcjs-tab-number';
 			if (params.isGrace) {
 				tabFont = "tabgracefont";
 				y += 2.5;

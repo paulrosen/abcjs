@@ -79,7 +79,7 @@ Classes.prototype.generate = function (c) {
 		return "";
 	var ret = [];
 	if (c && c.length > 0) ret.push(c);
-	if (c === "tab-number") // TODO-PER-HACK! straighten out the tablature
+	if (c === "abcjs-tab-number") // TODO-PER-HACK! straighten out the tablature
 		return ret.join(' ')
 	if (c === "text instrument-name")
 		return "abcjs-text abcjs-instrument-name"
