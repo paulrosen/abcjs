@@ -60,13 +60,22 @@ function buildTabAbsolute(plugin, absX, relX) {
     icon: tabIcon,
     Ypos: tabYPos
   };
-  var tabAbsolute = new AbsoluteElement(element, 0, 0, "symbol", 0);
-  tabAbsolute.x = absX;
-  var tabRelative = new RelativeElement(tabIcon, 0, 0, 7.5, "tab");
-  tabRelative.x = relX;
-  tabAbsolute.children.push(tabRelative);
-  if (tabAbsolute.abcelem.el_type == 'tab') {
-    tabRelative.pitch = tabYPos;
+
+  // Offset the TAB symbol position if specified in the tab description
+  tabYPos += plugin.tabSymbolOffset;
+
+  // For tablature like whistle tab where you want the TAB symbol hidden
+  if (!plugin.hideTabSymbol){
+
+    var tabAbsolute = new AbsoluteElement(element, 0, 0, "symbol", 0);
+    tabAbsolute.x = absX;
+    var tabRelative = new RelativeElement(tabIcon, 0, 0, 7.5, "tab");
+    tabRelative.x = relX;
+    tabAbsolute.children.push(tabRelative);
+    if (tabAbsolute.abcelem.el_type == 'tab') {
+      tabRelative.pitch = tabYPos;
+    }
+    
   }
   return tabAbsolute;
 }

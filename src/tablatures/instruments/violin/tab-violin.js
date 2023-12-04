@@ -18,8 +18,10 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params) {
   this.linePitch = 3;
   this.nbLines = 4;
   this.isTabBig = false;
+  this.tabSymbolOffset = 0;
   this.capo = params.capo;
   this.transpose = params.visualTranspose;
+  this.hideTabSymbol = params.hideTabSymbol;
   this.tablature = new StringTablature(this.nbLines,
     this.linePitch);
   var semantics = new ViolinPatterns(this);
