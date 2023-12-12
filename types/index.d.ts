@@ -1190,7 +1190,7 @@ declare module 'abcjs' {
 
 	export interface MidiRenderer {
 		setTempo(bpm: number): void
-		setGlobalInfo(bpm: number, name: string, key:string, time:string): void
+		setGlobalInfo(bpm: number, name: string, key:KeySignature, time:MeterFraction): void
 		startTrack(): void
 		endTrack(): void
 		setText(type: string, text: string):void
