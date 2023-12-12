@@ -1188,6 +1188,22 @@ declare module 'abcjs' {
 		appendNote(trackNumber: number, pitch: number, durationInMeasures: number, volume: number, cents: number): void
 	}
 
+	export interface MidiRenderer {
+		setTempo(bpm: number): void
+		setGlobalInfo(bpm: number, name: string, key:string, time:string): void
+		startTrack(): void
+		endTrack(): void
+		setText(type: string, text: string):void
+		setInstrument(instrument: number):void
+		setChannel(channel:number, pan?: number):void
+		startNote(pitch:number, loudness:number, cents?:number):void
+		endNote(pitch:number):void
+		addRest(length:number):void
+
+		getData():string
+		embed(parent:Element, noplayer:boolean):void
+	}
+
 	export namespace synth {
 		let instrumentIndexToName: [string]
 		let pitchToNoteName: [string]
@@ -1202,6 +1218,7 @@ declare module 'abcjs' {
 		export function getMidiFile(source: string | TuneObject, options?: MidiFileOptions): MidiFile;
 		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches | undefined, milliSecondsPerMeasure: number, soundFontUrl? : string, debugCallback?: (message: string) => void): Promise<void>;
 		export function sequence(visualObj: TuneObject, options: AbcVisualParams): AudioSequence
+		export function midiRenderer(): MidiRenderer
 	}
 
 	//
