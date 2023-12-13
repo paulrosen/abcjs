@@ -1026,10 +1026,29 @@ declare module 'abcjs' {
 		loaded: Array<string>;
 	}
 
-	export interface AudioTrack {
-		cmd: AudioTrackCommand;
-		[param: string]: any; // TODO - make this a union
+	export interface AudioTrackProgramItem {
+		cmd: 'program';
+		channel: number;
+		instrument: number;
 	}
+
+	export interface AudioTrackNoteItem {
+		cmd: 'note';
+		duration: number;
+		endChar: number;
+		gap: number;
+		instrument: number;
+		pitch: number;
+		start: number;
+		startChar: number;
+		volume: number;
+	}
+	export interface AudioTrackTextItem {
+		cmd: 'text';
+		type: 'name';
+		text: string;
+	}
+	export type AudioTrack = Array<AudioTrackProgramItem|AudioTrackNoteItem|AudioTrackTextItem>
 
 	export interface AudioTracks {
 		tempo: number;
