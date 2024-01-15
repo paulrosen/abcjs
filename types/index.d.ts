@@ -317,8 +317,8 @@ declare module 'abcjs' {
 	export interface EditorSynth {
 		synthControl?: SynthObjectController;
 		el: Selector;
-		cursorControl: CursorControl;
-		options: SynthOptions;
+		cursorControl?: CursorControl;
+		options?: SynthOptions;
 	}
 
 	export interface EditorOptions {
@@ -846,6 +846,7 @@ declare module 'abcjs' {
 		getElementFromChar: (charPos: number) => VoiceItem | null;
 		millisecondsPerMeasure: (bpm?: number) => number;
 		setTiming: (bpm?: number, measuresOfDelay? : number) => void;
+		setupEvents: (startingDelay: number, timeDivider:number, startingBpm: number, warp?: number) => Array<NoteTimingEvent>;
 		setUpAudio: (options: SynthOptions) => AudioTracks;
 		makeVoicesArray: () => Array<Selectable[]>
 		deline: () => Array<TuneLine>;
@@ -1036,6 +1037,7 @@ declare module 'abcjs' {
 		cmd: 'note';
 		duration: number;
 		endChar: number;
+		endType?: "staccato"|"tenuto";
 		gap: number;
 		instrument: number;
 		pitch: number;
