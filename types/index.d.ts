@@ -336,7 +336,7 @@ declare module 'abcjs' {
 	// Audio
 	export interface NoteMapTrackItem {
 		pitch: number;
-		instrument: number;
+		instrument: string;
 		start: number;
 		end: number;
 		startChar: number;
@@ -1178,6 +1178,7 @@ declare module 'abcjs' {
 		stop(): number
 		download(): string // returns audio buffer in wav format as a reference to a blob
 		getIsRunning(): boolean
+		getAudioBuffer(): AudioBuffer | undefined
 	}
 
 	export interface SynthInitResponse {
