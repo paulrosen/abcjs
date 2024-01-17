@@ -248,7 +248,7 @@ if (autostart &&
 }
 
 var abcjs = {
-	plugin: Plugin
+	plugin: plugin
 };
 
 module.exports = abcjs;
