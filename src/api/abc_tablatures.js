@@ -17,7 +17,7 @@ var pluginTab = {
   'fiddle': 'ViolinTab',
   'mandolin': 'ViolinTab',
   'guitar': 'GuitarTab',
-  'fivestring': 'FiveStringTab' 
+  'fiveString': 'FiveStringTab' 
 };
 
 var abcTablatures = {

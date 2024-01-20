@@ -48,7 +48,7 @@ If there are more voices in the music than are in the above array, the extra voi
 
 default: undefined
 
-Options: "violin" | "mandolin" | "fiddle" | "guitar" | ""
+Options: "violin" | "mandolin" | "fiddle" | "guitar" | "fiveString" | ""
 
 This is one of the predefined tablature types. If it is an empty string then that voice is skipped.
 If it is an unrecognized instrument type, then the voice is skipped and a warning is added.
@@ -109,6 +109,12 @@ string is on the fret of the capo.
 default: `a'`.
 
 This defines the highest note that can be played on that instrument. If a note is out of range a question mark will be printed instead.
+
+### hideTabSymbol
+
+default: `false`.
+
+If this is true then the "TAB" clef will not appear.
 
 ## Fonts
 
