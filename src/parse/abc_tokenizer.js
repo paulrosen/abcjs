@@ -652,138 +652,62 @@ var Tokenizer = function(lines, multilineVars) {
 //
 // Also added additional checks and handlers for lower case ", the" and ", a" since I found several tune collections with those tune name constructs
 //
+// Find an optional title number at the start of a tune title
+function getTitleNumber(str){
+
+  const regex = /^(\d+)\./;
+
+  // Use the exec method to search for the pattern in the string
+  const match = regex.exec(str);
+
+  // Check if a match is found
+  if (match) {
+
+	// The matched number is captured in the first group (index 1)
+	const foundNumber = match[1];
+	return foundNumber;
+
+  } else {
+
+	// Return null if no match is found
+	return null;
+	
+  }
+
+}
+
+var thePatterns = [
+	{ match: /,\s*[Tt]he$/, replace: "The " },
+	{ match: /,\s*[Aa]$/, replace: "A " },
+	{ match: /,\s*[Aa]n$/, replace: "An " },
+]
+
 this.theReverser = function (str) {
 
-    // Find an optional title number at the start of a tune title
-    function getTitleNumber(theTitle){
+    for (var i = 0; i < thePatterns.length; i++) {
+		var thisPattern = thePatterns[i]
+		var match = str.match(thisPattern.match)
+		if (match) {
+			var theTitleNumber = getTitleNumber(str);
+			if (theTitleNumber){
+		
+			  //console.log("theReverser The titlenumber:"+theTitleNumber); 
+		
+			  str = str.replace(theTitleNumber+".","");
+			  str = str.trim();
+			}
+			var len = match[0].length
+			var result = thisPattern.replace + str.substring(0, str.length - len);
+		
+			if (theTitleNumber){
+			  result = theTitleNumber+". "+result;
+			}
+			
+			return result;
 
-      const regex = /^(\d+)\./;
+		}
+	}
 
-      // Use the exec method to search for the pattern in the string
-      const match = regex.exec(str);
-
-      // Check if a match is found
-      if (match) {
-
-        // The matched number is captured in the first group (index 1)
-        const foundNumber = match[1];
-        return foundNumber;
-
-      } else {
-
-        // Return null if no match is found
-        return null;
-        
-      }
-
-    }
-    
-    if (parseCommon.endsWith(str, ", The")){
-      
-      //debugger;
-
-      //console.log("theReverser The in:"+str); 
-
-      var theTitleNumber = getTitleNumber(str);
-
-      if (theTitleNumber){
-
-        //console.log("theReverser The titlenumber:"+theTitleNumber); 
-
-        str = str.replace(theTitleNumber+".","");
-        str = str.trim();
-      }
-
-      var result = "The " + str.substring(0, str.length - 5);
-
-      if (theTitleNumber){
-        result = theTitleNumber+". "+result;
-      }
-      
-      //console.log("theReverser The out:"+result); 
-
-      return result;
-      
-    }
-
-    if (parseCommon.endsWith(str, ", the")){
-      
-      //debugger;
-
-      //console.log("theReverser The in:"+str); 
-
-      var theTitleNumber = getTitleNumber(str);
-
-      if (theTitleNumber){
-
-        //console.log("theReverser the titlenumber:"+theTitleNumber); 
-
-        str = str.replace(theTitleNumber+".","");
-        str = str.trim();
-      }
-
-      var result = "The " + str.substring(0, str.length - 5);
-
-      if (theTitleNumber){
-        result = theTitleNumber+". "+result;
-      }
-      
-      //console.log("theReverser the out:"+result); 
-
-      return result;
-
-    }
-
-    if (parseCommon.endsWith(str, ", A")){
-
-      //console.log("theReverser A in:"+str);  
-
-      var theTitleNumber = getTitleNumber(str);
-
-      if (theTitleNumber){
-
-        //console.log("theReverser A titlenumber:"+theTitleNumber); 
-
-        str = str.replace(theTitleNumber+".","");
-        str = str.trim();
-      }
-
-      var result = "A " + str.substring(0, str.length - 3);
-
-      if (theTitleNumber){
-        result = theTitleNumber+". "+result;
-      }
-    
-      //console.log("theReverser A out:"+result);  
-      return result;
-
-    } 
-
-    if (parseCommon.endsWith(str, ", a")){
-
-      //console.log("theReverser a in:"+str);  
-
-      var theTitleNumber = getTitleNumber(str);
-
-      if (theTitleNumber){
-
-        //console.log("theReverser a titlenumber:"+theTitleNumber); 
-
-        str = str.replace(theTitleNumber+".","");
-        str = str.trim();
-      }
-
-      var result = "A " + str.substring(0, str.length - 3);
-
-      if (theTitleNumber){
-        result = theTitleNumber+". "+result;
-      }
-    
-      //console.log("theReverser a out:"+result);  
-      return result;
-
-    } 
-    
     return str;
 
   };
