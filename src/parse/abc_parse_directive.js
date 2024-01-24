@@ -684,25 +684,25 @@ var parseDirective = {};
 	};
 
 	parseDirective.parseFontChangeLine = function(textstr) {
+		// We don't want to match two dollar signs, so change those temporarily
+		textstr = textstr.replace(/\$\$/g,"\x03")
 		var textParts = textstr.split('$');
 		if (textParts.length > 1 && multilineVars.setfont) {
-			var textarr = [ { text: textParts[0] }];
+			var textarr = [ ];
+			if (textParts[0] !== '') // did the original string start with `$`?
+				textarr.push({ text: textParts[0] })
 			for (var i = 1; i < textParts.length; i++) {
 				if (textParts[i][0] === '0')
-					textarr.push({ text: textParts[i].substring(1) });
-				else if (textParts[i][0] === '1' && multilineVars.setfont[1])
-					textarr.push({font: multilineVars.setfont[1], text: textParts[i].substring(1) });
-				else if (textParts[i][0] === '2' && multilineVars.setfont[2])
-					textarr.push({font: multilineVars.setfont[2], text: textParts[i].substring(1) });
-				else if (textParts[i][0] === '3' && multilineVars.setfont[3])
-					textarr.push({font: multilineVars.setfont[3], text: textParts[i].substring(1) });
-				else if (textParts[i][0] === '4' && multilineVars.setfont[4])
-					textarr.push({font: multilineVars.setfont[4], text: textParts[i].substring(1) });
-				else
-					textarr[textarr.length-1].text += '$' + textParts[i];
+					textarr.push({ text: textParts[i].substring(1).replace(/\x03/g,"$$") });
+				else {
+					var whichFont = parseInt(textParts[i][0],10)
+					if (multilineVars.setfont[whichFont])
+						textarr.push({font: multilineVars.setfont[whichFont], text: textParts[i].substring(1).replace(/\x03/g,"$$") });
+					else
+						textarr[textarr.length-1].text += '$' + textParts[i].replace(/\x03/g,"$$");
+				}				
 			}
-			if (textarr.length > 1)
-				return textarr;
+			return textarr;
 		}
 		return textstr;
 	};
@@ -939,7 +939,7 @@ var parseDirective = {};
 				if (sfTokens.length >= 4) {
 					if (sfTokens[0].token === '-' && sfTokens[1].type === 'number') {
 						var sfNum = parseInt(sfTokens[1].token);
-						if (sfNum >= 1 && sfNum <= 4) {
+						if (sfNum >= 1 && sfNum <= 9) {
 							if (!multilineVars.setfont)
 								multilineVars.setfont = [];
 							sfTokens.shift();

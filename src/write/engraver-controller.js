@@ -123,6 +123,7 @@ EngraverController.prototype.getMeasureWidths = function (abcTune) {
 	this.reset();
 	this.getFontAndAttr = new GetFontAndAttr(abcTune.formatting, this.classes);
 	this.getTextSize = new GetTextSize(this.getFontAndAttr, this.renderer.paper);
+	var origJazzChords = this.jazzchords
 
 	this.setupTune(abcTune, 0);
 	this.constructTuneElements(abcTune);
@@ -170,6 +171,7 @@ EngraverController.prototype.getMeasureWidths = function (abcTune) {
 		} else
 			needNewSection = true;
 	}
+	this.jazzchords = origJazzChords
 	return ret;
 };
 
@@ -206,7 +208,7 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 };
 
 EngraverController.prototype.constructTuneElements = function (abcTune) {
-	abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+	abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.classes.shouldAddClasses, this.getTextSize);
 
 	// Generate the raw staff line data
 	var i;
@@ -233,11 +235,12 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 			abcLine.nonMusic = new Separator(abcLine.separator.spaceAbove, abcLine.separator.lineLength, abcLine.separator.spaceBelow);
 		}
 	}
-	abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+	abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.classes.shouldAddClasses, this.getTextSize);
 };
 
 EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOffset) {
 
+	var origJazzChords = this.jazzchords
 	var scale = this.setupTune(abcTune, tuneNumber);
   
 	// Create all of the element objects that will appear on the page.
@@ -251,55 +254,35 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 	//Set the top text now that we know the width
 	if (this.expandToWidest && maxWidth > this.width + 1) {
   
-	  abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, maxWidth, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.getTextSize);
+		abcTune.topText = new TopText(abcTune.metaText, abcTune.metaTextInfo, abcTune.formatting, abcTune.lines, maxWidth, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.classes.shouldAddClasses, this.getTextSize);
   
-	  if ((abcTune.lines)&&(abcTune.lines.length > 0)){
-  
-		var nlines = abcTune.lines.length;
-  
-		for (var i=0;i<nlines;++i){
-  
-		  var entry = abcTune.lines[i];
-  
-		  if (entry.nonMusic){
-  
-			if ((entry.nonMusic.rows) && (entry.nonMusic.rows.length > 0)){
-  
-			  var nRows = entry.nonMusic.rows.length;
-  
-			  for (var j=0;j<nRows;++j){
-  
-				var thisRow = entry.nonMusic.rows[j];
-  
-				// Recenter the element if it's a subtitle or centered text 
-				if (thisRow.left){
-  
-				  if (entry.subtitle){
-  
-					//console.log("Got centered subtitle: "+entry.subtitle.text);
-  
-					thisRow.left = (maxWidth/2) + this.renderer.padding.left;
-  
-				  }
-				  else
-				  if ((entry.text)&&(entry.text.length>0)){
-  
-					if (entry.text[0].center){
-  
-					  //debugger;
-  
-					  //console.log("Got centered text element: "+entry.text[0].text);
-  
-					  thisRow.left = (maxWidth/2) + this.renderer.padding.left;
-  
+		if ((abcTune.lines)&&(abcTune.lines.length > 0)){
+			var nlines = abcTune.lines.length;
+
+			for (var i=0;i<nlines;++i){
+				var entry = abcTune.lines[i];
+				if (entry.nonMusic){
+					if ((entry.nonMusic.rows) && (entry.nonMusic.rows.length > 0)){
+						var nRows = entry.nonMusic.rows.length;
+						for (var j=0;j<nRows;++j){
+							var thisRow = entry.nonMusic.rows[j];
+							// Recenter the element if it's a subtitle or centered text 
+							if (thisRow.left){
+								if (entry.subtitle){
+									thisRow.left = (maxWidth/2) + this.renderer.padding.left;
+								} else {
+									if ((entry.text)&&(entry.text.length>0)){
+										if (entry.text[0].center){
+											thisRow.left = (maxWidth/2) + this.renderer.padding.left;
+										}
+									}
+								}
+							}
+						}
 					}
-				  }
 				}
-			  }
 			}
-		  }
 		}
-	  }
 	}
 
 	// Deal with tablature for staff
@@ -319,7 +302,8 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 	}
 	setupSelection(this, this.svgs);
 	
-  };
+	this.jazzchords = origJazzChords
+};
 
 function splitSvgIntoLines(renderer, output, title, responsive) {
 	// Each line is a top level <g> in the svg. To split it into separate

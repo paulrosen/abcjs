@@ -14,6 +14,13 @@ GetFontAndAttr.prototype.updateFonts = function (fontOverrides) {
 		this.formatting.vocalfont = fontOverrides.vocalfont;
 };
 
+GetFontAndAttr.prototype.getFamily = function (type) {
+	if (type[0] === '"' && type[type.length-1] === '"') {
+		return type.substring(1, type.length-1)
+	}
+	return type
+};
+
 GetFontAndAttr.prototype.calc = function (type, klass) {
 	var font;
 	if (typeof type === 'string') {
@@ -30,7 +37,7 @@ GetFontAndAttr.prototype.calc = function (type, klass) {
 
 	var attr = {
 		"font-size": font.size, 'font-style': font.style,
-		"font-family": font.face, 'font-weight': font.weight, 'text-decoration': font.decoration,
+		"font-family": this.getFamily(font.face), 'font-weight': font.weight, 'text-decoration': font.decoration,
 		'class': this.classes.generate(klass)
 	};
 	return { font: font, attr: attr };

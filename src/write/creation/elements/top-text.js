@@ -1,6 +1,7 @@
 const addTextIf = require("../add-text-if");
+const richText = require("./rich-text");
 
-function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, paddingLeft, spacing, getTextSize) {
+function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, paddingLeft, spacing, shouldAddClasses, getTextSize) {
 	this.rows = [];
 
 	if (metaText.header && isPrint) {
@@ -18,12 +19,17 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 	var tAnchor = formatting.titleleft ? 'start' : 'middle';
 	var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
 	if (metaText.title) {
-		addTextIf(this.rows, { marginLeft: tLeft, text: metaText.title, font: 'titlefont', klass: 'title meta-top', marginTop: spacing.title, anchor: tAnchor, absElemType: "title", info: metaTextInfo.title, name: "title" }, getTextSize);
+		var klass = shouldAddClasses ? 'abcjs-title' : ''
+		this.rows.push({move: spacing.title})
+		richText(this.rows, metaText.title, "titlefont", klass, 'title', tLeft, {marginTop: spacing.title, anchor: tAnchor, absElemType: "title", info: metaTextInfo.title},  getTextSize)
+		//addTextIf(this.rows, { marginLeft: tLeft, text: metaText.title, font: 'titlefont', klass: 'title meta-top', marginTop: spacing.title, anchor: tAnchor, absElemType: "title", info: metaTextInfo.title, name: "title" }, getTextSize);
 	}
 	if (lines.length) {
 		var index = 0;
 		while (index < lines.length && lines[index].subtitle) {
-			addTextIf(this.rows, { marginLeft: tLeft, text: lines[index].subtitle.text, font: 'subtitlefont', klass: 'text meta-top subtitle', marginTop: spacing.subtitle, anchor: tAnchor, absElemType: "subtitle", info: lines[index].subtitle, name: "subtitle" }, getTextSize);
+			var klass = shouldAddClasses ? 'abcjs-text abcjs-subtitle' : ''
+			richText(this.rows, lines[index].subtitle.text, "subtitlefont", klass, 'subtitle', tLeft, {marginTop: spacing.subtitle, anchor: tAnchor, absElemType: "subtitle", info: lines[index].subtitle},  getTextSize)
+			//addTextIf(this.rows, { marginLeft: tLeft, text: lines[index].subtitle.text, font: 'subtitlefont', klass: 'text meta-top subtitle', marginTop: spacing.subtitle, anchor: tAnchor, absElemType: "subtitle", info: lines[index].subtitle, name: "subtitle" }, getTextSize);
 			index++;
 		}
 	}
@@ -32,22 +38,47 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 		this.rows.push({ move: spacing.composer });
 		if (metaText.rhythm && metaText.rhythm.length > 0) {
 			var noMove = !!(metaText.composer || metaText.origin);
-			addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.rhythm, font: 'infofont', klass: 'meta-top rhythm', absElemType: "rhythm", noMove: noMove, info: metaTextInfo.rhythm, name: "rhythm" }, getTextSize);
+			var klass = shouldAddClasses ? 'abcjs-rhythm' : ''
+			addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.rhythm, font: 'infofont', klass: klass, absElemType: "rhythm", noMove: noMove, info: metaTextInfo.rhythm, name: "rhythm" }, getTextSize);
 		}
-		var composerLine = "";
-		if (metaText.composer) composerLine += metaText.composer;
-		if (metaText.origin) composerLine += ' (' + metaText.origin + ')';
-		if (composerLine.length > 0) {
-			addTextIf(this.rows, { marginLeft: paddingLeft + width, text: composerLine, font: 'composerfont', klass: 'meta-top composer', anchor: "end", absElemType: "composer", info: metaTextInfo.composer, name: "composer" }, getTextSize);
+		var hasSimpleComposerLine = true
+		if (metaText.composer && typeof metaText.composer !== 'string')
+			hasSimpleComposerLine = false
+		if (metaText.origin && typeof metaText.origin !== 'string')
+			hasSimpleComposerLine = false
+			
+		var composerLine = metaText.composer ? metaText.composer : '';
+		if (metaText.origin) {
+			if (typeof composerLine === 'string' && typeof metaText.origin === 'string')
+				composerLine += ' (' + metaText.origin + ')';
+			else if (typeof composerLine === 'string' && typeof metaText.origin !== 'string') {
+				composerLine = [{text:composerLine}]
+				composerLine.push({text:" ("})
+				composerLine = composerLine.concat(metaText.origin)
+				composerLine.push({text:")"})
+			} else {
+				composerLine.push({text:" ("})
+				composerLine = composerLine.concat(metaText.origin)
+				composerLine.push({text:")"})
+			}
+		}
+		if (composerLine) {
+			var klass = shouldAddClasses ? 'abcjs-composer' : ''
+			richText(this.rows, composerLine, 'composerfont', klass, "composer", paddingLeft+width, {anchor: "end", absElemType: "composer", info: metaTextInfo.composer, ingroup: true}, getTextSize)
+			//addTextIf(this.rows, { marginLeft: paddingLeft + width, text: composerLine, font: 'composerfont', klass: 'meta-top composer', anchor: "end", absElemType: "composer", info: metaTextInfo.composer, name: "composer" }, getTextSize);
 		}
 	}
 
 	if (metaText.author && metaText.author.length > 0) {
-		addTextIf(this.rows, { marginLeft: paddingLeft + width, text: metaText.author, font: 'composerfont', klass: 'meta-top author', anchor: "end", absElemType: "author", info: metaTextInfo.author, name: "author" }, getTextSize);
+		var klass = shouldAddClasses ? 'abcjs-author' : ''
+		richText(this.rows, metaText.author, 'composerfont', klass, "author", paddingLeft+width, {anchor: "end", absElemType: "composer", info: metaTextInfo.composer}, getTextSize)
+		//addTextIf(this.rows, { marginLeft: paddingLeft + width, text: metaText.author, font: 'composerfont', klass: 'meta-top author', anchor: "end", absElemType: "author", info: metaTextInfo.author, name: "author" }, getTextSize);
 	}
 
 	if (metaText.partOrder && metaText.partOrder.length > 0) {
-		addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.partOrder, font: 'partsfont', klass: 'meta-top part-order', absElemType: "partOrder", info: metaTextInfo.partOrder, name: "part-order" }, getTextSize);
+		var klass = shouldAddClasses ? 'abcjs-part-order' : ''
+		richText(this.rows, metaText.partOrder, 'partsfont', klass, "part-order", paddingLeft, {absElemType: "partOrder", info: metaTextInfo.composer, anchor: 'start'}, getTextSize)
+		//addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.partOrder, font: 'partsfont', klass: 'meta-top part-order', absElemType: "partOrder", info: metaTextInfo.partOrder, name: "part-order" }, getTextSize);
 	}
 }
 

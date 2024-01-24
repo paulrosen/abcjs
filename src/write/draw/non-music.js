@@ -8,12 +8,14 @@ function nonMusic(renderer, obj, selectables) {
 			renderer.absolutemoveY(row.absmove);
 		} else if (row.move) {
 			renderer.moveY(row.move);
-		} else if (row.text) {
+		} else if (row.text || row.phrases) {
 			var x = row.left ? row.left : 0;
 			var el = renderText(renderer, {
 				x: x,
 				y: renderer.y,
 				text: row.text,
+				phrases: row.phrases,
+				'dominant-baseline': row['dominant-baseline'],
 				type: row.font,
 				klass: row.klass,
 				name: row.name,

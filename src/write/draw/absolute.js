@@ -16,7 +16,10 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 				drawTempo(renderer, child);
 				break;
 			default:
-				drawRelativeElement(renderer, child, bartop);
+				var el = drawRelativeElement(renderer, child, bartop);
+				if (child.type === "symbol" && child.c && child.c.indexOf('notehead') >= 0) {
+					el.setAttribute('class', 'abcjs-notehead')
+				}
 		}
 	}
 	var klass = params.type;

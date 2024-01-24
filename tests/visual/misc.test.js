@@ -63,39 +63,113 @@ describe("Miscellaneous", function () {
 	
 	var abcSetFont = 'X:1\n' +
 		'%%setfont-1 cursive 16 bold\n' +
-		'T:Title $1bold$0 $$100 reg\n' +
-		'C:Thomas $1Fats$0 Waller\n' +
+		'%%setfont-7 Arial 19 bold\n' +
+		'T:Title $1bold$0 $$100 reg, the\n' +
+		'T:subtitle $1bold$0 reg\n' +
+		'C:Thomas $7Fats$0 Waller\n' +
+		'O:Copyright $11924$0 All Rights Reserved\n' +
+		'A:by $1Me\n' +
+		'P:AA$1BB$0CC\n' +
 		'H:one $1two $0 three\n' +
+		'H:aye $1bee $0 sea\n' +
+		'B:$1book\n' +
+		'D:records\n' +
+		'N:four $1five $0 six\n' +
+		'N:seven\n' +
 		'L:1/4\n' +
 		'M:4/4\n' +
+		'W: lo $1loo $0lou $$1dollar\n' +
 		'K:C\n' +
-		'"C$1m$7"G E2 F | "^above $1the$0 staff"D4 |]\n' +
+		'"C$1m$7"G "Dm7"E2 F | "^above $1the$0 staff"D4 |]\n' +
 		'w: la $1le $0lu\n' +
-		'W: lo $1loo $0lou $$1dollar\n'
+		'P:chorus $1with feeling\n' +
+		'A4|' +
+		'\n' +
+		'X:1\n' +
+		'T:Title bold $$100 reg, the\n' +
+		'T:subtitle bold reg\n' +
+		'C:Thomas Fats Waller\n' +
+		'O:Copyright 1924 All Rights Reserved\n' +
+		'A:by Me\n' +
+		'P:AABBCC\n' +
+		'H:one two three\n' +
+		'H:aye bee sea\n' +
+		'N:four five six\n' +
+		'N:seven\n' +
+		'L:1/4\n' +
+		'M:4/4\n' +
+		'W: lo loo lou $$1dollar\n' +
+		'K:C\n' +
+		'"Cm"G E2 F | "^above the staff"D4 |]\n' +
+		'w: la le lu\n' +
+		'P:chorus with feeling\n' +
+		'A4|'
 
 	var expectedSetFont = [
-		{"key":"title","text":"Title"},
-		{"key":"title","text":"bold","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
-		{"key":"title","text":"$$100 reg"},
-		{"key":"composer","text":"Thomas"},
-		{"key":"composer","text":"Fats","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
-		{"key":"composer","text":"Waller"},
-		{"key":"chord","text":"C"},
-		{"key":"chord","text":"m","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
-		{"key":"chord","text":"7"},
+		{"klass":"abcjs-title","phrases":[
+			{"content":"The Title ","attrs":{"font-family":"Times New Roman","font-size":27,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
+			{"content":"bold","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":" $100 reg","attrs":{"font-family":"Times New Roman","font-size":27,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
+		]},
+		{"klass":"abcjs-text abcjs-subtitle","phrases":[
+			{"content":"subtitle ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
+			{"content":"bold","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":" reg","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
+		]},
+		{"klass":"abcjs-composer","phrases":[
+			{"content":"Thomas ","attrs":{"font-family":"Times New Roman","font-size":19,"font-weight":"normal","font-style":"italic","font-decoration":"none"}},
+			{"content":"Fats","attrs":{"font-family":"Arial","font-size":19,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":" Waller","attrs":{"font-family":"Times New Roman","font-size":19,"font-weight":"normal","font-style":"italic","font-decoration":"none"}},
+			{"content":" (","attrs":{"font-family":"Times New Roman","font-size":19,"font-weight":"normal","font-style":"italic","font-decoration":"none"}},{"content":"Copyright ","attrs":{"font-family":"Times New Roman","font-size":19,"font-weight":"normal","font-style":"italic","font-decoration":"none"}},
+			{"content":"1924","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":" All Rights Reserved","attrs":{"font-family":"Times New Roman","font-size":19,"font-weight":"normal","font-style":"italic","font-decoration":"none"}},
+			{"content":")","attrs":{"font-family":"Times New Roman","font-size":19,"font-weight":"normal","font-style":"italic","font-decoration":"none"}}]},
+		{"klass":"abcjs-author","phrases":[
+			{"content":"by ","attrs":{"font-family":"Times New Roman","font-size":19,"font-weight":"normal","font-style":"italic","font-decoration":"none"}},
+			{"content":"Me","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}}]},
+		{"klass":"abcjs-part-order","phrases":[
+			{"content":"AA","attrs":{"font-family":"Times New Roman","font-size":20,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
+			{"content":"BB","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":"CC","attrs":{"font-family":"Times New Roman","font-size":20,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}]},
+		{"key":"subtitle","text":[{"text":"subtitle "},{"font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16},"text":"bold"},{"text":" reg"}]},
+		{"key":"chord","text":"C$1m$7"},
 		{"key":"lyric","text":"la"},
-		{"key":"lyric","text":"le","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
-		{"key":"lyric","text":"lu"},
-		{"key":"chord","text":"above"},
-		{"key":"chord","text":"the","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16}},
-		{"key":"chord","text":"staff"},
-		{"key":"bottom","font":"wordsfont","text":"lo "},
-		{"key":"bottom","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16},"text":"loo "},
-		{"key":"bottom","font":"wordsfont","text":"lou $"},
-		{"key":"bottom","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16},"text":"dollar"},
-		{"key":"bottom","font":"historyfont","text":"History: one"},
-		{"key":"bottom","font":{"face":"cursive","weight":"bold","style":"normal","decoration":"none","size":16},"text":"two"},
-		{"key":"bottom","font":"historyfont","text":"three\n"},
+		{"key":"chord","text":"Dm7"},
+		{"key":"lyric","text":"$1le"},
+		{"key":"lyric","text":"$0lu"},
+		{"key":"chord","text":"above $1the$0 staff"},
+		{"phrases":[
+			{"content":"lo ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
+			{"content":"loo ","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":"lou $1dollar","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
+		]},
+		{"klass":"abcjs-extra-text abcjs-book","phrases":[
+			{"content":"Book: ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
+			{"content":"book","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}}
+		]},
+		{"klass":"abcjs-extra-text abcjs-discography","phrases":[
+			{"content":"Discography: records","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
+		]},
+		{"font":"historyfont","text":"Notes:"},
+		{"phrases":[
+			{"content":"four ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
+			{"content":"five ","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":" six","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
+		]},
+		{"phrases":[
+			{"content":"seven","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
+		]},
+		{"font":"historyfont","text":"History:"},
+		{"phrases":[
+			{"content":"one ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
+			{"content":"two ","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":" three","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
+		]},
+		{"phrases":[
+			{"content":"aye ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
+			{"content":"bee ","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
+			{"content":" sea","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
+		]}
 	]
 
 	var abcLineWidth = 'X:1\n' +
@@ -147,49 +221,71 @@ describe("Miscellaneous", function () {
 	})
 
 	it("set-font", function() {
-		var visualObj = abcjs.renderAbc("paper", abcSetFont);
+		var visualObj = abcjs.renderAbc(["paper", 'paper2'], abcSetFont, {add_classes:true, jazzchords: true});
 		var results = extractText(visualObj)
-		chai.assert.deepEqual(results, expectedSetFont)
+		for (var i = 0; i < results.length; i++) {
+			chai.assert.deepEqual(results[i], expectedSetFont[i], "index: " + i + "\n" + JSON.stringify(results[i])+"\n" + JSON.stringify(expectedSetFont[i]))
+		}
 	})
 })
 
 function extractText(visualObj) {
 	var textResults = []
-	Object.keys(visualObj[0].metaText).forEach(key => {
-		if (key !== 'unalignedWords' && key !== 'history')
-		textResults.push({key: key, text: visualObj[0].metaText[key] })
-	})
+	// Object.keys(visualObj[0].metaText).forEach(key => {
+	// 	if (key !== 'unalignedWords' && key !== 'history')
+	// 	textResults.push({key: key, text: visualObj[0].metaText[key] })
+	// })
 
-	var voice = visualObj[0].lines[0].staff[0].voices[0]
-	for (var i = 0; i < voice.length; i++) {
-		var elem = voice[i];
-		if (elem.chord) {
-			for (var j = 0; j < elem.chord.length; j++) {
-				var chord = elem.chord[j]
-				var item = { key: "chord", text: chord.name}
-				if (chord.font)
-					item.font = chord.font
-				textResults.push(item)
-			}
-		}
-		if (elem.lyric) {
-			for (var j = 0; j < elem.lyric.length; j++) {
-				var lyric = elem.lyric[j]
-				var item = {key: "lyric", text: lyric.syllable}
-				if (lyric.font)
-					item.font = lyric.font
-				textResults.push(item)
-			}
+	var topText = visualObj[0].topText.rows.filter(item => {
+		return item.text !== undefined || item.phrases !== undefined
+	}).map(item => {
+		var ret = {}
+		if (item.klass) ret.klass = item.klass;
+		if (item.font) ret.font = item.font
+		if (item.text) ret.text = item.text
+		if (item.phrases) ret.phrases = item.phrases
+		return ret
+	})
+	textResults = textResults.concat(topText)
+
+	for (var i = 0; i < visualObj[0].lines.length; i++) {
+		var line = visualObj[0].lines[i]
+		if (line.subtitle) {
+			textResults.push({key: 'subtitle', text:line.subtitle.text})
+		} else if (line.staff) {
+			var voice = line.staff[0].voices[0]
+		   for (var i = 0; i < voice.length; i++) {
+			   var elem = voice[i];
+			   if (elem.chord) {
+				   for (var j = 0; j < elem.chord.length; j++) {
+					   var chord = elem.chord[j]
+					   var item = { key: "chord", text: chord.name}
+					   if (chord.font)
+						   item.font = chord.font
+					   textResults.push(item)
+				   }
+			   }
+			   if (elem.lyric) {
+				   for (var j = 0; j < elem.lyric.length; j++) {
+					   var lyric = elem.lyric[j]
+					   var item = {key: "lyric", text: lyric.syllable}
+					   if (lyric.font)
+						   item.font = lyric.font
+					   textResults.push(item)
+				   }
+			   }
+		   }
 		}
 	}
 
 	var bottomText = visualObj[0].bottomText.rows.filter(item => {
-		return item.text !== undefined
+		return item.text !== undefined || item.phrases !== undefined
 	}).map(item => {
 		var ret = {}
-		if (item.key) ret.key = item.key; else ret.key = 'bottom'
+		if (item.klass) ret.klass = item.klass;
 		if (item.font) ret.font = item.font
 		if (item.text) ret.text = item.text
+		if (item.phrases) ret.phrases = item.phrases
 		return ret
 	})
 	textResults = textResults.concat(bottomText)

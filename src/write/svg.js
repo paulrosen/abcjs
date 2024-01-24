@@ -211,6 +211,36 @@ Svg.prototype.text = function (text, attr, target) {
 	return el;
 };
 
+Svg.prototype.richTextLine = function (phrases, x, y, klass, anchor, target) {
+	var el = document.createElementNS(svgNS, 'text');
+	el.setAttribute("stroke", "none");
+	el.setAttribute("class", klass);
+	el.setAttribute("x", x);
+	el.setAttribute("y", y);
+	el.setAttribute("text-anchor", anchor);
+	el.setAttribute("dominant-baseline", "middle");
+
+	for (var i = 0; i < phrases.length; i++) {
+		var phrase = phrases[i]
+		var tspan = document.createElementNS(svgNS, 'tspan');
+		var attrs = Object.keys(phrase.attrs)
+		for (var j = 0; j < attrs.length; j++) {
+			var value = phrase.attrs[attrs[j]]
+			if (value !== '')
+				tspan.setAttribute(attrs[j], value)
+		}
+		tspan.textContent = phrase.content;
+
+		el.appendChild(tspan);
+	}
+
+	if (target)
+		target.appendChild(el);
+	else
+		this.append(el);
+	return el;
+}
+
 Svg.prototype.guessWidth = function (text, attr) {
 	var svg = this.createDummySvg();
 	var el = this.text(text, attr, svg);

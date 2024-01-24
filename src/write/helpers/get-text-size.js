@@ -11,6 +11,13 @@ GetTextSize.prototype.attr = function (type, klass) {
 	return this.getFontAndAttr.calc(type, klass);
 };
 
+GetTextSize.prototype.getFamily = function (type) {
+	if (type[0] === '"' && type[type.length-1] === '"') {
+		return type.substring(1, type.length-1)
+	}
+	return type
+};
+
 GetTextSize.prototype.calc = function (text, type, klass, el) {
 	var hash;
 	// This can be passed in either a string or a font. If it is a string it names one of the standard fonts.
@@ -28,7 +35,7 @@ GetTextSize.prototype.calc = function (text, type, klass, el) {
 			attr: {
 				"font-size": type.size,
 				"font-style": type.style,
-				"font-family": type.face,
+				"font-family": this.getFamily(type.face),
 				"font-weight": type.weight,
 				"text-decoration": type.decoration,
 				"class": this.getFontAndAttr.classes.generate(klass)

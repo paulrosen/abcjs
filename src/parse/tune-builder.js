@@ -878,7 +878,15 @@ var TuneBuilder = function(tune) {
 			tune.metaText[key] = value;
 			tune.metaTextInfo[key] = info;
 		} else {
-			tune.metaText[key] += "\n" + value;
+			if (typeof tune.metaText[key] === 'string' && typeof value === 'string')
+				tune.metaText[key] += "\n" + value;
+			else {
+				if (tune.metaText[key] === 'string')
+					tune.metaText[key] = [{text: tune.metaText[key]}]
+				if (typeof value === 'string')
+					value = [{text: value}]
+				tune.metaText[key] =tune.metaText[key].concat(value)
+			}
 			tune.metaTextInfo[key].endChar = info.endChar;
 		}
 	};

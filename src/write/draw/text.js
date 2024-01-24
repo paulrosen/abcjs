@@ -2,6 +2,14 @@ var roundNumber = require("./round-number");
 
 function renderText(renderer, params, alreadyInGroup) {
 	var y = params.y;
+
+	// TODO-PER: Probably need to merge the regular text and rich text better. At the least, rich text loses the font box.
+	if (params.phrases) {
+		//richTextLine = function (phrases, x, y, klass, anchor, target)
+		var elem = renderer.paper.richTextLine(params.phrases, params.x, params.y, params.klass, params.anchor);
+		return elem;
+	}
+
 	if (params.lane) {
 		var laneMargin = params.dim.font.size * 0.25;
 		y += (params.dim.font.size + laneMargin) * params.lane;
@@ -15,6 +23,8 @@ function renderText(renderer, params, alreadyInGroup) {
 		hash = renderer.controller.getFontAndAttr.calc(params.type, params.klass);
 	if (params.anchor)
 		hash.attr["text-anchor"] = params.anchor;
+	if (params['dominant-baseline'])
+		hash.attr["dominant-baseline"] = params['dominant-baseline'];
 	hash.attr.x = params.x;
 	hash.attr.y = y;
 	if (!params.centerVertically)

@@ -1,68 +1,92 @@
 const addTextIf = require("../add-text-if");
+const richText = require("./rich-text");
 
-function BottomText(metaText, width, isPrint, paddingLeft, spacing, getTextSize) {
+function BottomText(metaText, width, isPrint, paddingLeft, spacing, shouldAddClasses, getTextSize) {
 	this.rows = [];
 	if (metaText.unalignedWords && metaText.unalignedWords.length > 0)
-		this.unalignedWords(metaText.unalignedWords, paddingLeft, spacing, getTextSize);
-	this.extraText(metaText, paddingLeft, spacing, getTextSize);
+		this.unalignedWords(metaText.unalignedWords, paddingLeft, spacing, shouldAddClasses, getTextSize);
+	this.extraText(metaText, paddingLeft, spacing, shouldAddClasses, getTextSize);
 	if (metaText.footer && isPrint)
 		this.footer(metaText.footer, width, paddingLeft, getTextSize);
 }
 
-BottomText.prototype.unalignedWords = function (unalignedWords, paddingLeft, spacing, getTextSize) {
-	var klass = 'meta-bottom unaligned-words';
+BottomText.prototype.unalignedWords = function (unalignedWords, marginLeft, spacing, shouldAddClasses, getTextSize) {
+	var klass = shouldAddClasses ? 'abcjs-text abcjs-unaligned-words' : ''
 	var defFont = 'wordsfont';
-	this.rows.push({ startGroup: "unalignedWords", klass: 'abcjs-meta-bottom abcjs-unaligned-words', name: "words" });
 	var space = getTextSize.calc("i", defFont, klass);
-
+	
 	this.rows.push({ move: spacing.words });
-
-	for (var j = 0; j < unalignedWords.length; j++) {
-		if (unalignedWords[j] === '')
-			this.rows.push({ move: space.height });
-		else if (typeof unalignedWords[j] === 'string') {
-			addTextIf(this.rows, { marginLeft: paddingLeft, text: unalignedWords[j], font: defFont, klass: klass, inGroup: true, name: "words" }, getTextSize);
-		} else {
-			var largestY = 0;
-			var offsetX = 0;
-			for (var k = 0; k < unalignedWords[j].length; k++) {
-				var thisWord = unalignedWords[j][k];
-				var font = (thisWord.font) ? thisWord.font : defFont;
-				this.rows.push({
-					left: paddingLeft + offsetX,
-					text: thisWord.text,
-					font: font,
-					anchor: 'start'
-				});
-				var size = getTextSize.calc(thisWord.text, defFont, klass);
-				largestY = Math.max(largestY, size.height);
-				offsetX += size.width;
-				// If the phrase ends in a space, then that is not counted in the width, so we need to add that in ourselves.
-				if (thisWord.text[thisWord.text.length - 1] === ' ') {
-					offsetX += space.width;
-				}
-			}
-			this.rows.push({ move: largestY });
-		}
-	}
-	this.rows.push({ move: space.height * 2 });
-	this.rows.push({ endGroup: "unalignedWords", absElemType: "unalignedWords", startChar: -1, endChar: -1, name: "unalignedWords" });
+	
+	addMultiLine(this.rows, '', unalignedWords, marginLeft, defFont, "unalignedWords", "unalignedWords", klass, "words", spacing, shouldAddClasses, getTextSize)
+//	this.rows.push({ startGroup: "unalignedWords", klass: 'abcjs-meta-bottom abcjs-unaligned-words', name: "words" });
+	// for (var j = 0; j < unalignedWords.length; j++) {
+	// 	richText(this.rows, unalignedWords[j], defFont, klass, "words", paddingLeft, {}, getTextSize)
+	// }
+	this.rows.push({ move: space.height });
+	// this.rows.push({ endGroup: "unalignedWords", absElemType: "unalignedWords", startChar: -1, endChar: -1, name: "unalignedWords" });
 }
 
-BottomText.prototype.extraText = function (metaText, marginLeft, spacing, getTextSize) {
-	var extraText = "";
-	if (metaText.book) extraText += "Book: " + metaText.book + "\n";
-	if (metaText.source) extraText += "Source: " + metaText.source + "\n";
-	if (metaText.discography) extraText += "Discography: " + metaText.discography + "\n";
-	if (metaText.notes) extraText += "Notes: " + metaText.notes + "\n";
-	if (metaText.transcription) extraText += "Transcription: " + metaText.transcription + "\n";
-	if (metaText.history) extraText += "History: " + metaText.history + "\n";
-	if (metaText['abc-copyright']) extraText += "Copyright: " + metaText['abc-copyright'] + "\n";
-	if (metaText['abc-creator']) extraText += "Creator: " + metaText['abc-creator'] + "\n";
-	if (metaText['abc-edited-by']) extraText += "Edited By: " + metaText['abc-edited-by'] + "\n";
-	if (extraText.length > 0) {
-		addTextIf(this.rows, { marginLeft: marginLeft, text: extraText, font: 'historyfont', klass: 'meta-bottom extra-text', marginTop: spacing.info, absElemType: "extraText", name: "description" }, getTextSize);
+function addSingleLine(rows, preface, text, marginLeft, klass, shouldAddClasses, getTextSize) {
+	if (text) {
+		if (preface) {
+			if (typeof text === 'string')
+				text = preface + text
+			else
+				text = [{text: preface}].concat(text)
+		}
+		klass = shouldAddClasses ? 'abcjs-extra-text '+klass : ''
+		richText(rows, text, 'historyfont', klass, "description", marginLeft, {absElemType: "extraText", anchor: 'start'}, getTextSize)
 	}
+
+	// var lines = []
+	// if (text) {
+	// 	if (preface)
+	// 		lines.push({text: preface})
+	// 	if (typeof text === 'string')
+	// 		lines.push({text: text})
+	// 	else
+	// 		lines = lines.concat(text)
+	// 	lines.push({text: ''})
+	// }
+	// return lines
+}
+
+function addMultiLine(rows, preface, content, marginLeft, defFont, absElemType, groupName, klass, name, spacing, shouldAddClasses, getTextSize) {
+	if (content) {
+		klass = shouldAddClasses ? 'abcjs-extra-text '+klass : ''
+		rows.push({ startGroup: groupName, klass: klass, name: name });
+		rows.push({move: spacing.info})
+		var size = getTextSize.calc("A", defFont, klass);
+		if (preface) {
+			addTextIf(rows, { marginLeft: marginLeft, text: preface, font: defFont, absElemType: "extraText", name: name, 'dominant-baseline': 'middle' }, getTextSize);
+			rows.push({move: size.height*3/4})
+		}
+
+		for (var j = 0; j < content.length; j++) {
+			richText(rows, content[j], defFont, '', name, marginLeft, {anchor: 'start'}, getTextSize)
+		}
+		rows.push({ endGroup: groupName, absElemType: absElemType, startChar: -1, endChar: -1, name: name });
+		rows.push({move: size.height})
+	}
+}
+BottomText.prototype.extraText = function (metaText, marginLeft, spacing, shouldAddClasses, getTextSize) {
+	addSingleLine(this.rows, "Book: ", metaText.book, marginLeft, 'abcjs-book', shouldAddClasses, getTextSize)
+	addSingleLine(this.rows, "Source: ", metaText.source, marginLeft, 'abcjs-source', shouldAddClasses, getTextSize)
+	addSingleLine(this.rows, "Discography: ", metaText.discography, marginLeft, 'abcjs-discography', shouldAddClasses, getTextSize)
+
+	addMultiLine(this.rows, 'Notes:', metaText.notes, marginLeft, 'historyfont', "extraText", "notes", 'abcjs-extra-text abcjs-notes', "description", spacing, shouldAddClasses, getTextSize)
+
+	addSingleLine(this.rows, "Transcription: ", metaText.transcription, marginLeft, 'abcjs-transcription', shouldAddClasses, getTextSize)
+
+	addMultiLine(this.rows, "History:", metaText.history, marginLeft, 'historyfont', "extraText", "history", 'abcjs-extra-text abcjs-history', "description", spacing, shouldAddClasses, getTextSize)
+
+	addSingleLine(this.rows, "Copyright: ", metaText['abc-copyright'], marginLeft, 'abcjs-copyright', shouldAddClasses, getTextSize)
+	addSingleLine(this.rows, "Creator: ", metaText['abc-creator'], marginLeft, 'abcjs-creator', shouldAddClasses, getTextSize)
+	addSingleLine(this.rows, "Edited By: ", metaText['abc-edited-by'], marginLeft, 'abcjs-edited-by', shouldAddClasses, getTextSize)
+	// if (extraText.length > 0) {
+	// 	richText(this.rows, extraText, 'historyfont', 'meta-bottom extra-text', "description", marginLeft, {absElemType: "extraText"}, getTextSize)
+	// 	//addTextIf(this.rows, { marginLeft: marginLeft, text: extraText, font: 'historyfont', klass: 'meta-bottom extra-text', marginTop: spacing.info, absElemType: "extraText", name: "description" }, getTextSize);
+	// }
 }
 
 BottomText.prototype.footer = function (footer, width, paddingLeft, getTextSize) {

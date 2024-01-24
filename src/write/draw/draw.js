@@ -6,7 +6,10 @@ var Selectables = require('./selectables');
 
 function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset) {
 	var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
-	renderer.paper.openGroup()
+	var groupClasses = {}
+	if (classes.shouldAddClasses)
+		groupClasses.klass = "abcjs-meta-top"
+	renderer.paper.openGroup(groupClasses)
 	renderer.moveY(renderer.padding.top);
 	nonMusic(renderer, abcTune.topText, selectables);
 	renderer.paper.closeGroup()
@@ -16,7 +19,9 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 		classes.incrLine();
 		var abcLine = abcTune.lines[line];
 		if (abcLine.staff) {
-			renderer.paper.openGroup()
+			if (classes.shouldAddClasses)
+				groupClasses.klass = "abcjs-staff l" + classes.lineNumber
+			renderer.paper.openGroup(groupClasses)
 			if (abcLine.vskip) {
 				renderer.moveY(abcLine.vskip);
 			}
@@ -27,7 +32,9 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 			staffgroups.push(staffgroup);
 			renderer.paper.closeGroup()
 		} else if (abcLine.nonMusic) {
-			renderer.paper.openGroup()
+			if (classes.shouldAddClasses)
+				groupClasses.klass = "abcjs-non-music"
+			renderer.paper.openGroup(groupClasses)
 			nonMusic(renderer, abcLine.nonMusic, selectables);
 			renderer.paper.closeGroup()
 		}
@@ -35,7 +42,9 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 
 	classes.reset();
 	if (abcTune.bottomText && abcTune.bottomText.rows && abcTune.bottomText.rows.length > 0) {
-		renderer.paper.openGroup()
+		if (classes.shouldAddClasses)
+			groupClasses.klass = "abcjs-meta-bottom"
+		renderer.paper.openGroup(groupClasses)
 		renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
 		nonMusic(renderer, abcTune.bottomText, selectables);
 		renderer.paper.closeGroup()
