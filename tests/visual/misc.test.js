@@ -176,6 +176,10 @@ describe("Miscellaneous", function () {
 		"L:1/8\n" +
 		"AB||ef g D|Df f/D/| A,4 c'4|]\n"
 
+	var abcAccentPosition = 'X:1\n' +
+		"K:C\n" +
+		"!>!A2!>!c2|T!>!A2T!>!c2|]\n"
+
 	it("line-width", function () {
 		abcjs.renderAbc("paper", abcLineWidth, { add_classes: true});
 		var height = extractHeight()
@@ -196,6 +200,11 @@ describe("Miscellaneous", function () {
 		var second = coordinates[2].split(' ')
 		return (parseFloat(second[1]) - parseFloat(first[1])).toFixed(3)
 	}
+
+	it("accent position", function () {
+		abcjs.renderAbc("paper", abcAccentPosition, { accentAbove: true });
+		abcjs.renderAbc("paper2", abcAccentPosition, { });
+	})
 
 	it("jazz chords", function () {
 		extractChords(abcJazzChords, expectedJazzChords);

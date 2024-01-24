@@ -262,6 +262,7 @@ declare module 'abcjs' {
 	}
 
 	export interface AbcVisualParams {
+		accentAbove?: boolean;
 		add_classes?: boolean;
 		afterParsing?: AfterParsing;
 		ariaLabel?: string;

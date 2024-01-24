@@ -7,10 +7,15 @@ function callbackFn() {}
 renderAbc("paper", abcString, { add_classes: true, clickListener: callbackFn });
 ```
 
+## accentAbove
+Default: false
+ 
+If true, then the accent mark (`!>!`) always goes above the note instead of being attached to the note head.
+ 
 ## add_classes
 Default: false
  
- If true, then each element that is drawn on the SVG will have an identifying class with it that you can use to style, move, or hide the element. See the section on classes for more details.
+If true, then each element that is drawn on the SVG will have an identifying class with it that you can use to style, move, or hide the element. See the section on classes for more details.
  
 ## afterParsing
 Default: undefined

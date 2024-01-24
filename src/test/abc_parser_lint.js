@@ -427,6 +427,7 @@ var ParserLint = function() {
 	var formattingProperties = {
 		type:"object",
 		properties: {
+			accentAbove: { type: "boolean", optional: true },
 			alignbars: { type: "number", optional: true },
 			aligncomposer: { type: "string", Enum: [ 'left', 'center','right' ], optional: true },
 			annotationfont: fontType,

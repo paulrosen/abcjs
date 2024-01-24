@@ -14,10 +14,10 @@ var Decoration = function Decoration() {
 	this.minBottom = 0;
 };
 
-var closeDecoration = function (voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch) {
+var closeDecoration = function (voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, accentAbove) {
 	var yPos;
 	for (var i = 0; i < decoration.length; i++) {
-		if (decoration[i] === "staccato" || decoration[i] === "tenuto" || decoration[i] === "accent") {
+		if (decoration[i] === "staccato" || decoration[i] === "tenuto" || (decoration[i] === "accent" && !accentAbove)) {
 			var symbol = "scripts." + decoration[i];
 			if (decoration[i] === "accent") symbol = "scripts.sforzato";
 			if (yPos === undefined)
@@ -123,7 +123,7 @@ var compoundDecoration = function (decoration, pitch, width, abselem, dir) {
 	}
 };
 
-var stackedDecoration = function (decoration, width, abselem, yPos, positioning, minTop, minBottom) {
+var stackedDecoration = function (decoration, width, abselem, yPos, positioning, minTop, minBottom, accentAbove) {
 	function incrementPlacement(placement, height) {
 		if (placement === 'above')
 			yPos.above += height;
@@ -263,6 +263,12 @@ var stackedDecoration = function (decoration, width, abselem, yPos, positioning,
 			case "mark":
 				abselem.klass = "mark";
 				break;
+			case "accent":
+				if (accentAbove) {
+					symbolDecoration("scripts.sforzato", positioning);
+					hasOne = true;
+				}
+				break;	
 		}
 	}
 	return hasOne;
@@ -336,7 +342,8 @@ Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, p
 	}
 };
 
-Decoration.prototype.createDecoration = function (voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals) {
+Decoration.prototype.createDecoration = function (voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals, accentAbove) {
+	console.log("createDecoration", accentAbove, decoration)
 	if (!positioning)
 		positioning = { ornamentPosition: 'above', volumePosition: hasVocals ? 'above' : 'below', dynamicPosition: hasVocals ? 'above' : 'below' };
 	// These decorations don't affect the placement of other decorations
@@ -345,14 +352,14 @@ Decoration.prototype.createDecoration = function (voice, decoration, pitch, widt
 	compoundDecoration(decoration, pitch, width, abselem, dir);
 
 	// treat staccato, accent, and tenuto first (may need to shift other markers)
-	var yPos = closeDecoration(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch);
+	var yPos = closeDecoration(voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, accentAbove);
 	// yPos is an object containing 'above' and 'below'. That is the placement of the next symbol on either side.
 
 	yPos.above = Math.max(yPos.above, this.minTop);
-	var hasOne = stackedDecoration(decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, this.minBottom);
-	if (hasOne) {
+	var hasOne = stackedDecoration(decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, this.minBottom, accentAbove);
+	//if (hasOne) {
 		//			abselem.top = Math.max(yPos.above + 3, abselem.top); // TODO-PER: Not sure why we need this fudge factor.
-	}
+	//}
 	leftDecoration(decoration, abselem, roomtaken);
 };
 

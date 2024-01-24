@@ -53,6 +53,7 @@ var AbstractEngraver = function (getTextSize, tuneNumber, options) {
 	this.percmap = options.percmap;
 	this.initialClef = options.initialClef
 	this.jazzchords = !!options.jazzchords
+	this.accentAbove = !!options.accentAbove
 	this.germanAlphabet = !!options.germanAlphabet
 	this.reset();
 };
@@ -830,7 +831,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
 	}
 
 	if (elem.decoration) {
-		this.decoration.createDecoration(voice, elem.decoration, abselem.top, (notehead) ? notehead.w : 0, abselem, roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals);
+		this.decoration.createDecoration(voice, elem.decoration, abselem.top, (notehead) ? notehead.w : 0, abselem, roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals, this.accentAbove);
 	}
 
 	if (elem.barNumber) {
@@ -989,7 +990,7 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
 	}
 
 	if (elem.decoration) {
-		this.decoration.createDecoration(voice, elem.decoration, 12, (thick) ? 3 : 1, abselem, 0, "down", 2, elem.positioning, this.hasVocals);
+		this.decoration.createDecoration(voice, elem.decoration, 12, (thick) ? 3 : 1, abselem, 0, "down", 2, elem.positioning, this.hasVocals, this.accentAbove);
 	}
 
 	if (thick) {
