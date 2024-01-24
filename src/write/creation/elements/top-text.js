@@ -22,14 +22,12 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 		var klass = shouldAddClasses ? 'abcjs-title' : ''
 		this.rows.push({move: spacing.title})
 		richText(this.rows, metaText.title, "titlefont", klass, 'title', tLeft, {marginTop: spacing.title, anchor: tAnchor, absElemType: "title", info: metaTextInfo.title},  getTextSize)
-		//addTextIf(this.rows, { marginLeft: tLeft, text: metaText.title, font: 'titlefont', klass: 'title meta-top', marginTop: spacing.title, anchor: tAnchor, absElemType: "title", info: metaTextInfo.title, name: "title" }, getTextSize);
 	}
 	if (lines.length) {
 		var index = 0;
 		while (index < lines.length && lines[index].subtitle) {
 			var klass = shouldAddClasses ? 'abcjs-text abcjs-subtitle' : ''
 			richText(this.rows, lines[index].subtitle.text, "subtitlefont", klass, 'subtitle', tLeft, {marginTop: spacing.subtitle, anchor: tAnchor, absElemType: "subtitle", info: lines[index].subtitle},  getTextSize)
-			//addTextIf(this.rows, { marginLeft: tLeft, text: lines[index].subtitle.text, font: 'subtitlefont', klass: 'text meta-top subtitle', marginTop: spacing.subtitle, anchor: tAnchor, absElemType: "subtitle", info: lines[index].subtitle, name: "subtitle" }, getTextSize);
 			index++;
 		}
 	}
@@ -65,20 +63,18 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 		if (composerLine) {
 			var klass = shouldAddClasses ? 'abcjs-composer' : ''
 			richText(this.rows, composerLine, 'composerfont', klass, "composer", paddingLeft+width, {anchor: "end", absElemType: "composer", info: metaTextInfo.composer, ingroup: true}, getTextSize)
-			//addTextIf(this.rows, { marginLeft: paddingLeft + width, text: composerLine, font: 'composerfont', klass: 'meta-top composer', anchor: "end", absElemType: "composer", info: metaTextInfo.composer, name: "composer" }, getTextSize);
 		}
 	}
 
 	if (metaText.author && metaText.author.length > 0) {
 		var klass = shouldAddClasses ? 'abcjs-author' : ''
 		richText(this.rows, metaText.author, 'composerfont', klass, "author", paddingLeft+width, {anchor: "end", absElemType: "composer", info: metaTextInfo.composer}, getTextSize)
-		//addTextIf(this.rows, { marginLeft: paddingLeft + width, text: metaText.author, font: 'composerfont', klass: 'meta-top author', anchor: "end", absElemType: "author", info: metaTextInfo.author, name: "author" }, getTextSize);
 	}
 
 	if (metaText.partOrder && metaText.partOrder.length > 0) {
 		var klass = shouldAddClasses ? 'abcjs-part-order' : ''
 		richText(this.rows, metaText.partOrder, 'partsfont', klass, "part-order", paddingLeft, {absElemType: "partOrder", info: metaTextInfo.composer, anchor: 'start'}, getTextSize)
-		//addTextIf(this.rows, { marginLeft: paddingLeft, text: metaText.partOrder, font: 'partsfont', klass: 'meta-top part-order', absElemType: "partOrder", info: metaTextInfo.partOrder, name: "part-order" }, getTextSize);
+
 	}
 }
 

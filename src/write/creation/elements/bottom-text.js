@@ -18,12 +18,7 @@ BottomText.prototype.unalignedWords = function (unalignedWords, marginLeft, spac
 	this.rows.push({ move: spacing.words });
 	
 	addMultiLine(this.rows, '', unalignedWords, marginLeft, defFont, "unalignedWords", "unalignedWords", klass, "words", spacing, shouldAddClasses, getTextSize)
-//	this.rows.push({ startGroup: "unalignedWords", klass: 'abcjs-meta-bottom abcjs-unaligned-words', name: "words" });
-	// for (var j = 0; j < unalignedWords.length; j++) {
-	// 	richText(this.rows, unalignedWords[j], defFont, klass, "words", paddingLeft, {}, getTextSize)
-	// }
 	this.rows.push({ move: space.height });
-	// this.rows.push({ endGroup: "unalignedWords", absElemType: "unalignedWords", startChar: -1, endChar: -1, name: "unalignedWords" });
 }
 
 function addSingleLine(rows, preface, text, marginLeft, klass, shouldAddClasses, getTextSize) {
@@ -38,17 +33,6 @@ function addSingleLine(rows, preface, text, marginLeft, klass, shouldAddClasses,
 		richText(rows, text, 'historyfont', klass, "description", marginLeft, {absElemType: "extraText", anchor: 'start'}, getTextSize)
 	}
 
-	// var lines = []
-	// if (text) {
-	// 	if (preface)
-	// 		lines.push({text: preface})
-	// 	if (typeof text === 'string')
-	// 		lines.push({text: text})
-	// 	else
-	// 		lines = lines.concat(text)
-	// 	lines.push({text: ''})
-	// }
-	// return lines
 }
 
 function addMultiLine(rows, preface, content, marginLeft, defFont, absElemType, groupName, klass, name, spacing, shouldAddClasses, getTextSize) {
@@ -83,10 +67,7 @@ BottomText.prototype.extraText = function (metaText, marginLeft, spacing, should
 	addSingleLine(this.rows, "Copyright: ", metaText['abc-copyright'], marginLeft, 'abcjs-copyright', shouldAddClasses, getTextSize)
 	addSingleLine(this.rows, "Creator: ", metaText['abc-creator'], marginLeft, 'abcjs-creator', shouldAddClasses, getTextSize)
 	addSingleLine(this.rows, "Edited By: ", metaText['abc-edited-by'], marginLeft, 'abcjs-edited-by', shouldAddClasses, getTextSize)
-	// if (extraText.length > 0) {
-	// 	richText(this.rows, extraText, 'historyfont', 'meta-bottom extra-text', "description", marginLeft, {absElemType: "extraText"}, getTextSize)
-	// 	//addTextIf(this.rows, { marginLeft: marginLeft, text: extraText, font: 'historyfont', klass: 'meta-bottom extra-text', marginTop: spacing.info, absElemType: "extraText", name: "description" }, getTextSize);
-	// }
+
 }
 
 BottomText.prototype.footer = function (footer, width, paddingLeft, getTextSize) {
