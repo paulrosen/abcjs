@@ -21,6 +21,10 @@ function SynthController() {
 	self.load = function (selector, cursorControl, visualOptions) {
 		if (!visualOptions)
 			visualOptions = {};
+		if (visualOptions.displayPlay === undefined)
+			visualOptions.displayPlay = true
+		if (visualOptions.displayProgress === undefined)
+			visualOptions.displayProgress = true
 		self.control = new CreateSynthControl(selector, {
 			loopHandler: visualOptions.displayLoop ? self.toggleLoop : undefined,
 			restartHandler: visualOptions.displayRestart ? self.restart : undefined,
@@ -41,7 +45,7 @@ function SynthController() {
 	self.setTune = function(visualObj, userAction, audioParams) {
 		self.visualObj = visualObj;
 		self.disable(false);
-		self.options = audioParams;
+		self.options = audioParams ? audioParams : {};
 
 		if (self.control) {
 			self.pause();

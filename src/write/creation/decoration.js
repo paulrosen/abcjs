@@ -343,7 +343,6 @@ Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, p
 };
 
 Decoration.prototype.createDecoration = function (voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals, accentAbove) {
-	console.log("createDecoration", accentAbove, decoration)
 	if (!positioning)
 		positioning = { ornamentPosition: 'above', volumePosition: hasVocals ? 'above' : 'below', dynamicPosition: hasVocals ? 'above' : 'below' };
 	// These decorations don't affect the placement of other decorations

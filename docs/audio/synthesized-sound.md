@@ -186,8 +186,8 @@ This is a hash with the following possible properties:
 |---|---|---|
 | displayLoop | false | Whether to display a button that the user can press to make the tune loop instead of stopping when it gets to the end. |
 | displayRestart | false | Whether to display a button that the user can press to make the tune go back to the beginning. |
-| displayPlay | false | Whether to display a button that the user can press to make the tune start playing. (Note: this turns into the "pause" button when the tune is playing.) |
-| displayProgress | false | Whether to display the progress slider. The user can click anywhere on this to get the music to jump to that location. |
+| displayPlay | true | Whether to display a button that the user can press to make the tune start playing. (Note: this turns into the "pause" button when the tune is playing.) |
+| displayProgress | true | Whether to display the progress slider. The user can click anywhere on this to get the music to jump to that location. |
 | displayWarp | false | Whether to display the tempo and allow the user to change it on the fly. |
 
 ### disable(isDisabled)
