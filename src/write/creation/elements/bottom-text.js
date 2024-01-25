@@ -54,6 +54,9 @@ function addMultiLine(rows, preface, content, marginLeft, defFont, absElemType, 
 
 			for (var j = 0; j < content.length; j++) {
 				richText(rows, content[j], defFont, '', name, marginLeft, {anchor: 'start'}, getTextSize)
+				// TODO-PER: Hack! the string and rich lines should have used up the same amount of space without this.
+				if (j < content.length-1 && typeof content[j] === 'string' && typeof content[j+1] !== 'string')
+					rows.push({move: size.height*3/4})
 			}
 			rows.push({ endGroup: groupName, absElemType: absElemType, startChar: -1, endChar: -1, name: name });
 			rows.push({move: size.height})
