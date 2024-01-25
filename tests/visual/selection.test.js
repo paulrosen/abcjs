@@ -1334,8 +1334,8 @@ describe("Selection", function() {
 			},
 			"abcEl": {
 				"el_type": "slur",
-				"startChar": -1,
-				"endChar": -1
+				"startChar": 747,
+				"endChar": 761
 			},
 			"size": {
 				"x": 399,
@@ -2264,8 +2264,8 @@ describe("Selection", function() {
 			},
 			"abcEl": {
 				"el_type": "slur",
-				"startChar": -1,
-				"endChar": -1
+				"startChar": 1016,
+				"endChar": 1030
 			},
 			"size": {
 				"x": 237,
@@ -2283,8 +2283,8 @@ describe("Selection", function() {
 			},
 			"abcEl": {
 				"el_type": "slur",
-				"startChar": -1,
-				"endChar": -1
+				"startChar": 1028,
+				"endChar": 1038
 			},
 			"size": {
 				"x": 267,
@@ -6450,8 +6450,8 @@ describe("Selection", function() {
 			},
 			"abcEl": {
 				"el_type": "slur",
-				"startChar": -1,
-				"endChar": -1
+				"startChar": 1370,
+				"endChar": 1383
 			},
 			"size": {
 				"x": 156,
@@ -6475,7 +6475,7 @@ describe("Selection", function() {
 				"text": ""
 			},
 			"size": {
-				"x": 65,
+				"x": 15,
 				"y": 832,
 				"width": 278,
 				"height": 74
@@ -6495,15 +6495,38 @@ describe("Selection", function() {
 				"name": "description",
 				"startChar": -2,
 				"endChar": -2,
-				"text": "Source: My own testing\nHistory: This shows every type of thing that can possibly be drawn.\n\nAnd two lines of history!\n"
+				"text": "Source: My own testing"
 			},
 			"size": {
 				"x": 15,
 				"y": 956,
-				"width": 568,
+				"width": 201,
+				"height": 24
+			}
+		},
+		{
+			"draggable": false,
+			"svgEl": {
+				"x": "15",
+				"y": "1000.87",
+				"selectable": "true",
+				"tabindex": "0",
+				"data-index": "220"
+			},
+			"abcEl": {
+				"el_type": "extraText",
+				"name": "description",
+				"startChar": -2,
+				"endChar": -2,
+				"text": "History:\nThis shows every type of thing that can possibly be drawn.\n\nAnd two lines of history!"
+			},
+			"size": {
+				"x": 15,
+				"y": 987,
+				"width": 494,
 				"height": 100
 			}
-		}
+		},
 	]
 
 	var expectedNone = [{

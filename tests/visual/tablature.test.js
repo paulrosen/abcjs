@@ -817,18 +817,17 @@ describe("Tablature", function () {
 		830,
 	]
 
-	// TODO-PER: get the real values after it works
 	var firstStaffOnlyOutput2 = [
 		62,
 		128,
 		238,
-		284,
-		393,
-		439,
-		549,
-		595,
-		704,
-		780,
+		304,
+		392,
+		458,
+		547,
+		612,
+		701,
+		767,
 	]
 
 	it("accidentals-in-def", function () {
@@ -1126,7 +1125,7 @@ function doStaffTest(abc, expected, tabParams, params, callback) {
 
 function doVerticalTest(abc, expected, tabParams, params) {
 	var visualObj = doRender(abc, tabParams, params);
-	var yPos = document.querySelectorAll(".abcjs-top-line")
+	var yPos = document.querySelectorAll("#paper .abcjs-top-line")
 	for (var i = 0; i < yPos.length; i++) {
 		var topLine = yPos[i]
 		var dim = topLine.getBBox()
