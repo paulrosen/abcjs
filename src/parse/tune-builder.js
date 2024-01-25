@@ -147,6 +147,8 @@ var TuneBuilder = function(tune) {
 		this.closeLine();	// Close the last line.
 		delete tune.runningFonts;
 
+		simplifyMetaText(tune)
+
 		// If the tempo was created with a string like "Allegro", then the duration of a beat needs to be set at the last moment, when it is most likely known.
 		if (tune.metaText.tempo && tune.metaText.tempo.bpm && !tune.metaText.tempo.duration)
 			tune.metaText.tempo.duration = [ tune.getBeatLength() ];
@@ -906,4 +908,21 @@ var TuneBuilder = function(tune) {
 	};
 };
 
+function isArrayOfStrings(arr) {
+	if (!arr) return false
+	if (typeof arr === "string") return false
+	var str = ''
+	for (var i = 0; i < arr.length; i++) {
+		if (typeof arr[i] !== 'string')
+			return false
+	}
+	return true
+}
+
+function simplifyMetaText(tune) {
+	if (isArrayOfStrings(tune.metaText.notes))
+		tune.metaText.notes = tune.metaText.notes.join("\n")
+	if (isArrayOfStrings(tune.metaText.history))
+		tune.metaText.history = tune.metaText.history.join("\n")
+}
 module.exports = TuneBuilder;

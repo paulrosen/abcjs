@@ -11,13 +11,13 @@ function BottomText(metaText, width, isPrint, paddingLeft, spacing, shouldAddCla
 }
 
 BottomText.prototype.unalignedWords = function (unalignedWords, marginLeft, spacing, shouldAddClasses, getTextSize) {
-	var klass = shouldAddClasses ? 'abcjs-text abcjs-unaligned-words' : ''
+	var klass = shouldAddClasses ? 'abcjs-unaligned-words' : ''
 	var defFont = 'wordsfont';
 	var space = getTextSize.calc("i", defFont, klass);
 	
 	this.rows.push({ move: spacing.words });
 	
-	addMultiLine(this.rows, '', unalignedWords, marginLeft, defFont, "unalignedWords", "unalignedWords", klass, "words", spacing, shouldAddClasses, getTextSize)
+	addMultiLine(this.rows, '', unalignedWords, marginLeft, defFont, "unalignedWords", "unalignedWords", klass, "unalignedWords", spacing, shouldAddClasses, getTextSize)
 	this.rows.push({ move: space.height });
 }
 
@@ -38,19 +38,26 @@ function addSingleLine(rows, preface, text, marginLeft, klass, shouldAddClasses,
 function addMultiLine(rows, preface, content, marginLeft, defFont, absElemType, groupName, klass, name, spacing, shouldAddClasses, getTextSize) {
 	if (content) {
 		klass = shouldAddClasses ? 'abcjs-extra-text '+klass : ''
-		rows.push({ startGroup: groupName, klass: klass, name: name });
-		rows.push({move: spacing.info})
 		var size = getTextSize.calc("A", defFont, klass);
-		if (preface) {
-			addTextIf(rows, { marginLeft: marginLeft, text: preface, font: defFont, absElemType: "extraText", name: name, 'dominant-baseline': 'middle' }, getTextSize);
-			rows.push({move: size.height*3/4})
-		}
+		if (typeof content === 'string') {
+			if (preface)
+				content = preface + "\n" + content
+			addTextIf(rows, { marginLeft: marginLeft, text: content, font: defFont, absElemType: "extraText", name: name, 'dominant-baseline': 'middle', klass: klass }, getTextSize);
+			//rows.push({move: size.height*3/4})
+		} else {
+			rows.push({ startGroup: groupName, klass: klass, name: name });
+			rows.push({move: spacing.info})
+			if (preface) {
+				addTextIf(rows, { marginLeft: marginLeft, text: preface, font: defFont, absElemType: "extraText", name: name, 'dominant-baseline': 'middle' }, getTextSize);
+				rows.push({move: size.height*3/4})
+			}
 
-		for (var j = 0; j < content.length; j++) {
-			richText(rows, content[j], defFont, '', name, marginLeft, {anchor: 'start'}, getTextSize)
+			for (var j = 0; j < content.length; j++) {
+				richText(rows, content[j], defFont, '', name, marginLeft, {anchor: 'start'}, getTextSize)
+			}
+			rows.push({ endGroup: groupName, absElemType: absElemType, startChar: -1, endChar: -1, name: name });
+			rows.push({move: size.height})
 		}
-		rows.push({ endGroup: groupName, absElemType: absElemType, startChar: -1, endChar: -1, name: name });
-		rows.push({move: size.height})
 	}
 }
 BottomText.prototype.extraText = function (metaText, marginLeft, spacing, shouldAddClasses, getTextSize) {
@@ -58,11 +65,11 @@ BottomText.prototype.extraText = function (metaText, marginLeft, spacing, should
 	addSingleLine(this.rows, "Source: ", metaText.source, marginLeft, 'abcjs-source', shouldAddClasses, getTextSize)
 	addSingleLine(this.rows, "Discography: ", metaText.discography, marginLeft, 'abcjs-discography', shouldAddClasses, getTextSize)
 
-	addMultiLine(this.rows, 'Notes:', metaText.notes, marginLeft, 'historyfont', "extraText", "notes", 'abcjs-extra-text abcjs-notes', "description", spacing, shouldAddClasses, getTextSize)
+	addMultiLine(this.rows, 'Notes:', metaText.notes, marginLeft, 'historyfont', "extraText", "notes", 'abcjs-notes', "description", spacing, shouldAddClasses, getTextSize)
 
 	addSingleLine(this.rows, "Transcription: ", metaText.transcription, marginLeft, 'abcjs-transcription', shouldAddClasses, getTextSize)
 
-	addMultiLine(this.rows, "History:", metaText.history, marginLeft, 'historyfont', "extraText", "history", 'abcjs-extra-text abcjs-history', "description", spacing, shouldAddClasses, getTextSize)
+	addMultiLine(this.rows, "History:", metaText.history, marginLeft, 'historyfont', "extraText", "history", 'abcjs-history', "description", spacing, shouldAddClasses, getTextSize)
 
 	addSingleLine(this.rows, "Copyright: ", metaText['abc-copyright'], marginLeft, 'abcjs-copyright', shouldAddClasses, getTextSize)
 	addSingleLine(this.rows, "Creator: ", metaText['abc-creator'], marginLeft, 'abcjs-creator', shouldAddClasses, getTextSize)

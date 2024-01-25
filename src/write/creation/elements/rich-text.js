@@ -1,19 +1,26 @@
+const addTextIf = require("../add-text-if");
+
 function richText(rows, str, defFont, klass, name, paddingLeft, attr, getTextSize) {
 	var space = getTextSize.calc("i", defFont, klass);
 	if (str === '') {
 		rows.push({ move: space.height });
 	} else {
 		if (typeof str === 'string') {
-			str = [{text: str}]
+			addTextIf(rows, { marginLeft: paddingLeft, text: str, font: defFont, klass: klass, marginTop: attr.marginTop, anchor: attr.anchor, absElemType: attr.absElemType, info: attr.info, name: name }, getTextSize);
+			return
 		}
+		if (attr.marginTop)
+			rows.push({move: attr.marginTop})
+
 		var largestY = 0;
 		var gap = 0;
 		var row = {
-			klass: klass,
 			left: paddingLeft,
 			anchor: attr.anchor,
 			phrases: []
 		}
+		if (klass)
+			row.klass = klass
 		rows.push(row)
 		for (var k = 0; k < str.length; k++) {
 			var thisWord = str[k];

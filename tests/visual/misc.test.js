@@ -147,18 +147,14 @@ describe("Miscellaneous", function () {
 			{"content":"Book: ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
 			{"content":"book","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}}
 		]},
-		{"klass":"abcjs-extra-text abcjs-discography","phrases":[
-			{"content":"Discography: records","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
-		]},
+		{"klass":"abcjs-extra-text abcjs-discography","font":"historyfont","text":"Discography: records"},
 		{"font":"historyfont","text":"Notes:"},
 		{"phrases":[
 			{"content":"four ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},
 			{"content":"five ","attrs":{"font-family":"cursive","font-size":16,"font-weight":"bold","font-style":"normal","font-decoration":"none"}},
 			{"content":" six","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
 		]},
-		{"phrases":[
-			{"content":"seven","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}}
-		]},
+		{"font":"historyfont","text":"seven"},
 		{"font":"historyfont","text":"History:"},
 		{"phrases":[
 			{"content":"one ","attrs":{"font-family":"Times New Roman","font-size":21,"font-weight":"normal","font-style":"normal","font-decoration":"none"}},

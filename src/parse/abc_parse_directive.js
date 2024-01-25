@@ -704,7 +704,7 @@ var parseDirective = {};
 			}
 			return textarr;
 		}
-		return textstr;
+		return textstr.replace(/\x03/g,"$$");
 	};
 
 	var positionChoices = [ 'auto', 'above', 'below', 'hidden' ];

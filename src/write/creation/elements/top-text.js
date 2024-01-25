@@ -20,7 +20,6 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 	var tLeft = formatting.titleleft ? paddingLeft : paddingLeft + width / 2;
 	if (metaText.title) {
 		var klass = shouldAddClasses ? 'abcjs-title' : ''
-		this.rows.push({move: spacing.title})
 		richText(this.rows, metaText.title, "titlefont", klass, 'title', tLeft, {marginTop: spacing.title, anchor: tAnchor, absElemType: "title", info: metaTextInfo.title},  getTextSize)
 	}
 	if (lines.length) {
@@ -68,12 +67,12 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 
 	if (metaText.author && metaText.author.length > 0) {
 		var klass = shouldAddClasses ? 'abcjs-author' : ''
-		richText(this.rows, metaText.author, 'composerfont', klass, "author", paddingLeft+width, {anchor: "end", absElemType: "composer", info: metaTextInfo.composer}, getTextSize)
+		richText(this.rows, metaText.author, 'composerfont', klass, "author", paddingLeft+width, {anchor: "end", absElemType: "author", info: metaTextInfo.author}, getTextSize)
 	}
 
 	if (metaText.partOrder && metaText.partOrder.length > 0) {
 		var klass = shouldAddClasses ? 'abcjs-part-order' : ''
-		richText(this.rows, metaText.partOrder, 'partsfont', klass, "part-order", paddingLeft, {absElemType: "partOrder", info: metaTextInfo.composer, anchor: 'start'}, getTextSize)
+		richText(this.rows, metaText.partOrder, 'partsfont', klass, "part-order", paddingLeft, {absElemType: "partOrder", info: metaTextInfo.partOrder, anchor: 'start'}, getTextSize)
 
 	}
 }

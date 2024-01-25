@@ -11,12 +11,12 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 	};
 	this.reset(tokenizer, warn, multilineVars, tune);
 
-	this.setTitle = function(title) {
+	this.setTitle = function(title, origSize) {
 		if (multilineVars.hasMainTitle)
-			tuneBuilder.addSubtitle(title, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+title.length+2});	// display secondary title
+			tuneBuilder.addSubtitle(title, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+origSize+2});	// display secondary title
 		else
 		{
-			tuneBuilder.addMetaText("title", title, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+title.length+2});
+			tuneBuilder.addMetaText("title", title, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+origSize+2});
 			multilineVars.hasMainTitle = true;
 		}
 	};
@@ -475,6 +475,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 
 	this.parseHeader = function(line) {
 		var field = metaTextHeaders[line[0]];
+		var origSize = line.length-2
 		var restOfLine = tokenizer.translateString(tokenizer.stripComment(line.substring(2)))
 		if (field === 'unalignedWords' || field === 'notes') {
 			// These fields can be multi-line
@@ -535,7 +536,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 				case  'T':
 					if (multilineVars.titlecaps)
 						restOfLine = restOfLine.toUpperCase();		
-					this.setTitle(parseDirective.parseFontChangeLine(tokenizer.theReverser(restOfLine)));
+					this.setTitle(parseDirective.parseFontChangeLine(tokenizer.theReverser(restOfLine)), origSize);
 					break;
 				case 'U':
 					this.addUserDefinition(line, 2, line.length);
