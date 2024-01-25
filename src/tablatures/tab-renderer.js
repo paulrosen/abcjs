@@ -44,16 +44,16 @@ function buildTabName(self, dest) {
     doDraw = false
   }
 
-  var size = textSize.calc(tabName, 'tablabelfont', 'text instrumentname'); 
-
+  
   if (doDraw){
+    var size = textSize.calc(tabName, 'tablabelfont', 'text instrumentname'); 
     dest.tabNameInfos = {
       textSize: {height:size.height,width:size.width},
       name: tabName
     };
+    return size.height;
   }
-  
-  return size.height;
+  return 0
 
 }
 
