@@ -1059,6 +1059,8 @@ describe("Tablature", function () {
 });
 
 function doRender(abc, tabParams, params) {
+	var warningLine = document.getElementById('warnings')
+	warningLine.innerHTML = ""
 	var options = {
 		add_classes: true,
 		tablature: tabParams

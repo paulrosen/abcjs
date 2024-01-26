@@ -5,19 +5,17 @@
  * where plugin represents a plugin instance 
  * 
  */
-var ViolinTablature = require('../tablatures/instruments/violin/tab-violin');
-var GuitarTablature = require('../tablatures/instruments/guitar/tab-guitar');
-var FiveStringTablature = require('../tablatures/instruments/fivestring/tab-fivestring');
+var StringTablature = require('../tablatures/instruments/tab-string');
 
 /* extend the table below when adding a new instrument plugin */
 
 // Existing tab classes 
 var pluginTab = {
-  'violin': 'ViolinTab',
-  'fiddle': 'ViolinTab',
-  'mandolin': 'ViolinTab',
-  'guitar': 'GuitarTab',
-  'fiveString': 'FiveStringTab' 
+  'violin': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0},
+  'fiddle': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0},
+  'mandolin': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0},
+  'guitar': { name: 'StringTab', defaultTuning: ['E,', 'A,', 'D', 'G' , 'B' , 'e'], isTabBig: true, tabSymbolOffset: 0},
+  'fiveString': { name: 'StringTab', defaultTuning: ['C,', 'G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: -.95},
 };
 
 var abcTablatures = {
@@ -68,7 +66,7 @@ var abcTablatures = {
         var tabName = pluginTab[instrument];
         var plugin = null;
         if (tabName) {
-          plugin = this.plugins[tabName];
+          plugin = this.plugins[tabName.name];
         }
         if (plugin) {
           if (params.visualTranspose != 0) {
@@ -81,6 +79,7 @@ var abcTablatures = {
             tuneNumber: tuneNumber,
             params: args,
             instance: null,
+            tabType: tabName,
           };
           // proceed with tab plugin  init 
           // plugin.init(tune, tuneNumber, args, ii);
@@ -157,7 +156,8 @@ var abcTablatures = {
               tabPlugin.instance.init(abcTune,
                 tabPlugin.tuneNumber,
                 tabPlugin.params,
-                jj
+                jj,
+                tabPlugin.tabType
               );
             }
             // render next
@@ -174,9 +174,7 @@ var abcTablatures = {
   init: function () {
     // just register plugin hosted by abcjs 
     if (!this.inited) {
-      this.register(new ViolinTablature());
-      this.register(new GuitarTablature());
-      this.register(new FiveStringTablature());
+      this.register(new StringTablature());
       this.inited = true;
     }
   }
