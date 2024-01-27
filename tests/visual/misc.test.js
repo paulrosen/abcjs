@@ -80,7 +80,7 @@ describe("Miscellaneous", function () {
 		'M:4/4\n' +
 		'W: lo $1loo $0lou $$1dollar\n' +
 		'K:C\n' +
-		'"C$1m$7"G "Dm7"E2 F | "^above $1the$0 staff"D4 |]\n' +
+		'"C$1m$7\\ntwo"G "Dm7"E2 F | "^above $1the$0 staff"D4 |]\n' +
 		'w: la $1le $0lu\n' +
 		'P:chorus $1with feeling\n' +
 		'A4|' +

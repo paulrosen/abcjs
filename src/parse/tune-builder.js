@@ -1,5 +1,6 @@
 var parseKeyVoice = require('../parse/abc_parse_key_voice');
 var parseCommon = require('../parse/abc_common');
+var parseDirective = require('./abc_parse_directive');
 
 var TuneBuilder = function(tune) {
 	var self = this;
@@ -148,6 +149,7 @@ var TuneBuilder = function(tune) {
 		delete tune.runningFonts;
 
 		simplifyMetaText(tune)
+		//addRichTextToAnnotationsAndLyrics(tune)
 
 		// If the tempo was created with a string like "Allegro", then the duration of a beat needs to be set at the last moment, when it is most likely known.
 		if (tune.metaText.tempo && tune.metaText.tempo.bpm && !tune.metaText.tempo.duration)
@@ -925,4 +927,34 @@ function simplifyMetaText(tune) {
 	if (isArrayOfStrings(tune.metaText.history))
 		tune.metaText.history = tune.metaText.history.join("\n")
 }
+
+function addRichTextToAnnotationsAndLyrics(tune) {
+	var lines = tune.lines
+	for (var i = 0; i < lines.length; i++) {
+		if (lines[i].staff !== undefined) {
+			for (var s = 0; s < lines[i].staff.length; s++) {
+				for (var v = 0; v < lines[i].staff[s].voices.length; v++) {
+					var voice = lines[i].staff[s].voices[v];
+					for (var n = 0; n < voice.length; n++) {
+						var element = voice[n]
+						if (element.chord) {
+							for (var c = 0; c < element.chord.length; c++) {
+								element.chord[c].name = parseDirective.parseFontChangeLine(element.chord[c].name)
+								console.log(element.chord[c].name)
+							}
+						}
+						if (element.lyric) {
+							for (var l = 0; l < element.lyric.length; l++) {
+								element.lyric[l].syllable = parseDirective.parseFontChangeLine(element.lyric[l].syllable)
+								console.log(element.lyric[l].syllable)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+}
+
 module.exports = TuneBuilder;
