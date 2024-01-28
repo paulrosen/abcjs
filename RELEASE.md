@@ -1,3 +1,42 @@
+# Version 6.3.0
+
+## Features
+
+### Tablature
+* Add tab feature `hideTabSymbol`
+* Add 5-string tab named "fiveString"
+
+### Synth
+* change the default synth control options for "play" and "progress" to be true
+* expose the MIDI creator function
+
+### Rich Text
+* allow up to 9 custom fonts in `%%setfont`
+* for rich text fields, escape two dollar signs 
+* allow rich text in all non-music fields 
+* give all non-music fields a unique class
+
+### Miscellaneous
+* add abcjs-notehead class to note heads; 
+* add `accentAbove` parameter
+* handle numbered tune names in the reverser
+* support reversing tune names with ", a" and ", an", with a variable amount of whitespace and case-insensitive
+
+## Bugs
+* fix placement of tab staff when there is no label
+* fix font placement bugs
+* remove spurious quotes in font name in svg attribute
+* Fix the name of the `abcjs-tab-number` class
+* Fix tab staff height when there is a label
+* Fix for crash when rendering multiple tab staves
+* Offset breath mark to the right
+* Center text when using `expandToWidest` set true
+
+## Documentation
+* add missing typescript types
+* fix synth control types
+* fixed some typescript types in the TimingCallbacks
+
 # Version 6.2.3
 
 ## Features
@@ -24,7 +63,7 @@
 
 * various typescript fixes
 
-* afterParsing now works with line wrapping.
+* `afterParsing` now works with line wrapping.
 
 * Put start and end char on slurs so they can be selected.
 
