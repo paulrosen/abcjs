@@ -48,12 +48,22 @@ var bookParser = function(book) {
 			tune.title = parseCommon.strip(title[0]);
 		}
 
+		// for the user's convenience, parse and store the type separately. The type is between the first R: and the next \n
 		tune.type = "";
 		var type = tune.pure.split("R:");
 		if (type.length > 1) {
 			type = type[1].split("\n");
 			tune.type = parseCommon.strip(type[0]);
 		}
+
+		// for the user's convenience, parse and store the key separately. The type is between the first K: and the next \n
+		tune.key = "";
+		var key = tune.pure.split("K:");
+		if (type.key > 1) {
+			key = key[1].split("\n");
+			tune.key = parseCommon.strip(key[0]);
+		}
+
 
 		// for the user's convenience, parse and store the id separately. The id is between the first X: and the next \n
 		var id = tune.pure.substring(2, tune.pure.indexOf("\n"));
