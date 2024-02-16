@@ -39,6 +39,15 @@ var tunebook = {};
 		return null;
 	};
 
+	TuneBook.prototype.getTunesByType = function(type) {
+		for (var i = 0; i < this.tunes.length; i++) {
+			if (this.tunes[i].type.toLowerCase() !== type.toLowerCase()) {
+				this.tunes.pop(this.tunes[i])
+			}
+			return null
+		}
+	}
+
 	tunebook.parseOnly = function(abc, params) {
 		var numTunes = tunebook.numberOfTunes(abc);
 
