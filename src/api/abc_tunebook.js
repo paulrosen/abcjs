@@ -43,7 +43,7 @@ var tunebook = {};
 		if (type !== "none") {
 			for (var i = 0; i < this.tunes.length; i++) {
 				if (this.tunes[i].type.toLowerCase() !== type.toLowerCase()) {
-					this.tunes.slice(i)
+					this.tunes.splice(i, 1);
 				}
 			}
 		}
