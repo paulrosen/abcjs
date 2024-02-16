@@ -43,11 +43,11 @@ var tunebook = {};
 		if (type !== "none") {
 			for (var i = 0; i < this.tunes.length; i++) {
 				if (this.tunes[i].type.toLowerCase() !== type.toLowerCase()) {
-					this.tunes.pop(this.tunes[i])
+					this.tunes.slice(i)
 				}
 			}
 		}
-		return this.tunes
+		return this.tunes;
 	}
 
 	tunebook.parseOnly = function(abc, params) {
