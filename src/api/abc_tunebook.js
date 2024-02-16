@@ -40,12 +40,14 @@ var tunebook = {};
 	};
 
 	TuneBook.prototype.getTunesByType = function(type) {
-		for (var i = 0; i < this.tunes.length; i++) {
-			if (this.tunes[i].type.toLowerCase() !== type.toLowerCase()) {
-				this.tunes.pop(this.tunes[i])
+		if (type !== "none") {
+			for (var i = 0; i < this.tunes.length; i++) {
+				if (this.tunes[i].type.toLowerCase() !== type.toLowerCase()) {
+					this.tunes.pop(this.tunes[i])
+				}
 			}
-			return null
 		}
+		return this.tunes
 	}
 
 	tunebook.parseOnly = function(abc, params) {
