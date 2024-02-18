@@ -40,14 +40,16 @@ var tunebook = {};
 	};
 
 	TuneBook.prototype.getTunesByType = function(type) {
-		if (type !== "none") {
-			for (var i = 0; i < this.tunes.length; i++) {
-				if (this.tunes[i].type.toLowerCase() !== type.toLowerCase()) {
-					var index = this.tunes.indexOf(this.tunes[i]);
-					this.tunes.splice(index, 1);
-				}
-			}
-		}
+		// if (type !== "none") {
+			// for (var i = 0; i < this.tunes.length; i++) {
+			// 	if (this.tunes[i].type.toLowerCase() !== type.toLowerCase()) {
+			// 		var index = this.tunes.indexOf(this.tunes[i]);
+			// 		this.tunes.splice(index, 1);
+			// 	}
+			// }
+			
+		// }
+		this.tunes = this.tunes.filter((tune) => tune.type.toLowerCase() === type.toLowerCase())
 		return this.tunes;
 	}
 
