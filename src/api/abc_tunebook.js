@@ -44,7 +44,7 @@ var tunebook = {};
 			return this.tunes.filter((tune) => tune.type.toLowerCase() === type.toLowerCase())
 		}
 		
-		return this.tunes;
+		return this;
 	}
 
 	tunebook.parseOnly = function(abc, params) {
