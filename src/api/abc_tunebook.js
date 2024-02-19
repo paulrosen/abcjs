@@ -41,7 +41,7 @@ var tunebook = {};
 
 	TuneBook.prototype.getTunesByType = function(type) {
 		if (type !== "none") {
-			return this.tunes.filter((tune) => tune.type.toLowerCase() === type.toLowerCase())
+			this.tunes.filter((tune) => tune.type.toLowerCase() === type.toLowerCase())
 		}
 		
 		return this;
