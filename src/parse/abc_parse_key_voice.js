@@ -682,10 +682,10 @@ var parseKeyVoice = {};
 							warn("Expected value for stems in voice: " + attr.warn, line, start);
 						else if (attr.err !== undefined)
 							warn("Expected value for stems in voice: " + attr.err, line, start);
-						else if (attr.token === 'up' || attr.token === 'down')
+						else if (attr.token === 'up' || attr.token === 'down' || attr.token === 'auto')
 							multilineVars.voices[id].stem = attr.token;
 						else
-							warn("Expected up or down for voice stem", line, start);
+							warn("Expected up, down, or auto for voice stem", line, start);
 						start += attr.len;
 						break;
 					case 'up':
