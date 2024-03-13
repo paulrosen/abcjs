@@ -20,7 +20,7 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 		var abcLine = abcTune.lines[line];
 		if (abcLine.staff) {
 			if (classes.shouldAddClasses)
-				groupClasses.klass = "abcjs-staff l" + classes.lineNumber
+				groupClasses.klass = "abcjs-staff-wrapper abcjs-l" + classes.lineNumber
 			renderer.paper.openGroup(groupClasses)
 			if (abcLine.vskip) {
 				renderer.moveY(abcLine.vskip);
