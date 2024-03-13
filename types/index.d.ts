@@ -48,7 +48,7 @@ declare module 'abcjs' {
 
 	export type FormatAttributes = "titlefont" | "gchordfont" | "composerfont" | "footerfont" | "headerfont" | "historyfont" | "infofont" |
 		"measurefont" | "partsfont" | "repeatfont" | "subtitlefont" | "tempofont" | "textfont" | "voicefont" | "tripletfont" | "vocalfont" |
-		"wordsfont" | "annotationfont" | "scale" | "partsbox" | "freegchord" | "fontboxpadding" | "stretchlast" | "tablabelfont" | "tabnumberfont" | "tabgracefont";
+		"wordsfont" | "annotationfont" | "scale" | "partsbox" | "freegchord" | "fontboxpadding" | "stretchlast" | "tablabelfont" | "tabnumberfont" | "tabgracefont" | 'stafftopmargin';
 
 	export type MidiCommands = "nobarlines" | "barlines" | "beataccents" | "nobeataccents" | "droneon" | "droneoff" | "noportamento" | "channel" | "c" |
 		"drumon" | "drumoff" | "fermatafixed" | "fermataproportional" | "gchordon" | "gchordoff" | "bassvol" | "chordvol" | "bassprog" | "chordprog" |
@@ -554,6 +554,7 @@ declare module 'abcjs' {
 		subtitlespace?: number;
 		sysstaffsep?: number;
 		systemsep?: number;
+		stafftopmargin?: number;
 		textspace?: number;
 		titleformat?: string;
 		titleleft?: boolean;
@@ -777,8 +778,10 @@ declare module 'abcjs' {
 		el_type: "note";
 		startChar: number;
 		endChar: number;
+		duration: number;
+		pitches?: Array<any>; // TODO-PER
+		rest?: { type: 'rest' | 'spacer' | 'invisible' | 'invisible-multimeasure' | 'multimeasure', text? : number};
 	}
-
 	export type VoiceItem = VoiceItemClef | VoiceItemBar | VoiceItemGap | VoiceItemKey | VoiceItemMeter | VoiceItemMidi | VoiceItemOverlay | VoiceItemPart | VoiceItemScale | VoiceItemStem | VoiceItemStyle | VoiceItemTempo | VoiceItemTranspose | VoiceItemNote;
 
 	export interface TuneLine {
@@ -1122,6 +1125,8 @@ declare module 'abcjs' {
 	let signature: string;
 
 	export function renderAbc(target: Selector, code: string, params?: AbcVisualParams): TuneObjectArray
+
+	export function tuneMetrics(code: string, params?: AbcVisualParams): Array<{sections: Array<{left: number, measureWidths:Array<number>, total: number}>}>
 
 	export function parseOnly(abc: string, params?: AbcVisualParams) : TuneObjectArray
 

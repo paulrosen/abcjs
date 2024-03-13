@@ -103,6 +103,7 @@ Renderer.prototype.initVerticalSpace = function () {
 		parts: 11.33, // Set the vertical space above a new part.
 		slurHeight: 1.0, // Set the slur height factor.
 		staffSeparation: 61.33, // Do not put a staff system closer than <unit> from the previous system.
+		staffTopMargin: 0,
 		stemHeight: 26.67 + 10, // Set the stem height.
 		subtitle: 3.78, // Set the vertical space above the subtitle.
 		systemStaffSeparation: 48, // Do not place the staves closer than <unit> inside a system. * This values applies to all staves when in the tune header. Otherwise, it applies to the next staff
@@ -157,6 +158,8 @@ Renderer.prototype.setVerticalSpace = function (formatting) {
 		this.spacing.title = formatting.titlespace * 4 / 3;
 	if (formatting.sysstaffsep !== undefined)
 		this.spacing.systemStaffSeparation = formatting.sysstaffsep * 4 / 3;
+	if (formatting.stafftopmargin !== undefined)
+		this.spacing.staffTopMargin = formatting.stafftopmargin * 4 / 3;
 	if (formatting.subtitlespace !== undefined)
 		this.spacing.subtitle = formatting.subtitlespace * 4 / 3;
 	if (formatting.topspace !== undefined)

@@ -797,6 +797,7 @@ var parseDirective = {};
 			case "pageheight":
 			case "pagewidth":
 			case "rightmargin":
+			case "stafftopmargin":
 			case "staffsep":
 			case "staffwidth":
 			case "subtitlespace":
@@ -1196,6 +1197,11 @@ var parseDirective = {};
 						if (tokens.length !== 1 || tokens[0].type !== 'number')
 							warn("Directive \"" + cmd + "\" requires a number as a parameter.");
 						tune.formatting.fontboxpadding = tokens[0].floatt;
+						break;
+					case "stafftopmargin":
+						if (tokens.length !== 1 || tokens[0].type !== 'number')
+							warn("Directive \"" + cmd + "\" requires a number as a parameter.");
+						tune.formatting.stafftopmargin = tokens[0].floatt;
 						break;
 					case "stretchlast":
 						var sl = parseStretchLast(tokens);

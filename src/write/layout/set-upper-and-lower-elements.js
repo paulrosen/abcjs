@@ -87,6 +87,8 @@ var setUpperAndLowerElements = function (renderer, staffGroup) {
 			if (addedSpace > 0)
 				staff.top += addedSpace;
 		}
+		staff.top += renderer.spacing.staffTopMargin / spacing.STEP
+
 		lastStaffBottom = 2 - staff.bottom; // the staff starts at position 2 and the bottom variable is negative. Therefore to find out how large the bottom is, we reverse the sign of the bottom, and add the 2 in.
 
 		// Now we need a little margin on the top, so we'll just throw that in.
