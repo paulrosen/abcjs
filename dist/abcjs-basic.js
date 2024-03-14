@@ -54,6 +54,7 @@ Object.keys(tuneBook).forEach(function (key) {
   abcjs[key] = tuneBook[key];
 });
 abcjs.renderAbc = __webpack_require__(/*! ./src/api/abc_tunebook_svg */ "./src/api/abc_tunebook_svg.js");
+abcjs.tuneMetrics = __webpack_require__(/*! ./src/api/tune-metrics */ "./src/api/tune-metrics.js");
 abcjs.TimingCallbacks = __webpack_require__(/*! ./src/api/abc_timing_callbacks */ "./src/api/abc_timing_callbacks.js");
 var glyphs = __webpack_require__(/*! ./src/write/creation/glyphs */ "./src/write/creation/glyphs.js");
 abcjs.setGlyph = glyphs.setSymbol;
@@ -1085,6 +1086,32 @@ function doLineWrapping(div, tune, tuneNumber, abcString, params) {
   return tune;
 }
 module.exports = renderAbc;
+
+/***/ }),
+
+/***/ "./src/api/tune-metrics.js":
+/*!*********************************!*\
+  !*** ./src/api/tune-metrics.js ***!
+  \*********************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var tunebook = __webpack_require__(/*! ./abc_tunebook */ "./src/api/abc_tunebook.js");
+var EngraverController = __webpack_require__(/*! ../write/engraver-controller */ "./src/write/engraver-controller.js");
+var tuneMetrics = function tuneMetrics(abc, params) {
+  function callback(div, tune, tuneNumber, abcString) {
+    div = document.createElement("div");
+    div.setAttribute("style", "visibility: hidden;");
+    document.body.appendChild(div);
+    var engraver_controller = new EngraverController(div, params);
+    var widths = engraver_controller.getMeasureWidths(tune);
+    div.parentNode.removeChild(div);
+    return {
+      sections: widths
+    };
+  }
+  return tunebook.renderEngine(callback, "*", abc, params);
+};
+module.exports = tuneMetrics;
 
 /***/ }),
 
@@ -4353,6 +4380,7 @@ var parseDirective = {};
       case "pageheight":
       case "pagewidth":
       case "rightmargin":
+      case "stafftopmargin":
       case "staffsep":
       case "staffwidth":
       case "subtitlespace":
@@ -4752,6 +4780,10 @@ var parseDirective = {};
           case "fontboxpadding":
             if (tokens.length !== 1 || tokens[0].type !== 'number') warn("Directive \"" + cmd + "\" requires a number as a parameter.");
             tune.formatting.fontboxpadding = tokens[0].floatt;
+            break;
+          case "stafftopmargin":
+            if (tokens.length !== 1 || tokens[0].type !== 'number') warn("Directive \"" + cmd + "\" requires a number as a parameter.");
+            tune.formatting.stafftopmargin = tokens[0].floatt;
             break;
           case "stretchlast":
             var sl = parseStretchLast(tokens);
@@ -21507,7 +21539,7 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
     classes.incrLine();
     var abcLine = abcTune.lines[line];
     if (abcLine.staff) {
-      if (classes.shouldAddClasses) groupClasses.klass = "abcjs-staff l" + classes.lineNumber;
+      if (classes.shouldAddClasses) groupClasses.klass = "abcjs-staff-wrapper abcjs-l" + classes.lineNumber;
       renderer.paper.openGroup(groupClasses);
       if (abcLine.vskip) {
         renderer.moveY(abcLine.vskip);
@@ -24827,6 +24859,7 @@ var setUpperAndLowerElements = function setUpperAndLowerElements(renderer, staff
       var addedSpace = minSpacingInPitches - forcedSpacingBetween;
       if (addedSpace > 0) staff.top += addedSpace;
     }
+    staff.top += renderer.spacing.staffTopMargin / spacing.STEP;
     lastStaffBottom = 2 - staff.bottom; // the staff starts at position 2 and the bottom variable is negative. Therefore to find out how large the bottom is, we reverse the sign of the bottom, and add the 2 in.
 
     // Now we need a little margin on the top, so we'll just throw that in.
@@ -25536,6 +25569,7 @@ Renderer.prototype.initVerticalSpace = function () {
     // Set the slur height factor.
     staffSeparation: 61.33,
     // Do not put a staff system closer than <unit> from the previous system.
+    staffTopMargin: 0,
     stemHeight: 26.67 + 10,
     // Set the stem height.
     subtitle: 3.78,
@@ -25587,6 +25621,7 @@ Renderer.prototype.setVerticalSpace = function (formatting) {
   if (formatting.musicspace !== undefined) this.spacing.music = formatting.musicspace * 4 / 3;
   if (formatting.titlespace !== undefined) this.spacing.title = formatting.titlespace * 4 / 3;
   if (formatting.sysstaffsep !== undefined) this.spacing.systemStaffSeparation = formatting.sysstaffsep * 4 / 3;
+  if (formatting.stafftopmargin !== undefined) this.spacing.staffTopMargin = formatting.stafftopmargin * 4 / 3;
   if (formatting.subtitlespace !== undefined) this.spacing.subtitle = formatting.subtitlespace * 4 / 3;
   if (formatting.topspace !== undefined) this.spacing.top = formatting.topspace * 4 / 3;
   if (formatting.vocalspace !== undefined) this.spacing.vocal = formatting.vocalspace * 4 / 3;
