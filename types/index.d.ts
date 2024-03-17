@@ -836,6 +836,7 @@ declare module 'abcjs' {
 		metaText: MetaText;
 		metaTextInfo: MetaTextInfo;
 		version: string;
+		warnings?: Array<string>;
 
 		getTotalTime: NumberFunction;
 		getTotalBeats: NumberFunction;
