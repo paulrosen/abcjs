@@ -292,10 +292,12 @@ declare module 'abcjs' {
 		selectTypes?: boolean | Array<DragTypes>;
 		showDebug?: Array<"grid" | "box">;
 		staffwidth?: number;
+		stafftopmargin?: number;
 		startingTune?: number;
 		stop_on_warning?: boolean;
 		tablature?: Array<Tablature>;
 		textboxpadding?: number;
+		timeBasedLayout?: { minPadding?:number, minWidth?:number};
 		viewportHorizontal?: boolean;
 		viewportVertical?: boolean;
 		visualTranspose?: number;
@@ -808,23 +810,31 @@ declare module 'abcjs' {
 			text: TextFieldProperties;
 		};
 		staff?: Array<{
-					barNumber?: number;
-					brace: BracePosition;
-					bracket: BracePosition;
-					clef?: ClefProperties;
-					connectBarLines: BracePosition;
-					gchordfont: Font;
-					tripletfont: Font;
-					vocalfont: Font;
-					key?: KeySignature;
-					meter?: Meter;
-					spacingAbove?: number;
-					spacingBelow?: number;
-					stafflines?: number;
-					staffscale?: number;
-					title?: Array<string>;
-					voices?: Array<Array<VoiceItem>>;
-			}>
+			clef?: ClefProperties;
+			key?: KeySignature;
+			meter?: Meter;
+			voices?: Array<Array<VoiceItem>>;
+		}>;
+		staffGroup?: {
+			barNumber?: number;
+			brace?: BracePosition;
+			bracket?: BracePosition;
+			connectBarLines?: BracePosition;
+			gchordfont?: Font;
+			tripletfont?: Font;
+			vocalfont?: Font;
+			spacingAbove?: number;
+			spacingBelow?: number;
+			stafflines?: number;
+			staffscale?: number;
+			title?: Array<string>;
+			height?:number;
+			line?: number;
+			startx?:number;
+			w?:number;
+			gridStart?:number;
+			gridEnd?:number;
+		};
 		vskip?: number;
 	}
 

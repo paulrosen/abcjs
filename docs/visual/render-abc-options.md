@@ -214,6 +214,11 @@ This prints out lines showing where various parts of the music are calculated.
 
 This prints a shaded box for each element. If you see elements either too far apart or too close together this will give you an idea of what is causing it.
 
+## stafftopmargin
+Default: 0
+
+This adds extra space to the top of each staff system. This is different from the directive `systemsep` because the latter specifies a minimum amount of space. This directive adds the specified space no matter what other space is used.
+
 ## staffwidth
 Default: 740
 
@@ -221,13 +226,29 @@ This is the width in pixels of the layout. It won't change where things are laid
  
 ## startingTune
 Default: 0
- 
- The index of the tune in the tunebook to render (starting at zero for the first tune). This is only relevant if the abc string that is passed in contains multiple tunes.
+
+The index of the tune in the tunebook to render (starting at zero for the first tune). This is only relevant if the abc string that is passed in contains multiple tunes.
 
 ## textboxpadding
 Default: 0.10
  
 What percentage of the font size should the box that is drawn around the font be padded by? 
+
+
+## timeBasedLayout
+Default: undefined
+
+`{ minPadding?: number, minWidth?: number}`
+
+This changes the horizontal spacing to be completely time-based. Normally, music is printed so that a whole note doesn't take up four times the space of a quarter note because that would create a lot of blank space. However, for some uses - for instance showing the music along with a timeline - that is desired.
+
+To achieve this, first the line is scanned for the item that will take up the most space. For instance, if there is a sharp on a sixteenth note, that will take up more space than an eighth note. That is the minimum spacing that will be used.
+
+The scale can be specified in two ways. If `minPadding` is passed in, then that is added to the minimum spacing. For instance, lets say that the largest item is a sixteenth note that is 15px wide. And `minPadding: 5`. Then all sixteenth notes will be 20px wide. All eighth notes will be 40px wide, etc.
+
+If `minWidth` is set, then if the resultant size of the line is shorter than the specified width, extra space is added evenly to use up the space.
+
+Either of those methods can be used by themselves. They also work together. For instance, if you pass in a width that is the width of the browser, then the music will take up the entire window. But if the width calculated by minPadding is larger than that, it will be used instead and there will be a horizontal scroll bar.
 
 ## tablatures
 Default: undefined
@@ -237,21 +258,21 @@ Add a tablature-style staff below the standard music output. See [the tablature 
 ## viewportHorizontal
 Default: false
  
- Should the horizontal width be limited by the device's width? 
+Should the horizontal width be limited by the device's width? 
 
 ## viewportVertical
 Default: false
 
 ## visualTranspose
 Default: 0
- 
- Transposes the written music by the number of half-steps passed. Use a negative number to transpose down in pitch. 
+
+Transposes the written music by the number of half-steps passed. Use a negative number to transpose down in pitch. 
 
 ## wrap
 Default: null
  
- ::: tip staffwidth
- NOTE: this requires the parameter `staffwidth` to be set! 
+::: tip Tip
+NOTE: this requires the parameter `staffwidth` to be set! 
 :::
  
  To have the parser ignore the line breaks, and figure out the line breaks based on the size of each measure. 
