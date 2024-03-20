@@ -96,7 +96,7 @@ VoiceElement.shiftRight = function (dx, voice) {
 
 // call when spacingduration has been updated
 VoiceElement.updateNextX = function (x, spacing, voice) {
-	voice.nextx = x + (spacing * Math.sqrt(voice.spacingduration * 8));
+	voice.nextx = x + (spacing * this.getSpacingUnits(voice));
 };
 
 VoiceElement.updateIndices = function (voice) {

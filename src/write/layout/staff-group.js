@@ -19,7 +19,7 @@ function checkLastBarX(voices) {
 	}
 }
 
-var layoutStaffGroup = function (spacing, renderer, debug, staffGroup, leftEdge) {
+var layoutStaffGroup = function (spacing, minPadding, debug, staffGroup, leftEdge) {
 	var epsilon = 0.0000001; // Fudging for inexactness of floating point math.
 	var spacingunits = 0; // number of times we will have ended up using the spacing distance (as opposed to fixed width distances)
 	var minspace = 1000; // a big number to start off with - used to find out what the smallest space between two notes is -- GD 2014.1.7
@@ -82,7 +82,7 @@ var layoutStaffGroup = function (spacing, renderer, debug, staffGroup, leftEdge)
 			var topVoice = (lastTopVoice !== undefined && currentvoices[lastTopVoice].voicenumber !== v.voicenumber) ? currentvoices[lastTopVoice] : undefined;
 			if (!isSameStaff(v, topVoice))
 				topVoice = undefined;
-			var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, v, renderer.minPadding, topVoice);
+			var voicechildx = layoutVoiceElements.layoutOneItem(x, spacing, v, minPadding, topVoice);
 			var dx = voicechildx - x;
 			if (dx > 0) {
 				x = voicechildx; //update x

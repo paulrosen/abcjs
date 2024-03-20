@@ -2,8 +2,12 @@ var layoutVoice = require('./voice');
 var setUpperAndLowerElements = require('./set-upper-and-lower-elements');
 var layoutStaffGroup = require('./staff-group');
 var getLeftEdgeOfStaff = require('./get-left-edge-of-staff');
+var layoutInGrid = require('./layout-in-grid');
 
-var layout = function (renderer, abctune, width, space, expandToWidest) {
+// This sets the "x" attribute on all the children in abctune.lines
+// It also sets the "w" and "startx" attributes on "voices"
+// It also sets the "w" and "startx" attributes on "voices.children"
+var layout = function (renderer, abctune, width, space, expandToWidest, timeBasedLayout) {
 	var i;
 	var abcLine;
 	// Adjust the x-coordinates to their absolute positions
@@ -12,7 +16,11 @@ var layout = function (renderer, abctune, width, space, expandToWidest) {
 		abcLine = abctune.lines[i];
 		if (abcLine.staff) {
 			// console.log("=== line", i)
-			var thisWidth = setXSpacing(renderer, maxWidth, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
+			var thisWidth;
+			if (timeBasedLayout !== undefined)
+				thisWidth = layoutInGrid(renderer, abcLine.staffGroup, timeBasedLayout);
+			else
+				thisWidth = setXSpacing(renderer, maxWidth, space, abcLine.staffGroup, abctune.formatting, i === abctune.lines.length - 1, false);
 			// console.log(thisWidth, maxWidth)
 			if (Math.round(thisWidth) > Math.round(maxWidth)) { // to take care of floating point weirdness
 				maxWidth = thisWidth
@@ -46,39 +54,36 @@ var layout = function (renderer, abctune, width, space, expandToWidest) {
 var setXSpacing = function (renderer, width, space, staffGroup, formatting, isLastLine, debug) {
 	var leftEdge = getLeftEdgeOfStaff(renderer, staffGroup.getTextSize, staffGroup.voices, staffGroup.brace, staffGroup.bracket);
 	var newspace = space;
+	//dumpGroup("before", staffGroup)
 	for (var it = 0; it < 8; it++) { // TODO-PER: shouldn't need multiple passes, but each pass gets it closer to the right spacing. (Only affects long lines: normal lines break out of this loop quickly.)
 		// console.log("iteration", it)
-		// dumpGroup("before", staffGroup)
-		var ret = layoutStaffGroup(newspace, renderer, debug, staffGroup, leftEdge);
-		// dumpGroup("after",staffGroup)
+		var ret = layoutStaffGroup(newspace, renderer.minPadding, debug, staffGroup, leftEdge);
 		newspace = calcHorizontalSpacing(isLastLine, formatting.stretchlast, width + renderer.padding.left, staffGroup.w, newspace, ret.spacingUnits, ret.minSpace, renderer.padding.left + renderer.padding.right);
 		if (debug)
 			console.log("setXSpace", it, staffGroup.w, newspace, staffGroup.minspace);
 		if (newspace === null) break;
 	}
+	//dumpGroup("after",staffGroup)
 	centerWholeRests(staffGroup.voices);
 	return staffGroup.w - leftEdge
 };
 
-// function dumpGroup(label, staffGroup) {
-// 	var output = {
-// 		line: staffGroup.line,
-// 		w: staffGroup.w,
-// 		voice: {
-// 			i: staffGroup.voices[0].i,
-// 			minx: staffGroup.voices[0].minx,
-// 			nextx: staffGroup.voices[0].nextx,
-// 			spacingduration: staffGroup.voices[0].spacingduration,
-// 			w: staffGroup.voices[0].w,
-// 			children: [],
-// 		}
-// 	}
-// 	for (var i = 0; i < staffGroup.voices[0].children.length; i++) {
-// 		var child = staffGroup.voices[0].children[i]
-// 		output.voice.children.push({ fixedW: child.fixed.w, w: child.w, x: child.x, type: child.type })
-// 	}
-// 	console.log(label,output)
-// }
+function replacer(key, value) {
+	// Filtering out properties
+	if (key === 'parent') {
+		return 'parent';
+	}
+	if (key === 'beam') {
+		return 'beam';
+	}
+	return value;
+}
+
+function dumpGroup(label, staffGroup) {
+	console.log("=================== " + label + " =========================")
+	console.log(staffGroup)
+	console.log(JSON.stringify(staffGroup, replacer, "\t"))
+}
 
 function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, spacing, spacingUnits, minSpace, padding) {
 	if (isLastLine) {
