@@ -1275,7 +1275,7 @@ declare module 'abcjs' {
 	export function numberOfTunes(abc: string) : number;
 	export function extractMeasures(abc: string) : Array<MeasureList>;
 	
-	export function strTranspose(originalAbc: string, visualObj: TuneObject, steps: number): string;
+	export function strTranspose(originalAbc: string, visualObj: TuneObjectArray, steps: number): string;
 
 	//
 	// Glyph
