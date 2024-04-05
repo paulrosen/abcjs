@@ -297,7 +297,7 @@ declare module 'abcjs' {
 		stop_on_warning?: boolean;
 		tablature?: Array<Tablature>;
 		textboxpadding?: number;
-		timeBasedLayout?: { minPadding?:number, minWidth?:number};
+		timeBasedLayout?: { minPadding?:number, minWidth?:number, align?: 'left'|'center'};
 		viewportHorizontal?: boolean;
 		viewportVertical?: boolean;
 		visualTranspose?: number;

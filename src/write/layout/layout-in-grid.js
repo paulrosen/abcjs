@@ -8,6 +8,7 @@ function layoutInGrid(renderer, staffGroup, timeBasedLayout) {
 	var totalWidth = minSpacing * totalDuration
 	if (timeBasedLayout.minWidth)
 		totalWidth = Math.max(totalWidth, timeBasedLayout.minWidth)
+	var leftAlignPadding = timeBasedLayout.minPadding ? timeBasedLayout.minPadding/2 : 2 // If the padding isn't specified still give it some
 
 	staffGroup.startx = leftEdge
 	staffGroup.w = totalWidth + leftEdge
@@ -34,7 +35,13 @@ function layoutInGrid(renderer, staffGroup, timeBasedLayout) {
 				}
 			}
 			if (afterFixedLeft) {
-				child.x = x + (child.duration * durationUnit) / 2 - child.w / 2
+				if (timeBasedLayout.align === 'center')
+					child.x = x + (child.duration * durationUnit) / 2 - child.w / 2
+				else {
+					// left align with padding - but no padding for barlines, they should be right aligned.
+					// TODO-PER: it looks better to move bar lines on pixel to right. Not sure why.
+					child.x = x + (child.duration === 0 ? 1-child.w : leftAlignPadding)
+				}
 				x += child.duration * durationUnit
 			}
 			for (var k = 0; k < child.children.length; k++) {

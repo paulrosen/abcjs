@@ -238,7 +238,7 @@ What percentage of the font size should the box that is drawn around the font be
 ## timeBasedLayout
 Default: undefined
 
-`{ minPadding?: number, minWidth?: number}`
+`{ minPadding?: number, minWidth?: number, align?: 'left' | 'center'}`
 
 This changes the horizontal spacing to be completely time-based. Normally, music is printed so that a whole note doesn't take up four times the space of a quarter note because that would create a lot of blank space. However, for some uses - for instance showing the music along with a timeline - that is desired.
 
@@ -249,6 +249,8 @@ The scale can be specified in two ways. If `minPadding` is passed in, then that 
 If `minWidth` is set, then if the resultant size of the line is shorter than the specified width, extra space is added evenly to use up the space.
 
 Either of those methods can be used by themselves. They also work together. For instance, if you pass in a width that is the width of the browser, then the music will take up the entire window. But if the width calculated by minPadding is larger than that, it will be used instead and there will be a horizontal scroll bar.
+
+The notes can be placed either in the center of the area reserved or on the left side. If they are placed on the left side, they are offset by minPadding/2.
 
 ## tablatures
 Default: undefined
