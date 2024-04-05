@@ -39,8 +39,13 @@ function layoutInGrid(renderer, staffGroup, timeBasedLayout) {
 					child.x = x + (child.duration * durationUnit) / 2 - child.w / 2
 				else {
 					// left align with padding - but no padding for barlines, they should be right aligned.
-					// TODO-PER: it looks better to move bar lines on pixel to right. Not sure why.
-					child.x = x + (child.duration === 0 ? 1-child.w : leftAlignPadding)
+					// TODO-PER: it looks better to move bar lines one pixel to right. Not sure why.
+					if (child.duration === 0) {
+						child.x = x + 1 - child.w
+					} else {
+						// child.extraw has the width of the accidentals - push the note to the right to take that into consideration. It will be 0 if there is nothing to the left.
+						child.x = x + leftAlignPadding - child.extraw
+					}
 				}
 				x += child.duration * durationUnit
 			}
