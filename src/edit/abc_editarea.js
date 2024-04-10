@@ -44,7 +44,10 @@ try {
 }
 
 var EditArea = function(textareaid) {
-  this.textarea = document.getElementById(textareaid);
+  if (typeof textareaid === "string")
+    this.textarea = document.getElementById(textareaid);
+  else
+    this.textarea = textareaid;
   this.initialText = this.textarea.value;
   this.isDragging = false;
 }
