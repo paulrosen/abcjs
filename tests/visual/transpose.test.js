@@ -103,6 +103,10 @@ describe("Transpose", function() {
 		transposeTest(abcInline, 3, expectedInline)
 	})
 
+	it("transpose-directive", function () {
+		transposeTestDirective(abcInline, 3, expectedInline)
+	})
+
 	it("transpose-accidentals", function () {
 		transposeTest(abcAccidentals, -2, expectedAccidentals_2)
 		transposeTest(abcAccidentals, -1, expectedAccidentals_1)
@@ -150,11 +154,7 @@ describe("Transpose", function() {
 	})
 })
 
-function transposeTest(abc, halfSteps, expected) {
-	var visualObj = abcjs.renderAbc("paper", abc, {
-		visualTranspose: halfSteps
-	});
-	//console.log(visualObj)
+function extractTransposeInfo(visualObj) {
 	var lines = visualObj[0].lines.map(function (line) {
 		line = line.staff[0]
 		var out = { key: line.key.root + line.key.acc}
@@ -176,6 +176,10 @@ function transposeTest(abc, halfSteps, expected) {
 		return out
 	})
 	console.log(JSON.stringify(lines))
+	return lines
+}
+
+function compareResults(lines, expected, halfSteps) {
 	for (var i = 0; i < expected.length; i++) {
 		var exp = expected[i]
 		var rcv = lines[i]
@@ -186,5 +190,19 @@ function transposeTest(abc, halfSteps, expected) {
 			chai.assert.deepStrictEqual(rNote, eNote, "at location " + i + ' ' + j + ' steps:'+halfSteps)
 		}
 	}
+}
 
+function transposeTest(abc, halfSteps, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc, {
+		visualTranspose: halfSteps
+	});
+	var lines = extractTransposeInfo(visualObj)
+	compareResults(lines, expected, halfSteps)
+}
+
+function transposeTestDirective(abc, halfSteps, expected) {
+	abc = "%%visualTranspose "+halfSteps
+	var visualObj = abcjs.renderAbc("paper", abc);
+	var lines = extractTransposeInfo(visualObj)
+	compareResults(lines, expected, halfSteps)
 }

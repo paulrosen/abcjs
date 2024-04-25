@@ -157,6 +157,33 @@ var expectedBeatCallback = [
 	{beat: 10, left: 'NONE'},
 ]
 
+var abcTieOverLineBreak = 'X:1\n' +
+'%%stretchlast 1\n' +
+'M:4/4\n' +
+'K:C\n' +
+'C4 D4-|\n' +
+'D4 F4 |\n';
+
+var expectedTieOverLineBreak = [
+	{beat: 0, top: 23, left: 70 },
+	{beat: 0.5, top: 23, left: 105 },
+	{beat: 1, top: 23, left: 150 },
+	{beat: 1.5, top: 23, left: 195 },
+	{beat: 2, top: 23, left: 240 },
+	{beat: 2.5, top: 23, left: 260 },
+	{beat: 3, top: 23, left: 285 },
+	{beat: 3.5, top: 23, left: 305 },
+	{beat: 4, top: 115, left: 330 },
+	{beat: 4.5, top: 115, left: 345 },
+	{beat: 5, top: 115, left: 370 },
+	{beat: 5.5, top: 115, left: 390 },
+	{beat: 6, top: 115, left: 230 },
+	{beat: 6.5, top: 115, left: 270 },
+	{beat: 7, top: 115, left: 315 },
+	{beat: 7.5, top: 115, left: 365 },
+	{beat: 8, top: 'NONE', left: 'NONE' },
+]
+
 //////////////////////////////////////////////////////////
 
 	it("of repeated sections", function() {
@@ -205,6 +232,10 @@ var expectedBeatCallback = [
 
 	it("beat-callback", function() {
 		return doBeatCallbackTest(abcBeatCallback, expectedBeatCallback)
+	});
+
+	it("tieOverLineBreak", function() {
+		return doBeatCallbackTestTies(abcTieOverLineBreak, expectedTieOverLineBreak)
 	});
 });
 
@@ -296,6 +327,33 @@ function listener(abcElem, expected) {
 }
 
 //////////////////////////////////////////////////////////
+
+function doBeatCallbackTestTies(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc, { staffwidth: 400, stretchlast: true})
+	var timing = new abcjs.TimingCallbacks(visualObj[0], {
+		beatCallback: beatCallback,
+		beatSubdivisions: 2,
+		qpm: 480,
+	})
+	var actual = []
+	function beatCallback(beat,total,totalTime,position) {
+		var left = position.left === undefined ? 'NONE' : Math.round(position.left/5)*5
+		var top = position.top === undefined ? 'NONE' : Math.round(position.top)
+		actual.push({beat: beat, top: top, left: left})
+	}
+
+	timing.start()
+	return sleep(1950).then(function () {
+		var msg = []
+		for (var i = 0; i < Math.min(actual.length, expected.length); i++) {
+			var err = JSON.stringify(actual[i]) !== JSON.stringify(expected[i]) ? 'XXXX' : ''
+			msg.push(JSON.stringify(actual[i]) + ' = ' + JSON.stringify(expected[i]) + ' ' + err)
+		}
+		msg = "\n" + msg.join("\n") + "\n"
+		chai.assert.deepStrictEqual(actual,expected, msg);
+		return Promise.resolve();
+	})
+}
 
 function doBeatCallbackTest(abc, expected) {
 	var visualObj = abcjs.renderAbc("paper", abc, { staffwidth: 500, stretchlast: true})

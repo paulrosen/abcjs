@@ -656,10 +656,10 @@ describe("Tablature", function () {
 		"[V: PianoLeftHand] B,6 .D2 !arpeggio![F,8F8A,8]|(B,2 B,,2 C,12)|\"^annotation\"F,16|[F,16D,16]|Z2|]\n"
 
 	var kitchenSinkOutput = [
-		424,
-		780,
-		575,
-		653
+		429,
+		786,
+		580,
+		657
 	]
 
 	var octaveClef = "X: 1\n" +
@@ -695,14 +695,14 @@ describe("Tablature", function () {
 	var unusualFontSizeOutput = [
 		72,
 		138,
-		269,
-		335,
-		505,
-		571,
-		823,
-		889,
-		1242,
-		1308,
+		268,
+		334,
+		504,
+		570,
+		822,
+		888,
+		1239,
+		1305,
 	]
 
 	var weirdNoteConstruction = "X:1\n" +
@@ -738,10 +738,10 @@ describe("Tablature", function () {
 	var staffPlacementOutput = [
 		44,
 		145,
-		258,
-		363,
-		475,
-		580
+		257,
+		362,
+		473,
+		578
 	]
 
 	var accidentals2 = "X: 1\n" +
@@ -805,27 +805,27 @@ describe("Tablature", function () {
 		"|:\"Gbmaj7\"DEGB:|\n"
 
 	var firstStaffOnlyOutput1 = [
-		62,
-		128,
+		63,
+		129,
 		238,
 		304,
 		413,
 		479,
-		589,
-		655,
-		764,
-		830,
+		588,
+		654,
+		763,
+		829,
 	]
 
 	var firstStaffOnlyOutput2 = [
-		62,
-		128,
+		63,
+		129,
 		238,
 		304,
-		392,
-		458,
+		393,
+		459,
 		547,
-		612,
+		613,
 		701,
 		767,
 	]

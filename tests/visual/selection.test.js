@@ -105,7 +105,7 @@ describe("Selection", function() {
 				"x": 14,
 				"y": 97,
 				"width": 40,
-				"height": 21
+				"height": 22
 			}
 		},
 		{
@@ -128,14 +128,14 @@ describe("Selection", function() {
 				"x": 644,
 				"y": 97,
 				"width": 111,
-				"height": 21
+				"height": 22
 			}
 		},
 		{
 			"draggable": false,
 			"svgEl": {
 				"x": "755",
-				"y": "136.9",
+				"y": "137.9",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "4"
@@ -149,9 +149,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 668,
-				"y": 120,
-				"width": 88,
-				"height": 21
+				"y": 121,
+				"width": 87,
+				"height": 22
 			}
 		},
 		{
@@ -170,16 +170,16 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 141,
+				"y": 143,
 				"width": 61,
-				"height": 27
+				"height": 28
 			}
 		},
 		{
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "205.4",
+				"y": "208.4",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "6"
@@ -193,7 +193,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 186,
+				"y": 189,
 				"width": 217,
 				"height": 24
 			}
@@ -212,7 +212,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 43,
-				"y": 364,
+				"y": 369,
 				"width": 8,
 				"height": 155
 			}
@@ -221,7 +221,7 @@ describe("Selection", function() {
 			"draggable": false,
 			"svgEl": {
 				"x": "15",
-				"y": "372.06",
+				"y": "376.74",
 				"selectable": "true",
 				"tabindex": "0",
 				"data-index": "8"
@@ -234,7 +234,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 15,
-				"y": 360,
+				"y": 365,
 				"width": 19,
 				"height": 15
 			}
@@ -254,7 +254,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 58,
-				"y": 350,
+				"y": 354,
 				"width": 19,
 				"height": 57
 			}
@@ -286,7 +286,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 88,
-				"y": 354,
+				"y": 358,
 				"width": 16,
 				"height": 30
 			}
@@ -310,7 +310,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 114,
-				"y": 365,
+				"y": 369,
 				"width": 12,
 				"height": 30
 			}
@@ -335,9 +335,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 136,
-				"y": 212,
+				"y": 215,
 				"width": 167,
-				"height": 22
+				"height": 23
 			}
 		},
 		{
@@ -355,9 +355,9 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 136,
-				"y": 236,
+				"y": 238,
 				"width": 19,
-				"height": 27
+				"height": 28
 			}
 		},
 		{
@@ -401,7 +401,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 134,
-				"y": 325,
+				"y": 330,
 				"width": 14,
 				"height": 58
 			}
@@ -433,7 +433,7 @@ describe("Selection", function() {
 			},
 			"size": {
 				"x": 176,
-				"y": 333,
+				"y": 337,
 				"width": 16,
 				"height": 35
 			}
@@ -646,7 +646,7 @@ describe("Selection", function() {
 				"x": 365,
 				"y": 352,
 				"width": 8,
-				"height": 21
+				"height": 22
 			}
 		},
 		{
@@ -1029,7 +1029,7 @@ describe("Selection", function() {
 				"x": 519,
 				"y": 352,
 				"width": 8,
-				"height": 21
+				"height": 22
 			}
 		},
 		{

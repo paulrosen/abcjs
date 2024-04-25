@@ -1,11 +1,11 @@
 describe("Layout", function() {
 	var abcBarLinesTreble = "X:1\n%%barlabelfont Times-Bold 18 box\n%%setbarnb 42\n%%barnumbers 1\nM: 4/4\nL: 1/16\nK:D\nz8 |\n z8 |\n"
 
-	var expectedBarLinesTreble = [{x: 20, y: 88}]
+	var expectedBarLinesTreble = [{x: 20, y: 85}]
 
 	var abcBarLinesBass = "X:1\n%%barlabelfont Times-Bold 18 box\n%%setbarnb 42\n%%barnumbers 1\nM: 4/4\nL: 1/16\nK:D clef=bass\nz8 |\n z8 |\n"
 
-	var expectedBarLinesBass = [{x: 20, y: 84}]
+	var expectedBarLinesBass = [{x: 20, y: 82}]
 
 	var abcMinSpacing = "X:1\nL:1/8\nM:4/4\ncdef cdef|\ncdef cdef|cdef cdef|\ncdef cdef|cdef cdef|cdef cdef|\n";
 
@@ -101,7 +101,7 @@ describe("Layout", function() {
 
 	var abcChordLayout = '"F"c3c|"C7"c2df|1f4- & "F"xx"Bb"x"Bbm"x|"F"f3z:|2f4- & "Bb"!style=harmonic!d2 "F"!style=harmonic!c "C7"!style=harmonic!B|"F"f4 & !style=harmonic!A4||\n'
 
-	var expectedChordLayout = [{"x":54,"y":32},{"x":106,"y":32},{"x":344,"y":32},{"x":533,"y":32},{"x":190,"y":32},{"x":208,"y":32},{"x":254,"y":32},{"x":405,"y":32},{"x":455,"y":32},{"x":476,"y":32}];
+	var expectedChordLayout = [{"x":54,"y":32},{"x":106,"y":32},{"x":344,"y":32},{"x":533,"y":32},{"x":190,"y":32},{"x":208,"y":32},{"x":254,"y":32},{"x":405,"y":32},{"x":455,"y":32},{"x":477,"y":32}];
 
 	var abcStaccatoPlacement = "E.B .B"
 
@@ -110,7 +110,7 @@ describe("Layout", function() {
 	var abcRhythmPlacement = "R: reel\n" +
 		"C"
 
-	var expectedRhythmPlacement = [{ x: 20, y: 53 }]
+	var expectedRhythmPlacement = [{ x: 20, y: 54 }]
 
 	var lineTooWide = 
 		"T:The title should be centered\n" +
@@ -130,6 +130,18 @@ describe("Layout", function() {
 		[313],
 		[108,119,130,141,152,162,173,184,200,211,222,232,243,254,265,276,287,302,313,324,335,346,357,367,378,389,405,416,427,438,448,459,470,481,492,507,518,529,540,551,562,573,583,594,610]
 	]
+
+	var equalSpacing =
+	"T: Notes should take up the space proportional to their duration\n" +
+	"L:1/4\n" +
+	"Q:1/4=83\n" +
+	"K:C\n" +
+	"C (3DEF G/A/ | f4 | B//c//d//e// f2 (3g/f/e/ |z d z/c/ B//z// A/|\n" +
+	"z d z/c/ B//z// A/|C (3DEF G/A/ | f4 | B//c//d//e// f2 (3g/f/e/ |\n" +
+	" B//c//d//e// f2 (3g/f/e/ |z d z/c/ B//z// A/|C (3DEF G/A/ | f4 |\n" +
+	"C4 | f4 | g3/2 a/ f3/4 e// d3/8 c/// B// A//|d3 c|\n" +
+	"^C (3^D^E^F ^G/^A/ | f4 | g3/2 a/ f3/4 e// d3/8 c/// B// A//|d3 c|\n" +
+	"\n"
 
 	it("line-too-wide", function() {
 		var visualObj = doLayoutTest(lineTooWide, {staffwidth: 500, expandToWidest: true }, expectedLineTooWide, 'staffwidth=500');
@@ -181,6 +193,22 @@ describe("Layout", function() {
 		doItemPlacementTest(abcBarLinesBass, expectedBarLinesBass, '[data-name="bar-number"]');
 	})
 
+	it("equal-spacing", function() {
+		abcjs.renderAbc("paper", equalSpacing, {add_classes: true, timeBasedLayout:{minPadding: 5, minWidth: 1200}});
+		var svg = document.querySelector('#paper svg')
+		var OFFSET = 50
+		var SPACING = 291.48725/4
+		for (var i = 0; i < 17; i++) {
+			const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+			line.setAttribute("x1", ''+(OFFSET+SPACING*i));
+			line.setAttribute("y1", ''+90);
+			line.setAttribute("x2", ''+(OFFSET+SPACING*i));
+			line.setAttribute("y2", ''+510);
+			line.setAttribute("stroke", "#0000ff50");
+			svg.appendChild(line);
+		}
+	})
+
 })
 
 function doItemPlacementTest(abc, expected, selector) {
@@ -203,6 +231,7 @@ function doChordLayoutTest(abc, expected) {
 		var bb = els[i].getBBox()
 		pos.push({x: Math.round(bb.x), y: Math.round(bb.y)})
 	}
+	console.log(pos)
 	chai.assert.deepEqual(pos, expected)
 }
 
