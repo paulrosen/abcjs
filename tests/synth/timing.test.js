@@ -162,7 +162,7 @@ var abcTieOverLineBreak = 'X:1\n' +
 'M:4/4\n' +
 'K:C\n' +
 'C4 D4-|\n' +
-'D4 F4 |\n';
+'D4 F2-F2 |\n';
 
 var expectedTieOverLineBreak = [
 	{beat: 0, top: 23, left: 70 },
@@ -170,13 +170,13 @@ var expectedTieOverLineBreak = [
 	{beat: 1, top: 23, left: 150 },
 	{beat: 1.5, top: 23, left: 195 },
 	{beat: 2, top: 23, left: 240 },
-	{beat: 2.5, top: 23, left: 260 },
-	{beat: 3, top: 23, left: 285 },
-	{beat: 3.5, top: 23, left: 305 },
-	{beat: 4, top: 115, left: 330 },
-	{beat: 4.5, top: 115, left: 345 },
-	{beat: 5, top: 115, left: 370 },
-	{beat: 5.5, top: 115, left: 390 },
+	{beat: 2.5, top: 23, left: 275 },
+	{beat: 3, top: 23, left: 325 },
+	{beat: 3.5, top: 23, left: 370 },
+	{beat: 4, top: 115, left: 50 },
+	{beat: 4.5, top: 115, left: 85 },
+	{beat: 5, top: 115, left: 135 },
+	{beat: 5.5, top: 115, left: 185 },
 	{beat: 6, top: 115, left: 230 },
 	{beat: 6.5, top: 115, left: 270 },
 	{beat: 7, top: 115, left: 315 },
@@ -335,6 +335,13 @@ function doBeatCallbackTestTies(abc, expected) {
 		beatSubdivisions: 2,
 		qpm: 480,
 	})
+	console.log(visualObj[0].noteTimings)
+	console.log(timing)
+	//timing.noteTimings[2].left = 40
+	for (var k = 0; k < timing.noteTimings.length; k++) {
+		var t = timing.noteTimings[k]
+		console.log(k, t.milliseconds, t.line, t.left )
+	}
 	var actual = []
 	function beatCallback(beat,total,totalTime,position) {
 		var left = position.left === undefined ? 'NONE' : Math.round(position.left/5)*5
@@ -342,17 +349,34 @@ function doBeatCallbackTestTies(abc, expected) {
 		actual.push({beat: beat, top: top, left: left})
 	}
 
+	var svg = document.querySelector('#paper svg')
 	timing.start()
 	return sleep(1950).then(function () {
 		var msg = []
 		for (var i = 0; i < Math.min(actual.length, expected.length); i++) {
 			var err = JSON.stringify(actual[i]) !== JSON.stringify(expected[i]) ? 'XXXX' : ''
 			msg.push(JSON.stringify(actual[i]) + ' = ' + JSON.stringify(expected[i]) + ' ' + err)
+			if (actual[i].left !== 'NONE' && actual[i].top !== 'NONE')
+				createLine(actual[i].left, actual[i].top, actual[i].left, actual[i].top+20, "stroke-width:2;stroke:blue", svg)
+			console.log(actual[i])
 		}
 		msg = "\n" + msg.join("\n") + "\n"
 		chai.assert.deepStrictEqual(actual,expected, msg);
 		return Promise.resolve();
 	})
+}
+
+const svgNS = "http://www.w3.org/2000/svg";
+
+function createLine(x, y, x2, y2, style, parent) {
+	const line = document.createElementNS(svgNS, "line");
+	line.setAttribute("x1", ''+x);
+	line.setAttribute("y1", ''+y);
+	line.setAttribute("x2", ''+x2);
+	line.setAttribute("y2", ''+y2);
+	if (style)
+		line.setAttribute("style", style);
+	parent.appendChild(line);
 }
 
 function doBeatCallbackTest(abc, expected) {

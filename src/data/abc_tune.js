@@ -374,8 +374,9 @@ var Tune = function() {
 					eventHash["event" + voiceTimeMilliseconds].measureStart = true;
 					nextIsBar = false;
 				}
-				if (isTiedToNext)
-					isTiedState = voiceTimeMilliseconds;
+				// TODO-PER: There doesn't seem to be a harm in letting ties be two different notes and it fixes a bug when a tie goes to a new line. If there aren't other problems with this change, then the variable can be removed completely. 
+				// if (isTiedToNext)
+				// 	isTiedState = voiceTimeMilliseconds;
 			}
 		}
 		return { isTiedState: isTiedState, duration: realDuration / timeDivider, nextIsBar: nextIsBar || element.type === 'bar' };
