@@ -177,6 +177,29 @@ TieElem.prototype.calcSlurY = function () {
 		} else
 			this.endY = this.above && beamInterferes ? this.anchor2.highestVert : this.anchor2.pitch;
 
+		if (this.anchor1.scalex === 1) { // Need a way to tell if this is a grace note - if so then keep the slur as close as possible. TODO-PER-HACK: this should be more declaratively determined.
+			var hasBeam1 = !!this.anchor1.parent.beam
+			var hasBeam2 = !!this.anchor2.parent.beam
+			if (hasBeam1) {
+				var isLastInBeam = this.anchor1.parent === this.anchor1.parent.beam.elems[this.anchor1.parent.beam.elems.length-1]
+				if (!isLastInBeam) {
+						if (this.above)
+						this.startY = this.anchor1.parent.fixed.t
+					else
+						this.startY = this.anchor1.parent.fixed.b
+				}
+			}
+
+			if (hasBeam2) {
+				var isFirstInBeam = this.anchor2.parent === this.anchor2.parent.beam.elems[0]
+				if (!isFirstInBeam) {
+					if (this.above)
+						this.endY = this.anchor2.parent.fixed.t
+					else
+						this.endY = this.anchor2.parent.fixed.b
+				}
+			}
+		}
 	} else if (this.anchor1) {
 		this.startY = this.endY = this.anchor1.pitch;
 	} else if (this.anchor2) {
