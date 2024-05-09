@@ -33,7 +33,7 @@ function activate() {
 //	if (getters.hideVoice) options.push("hideVoice");
 //	if (getters.preload) options.push("preload");
 //	if (getters.loopMeasures) options.push("loopmeasures");
-//	if (getters.swingFeel) options.push("swing");
+	if (getters.swingFeel) options.push("swing");
 	if (getters.soundfont) optionsOptions.push("soundfont: '/path/to/soundfont/'");
 	options.push("options: {\n\t\t\t\t"+optionsOptions.join(",\n\t\t\t\t") + "\n\t\t\t}\n")
 
