@@ -550,23 +550,22 @@ function CreateSynth() {
 	};
 
 	function addSwing(noteMapTracks, swing, meterFraction) {
-		console.log("addSwing", noteMapTracks, swing, meterFraction)
 
-		// we can only swing in X/4 meters.
-		if (meterFraction.den != 4)
+		// we can only swing in X/4 and X/8 meters.
+		if (meterFraction.den != 4 && meterFraction.den != 8)
 			return;
 
 		swing = parseFloat(swing);
 
-		if (isNaN(swing))
+		// 50 (or less) is no swing, 
+		if (isNaN(swing) || swing <= 50)
 			return;
 
-		// 50 is no swing, 
 		// 66 is triplet swing 2:1, and 
 		// 60 is swing with a ratio of 3:2. 
 		// 75 is the maximum swing where the first eight is played as a dotted eight and the second as a sixteenth. 
-		if (swing <= 50 || swing > 75)
-			return;
+		if (swing > 75)
+			swing = 75;
 
 		// convert the swing percentage to a percentage of increase for the first half of the beat
 		swing = swing/50 - 1;
@@ -575,10 +574,17 @@ function CreateSynth() {
 		// could be also in the settings. Try out values such 0.1, 0.2
 		var volumeIncrease = 0.0;
 
-		console.log("SWING", swing)
-
+		// the beatLength in X/8 meters
 		var beatLength = 0.25; 
-		var halfbeatLength = 0.125;
+
+		// in X/8 meters the 16s swing so the beatLength is halved
+		if (meterFraction.den === 8) 
+			beatLength = beatLength/2; 
+
+		// duration of a half beat
+		var halfbeatLength = beatLength/2;
+
+		// the extra duration of the first swung notes and the delay of the second notes
 		var swingDuration = halfbeatLength * swing;
 
 		for (var t = 0; t < noteMapTracks.length; t++) {
@@ -602,7 +608,6 @@ function CreateSynth() {
 					var oldEventStart = event.start;
 
 					event.start += swingDuration;
-					// event.end -= swingDuration;
 
 					// Increase volume of swung notes
 					event.volume *= 1 + volumeIncrease;

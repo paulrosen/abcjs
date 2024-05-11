@@ -87,12 +87,21 @@
       <p>In the example below, change the value of the swing to see how it matches of differs from the explicit
         triplets of dotted eighth and sixteenth notes.
       </p>
+      <p>
+        Swing is supported in all X/4 and X/8 meters. In a X/8 meter the sixteenths swing.
+        You can try a X/8 meter by changing the meter in the ABC string to "M: 4/8
+        L: 1/16"
+        However, meter changes in the middle of a tune do not affect the main swing duration.
+      </p>
       <section class="input">
         <h2>ABC String</h2>
         <textarea aria-label="ABC string" id="abc" spellcheck="false">
-|: "Am" "^swung notes"cc cc cc cc | "^triplets"(3:2:2c2c (3:2:2c2c (3:2:2c2c (3:2:2c2c | 
-"^swung notes"cc cc cc cc | "^sixteenths"c/z/c/c/ z/c/c/z/ c/c/z/c/ c/z/c/c/ |
-"^dotted eighth and sixteenth"c>c c>c c>c c>c | "^swung notes"zc cz cc zc :|
+M:4/4
+L:1/8
+Q:1/8=140
+"^swung notes"cc cc cc cc | "^triplets"(3:2:2c2c (3:2:2c2c (3:2:2c2c (3:2:2c2c | 
+"^swung notes"cc cc cc cc | "^dotted eighth and sixteenth"c>c c>c c>c c2 | 
+"^swung notes"zc cz cc zc |"^sixteenths are not affected in a 4/4"c/c/c/c/ z/c/c/z/ c/c/z/c/ c/z/c/c/ | 
                   </textarea>
         <fieldset>
           <legend>Options</legend>
