@@ -1243,6 +1243,29 @@ declare module 'abcjs' {
 		embed(parent:Element, noplayer:boolean):void
 	}
 
+	export interface SynthControlOptions {
+		ac?: AudioContext;
+		afterResume?: () => void;
+		loopHandler?: (ev: any) => Promise<void>;
+		restartHandler?: (ev: any) => Promise<void>;
+		playHandler?: (ev: any) => Promise<void>;
+		playPromiseHandler?: (ev: any) => Promise<void>;
+		progressHandler?: (ev: any) => Promise<void>;
+		warpHandler?: (ev: any) => Promise<void>;
+		hasClock?: boolean;
+		repeatTitle?: string;
+		repeatAria?: string;
+		restartTitle?: string;
+		restartAria?: string;
+		playTitle?: string;
+		playAria?: string;
+		randomTitle?: string;
+		randomAria?: string;
+		warpTitle?: string;
+		warpAria?: string;
+		bpm?: string;
+	}
+
 	export namespace synth {
 		let instrumentIndexToName: [string]
 		let pitchToNoteName: [string]
@@ -1253,7 +1276,7 @@ declare module 'abcjs' {
 		export function supportsAudio(): boolean
 		export function registerAudioContext(ac?: AudioContext): boolean
 		export function activeAudioContext(): AudioContext
-		export function CreateSynthControl(element: Selector, options: AbcVisualParams): AudioControl
+		export function CreateSynthControl(element: Selector, options?: SynthControlOptions): AudioControl
 		export function getMidiFile(source: string | TuneObject, options?: MidiFileOptions): MidiFile;
 		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches | undefined, milliSecondsPerMeasure: number, soundFontUrl? : string, debugCallback?: (message: string) => void): Promise<void>;
 		export function sequence(visualObj: TuneObject, options: AbcVisualParams): AudioSequence
