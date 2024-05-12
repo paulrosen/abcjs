@@ -55,6 +55,18 @@ describe("Svg Per Line", function() {
 		doSvgTest(abcMultiple, "paper-resp-norm", { responsive: "resize" }, 1);
 	})
 
+	it("svg-per-line-scaled", function() {
+		var abcScaled = 'X:1\n' +
+			'%%staffwidth 400\n' +
+			'M:4/4\n' +
+			'L:1/16\n' +
+			'T: Scaled\n' +
+			'K: G\n' +
+			'CDEF|GABC||\n' +
+			'cdef|gabc||\n'
+		doSvgTest(abcScaled, "paper-scaled", { oneSvgPerLine: true, scale: 0.5 }, 1);
+	})
+
 })
 
 //////////////////////////////////////////////////////////
