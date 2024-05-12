@@ -303,7 +303,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 	this.selectables = ret.selectables;
 	if (this.oneSvgPerLine) {
 	  var div = this.renderer.paper.svg.parentNode;
-	  this.svgs = splitSvgIntoLines(this.renderer, div, abcTune.metaText.title, this.responsive);
+	  this.svgs = splitSvgIntoLines(this.renderer, div, abcTune.metaText.title, this.responsive, scale);
 	} else {
 	  this.svgs = [this.renderer.paper.svg];
 	}
@@ -312,7 +312,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 	this.jazzchords = origJazzChords
 };
 
-function splitSvgIntoLines(renderer, output, title, responsive) {
+function splitSvgIntoLines(renderer, output, title, responsive, scale) {
 	// Each line is a top level <g> in the svg. To split it into separate
 	// svgs iterate through each of those and put them in a new svg. Since
 	// they are placed absolutely, the viewBox needs to be manipulated to
@@ -337,7 +337,7 @@ function splitSvgIntoLines(renderer, output, title, responsive) {
 		var wrapper = document.createElement("div");
 		var divStyles = "overflow: hidden;"
 		if (responsive !== 'resize')
-			divStyles += "height:" + height + "px;"
+			divStyles += "height:" + (height * scale) + "px;"
 		wrapper.setAttribute("style", divStyles)
 		var svg = duplicateSvg(source)
 		var fullTitle = "Sheet Music for \"" + title + "\" section " + (i + 1)
