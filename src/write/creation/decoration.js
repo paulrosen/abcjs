@@ -160,7 +160,7 @@ var stackedDecoration = function (decoration, width, abselem, yPos, positioning,
 		var height = glyphs.symbolHeightInPitches(symbol) + 1; // adding a little padding so nothing touches.
 		var y = getPlacement(placement);
 		y = (placement === 'above') ? y + height / 2 : y - height / 2;// Center the element vertically.
-		abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, { klass: 'ornament', thickness: glyphs.symbolHeightInPitches(symbol) }));
+		abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, { klass: 'ornament', thickness: glyphs.symbolHeightInPitches(symbol), position: placement }));
 
 		incrementPlacement(placement, height);
 	}
@@ -355,7 +355,8 @@ Decoration.prototype.createDecoration = function (voice, decoration, pitch, widt
 	// yPos is an object containing 'above' and 'below'. That is the placement of the next symbol on either side.
 
 	yPos.above = Math.max(yPos.above, this.minTop);
-	var hasOne = stackedDecoration(decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, this.minBottom, accentAbove);
+	yPos.below = Math.min(yPos.below, minPitch);
+	var hasOne = stackedDecoration(decoration, width, abselem, yPos, positioning.ornamentPosition, this.minTop, minPitch, accentAbove);
 	//if (hasOne) {
 		//			abselem.top = Math.max(yPos.above + 3, abselem.top); // TODO-PER: Not sure why we need this fudge factor.
 	//}

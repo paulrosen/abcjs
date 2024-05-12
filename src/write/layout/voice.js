@@ -36,7 +36,7 @@ function moveDecorations(beam) {
 			var top = yAtNote(child, beam);
 			for (var i = 0; i < child.children.length; i++) {
 				var el = child.children[i];
-				if (el.klass === 'ornament') {
+				if (el.klass === 'ornament' && el.position !== 'below') {
 					if (el.bottom - padding < top) {
 						var distance = top - el.bottom + padding; // Find the distance that it needs to move and add a little margin so the element doesn't touch the beam.
 						el.bottom += distance;

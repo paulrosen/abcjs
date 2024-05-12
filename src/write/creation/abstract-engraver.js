@@ -831,7 +831,10 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
 	}
 
 	if (elem.decoration) {
-		this.decoration.createDecoration(voice, elem.decoration, abselem.top, (notehead) ? notehead.w : 0, abselem, roomtaken, dir, abselem.bottom, elem.positioning, this.hasVocals, this.accentAbove);
+		// TODO-PER: nostem is true if this is beamed. In that case we don't know where to place the decoration yet so just make a guess. This should be refactored to not place decorations until after the beams are determined.
+		// This should probably be combined with moveDecorations()
+		var bottom = nostem ? Math.min(-3, abselem.bottom - 6) : abselem.bottom
+		this.decoration.createDecoration(voice, elem.decoration, abselem.top, (notehead) ? notehead.w : 0, abselem, roomtaken, dir, bottom, elem.positioning, this.hasVocals, this.accentAbove);
 	}
 
 	if (elem.barNumber) {
