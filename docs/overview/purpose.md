@@ -28,6 +28,8 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 * For working with tunes in the browser, see [the Editor](https://editor.drawthedots.com). 
 
+* Also see Michael Eskin's [ABC Tools](https://michaeleskin.com/abctools/abctools.html) for a much more fully-featured editor.
+
 * If you are using VSCode, there is an extension that you install. Get to the extension panel with shift-cmd-X, then search for "abcjs". Once you install that you can see the notation rendered as you type in a file. To use it, open your tune file (ending in `.abc`) and type shift-cmd-P to get the command pallet. Search for "abcjs" to open the preview pane.
 
 ## Browser/device support
