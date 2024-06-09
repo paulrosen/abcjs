@@ -28,6 +28,7 @@ var parseCommon = require("../parse/abc_common");
 		var drumBars = options.drumBars || 1;
 		var drumIntro = options.drumIntro || 0;
 		var drumOn = drumPattern !== "";
+		var drumOffAfterIntro = !!options.drumOff
 		var style = []; // The note head style for each voice.
 		var rhythmHeadThisBar = false; // Rhythm notation was detected.
 		var crescendoSize = 50; // how much to increase or decrease volume when crescendo/diminuendo is encountered.
@@ -494,12 +495,20 @@ var parseCommon = require("../parse/abc_common");
 				if (voices[vv].length > insertPoint) {
 					for (var w = 0; w < drumIntro; w++) {
 						// If it is the last measure of intro, subtract the pickups.
-						if (pickups === 0 || w < drumIntro-1)
-							voices[vv].splice(insertPoint, 0, {el_type: "note", rest: {type: "rest"}, duration: measureLength},
-								{ el_type: "bar" });
-						else {
-							voices[vv].splice(insertPoint, 0, {el_type: "note", rest: {type: "rest"}, duration: measureLength-pickups});
+						if (pickups === 0 || w < drumIntro-1) {
+							voices[vv].splice(insertPoint, 0, 
+								{el_type: "note", rest: {type: "rest"}, duration: measureLength},
+								{ el_type: "bar" }
+							);
+							insertPoint += 2
+						} else {
+							voices[vv].splice(insertPoint++, 0, {el_type: "note", rest: {type: "rest"}, duration: measureLength-pickups});
 						}
+					}
+					if (drumOffAfterIntro) {
+						drumOn = false
+						voices[vv].splice(insertPoint++, 0, {el_type: 'drum', params: { pattern: drumPattern, bars: drumBars, intro: drumIntro, on: drumOn}});
+						drumOffAfterIntro = false
 					}
 				}
 			}

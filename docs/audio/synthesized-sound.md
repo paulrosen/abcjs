@@ -233,9 +233,10 @@ The `options` element above can have the following properties:
 | program | 0 | The midi program (aka "instrument") to use, if not specified in ABC string. |
 | midiTranspose | 0 | The number of half-steps to transpose everything, if not specified in ABC string. |
 | channel | 0 | The "midi channel" to use. This isn't particularly useful except that specifying channel 10 means to use the percussion sounds. |
-| drum | null | Whether to add a drum, or metronome track. A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` See the section for "Drum Parameter" for an explanation. |
+| drum | null | Whether to add a drum (or metronome) track. A string formatted like the `%%MIDI drum` specification. Using this parameter also implies `%%MIDI drumon` See the section for "Drum Parameter" for an explanation. |
 | drumBars | 1 | How many bars to spread the drum pattern over. See the section for "Drum Parameter" for an explanation. |
 | drumIntro | 0 | The number of measures of count in beats before the music starts. |
+| drumOff | false | If you want a metronome only for the intro measures but not when the tune starts, use this along with the `drumIntro` and `drum` params. This has no effect if either one of those is missing. |
 | qpm | null | The tempo to use. This overrides a tempo that is in the tune. |
 | defaultQpm | null | The tempo to use, only if there is no tempo in the tune. |
 | chordsOff | false | If true, then don't turn the guitar chord symbols into sound. (But do play the metronome if there is one.) |

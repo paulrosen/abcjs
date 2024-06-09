@@ -363,6 +363,7 @@ declare module 'abcjs' {
 		drum?: string;
 		drumBars?: number;
 		drumIntro?: number;
+		drumOff?: boolean;
 		program?: number;
 		midiTranspose?: number;
 		visualTranspose?: number;

@@ -44,8 +44,8 @@ This is the object that is passed into the editor in the `synth` property. If th
 | Property | Description |
 |---|---|
 | el | Either a CSS selector or an HTML element for where to place the audio control. |
-| cursorControl | Optional: The callback object of type `CursorControl` if you want to get notified when timing events happen. (See the audio section for more details.) |
-| options | Optional: The options to pass directly to the `SynthController` object. |
+| cursorControl | Optional: The callback object of type `CursorControl` if you want to get notified when timing events happen. (See the [audio](https://paulrosen.github.io/abcjs/audio/synthesized-sound.html#cursorcontrol-object) section for more details.) |
+| options | Optional: The options to pass directly to the [SynthController](https://raw.githubusercontent.com/paulrosen/abcjs/audio/synthesized-sound.html#audioparams) object. |
 
 ## Available Methods
 
