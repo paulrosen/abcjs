@@ -1,4 +1,5 @@
 var spacing = require('../helpers/spacing');
+var createAnalysis = require('./create-analysis');
 
 function setupSelection(engraver, svgs) {
 	engraver.rangeHighlight = rangeHighlight;
@@ -339,55 +340,14 @@ function setSelection(dragIndex) {
 	}
 }
 
+
 function notifySelect(target, dragStep, dragMax, dragIndex, ev) {
-	var classes = [];
-	if (target.absEl.elemset) {
-		var classObj = {};
-		for (var j = 0; j < target.absEl.elemset.length; j++) {
-			var es = target.absEl.elemset[j];
-			if (es) {
-				var klass = es.getAttribute("class").split(' ');
-				for (var k = 0; k < klass.length; k++)
-					classObj[klass[k]] = true;
-			}
-		}
-		for (var kk = 0; kk < Object.keys(classObj).length; kk++)
-			classes.push(Object.keys(classObj)[kk]);
-	}
-	var analysis = {};
-	for (var ii = 0; ii < classes.length; ii++) {
-		findNumber(classes[ii], "abcjs-v", analysis, "voice");
-		findNumber(classes[ii], "abcjs-l", analysis, "line");
-		findNumber(classes[ii], "abcjs-m", analysis, "measure");
-	}
-	if (target.staffPos)
-		analysis.staffPos = target.staffPos;
-	var closest = ev.target;
-	while (closest && closest.dataset && !closest.dataset.name && closest.tagName.toLowerCase() !== 'svg')
-		closest = closest.parentNode;
-	var parent = ev.target;
-	while (parent && parent.dataset && !parent.dataset.index && parent.tagName.toLowerCase() !== 'svg')
-		parent = parent.parentNode;
-	if (parent && parent.dataset) {
-		analysis.name = parent.dataset.name;
-		analysis.clickedName = closest.dataset.name;
-		analysis.parentClasses = parent.classList;
-	}
-	if (closest && closest.classList)
-		analysis.clickedClasses = closest.classList;
-	analysis.selectableElement = target.svgEl;
+	var ret = createAnalysis(target, ev)
+	var classes = ret.classes
+	var analysis = ret.analysis
 
 	for (var i = 0; i < this.listeners.length; i++) {
 		this.listeners[i](target.absEl.abcelem, target.absEl.tuneNumber, classes.join(' '), analysis, { step: dragStep, max: dragMax, index: dragIndex, setSelection: setSelection.bind(this) }, ev);
-	}
-}
-
-function findNumber(klass, match, target, name) {
-	if (klass.indexOf(match) === 0) {
-		var value = klass.replace(match, '');
-		var num = parseInt(value, 10);
-		if ('' + num === value)
-			target[name] = num;
 	}
 }
 

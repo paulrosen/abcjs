@@ -617,6 +617,16 @@ var Tune = function() {
 	this.deline = function(options) {
 		return delineTune(this.lines, options);
 	}
+	this.findSelectableElement = function(target) {
+		if (this.engraver && this.engraver.selectables)
+			return this.engraver.findSelectableElement(target)
+		return null
+	}
+	this.getSelectableArray = function() {
+		if (this.engraver && this.engraver.selectables)
+			return this.engraver.selectables
+		return []
+	}
 };
 
 module.exports = Tune;

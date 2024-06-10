@@ -126,3 +126,34 @@ If you aren't using the built in synth, but you still want the information that 
 
 This returns an array of all the sequence data. Normally you won't need this information, but there may be cases where it is useful for post-processing.
 
+### findSelectableElement(target)
+
+`target` is an HTML element. This will find the most appropriate selectable item for that element. This is useful if you want to know what a user is hovering over, for instance. Here's an example of how it might be used:
+
+```
+var renderAbc
+
+var options = {
+	add_classes: true,
+	selectTypes: true // Add selection for all possible elements
+};
+
+renderAbc = ABCJS.renderAbc("paper", abcString, options);
+var svg = document.getElementById("paper");
+svg.addEventListener('mouseover', hoverListener) // one hover listener for the entire tune
+
+function hoverListener(event) {
+	// use the most specific element that was hovered on - it will bubble up until a selectable element is found
+    var ret = renderAbc[0].findSelectableElement(event.relatedTarget)
+	// if there isn't a selectable element (that is, the hover is over a blank space), null is returned
+    if (ret)
+        console.log(ret) // info about what the mouse is over
+}
+```
+
+### getSelectableArray()
+
+This returns an array of all of the selectable items in the tune. The return type is `Array<Selectable>`.
+
+This can be used to build more complicated interactive functionality.
+

@@ -17,6 +17,7 @@ var GetFontAndAttr = require('./helpers/get-font-and-attr');
 var GetTextSize = require('./helpers/get-text-size');
 var draw = require('./draw/draw');
 var tablatures = require('../api/abc_tablatures');
+var findSelectableElement = require('./interactive/find-selectable-element');
 
 /**
  * @class
@@ -32,6 +33,7 @@ var tablatures = require('../api/abc_tablatures');
  */
 var EngraverController = function (paper, params) {
 	params = params || {};
+	this.findSelectableElement = findSelectableElement;
 	this.oneSvgPerLine = params.oneSvgPerLine;
 	this.selectionColor = params.selectionColor;
 	this.dragColor = params.dragColor ? params.dragColor : params.selectionColor;

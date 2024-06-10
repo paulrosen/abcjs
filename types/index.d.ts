@@ -839,6 +839,31 @@ declare module 'abcjs' {
 		vskip?: number;
 	}
 
+	export interface Selectable {
+		absEl: AbsoluteElement;
+		isDraggable: boolean;
+		staffPos: {
+			height: number;
+			top: number;
+			zero: number;
+		}
+		svgEl: SVGElement;
+	}
+
+	export interface SelectableReturn {
+		index: number;
+		classes: Array<string>;
+		element: Selectable;
+		analysis: {
+			staffPos: number;
+			name: string;
+			voice: number;
+			line: number;
+			measure: number;
+			selectableElement: HTMLElement;
+		}
+	}
+
 	export interface TuneObject {
 		formatting: Formatting;
 		engraver?: EngraverController;
@@ -866,21 +891,13 @@ declare module 'abcjs' {
 		setUpAudio: (options: SynthOptions) => AudioTracks;
 		makeVoicesArray: () => Array<Selectable[]>
 		deline: () => Array<TuneLine>;
+		findSelectableElement: (target: HTMLElement) => SelectableReturn | null;
+		getSelectableArray: () => Array<Selectable>
 		lineBreaks?: Array<number>;
 		visualTranspose?: number;
 	}
 
 	export type TuneObjectArray = [TuneObject]
-
-	export interface Selectable {
-		absEl: AbsoluteElement;
-		isDraggable: boolean;
-		staffPos: {
-			height: number;
-			top: number;
-			zero: number;
-		}
-	}
 
 	export interface AbcElem {
 		el_type: string; //TODO enumerate these

@@ -10,6 +10,7 @@
 	<title>abcjs: Drag And Drop Demo</title>
 	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 	<script type="text/javascript">
+		var renderAbc
 		function sanitize(str) {
 			return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		}
@@ -40,7 +41,7 @@
 			};
 
 			var start = Date.now();
-			ABCJS.renderAbc("paper", abcString, options);
+			renderAbc = ABCJS.renderAbc("paper", abcString, options);
 			var len = Date.now() - start;
 
 			var svg = document.getElementById("paper");
@@ -49,6 +50,8 @@
 			el.innerText = Math.round(size.length / 1000);
 			el = document.getElementById("time");
 			el.innerText = len;
+
+			svg.addEventListener('mouseover', hoverListener)
 		}
 
 		var allPitches = [
@@ -99,6 +102,12 @@
 		function selectNext() {
 			if (selectionCallback && currentIndex < maxIndex)
 				selectionCallback(currentIndex+1);
+		}
+
+		function hoverListener(event) {
+			var ret = renderAbc[0].findSelectableElement(event.relatedTarget)
+			if (ret)
+				console.log(ret)
 		}
 
 		function clickListener(abcelem, tuneNumber, classes, analysis, drag, mouseEvent) {

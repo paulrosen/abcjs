@@ -46,6 +46,8 @@ var Parse = function() {
 			setTiming: tune.setTiming,
 			setUpAudio: tune.setUpAudio,
 			deline: tune.deline,
+			findSelectableElement: tune.findSelectableElement,
+			getSelectableArray: tune.getSelectableArray,
 		};
 		if (tune.lineBreaks)
 			t.lineBreaks = tune.lineBreaks;
