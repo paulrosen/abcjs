@@ -138,18 +138,19 @@ function CreateSynth() {
 				if (event.pitch !== undefined) {
 					var pitchNumber = event.pitch;
 					var noteName = pitchToNoteName[pitchNumber];
+					var inst = event.instrument !== undefined ? instrumentIndexToName[event.instrument] : currentInstrument
 					if (noteName) {
-						if (!allNotes[currentInstrument])
-							allNotes[currentInstrument] = {};
-						if (!soundsCache[currentInstrument] || !soundsCache[currentInstrument][noteName])
-							allNotes[currentInstrument][noteName] = true;
+						if (!allNotes[inst])
+							allNotes[inst] = {};
+						if (!soundsCache[inst] || !soundsCache[inst][noteName])
+							allNotes[inst][noteName] = true;
 						else {
-							var label2 = currentInstrument+":"+noteName
+							var label2 = inst+":"+noteName
 							if (cached.indexOf(label2) < 0)
 								cached.push(label2);
 						}
 					} else {
-						var label = currentInstrument+":"+noteName
+						var label = inst+":"+noteName
 						console.log("Can't find note: ", pitchNumber, label);
 						if (errorNotes.indexOf(label) < 0)
 							errorNotes.push(label)
