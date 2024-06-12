@@ -92,6 +92,16 @@ var pitchesToPerc = require('./pitches-to-perc');
 			pickupLength = voices[0][0].pickupLength;
 
 		// For resolving chords.
+		if (options.bassprog !== undefined)
+			midiOptions.bassprog = [options.bassprog]
+		if (options.bassvol !== undefined)
+			midiOptions.bassvol = [options.bassvol]
+		if (options.chordprog !== undefined)
+			midiOptions.chordprog = [options.chordprog]
+		if (options.chordvol !== undefined)
+			midiOptions.chordvol = [options.chordvol]
+		if (options.gchord !== undefined)
+			midiOptions.gchord = [options.gchord]
 		chordTrack = new ChordTrack(voices.length, options.chordsOff, midiOptions, meter)
 
 		// First adjust the input to resolve ties, set the starting time for each note, etc. That will make the rest of the logic easier
