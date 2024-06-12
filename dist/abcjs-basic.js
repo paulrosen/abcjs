@@ -14000,12 +14000,12 @@ function CreateSynth() {
   self.audioBuffers = []; // cache of the buffers so starting play can be fast.
   self.duration = undefined; // the duration of the tune in seconds.
   self.isRunning = false; // whether there is currently a sound buffer running.
-  //	self.options = undefined
+  self.options = undefined;
 
   // Load and cache all needed sounds
   self.init = function (options) {
     if (!options) options = {};
-    //		self.options = options
+    if (options.options) self.options = options.options;
     registerAudioContext(options.audioContext); // This works no matter what - if there is already an ac it is a nop; if the context is not passed in, then it creates one.
     var startTime = activeAudioContext().currentTime;
     self.debugCallback = options.debugCallback;
@@ -14080,6 +14080,7 @@ function CreateSynth() {
     self.sequenceCallback = params.sequenceCallback;
     self.callbackContext = params.callbackContext;
     self.onEnded = params.onEnded;
+    self.meterFraction = options.visualObj.getMeterFraction();
     var allNotes = {};
     var cached = [];
     var errorNotes = [];
@@ -14238,8 +14239,7 @@ function CreateSynth() {
       // There might be a previous run that needs to be turned off.
       self.stop();
       var noteMapTracks = createNoteMap(self.flattened);
-      // if (self.options.swing)
-      // 	addSwing(noteMapTracks, self.options.swing, self.beatsPerMeasure)
+      if (self.options.swing) addSwing(noteMapTracks, self.options.swing, self.meterFraction);
       if (self.sequenceCallback) self.sequenceCallback(noteMapTracks, self.callbackContext);
       var panDistances = setPan(noteMapTracks.length, self.pan);
 
@@ -14452,41 +14452,65 @@ function CreateSynth() {
       };
     }
   };
+  function addSwing(noteMapTracks, swing, meterFraction) {
+    // we can only swing in X/4 and X/8 meters.
+    if (meterFraction.den != 4 && meterFraction.den != 8) return;
+    swing = parseFloat(swing);
 
-  // // this is a first attempt at adding a little bit of swing to the output, but the algorithm isn't correct.
-  // function addSwing(noteMapTracks, swing, beatsPerMeasure) {
-  // 	console.log("addSwing", noteMapTracks, swing, beatsPerMeasure)
-  // 	// Swing should be between -0.9 and 0.9. Make sure the input is between them.
-  // 	// Then that is the percentage to add to the first beat, so a negative number moves the second beat earlier.
-  // 	// A value of zero is the same as no swing at all.
-  // 	// This only works when there are an even number of beats in a measure.
-  // 	if (beatsPerMeasure % 2 !== 0)
-  // 		return;
-  // 	swing = parseFloat(swing)
-  // 	if (isNaN(swing))
-  // 		return
-  // 	if (swing < -0.9)
-  // 		swing = -0.9
-  // 	if (swing > 0.9)
-  // 		swing = 0.9
-  // 	var beatLength = (1 / beatsPerMeasure)*2
-  // 	swing = beatLength * swing
-  // 	for (var t = 0; t < noteMapTracks.length; t++) {
-  // 		var track = noteMapTracks[t];
-  // 		for (var i = 0; i < track.length; i++) {
-  // 			var event = track[i];
-  // 			if (event.start % beatLength) {
-  // 				// This is the off beat
-  // 				event.start += swing;
-  // 			} else {
-  // 				// This is the beat
-  // 				event.end += swing;
-  // 			}
-  // 		}
-  // 	}
-  // }
+    // 50 (or less) is no swing, 
+    if (isNaN(swing) || swing <= 50) return;
+
+    // 66 is triplet swing 2:1, and 
+    // 60 is swing with a ratio of 3:2. 
+    // 75 is the maximum swing where the first eight is played as a dotted eight and the second as a sixteenth. 
+    if (swing > 75) swing = 75;
+
+    // convert the swing percentage to a percentage of increase for the first half of the beat
+    swing = swing / 50 - 1;
+
+    // The volume of the swung notes is increased by this factor
+    // could be also in the settings. Try out values such 0.1, 0.2
+    var volumeIncrease = 0.0;
+
+    // the beatLength in X/8 meters
+    var beatLength = 0.25;
+
+    // in X/8 meters the 16s swing so the beatLength is halved
+    if (meterFraction.den === 8) beatLength = beatLength / 2;
+
+    // duration of a half beat
+    var halfbeatLength = beatLength / 2;
+
+    // the extra duration of the first swung notes and the delay of the second notes
+    var swingDuration = halfbeatLength * swing;
+    for (var t = 0; t < noteMapTracks.length; t++) {
+      var track = noteMapTracks[t];
+      for (var i = 0; i < track.length; i++) {
+        var event = track[i];
+        if (
+        // is halfbeat
+        event.start % halfbeatLength == 0 && event.start % beatLength != 0 && (
+        // the previous note is on the beat or before OR there is no previous note 
+        i == 0 || track[i - 1].start <= track[i].start - halfbeatLength) && (
+        // the next note is on the beat or after OR there is no next note
+        i == track.length - 1 || track[i + 1].start >= track[i].start + halfbeatLength)) {
+          var oldEventStart = event.start;
+          event.start += swingDuration;
+
+          // Increase volume of swung notes
+          event.volume *= 1 + volumeIncrease;
+
+          // if there is a previous note ending at the start of this note, extend its end
+          // and decrease its volume
+          if (i > 0 && track[i - 1].end == oldEventStart) {
+            track[i - 1].end = event.start;
+            track[i - 1].volume *= 1 - volumeIncrease;
+          }
+        }
+      }
+    }
+  }
 }
-
 module.exports = CreateSynth;
 
 /***/ }),
