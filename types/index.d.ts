@@ -55,7 +55,7 @@ declare module 'abcjs' {
 		"controlcombo" | "temperamentnormal" | "gchord" | "ptstress" | "beatmod" | "deltaloudness" | "drumbars" | "pitchbend" |
 		"gracedivider" | "makechordchannels" | "randomchordattack" | "chordattack" | "stressmodel" | "transpose" |
 		"rtranspose" | "volinc" | "program" | "ratio" | "snt" | "bendvelocity" | "control" | "temperamentlinear" | "beat" | "beatstring" |
-		"drone" | "bassprog" | "chordprog" | "drummap" | "portamento" | "expand" | "grace" | "trim" | "drum" | "chordname";
+		"drone" | "drummap" | "portamento" | "expand" | "grace" | "trim" | "drum" | "chordname";
 
 	export type StemDirection = 'up' | 'down' | 'auto' | 'none';
 
@@ -372,6 +372,13 @@ declare module 'abcjs' {
 		defaultQpm?: number;
 		chordsOff?: boolean;
 		detuneOctave?: boolean;
+
+		swing?: number;
+		bassprog?: number;
+		bassvol?: number;
+		chordprog?: number;
+		chordvol?: number;
+		gchord?: string;
 }
 
 	export interface SynthVisualOptions {
