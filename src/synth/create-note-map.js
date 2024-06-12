@@ -18,13 +18,14 @@ var createNoteMap = function(sequence) {
 					// ev contains:
 					// {"cmd":"note","pitch":72,"volume":95,"start":0.125,"duration":0.25,"instrument":0,"gap":0}
 					// where start and duration are in whole notes, gap is in 1/1920 of a second (i.e. MIDI ticks)
+					var inst = ev.instrument !== undefined ? instrumentIndexToName[ev.instrument] : currentInstrument
 					if (ev.duration > 0) {
 						var gap = ev.gap ? ev.gap : 0;
 						var len = ev.duration;
 						gap = Math.min(gap, len * 2 / 3);
 						var obj = {
 							pitch: ev.pitch,
-							instrument: currentInstrument,
+							instrument: inst,
 							start: Math.round((ev.start) * 1000000)/1000000,
 							end: Math.round((ev.start + len - gap) * 1000000)/1000000,
 							volume: ev.volume
