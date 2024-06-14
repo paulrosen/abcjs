@@ -92,15 +92,15 @@ var pitchesToPerc = require('./pitches-to-perc');
 			pickupLength = voices[0][0].pickupLength;
 
 		// For resolving chords.
-		if (options.bassprog !== undefined)
+		if (options.bassprog !== undefined && !midiOptions.bassprog)
 			midiOptions.bassprog = [options.bassprog]
-		if (options.bassvol !== undefined)
+		if (options.bassvol !== undefined && !midiOptions.bassvol)
 			midiOptions.bassvol = [options.bassvol]
-		if (options.chordprog !== undefined)
+		if (options.chordprog !== undefined && !midiOptions.chordprog)
 			midiOptions.chordprog = [options.chordprog]
-		if (options.chordvol !== undefined)
+		if (options.chordvol !== undefined && !midiOptions.chordvol)
 			midiOptions.chordvol = [options.chordvol]
-		if (options.gchord !== undefined)
+		if (options.gchord !== undefined && !midiOptions.gchord)
 			midiOptions.gchord = [options.gchord]
 		chordTrack = new ChordTrack(voices.length, options.chordsOff, midiOptions, meter)
 
