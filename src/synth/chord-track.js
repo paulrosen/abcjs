@@ -200,15 +200,6 @@ ChordTrack.prototype.chordNotes = function (bass, modifier) {
 	return notes;
 }
 
-ChordTrack.prototype.writeBoom = function (boom, beatLength, volume, beat, noteLength) {
-	this.writeNote(boom, beatLength, volume, beat, noteLength, this.bassInstrument)
-}
-
-ChordTrack.prototype.writeChick = function (chick, beatLength, volume, beat, noteLength) {
-	for (var c = 0; c < chick.length; c++)
-		this.writeNote(chick[c], beatLength, volume, beat, noteLength, this.chordInstrument)
-}
-
 ChordTrack.prototype.writeNote = function (note, beatLength, volume, beat, noteLength, instrument) {
 	// undefined means there is a stop time.
 	if (note !== undefined)
@@ -246,7 +237,7 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
 
 	//console.log(this.currentChords)
 	var currentChordsExpanded = expandCurrentChords(this.currentChords, 8*num/den, beatLength)
-	console.log(currentChordsExpanded)
+	//console.log(currentChordsExpanded)
 	var thisPattern = this.overridePattern ? this.overridePattern : this.rhythmPatterns[num + '/' + den]
 	if (portionOfAMeasure) {
 		thisPattern = [];
@@ -268,19 +259,24 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
 		if (p > 0 && currentChordsExpanded[p-1] && currentChordsExpanded[p] && currentChordsExpanded[p-1].boom !== currentChordsExpanded[p].boom)
 			firstBoom = true
 		var type = thisPattern[p]
-		var pitches = resolvePitch(currentChordsExpanded[p], type, firstBoom)
 		var isBoom = type.indexOf('boom') >= 0
+		// If we changed chords at a time when we're not expecting a bass note, then add an extra bass note in.
+		var newBass = !isBoom && p !== 0 && currentChordsExpanded[p-1].boom !== currentChordsExpanded[p].boom
+		var pitches = resolvePitch(currentChordsExpanded[p], type, firstBoom, newBass)
 		if (isBoom)
 			firstBoom = false
 		for (var oo = 0; oo < pitches.length; oo++) {
 			this.writeNote(pitches[oo], 
 				0.125,
-				isBoom ? this.boomVolume : this.chickVolume,
+				isBoom || newBass ? this.boomVolume : this.chickVolume,
 				p,
 				noteLength,
-				isBoom ? this.bassInstrument : this.chordInstrument
+				isBoom || newBass ? this.bassInstrument : this.chordInstrument
 			)
-			isBoom = false // only the first note in a chord is a bass note. This handles the case where bass and chord are played at the same time.
+			if (newBass)
+				newBass = false
+			else
+				isBoom = false // only the first note in a chord is a bass note. This handles the case where bass and chord are played at the same time.
 		}
 	}
 	return
@@ -307,12 +303,14 @@ ChordTrack.prototype.processChord = function (elem) {
 	}
 }
 
-function resolvePitch(currentChord, type, firstBoom) {
+function resolvePitch(currentChord, type, firstBoom, newBass) {
 	var ret = []
 	if (!currentChord)
 		return ret
 	if (type.indexOf('boom') >= 0)
 		ret.push(firstBoom ? currentChord.boom : currentChord.boom2)
+	else if (newBass)
+		ret.push(currentChord.boom)
 	if (type.indexOf('chick') >= 0) {
 		for (var i = 0; i < currentChord.chick.length; i++)
 			ret.push(currentChord.chick[i])
