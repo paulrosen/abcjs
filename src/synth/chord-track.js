@@ -8,23 +8,14 @@
 // - If a chord root is not A-G, then ignore it as if the chord wasn't there at all.
 // - If a chord modification isn't in our supported list, change it to a major triad.
 //
-// - If there is only one chord in a measure:
-//		- If 2/4, play root chord
-//		- If cut time, play root(1) chord(3)
-//		- If 3/4, play root chord chord
-//		- If 4/4 or common time, play root chord fifth chord
-//		- If 6/8, play root(1) chord(3) fifth(4) chord(6)
-//		- For any other meter, play the full chord on each beat. (TODO-PER: expand this as more support is added.)
+// - There is a standard pattern of boom-chick for each time sig, or it can be overridden.
+// - For any unrecognized meter, play the full chord on each beat.
 //
 //	- If there is a chord specified that is not on a beat, move it earlier to the previous beat, unless there is already a chord on that beat.
 //	- Otherwise, move it later, unless there is already a chord on that beat.
 // 	- Otherwise, ignore it. (TODO-PER: expand this as more support is added.)
 //
-// - If there is a chord on the second beat, play a chord for the first beat instead of a bass note.
-// - Likewise, if there is a chord on the fourth beat of 4/4, play a chord on the third beat instead of a bass note.
-//
-// If there is any note in the melody that has a rhythm head, then assume the melody controls the rhythm, so that is
-// the same as a break.
+// If there is any note in the melody that has a rhythm head, then assume the melody controls the rhythm, so there is no chord added for that entire measure.
 
 var parseCommon = require("../parse/abc_common");
 
@@ -47,6 +38,8 @@ var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter) {
 	this.chordInstrument = midiOptions.chordprog && midiOptions.chordprog.length === 1 ? midiOptions.chordprog[0] : 0;
 	this.boomVolume = midiOptions.bassvol && midiOptions.bassvol.length === 1 ? midiOptions.bassvol[0] : 64;
 	this.chickVolume = midiOptions.chordvol && midiOptions.chordvol.length === 1 ? midiOptions.chordvol[0] : 48;
+
+	this.overridePattern = midiOptions.gchord ? parseGChord(midiOptions.gchord[0]) : undefined
 };
 
 ChordTrack.prototype.setMeter = function (meter) {
@@ -88,7 +81,7 @@ ChordTrack.prototype.barEnd = function (element) {
 	this.chordLastBar = this.lastChord;
 };
 
-ChordTrack.prototype.gChordReceived = function (element) {
+ChordTrack.prototype.gChordOn = function (element) {
 	if (!this.chordsOff)
 		this.gChordTacet = element.tacet;
 };
@@ -208,14 +201,18 @@ ChordTrack.prototype.chordNotes = function (bass, modifier) {
 }
 
 ChordTrack.prototype.writeBoom = function (boom, beatLength, volume, beat, noteLength) {
-	// undefined means there is a stop time.
-	if (boom !== undefined)
-		this.chordTrack.push({ cmd: 'note', pitch: boom, volume: volume, start: this.lastBarTime + beat * durationRounded(beatLength, this.tempoChangeFactor), duration: durationRounded(noteLength, this.tempoChangeFactor), gap: 0, instrument: this.bassInstrument });
+	this.writeNote(boom, beatLength, volume, beat, noteLength, this.bassInstrument)
 }
 
 ChordTrack.prototype.writeChick = function (chick, beatLength, volume, beat, noteLength) {
 	for (var c = 0; c < chick.length; c++)
-		this.chordTrack.push({ cmd: 'note', pitch: chick[c], volume: volume, start: this.lastBarTime + beat * durationRounded(beatLength, this.tempoChangeFactor), duration: durationRounded(noteLength, this.tempoChangeFactor), gap: 0, instrument: this.chordInstrument });
+		this.writeNote(chick[c], beatLength, volume, beat, noteLength, this.chordInstrument)
+}
+
+ChordTrack.prototype.writeNote = function (note, beatLength, volume, beat, noteLength, instrument) {
+	// undefined means there is a stop time.
+	if (note !== undefined)
+		this.chordTrack.push({ cmd: 'note', pitch: note, volume: volume, start: this.lastBarTime + beat * durationRounded(beatLength, this.tempoChangeFactor), duration: durationRounded(noteLength, this.tempoChangeFactor), gap: 0, instrument: instrument });
 }
 
 ChordTrack.prototype.chordTrackEmpty = function () {
@@ -228,107 +225,70 @@ ChordTrack.prototype.chordTrackEmpty = function () {
 }
 
 ChordTrack.prototype.resolveChords = function (startTime, endTime) {
+	// If there is a rhythm head anywhere in the measure then don't add a separate rhythm track
+	if (this.hasRhythmHead)
+		return
+
 	var num = this.meter.num;
 	var den = this.meter.den;
 	var beatLength = 1 / den;
 	var noteLength = beatLength / 2;
-	var pattern = this.rhythmPatterns[num + '/' + den];
 	var thisMeasureLength = parseInt(num, 10) / parseInt(den, 10);
 	var portionOfAMeasure = thisMeasureLength - (endTime - startTime) / this.tempoChangeFactor;
 	if (Math.abs(portionOfAMeasure) < 0.00001)
-		portionOfAMeasure = false;
-	if (!pattern || portionOfAMeasure) { // If it is an unsupported meter, or this isn't a full bar, just chick on each beat.
-		pattern = [];
-		var beatsPresent = ((endTime - startTime) / this.tempoChangeFactor) / beatLength;
-		for (var p = 0; p < beatsPresent; p++)
-			pattern.push("chick");
-	}
-	//console.log(startTime, pattern, currentChords, lastChord, portionOfAMeasure)
+		portionOfAMeasure = 0;
 
-	if (this.currentChords.length === 0) { // there wasn't a new chord this measure, so use the last chord declared.
-		this.currentChords.push({ beat: 0, chord: this.lastChord });
-	}
-	if (this.currentChords[0].beat !== 0 && this.lastChord) { // this is the case where there is a chord declared in the measure, but not on its first beat.
-		if (this.chordLastBar)
-			this.currentChords.unshift({ beat: 0, chord: this.chordLastBar });
-	}
-	if (this.currentChords.length === 1) {
-		for (var m = this.currentChords[0].beat; m < pattern.length; m++) {
-			if (!this.hasRhythmHead) {
-				switch (pattern[m]) {
-					case 'boom':
-						this.writeBoom(this.currentChords[0].chord.boom, beatLength, this.boomVolume, m, noteLength);
-						break;
-					case 'boom2':
-						this.writeBoom(this.currentChords[0].chord.boom2, beatLength, this.boomVolume, m, noteLength);
-						break;
-					case 'chick':
-						this.writeChick(this.currentChords[0].chord.chick, beatLength, this.chickVolume, m, noteLength);
-						break;
-				}
-			}
-		}
-		return;
+	 // there wasn't a new chord this measure, so use the last chord declared.
+	 // also the case where there is a chord declared in the measure, but not on its first beat.
+	if (this.currentChords.length === 0 || this.currentChords[0].beat !== 0) {
+		this.currentChords.unshift({ beat: 0, chord: this.chordLastBar });
 	}
 
-	// If we are here it is because more than one chord was declared in the measure, so we have to sort out what chord goes where.
-
-	// First, normalize the chords on beats.
-	var mult = beatLength === 0.125 ? 3 : 1; // If this is a compound meter then the beats in the currentChords is 1/3 of the true beat
-	var beats = {};
-	for (var i = 0; i < this.currentChords.length; i++) {
-		var cc = this.currentChords[i];
-		var b = Math.round(cc.beat * mult);
-		beats['' + b] = cc;
-	}
-
-	// - If there is a chord on the second beat, play a chord for the first beat instead of a bass note.
-	// - Likewise, if there is a chord on the fourth beat of 4/4, play a chord on the third beat instead of a bass note.
-	for (var m2 = 0; m2 < pattern.length; m2++) {
-		var thisChord;
-		if (beats['' + m2])
-			thisChord = beats['' + m2];
-		var lastBoom;
-		if (!this.hasRhythmHead && thisChord) {
-			switch (pattern[m2]) {
-				case 'boom':
-					if (beats['' + (m2 + 1)]) // If there is not a chord change on the next beat, play a bass note.
-						this.writeChick(thisChord.chord.chick, beatLength, this.chickVolume, m2, noteLength);
-					else {
-						this.writeBoom(thisChord.chord.boom, beatLength, this.boomVolume, m2, noteLength);
-						lastBoom = thisChord.chord.boom;
-					}
-					break;
-				case 'boom2':
-					if (beats['' + (m2 + 1)])
-						this.writeChick(thisChord.chord.chick, beatLength, this.chickVolume, m2, noteLength);
-					else {
-						// If there is the same root as the last chord, use the alternating bass, otherwise play the root.
-						if (lastBoom === thisChord.chord.boom) {
-							this.writeBoom(thisChord.chord.boom2, beatLength, this.boomVolume, m2, noteLength);
-							lastBoom = undefined;
-						} else {
-							this.writeBoom(thisChord.chord.boom, beatLength, this.boomVolume, m2, noteLength);
-							lastBoom = thisChord.chord.boom;
-						}
-					}
-					break;
-				case 'chick':
-					this.writeChick(thisChord.chord.chick, beatLength, this.chickVolume, m2, noteLength);
-					break;
-				case '':
-					if (beats['' + m2])	// If there is an explicit chord on this beat, play it.
-						this.writeChick(thisChord.chord.chick, beatLength, this.chickVolume, m2, noteLength);
-					break;
-			}
+	//console.log(this.currentChords)
+	var currentChordsExpanded = expandCurrentChords(this.currentChords, 8*num/den, beatLength)
+	console.log(currentChordsExpanded)
+	var thisPattern = this.overridePattern ? this.overridePattern : this.rhythmPatterns[num + '/' + den]
+	if (portionOfAMeasure) {
+		thisPattern = [];
+		var beatsPresent = ((endTime - startTime) / this.tempoChangeFactor) * 8;
+		for (var p = 0; p < beatsPresent/2; p += 2) {
+			thisPattern.push("chick");
+			thisPattern.push("");
 		}
 	}
+	if (!thisPattern) {
+		thisPattern = []
+		for (var p = 0; p < (8*num/den)/2; p++) {
+			thisPattern.push('chick')
+			thisPattern.push("");
+		}
+	}
+	var firstBoom = true
+	for (var p = 0; p < thisPattern.length; p++) {
+		if (p > 0 && currentChordsExpanded[p-1] && currentChordsExpanded[p] && currentChordsExpanded[p-1].boom !== currentChordsExpanded[p].boom)
+			firstBoom = true
+		var type = thisPattern[p]
+		var pitches = resolvePitch(currentChordsExpanded[p], type, firstBoom)
+		var isBoom = type.indexOf('boom') >= 0
+		if (isBoom)
+			firstBoom = false
+		for (var oo = 0; oo < pitches.length; oo++) {
+			this.writeNote(pitches[oo], 
+				0.125,
+				isBoom ? this.boomVolume : this.chickVolume,
+				p,
+				noteLength,
+				isBoom ? this.bassInstrument : this.chordInstrument
+			)
+			isBoom = false // only the first note in a chord is a bass note. This handles the case where bass and chord are played at the same time.
+		}
+	}
+	return
 }
 
 ChordTrack.prototype.processChord = function (elem) {
 	if (this.chordTrackFinished)
 		return
-	//var firstChord = false;
 	var chord = this.findChord(elem);
 	if (chord) {
 		var c = this.interpretChord(chord);
@@ -337,16 +297,90 @@ ChordTrack.prototype.processChord = function (elem) {
 			// If we ever have a chord in this voice, then we add the chord track.
 			// However, if there are chords on more than one voice, then just use the first voice.
 			if (this.chordTrack.length === 0) {
-				//firstChord = true;
 				this.chordTrack.push({ cmd: 'program', channel: this.chordChannel, instrument: this.chordInstrument });
 			}
 
 			this.lastChord = c;
-			var barBeat = calcBeat(this.lastBarTime, getBeatFraction(this.meter), timeToRealTime(elem.time));
+			var barBeat = calcBeat(this.lastBarTime, timeToRealTime(elem.time));
 			this.currentChords.push({ chord: this.lastChord, beat: barBeat, start: timeToRealTime(elem.time) });
 		}
 	}
-	//return firstChord;
+}
+
+function resolvePitch(currentChord, type, firstBoom) {
+	var ret = []
+	if (!currentChord)
+		return ret
+	if (type.indexOf('boom') >= 0)
+		ret.push(firstBoom ? currentChord.boom : currentChord.boom2)
+	if (type.indexOf('chick') >= 0) {
+		for (var i = 0; i < currentChord.chick.length; i++)
+			ret.push(currentChord.chick[i])
+	}
+	switch (type) {
+		case 'DO': ret.push(currentChord.chick[0]); break;
+		case 'MI': ret.push(currentChord.chick[1]); break;
+		case 'SOL': ret.push(currentChord.chick[2]); break;
+		case 'TI': currentChord.chick.length > 3 ? ret.push(currentChord.chick[2]) : ret.push(currentChord.chick[0]+12); break;
+		case 'TOP': currentChord.chick.length > 4 ? ret.push(currentChord.chick[2]) : ret.push(currentChord.chick[1]+12); break;
+		case 'do': ret.push(currentChord.chick[0]+12); break;
+		case 'mi': ret.push(currentChord.chick[1]+12); break;
+		case 'sol': ret.push(currentChord.chick[2]+12); break;
+		case 'ti': currentChord.chick.length > 3 ? ret.push(currentChord.chick[2]+12) : ret.push(currentChord.chick[0]+24); break;
+		case 'top': currentChord.chick.length > 4 ? ret.push(currentChord.chick[2]+12) : ret.push(currentChord.chick[1]+24); break;
+	}
+	return ret
+}
+
+function parseGChord(gchord) {
+	// TODO-PER: The spec is more complicated than this but for now this will not try to do anything with error cases like the wrong number of beats.
+	var pattern = []
+	for (var i = 0; i < gchord.length; i++) {
+		var ch = gchord[i]
+		switch(ch) {
+			case 'z' : pattern.push(''); break;
+			case '2' : pattern.push(''); break; // TODO-PER: This should extend the last note, but that's a small effect
+			case 'c' : pattern.push('chick'); break;
+			case 'b' : pattern.push('boom&chick'); break;
+			case 'f' : pattern.push('boom'); break;
+			case 'G' : pattern.push('DO'); break;
+			case 'H' : pattern.push('MI'); break;
+			case 'I' : pattern.push('SOL'); break;
+			case 'J' : pattern.push('TI'); break;
+			case 'K' : pattern.push('TOP'); break;
+			case 'g' : pattern.push('do'); break;
+			case 'h' : pattern.push('mi'); break;
+			case 'i' : pattern.push('sol'); break;
+			case 'j' : pattern.push('ti'); break;
+			case 'k' : pattern.push('top'); break;
+		}
+	}
+	return pattern
+}
+
+// This returns an array that has a chord for each 1/8th note position in the current measure
+function expandCurrentChords(currentChords, num8thNotes, beatLength) {
+	beatLength = beatLength * 8 // this is expressed as a fraction, so that 0.25 is a quarter notes. We want it to be the number of 8th notes
+	var chords = []
+	if (currentChords.length === 0)
+		return chords
+
+	var currentChord = currentChords[0].chord
+	for (var i = 1; i < currentChords.length; i++) {
+		var current = currentChords[i]
+		while (chords.length < current.beat) {
+			chords.push(currentChord)
+		}
+		currentChord = current.chord
+	}
+	while (chords.length < num8thNotes)
+		chords.push(currentChord)
+	return chords
+}
+
+function calcBeat(measureStart, currTime) {
+	var distanceFromStart = currTime - measureStart;
+	return distanceFromStart * 8;
 }
 
 ChordTrack.prototype.breakSynonyms = ['break', '(break)', 'no chord', 'n.c.', 'tacet'];
@@ -477,35 +511,23 @@ ChordTrack.prototype.chordIntervals = {
 };
 
 ChordTrack.prototype.rhythmPatterns = {
-	"2/2": ['boom', 'chick'],
-	"2/4": ['boom', 'chick'],
-	"3/4": ['boom', 'chick', 'chick'],
-	"4/4": ['boom', 'chick', 'boom2', 'chick'],
-	"5/4": ['boom', 'chick', 'chick', 'boom2', 'chick'],
-	"6/8": ['boom', '', 'chick', 'boom2', '', 'chick'],
-	"9/8": ['boom', '', 'chick', 'boom2', '', 'chick', 'boom2', '', 'chick'],
-	"12/8": ['boom', '', 'chick', 'boom2', '', 'chick', 'boom', '', 'chick', 'boom2', '', 'chick'],
+	"2/2": ['boom', '', '', '', 'chick', '', '', ''],
+	"3/2": ['boom', '', '', '', 'chick', '', '', '', 'chick', '', '', ''],
+	"4/2": ['boom', '', '', '', 'chick', '', '', '', 'boom', '', '', '', 'chick', '', '', ''],
+
+	"2/4": ['boom', '', 'chick', ''],
+	"3/4": ['boom', '', 'chick', '', 'chick', ''],
+	"4/4": ['boom', '', 'chick', '', 'boom', '', 'chick', ''],
+	"5/4": ['boom', '', 'chick', '', 'chick', '', 'boom', '', 'chick', ''],
+	"6/4": ['boom', '', 'chick', '', 'boom', '', 'chick', '', 'boom', '', 'chick', ''],
+
+	"3/8": ['boom', '', 'chick'],
+	"6/8": ['boom', '', 'chick', 'boom', '', 'chick'],
+	"9/8": ['boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick'],
+	"12/8": ['boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick'],
 };
 
 // TODO-PER: these are repeated in flattener. Can it be shared?
-function calcBeat(measureStart, beatLength, currTime) {
-	var distanceFromStart = currTime - measureStart;
-	return distanceFromStart / beatLength;
-}
-
-function getBeatFraction(meter) {
-	switch (parseInt(meter.den, 10)) {
-		case 2: return 0.5;
-		case 4: return 0.25;
-		case 8:
-			if (meter.num % 3 === 0)
-				return 0.375;
-			else
-				return 0.125;
-		case 16: return 0.125;
-	}
-	return 0.25;
-}
 
 function timeToRealTime(time) {
 	return time / 1000000;

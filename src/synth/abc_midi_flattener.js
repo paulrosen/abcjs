@@ -187,7 +187,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 						alignDrumToMeter();
 						break;
 					case "gchord":
-						chordTrack.gChordReceived(element)
+						chordTrack.gChordOn(element)
 						break;
 					case "beat":
 						stressBeat1 = element.beats[0];

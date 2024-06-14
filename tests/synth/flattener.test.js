@@ -1249,9 +1249,9 @@ describe("Audio flattener", function() {
 				{"cmd":"note","pitch":54,"volume":48,"start":0.5,"duration":0.25,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":57,"volume":48,"start":0.5,"duration":0.25,"gap":0,"instrument":0},
 				{"cmd":"note","pitch":38,"volume":64,"start":1,"duration":0.166667,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":50,"volume":48,"start":1.333333,"duration":0.166667,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":54,"volume":48,"start":1.333333,"duration":0.166667,"gap":0,"instrument":0},
-				{"cmd":"note","pitch":57,"volume":48,"start":1.333333,"duration":0.166667,"gap":0,"instrument":0}
+				{"cmd":"note","pitch":50,"volume":48,"start":1.333332,"duration":0.166667,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":54,"volume":48,"start":1.333332,"duration":0.166667,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":57,"volume":48,"start":1.333332,"duration":0.166667,"gap":0,"instrument":0}
 			]
 		]
 	};
@@ -2726,34 +2726,171 @@ describe("Audio flattener", function() {
 	'"C"z4|"G7"z4|\n'
 
 	var expectedChordArpeggio = 
-		{
-			"tempo":180,"instrument":0,"tracks":[
-				[
-					{"cmd":"program","channel":0,"instrument":0}
-				],
-				[
-					{"cmd":"program","channel":1,"instrument":72},
-					{"cmd":"note","pitch":36,"volume":125,"start":0,"duration":0.125,"gap":0,"instrument":10},
-					{"cmd":"note","pitch":48,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":52,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":55,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":31,"volume":125,"start":0.5,"duration":0.125,"gap":0,"instrument":10},
-					{"cmd":"note","pitch":48,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":52,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":55,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":43,"volume":125,"start":1,"duration":0.125,"gap":0,"instrument":10},
-					{"cmd":"note","pitch":55,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":59,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":62,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":65,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":38,"volume":125,"start":1.5,"duration":0.125,"gap":0,"instrument":10},
-					{"cmd":"note","pitch":55,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},{"cmd":"note","pitch":59,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":62,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":65,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72}
-				]
+	{
+		"tempo": 180,
+		"instrument": 0,
+		"tracks": [
+			[
+				{
+					"cmd": "program",
+					"channel": 0,
+					"instrument": 0
+				}
 			],
-			"totalDuration":2
-		}
+			[
+				{
+					"cmd": "program",
+					"channel": 1,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 36,
+					"volume": 125,
+					"start": 0,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 52,
+					"volume": 23,
+					"start": 0.125,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 0.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 52,
+					"volume": 23,
+					"start": 0.375,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 31,
+					"volume": 125,
+					"start": 0.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 64,
+					"volume": 23,
+					"start": 0.625,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 67,
+					"volume": 23,
+					"start": 0.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 64,
+					"volume": 23,
+					"start": 0.875,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 43,
+					"volume": 125,
+					"start": 1,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 23,
+					"start": 1.125,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 23,
+					"start": 1.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 23,
+					"start": 1.375,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 38,
+					"volume": 125,
+					"start": 1.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 71,
+					"volume": 23,
+					"start": 1.625,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 74,
+					"volume": 23,
+					"start": 1.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 71,
+					"volume": 23,
+					"start": 1.875,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				}
+			]
+		],
+		"totalDuration": 2
+	}
 
 	//////////////////////////////////////////////////////////
 
@@ -2766,38 +2903,366 @@ describe("Audio flattener", function() {
 	'%%MIDI chordprog 72\n' +
 	'%%MIDI chordvol 23\n' +
 	'K:C\n' +
-	'"C"z4|"G7"z4|\n'
+	'"C"z4|"G7"z4|"C"z"C#°7"z"Dm7"z"G7"z|"F"z3"F#°7"z|\n'
 
 	var expectedChordSwing = 
-		{
-			"tempo":180,"instrument":0,"tracks":[
-				[
-					{"cmd":"program","channel":0,"instrument":0}
-				],
-				[
-					{"cmd":"program","channel":1,"instrument":72},
-					{"cmd":"note","pitch":36,"volume":125,"start":0,"duration":0.125,"gap":0,"instrument":10},
-					{"cmd":"note","pitch":48,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":52,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":55,"volume":23,"start":0.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":31,"volume":125,"start":0.5,"duration":0.125,"gap":0,"instrument":10},
-					{"cmd":"note","pitch":48,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":52,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":55,"volume":23,"start":0.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":43,"volume":125,"start":1,"duration":0.125,"gap":0,"instrument":10},
-					{"cmd":"note","pitch":55,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":59,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":62,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":65,"volume":23,"start":1.25,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":38,"volume":125,"start":1.5,"duration":0.125,"gap":0,"instrument":10},
-					{"cmd":"note","pitch":55,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},{"cmd":"note","pitch":59,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":62,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72},
-					{"cmd":"note","pitch":65,"volume":23,"start":1.75,"duration":0.125,"gap":0,"instrument":72}
-				]
+	{
+		"tempo": 180,
+		"instrument": 0,
+		"tracks": [
+			[
+				{
+					"cmd": "program",
+					"channel": 0,
+					"instrument": 0
+				}
 			],
-			"totalDuration":2
-		}
+			[
+				{
+					"cmd": "program",
+					"channel": 1,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 36,
+					"volume": 125,
+					"start": 0,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 48,
+					"volume": 23,
+					"start": 0,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 52,
+					"volume": 23,
+					"start": 0,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 0,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 48,
+					"volume": 23,
+					"start": 0.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 52,
+					"volume": 23,
+					"start": 0.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 0.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 31,
+					"volume": 125,
+					"start": 0.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 48,
+					"volume": 23,
+					"start": 0.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 52,
+					"volume": 23,
+					"start": 0.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 0.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 48,
+					"volume": 23,
+					"start": 0.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 52,
+					"volume": 23,
+					"start": 0.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 0.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 43,
+					"volume": 125,
+					"start": 1,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 1,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 23,
+					"start": 1,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 23,
+					"start": 1,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 65,
+					"volume": 23,
+					"start": 1,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 1.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 23,
+					"start": 1.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 23,
+					"start": 1.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 65,
+					"volume": 23,
+					"start": 1.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 38,
+					"volume": 125,
+					"start": 1.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 1.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 23,
+					"start": 1.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 23,
+					"start": 1.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 65,
+					"volume": 23,
+					"start": 1.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 1.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 23,
+					"start": 1.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 23,
+					"start": 1.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 65,
+					"volume": 23,
+					"start": 1.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				}
+			]
+		],
+		"totalDuration": 4
+	}
 
+	//////////////////////////////////////////////////////////
+
+	var abcAllTimeSigs = 'X: 1\n' +
+	'L: 1/4\n' +
+	'M: 4/4\n' +
+	'K:C\n' +
+	'M:2/4\n' +
+	'"C"zz|"D"z"E"z|\n' +
+	'M:3/4\n' +
+	'"C"zzz|"D"z"E"z"F"z|z"G"zz|\n' +
+	'M:5/4\n' +
+	'"C"zzzzz|"D"zzz"E"zz|z"G"zzzz|\n' +
+	'M:6/4\n' +
+	'"C"zzzzzz|"D"zzz"E"zzz|"G"zz"A"zz"B"zz|\n' +
+	'M:2/2\n' +
+	'"C"zzzz|"D"zz"E"zz|"G"z"A"zz"B"z|\n' +
+	'M:3/2\n' +
+	'"C"zzzzzz|"D"zzz"E"zzz|"G"zz"A"zz"B"zz|\n' +
+	'M:4/2\n' +
+	'"C"zzzzzzzz|"D"zzzz"E"zzzz|"G"zz"A"zz"B"zz"C"zz|\n' +
+	'M:3/8\n' +
+	'"C"z/z/z/|"D"z/"E"z/z/|"D"z/z/"E"z/|"G"z/"A"z/"B"z/|\n' +
+	'M:6/8\n' +
+	'"C"z/z/z/z/z/z/|"D"z/"E"z/z/"D"z/z/"E"z/|"G"z"A"z"B"z|\n' +
+	'M:9/8\n' +
+	'"C"z/z/z/z/z/z/z/z/z/|"D"z/z/"E"z/z/z/"D"z/z/z/"E"z/|"G"zz/"A"zz/"B"zz/|\n' +
+	'M:12/8\n' +
+	'"C"z/z/z/z/z/z/z/z/z/z/z/z/|"D"z/z/z/"E"z/z/z/z/"D"z/z/z/z/"E"z/|"G"zz"A"zz"B"zz|\n' +
+	'M:7/8\n' +
+	'"C"z/z/z/z/z/z/z/|"D"z/z/z/"E"z/z/z/z/|"G"z/z/z/z/"A"z/z/z/|\n'
+
+	var expectedAllTimeSigs = 
+	{
+		"tempo": 180,
+		"instrument": 0,
+		"tracks": [
+			[
+				{
+					"cmd": "program",
+					"channel": 0,
+					"instrument": 0
+				}
+			],
+			[]
+		],
+		"totalDuration": 39.25
+	}
 
 	//////////////////////////////////////////////////////////
 
@@ -2951,6 +3416,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-chord-swing", function() {
 		doFlattenTest(abcChordSwing, expectedChordSwing);
+	})
+
+	it("flatten-all-time-sigs", function() {
+		doFlattenTest(abcAllTimeSigs, expectedAllTimeSigs);
 	})
 
 })
