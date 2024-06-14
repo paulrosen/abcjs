@@ -3250,11 +3250,11 @@ describe("Audio flattener", function() {
 				{
 					"cmd": "note",
 					"pitch": 37,
-					"volume": 23,
+					"volume": 125,
 					"start": 2.25,
 					"duration": 0.125,
 					"gap": 0,
-					"instrument": 72
+					"instrument": 10
 				},
 				{
 					"cmd": "note",
@@ -3340,11 +3340,11 @@ describe("Audio flattener", function() {
 				{
 					"cmd": "note",
 					"pitch": 43,
-					"volume": 23,
+					"volume": 125,
 					"start": 2.75,
 					"duration": 0.125,
 					"gap": 0,
-					"instrument": 72
+					"instrument": 10
 				},
 				{
 					"cmd": "note",
@@ -3484,11 +3484,11 @@ describe("Audio flattener", function() {
 				{
 					"cmd": "note",
 					"pitch": 42,
-					"volume": 23,
+					"volume": 125,
 					"start": 3.75,
 					"duration": 0.125,
 					"gap": 0,
-					"instrument": 72
+					"instrument": 10
 				},
 				{
 					"cmd": "note",
@@ -3530,7 +3530,7 @@ describe("Audio flattener", function() {
 		],
 		"totalDuration": 4
 	}
-		
+
 	//////////////////////////////////////////////////////////
 
 	var abcAllTimeSigs = 'X: 1\n' +
