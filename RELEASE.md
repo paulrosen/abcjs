@@ -1,3 +1,47 @@
+# Version 6.4.0
+
+## Features
+
+* Support custom rhythm patterns in gChords
+
+* Add swing to the playback
+
+* Allow swing, bassprog, bassvol, chordprog, chordvol, and gchord to be set in the options.
+
+* Add findSelectableElement and getSelectableArray functions to help with hover.
+
+* Add `drumOff` to the parameters so that the metronome can only be for the prep beats
+
+* Allow an element to be passed into to the EditArea object in addition to an ID
+
+* Add left alignment option ot time-based-layout
+
+* Add timeBasedLayout parameter
+
+* Add "stafftopmargin" directive
+
+* Add tuneMetrics function
+
+## Bugs
+
+* Fix linespacing when using both oneSvgPerLine and scale
+    
+* fix placement of inverted fermata
+
+* Fix end points of slurs when there are beams involved
+
+* Fix bug with cursor not following a tie across a line break.
+
+* Improve spacing on time-based layout when left aligned
+
+* fix line distance when scaling
+
+* fix abcjs-staff class appearing in two places
+
+* fix bug in gchord sound when bass and chord programs are different
+
+* Many small fixes to types
+
 # Version 6.3.0
 
 ## Features

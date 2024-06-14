@@ -10,6 +10,10 @@ Full documentation is here: [abcjs documentation](https://paulrosen.github.io/ab
 
 There is an organization that has a collection of useful projects related to abcjs called [abcjs-music](https://github.com/abcjs-music). See some examples there. If you have a project that you think would be of general interest and would like to add it to that organization, contact me.
 
+## Announcement: version 6.4.0
+
+The method for creating chord accompaniment has changed. Hopefully there aren't any regressions but if you have an example that doesn't match what it used to be, please open an issue.
+
 ## Announcement: version 6.3.0
 
 Most users won't see any difference, but there was some changes to the underlying SVG structure for the top (the title, etc.) and bottom (the notes, etc.) text, so if your code depends on particular classes then this might be a breaking change. Hopefully the new structure will be clearer and will allow css to target particular parts easier.
