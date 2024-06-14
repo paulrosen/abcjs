@@ -27,6 +27,7 @@ function CreateSynth() {
 	self.duration = undefined; // the duration of the tune in seconds.
 	self.isRunning = false; // whether there is currently a sound buffer running.
 	self.options = undefined
+	self.pickupLength = 0
 
 	// Load and cache all needed sounds
 	self.init = function(options) {
@@ -116,6 +117,7 @@ function CreateSynth() {
 			var meter = options.visualObj.getMeterFraction();
 			if (meter.den)
 				self.meterSize = options.visualObj.getMeterFraction().num / options.visualObj.getMeterFraction().den;
+			self.pickupLength = options.visualObj.getPickupLength()
 		} else if (options.sequence)
 			self.flattened = options.sequence;
 		else
@@ -314,7 +316,7 @@ function CreateSynth() {
 			var noteMapTracks = createNoteMap(self.flattened);
 
 			if (self.options.swing)
-				addSwing(noteMapTracks, self.options.swing, self.meterFraction)
+				addSwing(noteMapTracks, self.options.swing, self.meterFraction, self.pickupLength)
 
 			if (self.sequenceCallback)
 				self.sequenceCallback(noteMapTracks, self.callbackContext);
@@ -550,7 +552,7 @@ function CreateSynth() {
 		}
 	};
 
-	function addSwing(noteMapTracks, swing, meterFraction) {
+	function addSwing(noteMapTracks, swing, meterFraction, pickupLength) {
 
 		// we can only swing in X/4 and X/8 meters.
 		if (meterFraction.den != 4 && meterFraction.den != 8)
@@ -594,7 +596,7 @@ function CreateSynth() {
 				var event = track[i];
 				if (
 					// is halfbeat
-					event.start % halfbeatLength == 0 && event.start % beatLength != 0 
+					(event.start-pickupLength) % halfbeatLength == 0 && (event.start-pickupLength) % beatLength != 0 
 					&& (
 						// the previous note is on the beat or before OR there is no previous note 
 						i == 0 
