@@ -6,7 +6,7 @@
 
 * Add swing to the playback
 
-* Allow swing, bassprog, bassvol, chordprog, chordvol, and gchord to be set in the options.
+* Allow swing, bassprog, bassvol, chordprog, chordvol, and gchord to be set in the options, and also on the fly.
 
 * Add findSelectableElement and getSelectableArray functions to help with hover.
 

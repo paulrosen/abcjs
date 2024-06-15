@@ -11429,7 +11429,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
             drumDefinition = normalizeDrumDefinition(element.params);
             alignDrumToMeter();
             break;
-          case "gchord":
+          case "gchordOn":
             chordTrack.gChordOn(element);
             break;
           case "beat":
@@ -11446,6 +11446,13 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
             break;
           case "beataccents":
             doBeatAccents = element.value;
+            break;
+          case "gchord":
+          case "bassprog":
+          case "chordprog":
+          case "bassvol":
+          case "chordvol":
+            chordTrack.paramChange(element);
             break;
           default:
             // This should never happen
@@ -12979,13 +12986,13 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                       break;
                     case "gchordoff":
                       voices[voiceNumber].push({
-                        el_type: 'gchord',
+                        el_type: 'gchordOn',
                         tacet: true
                       });
                       break;
                     case "gchordon":
                       voices[voiceNumber].push({
-                        el_type: 'gchord',
+                        el_type: 'gchordOn',
                         tacet: false
                       });
                       break;
@@ -13008,15 +13015,21 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                       });
                       break;
                     case "vol":
+                    case "volinc":
                       voices[voiceNumber].push({
-                        el_type: 'vol',
+                        el_type: elem.cmd,
                         volume: elem.params[0]
                       });
                       break;
-                    case "volinc":
+                    case "swing":
+                    case "gchord":
+                    case "bassprog":
+                    case "chordprog":
+                    case "bassvol":
+                    case "chordvol":
                       voices[voiceNumber].push({
-                        el_type: 'volinc',
-                        volume: elem.params[0]
+                        el_type: elem.cmd,
+                        param: elem.params[0]
                       });
                       break;
                     default:
@@ -13368,6 +13381,27 @@ ChordTrack.prototype.barEnd = function (element) {
 };
 ChordTrack.prototype.gChordOn = function (element) {
   if (!this.chordsOff) this.gChordTacet = element.tacet;
+};
+ChordTrack.prototype.paramChange = function (element) {
+  switch (element.el_type) {
+    case "gchord":
+      this.overridePattern = parseGChord(element.param);
+      break;
+    case "bassprog":
+      this.bassInstrument = element.param;
+      break;
+    case "chordprog":
+      this.chordInstrument = element.param;
+      break;
+    case "bassvol":
+      this.boomVolume = element.param;
+      break;
+    case "chordvol":
+      this.chickVolume = element.param;
+      break;
+    default:
+      console.log("unhandled midi param", element);
+  }
 };
 ChordTrack.prototype.finish = function () {
   if (!this.chordTrackEmpty())
