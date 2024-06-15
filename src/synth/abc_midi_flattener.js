@@ -186,7 +186,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 						drumDefinition = normalizeDrumDefinition(element.params);
 						alignDrumToMeter();
 						break;
-					case "gchord":
+					case "gchordOn":
 						chordTrack.gChordOn(element)
 						break;
 					case "beat":
@@ -204,6 +204,13 @@ var pitchesToPerc = require('./pitches-to-perc');
 					case "beataccents":
 						doBeatAccents = element.value;
 						break;
+					case "gchord":
+					case "bassprog":
+					case "chordprog":
+					case "bassvol":
+					case "chordvol":
+						chordTrack.paramChange(element)
+						break
 					default:
 						// This should never happen
 						console.log("MIDI creation. Unknown el_type: " + element.el_type + "\n");// jshint ignore:line

@@ -369,10 +369,10 @@ var parseCommon = require("../parse/abc_common");
 											voices[voiceNumber].push({ el_type: 'transpose', transpose: elem.params[0] });
 											break;
 										case "gchordoff":
-											voices[voiceNumber].push({ el_type: 'gchord', tacet: true });
+											voices[voiceNumber].push({ el_type: 'gchordOn', tacet: true });
 											break;
 										case "gchordon":
-											voices[voiceNumber].push({ el_type: 'gchord', tacet: false });
+											voices[voiceNumber].push({ el_type: 'gchordOn', tacet: false });
 											break;
 										case "beat":
 											voices[voiceNumber].push({ el_type: 'beat', beats: elem.params });
@@ -384,10 +384,16 @@ var parseCommon = require("../parse/abc_common");
 											voices[voiceNumber].push({ el_type: 'beataccents', value: true });
 											break;
 										case "vol":
-											voices[voiceNumber].push({ el_type: 'vol', volume: elem.params[0] });
-											break;
 										case "volinc":
-											voices[voiceNumber].push({ el_type: 'volinc', volume: elem.params[0] });
+											voices[voiceNumber].push({ el_type: elem.cmd, volume: elem.params[0] });
+											break;
+										case "swing":
+										case "gchord":
+										case "bassprog":
+										case "chordprog":
+										case "bassvol":
+										case "chordvol":
+											voices[voiceNumber].push({ el_type: elem.cmd, param: elem.params[0] });
 											break;
 										default:
 											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);

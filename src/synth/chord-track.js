@@ -86,6 +86,28 @@ ChordTrack.prototype.gChordOn = function (element) {
 		this.gChordTacet = element.tacet;
 };
 
+ChordTrack.prototype.paramChange = function (element) {
+	switch (element.el_type) {
+		case "gchord":
+			this.overridePattern = parseGChord(element.param);
+			break;
+		case "bassprog":
+			this.bassInstrument = element.param;
+			break;
+		case "chordprog":
+			this.chordInstrument = element.param;
+			break;
+		case "bassvol":
+			this.boomVolume = element.param;
+			break;
+		case "chordvol":
+			this.chickVolume = element.param;
+			break;
+		default:
+			console.log("unhandled midi param", element)	
+	}
+};
+
 ChordTrack.prototype.finish = function () {
 	if (!this.chordTrackEmpty()) // Don't do chords on more than one track, so turn off chord detection after we create it.
 		this.chordTrackFinished = true;
