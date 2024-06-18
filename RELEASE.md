@@ -1,3 +1,11 @@
+# Version 6.4.1
+
+## Bugs
+
+* fix regression when playing a specified sequence instead of using visualObj
+
+* don't inject a bass note when chords change mid-measure if the pattern doesn't start on a bass note.
+
 # Version 6.4.0
 
 ## Features
