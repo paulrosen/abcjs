@@ -127,7 +127,7 @@ function CreateSynth() {
 		self.sequenceCallback = params.sequenceCallback;
 		self.callbackContext = params.callbackContext;
 		self.onEnded = params.onEnded;
-		self.meterFraction = options.visualObj.getMeterFraction();
+		self.meterFraction = options.visualObj ? options.visualObj.getMeterFraction() : {den: 1} // If we are given a sequence instead of a regular visual obj, then don't do the swing
 
 		var allNotes = {};
 		var cached = [];
