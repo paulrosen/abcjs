@@ -19,7 +19,7 @@
 
 var parseCommon = require("../parse/abc_common");
 
-var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter, bassOctaveShift, chordOctaveShift) {
+var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter) {
   
   //console.log("ChordTrack top");
   
@@ -37,24 +37,14 @@ var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter, b
   this.meter = meter;
   this.tempoChangeFactor = 1;
 
-  // MAE For octave shifted bass and chords
-  if (bassOctaveShift){
-  	this.bassOctaveShift = bassOctaveShift;
-  }
-  else{
-  	this.baseOctaveShift = 0;
-  }
-
-  if (chordOctaveShift){
-  	this.chordOctaveShift = chordOctaveShift;
-  }
-  else{
-  	this.chordOctaveShift = 0;
-  }
-
   // MAE - In my version, there is support for shifting the bass and chord sounds up or down by a specified number of octave, but it's done via a library global
-  
-  // I've included the values here in the ChordTrack object, but the values would have to be sent in the constructor
+
+  // I've included handling the values here in the ChordTrack object, but the values need to be added by the MIDI parser and event generator and consumed by the paramChange() method
+
+  // MAE For octave shifted bass and chords
+  this.bassOctaveShift = midiOptions.bassOctaveShift && midiOptions.bassOctaveShift.length === 1 ? midiOptions.bassOctaveShift[0] : 0;
+
+  this.chordOctaveShift = midiOptions.chordOctaveShift && midiOptions.chordOctaveShift.length === 1 ? midiOptions.chordOctaveShift[0] : 0;
 
   // MAE 17 Jun 2024 - To allow for bass and chord instrument octave shifts
   this.bassInstrument = midiOptions.bassprog && ((midiOptions.bassprog.length === 1) || (midiOptions.bassprog.length === 2)) ? midiOptions.bassprog[0] : 0;
