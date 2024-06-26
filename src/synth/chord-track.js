@@ -36,19 +36,14 @@ var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter) {
   this.lastBarTime = 0;
   this.meter = meter;
   this.tempoChangeFactor = 1;
-
-  // MAE - In my version, there is support for shifting the bass and chord sounds up or down by a specified number of octave, but it's done via a library global
-
-  // I've included handling the values here in the ChordTrack object, but the values need to be added by the MIDI parser and event generator and consumed by the paramChange() method
-
-  // MAE For octave shifted bass and chords
-  this.bassOctaveShift = midiOptions.bassOctaveShift && midiOptions.bassOctaveShift.length === 1 ? midiOptions.bassOctaveShift[0] : 0;
-
-  this.chordOctaveShift = midiOptions.chordOctaveShift && midiOptions.chordOctaveShift.length === 1 ? midiOptions.chordOctaveShift[0] : 0;
-
+ 
   // MAE 17 Jun 2024 - To allow for bass and chord instrument octave shifts
   this.bassInstrument = midiOptions.bassprog && ((midiOptions.bassprog.length === 1) || (midiOptions.bassprog.length === 2)) ? midiOptions.bassprog[0] : 0;
   this.chordInstrument = midiOptions.chordprog && ((midiOptions.chordprog.length === 1) || (midiOptions.chordprog.length === 2)) ? midiOptions.chordprog[0] : 0;
+
+   // MAE For octave shifted bass and chords
+  this.bassOctaveShift = midiOptions.bassprog && midiOptions.bassprog.length === 2 ? midiOptions.bassprog[1] : 0;
+  this.chordOctaveShift = midiOptions.chordprog && midiOptions.chordprog.length === 2 ? midiOptions.chordprog[1] : 0;
   
   this.boomVolume = midiOptions.bassvol && midiOptions.bassvol.length === 1 ? midiOptions.bassvol[0] : 64;
   this.chickVolume = midiOptions.chordvol && midiOptions.chordvol.length === 1 ? midiOptions.chordvol[0] : 48;
@@ -200,17 +195,22 @@ ChordTrack.prototype.paramChange = function (element) {
       this.gchorddurationscale = element.param;
       break;
     case "bassprog":
-      this.bassInstrument = element.param;
+      this.bassInstrument = element.value;
       if ((element.octaveShift != undefined) && (element.octaveShift != null)){
         this.bassOctaveShift = element.octaveShift;
-      }  
+      }
+      else{
+        this.bassOctaveShift = 0;
+      }
       break;
     case "chordprog":
-      this.chordInstrument = element.param;
+      this.chordInstrument = element.value;
       if ((element.octaveShift != undefined) && (element.octaveShift != null)){
         this.chordOctaveShift = element.octaveShift;
-      }  
-
+      } 
+      else{
+        this.chordOctaveShift = 0;
+      }
       break;
     case "bassvol":
       this.boomVolume = element.param;
