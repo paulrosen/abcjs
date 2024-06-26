@@ -388,13 +388,57 @@ var parseCommon = require("../parse/abc_common");
 											voices[voiceNumber].push({ el_type: elem.cmd, volume: elem.params[0] });
 											break;
 										case "swing":
-										case "gchord":
 										case "bassprog":
 										case "chordprog":
 										case "bassvol":
 										case "chordvol":
 											voices[voiceNumber].push({ el_type: elem.cmd, param: elem.params[0] });
 											break;
+
+										// MAE 16 Jun 2024
+					                    case "gchord":
+					                      if (gUseGChord){
+					                        voices[voiceNumber].push({
+					                          el_type: elem.cmd,
+					                          param: elem.params[0],
+					                          gchordDivider: elem.params[1]
+					                        });
+					                      }
+					                      break;
+
+					                    // MAE 23 Jun 2024
+					                    case "gchordbars":
+					                      if (gUseGChord){
+					                        voices[voiceNumber].push({
+					                          el_type: elem.cmd,
+					                          value: elem.params[0],
+					                         });
+					                      }
+					                      break;
+
+					                    // MAE 20 Jun 2024
+					                    case "gchordstress":{
+					                      //console.log("Handle inline gchordstress");
+					                      if (gUseGChord){
+					                        voices[voiceNumber].push({
+					                          el_type: 'gchordstress',
+					                          param: elem.params[0]
+					                        });
+					                      }
+					                    }
+					                    break;
+
+					                    // MAE 20 Jun 2024
+					                    case "gchorddurationscale":{
+					                      //console.log("Handle inline gchorddurationscale");
+					                      if (gUseGChord){
+					                        voices[voiceNumber].push({
+					                          el_type: 'gchorddurationscale',
+					                          param: elem.params[0]
+					                        });
+					                      }
+					                    }
+					                    break;
 										default:
 											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);
 									}

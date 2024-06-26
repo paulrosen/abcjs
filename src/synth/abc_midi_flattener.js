@@ -209,6 +209,9 @@ var pitchesToPerc = require('./pitches-to-perc');
 					case "chordprog":
 					case "bassvol":
 					case "chordvol":
+					case "gchordbars":
+					case "gchordstress":
+					case "gchorddurationscale":
 						chordTrack.paramChange(element)
 						break
 					default:
