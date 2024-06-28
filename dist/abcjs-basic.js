@@ -15893,7 +15893,7 @@ function toNumber(self, note) {
       if (note.quarter === '^') num -= 0.5;else if (note.quarter === "v") num += 0.5;
       return {
         num: Math.round(num),
-        str: self.stringPitches.length - 1 - i,
+        str: self.str_order[i],
         // reverse the strings because string 0 is on the bottom
         note: note
       };
@@ -16045,6 +16045,7 @@ function StringPatterns(plugin) {
   }
   // second position pattern per string
   this.secondPos = buildSecond(this);
+  this.str_order = plugin._super.params.str_order;
 }
 module.exports = StringPatterns;
 

@@ -35,7 +35,7 @@ Plugin.prototype.render = function (renderer, line, staffIndex) {
   rndrer.doLayout();
 };
 
-function Plugin() {}
+function Plugin() { }
 
 //
 // Tablature plugin definition
