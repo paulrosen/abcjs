@@ -13577,8 +13577,8 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
     if (p > 0 && currentChordsExpanded[p - 1] && currentChordsExpanded[p] && currentChordsExpanded[p - 1].boom !== currentChordsExpanded[p].boom) firstBoom = true;
     var type = thisPattern[p];
     var isBoom = type.indexOf('boom') >= 0;
-    // If we changed chords at a time when we're not expecting a bass note, then add an extra bass note in.
-    var newBass = !isBoom && p !== 0 && (!currentChordsExpanded[p - 1] || currentChordsExpanded[p - 1].boom !== currentChordsExpanded[p].boom);
+    // If we changed chords at a time when we're not expecting a bass note, then add an extra bass note in if the first thing in the pattern is a bass note.
+    var newBass = !isBoom && p !== 0 && thisPattern[0].indexOf('boom') >= 0 && (!currentChordsExpanded[p - 1] || currentChordsExpanded[p - 1].boom !== currentChordsExpanded[p].boom);
     var pitches = resolvePitch(currentChordsExpanded[p], type, firstBoom, newBass);
     if (isBoom) firstBoom = false;
     for (var oo = 0; oo < pitches.length; oo++) {
@@ -14261,7 +14261,10 @@ function CreateSynth() {
     self.sequenceCallback = params.sequenceCallback;
     self.callbackContext = params.callbackContext;
     self.onEnded = params.onEnded;
-    self.meterFraction = options.visualObj.getMeterFraction();
+    self.meterFraction = options.visualObj ? options.visualObj.getMeterFraction() : {
+      den: 1
+    }; // If we are given a sequence instead of a regular visual obj, then don't do the swing
+
     var allNotes = {};
     var cached = [];
     var errorNotes = [];
@@ -26376,7 +26379,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.4.0';
+var version = '6.4.1';
 module.exports = version;
 
 /***/ })

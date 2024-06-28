@@ -2727,7 +2727,9 @@ describe("Audio flattener", function() {
 	'%%MIDI chordprog 72\n' +
 	'%%MIDI chordvol 23\n' +
 	'K:C\n' +
-	'"C"z4|"G7"z4|\n'
+	'"C"z4|"G7"z2z"C"z|\n' +
+	'%%MIDI gchord GHIHghih\n' +
+	'"C"z4|"G7"z2z"C"z|\n'
 
 	var expectedChordArpeggio = 
 	{
@@ -2875,7 +2877,16 @@ describe("Audio flattener", function() {
 				},
 				{
 					"cmd": "note",
-					"pitch": 74,
+					"pitch": 36,
+					"volume": 125,
+					"start": 1.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 10
+				},
+				{
+					"cmd": "note",
+					"pitch": 67,
 					"volume": 23,
 					"start": 1.75,
 					"duration": 0.125,
@@ -2884,18 +2895,161 @@ describe("Audio flattener", function() {
 				},
 				{
 					"cmd": "note",
-					"pitch": 71,
+					"pitch": 64,
 					"volume": 23,
 					"start": 1.875,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 48,
+					"volume": 23,
+					"start": 2,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 52,
+					"volume": 23,
+					"start": 2.125,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 2.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 52,
+					"volume": 23,
+					"start": 2.375,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 60,
+					"volume": 23,
+					"start": 2.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 64,
+					"volume": 23,
+					"start": 2.625,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 67,
+					"volume": 23,
+					"start": 2.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 64,
+					"volume": 23,
+					"start": 2.875,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 23,
+					"start": 3,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 23,
+					"start": 3.125,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 23,
+					"start": 3.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 23,
+					"start": 3.375,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 67,
+					"volume": 23,
+					"start": 3.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 71,
+					"volume": 23,
+					"start": 3.625,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 67,
+					"volume": 23,
+					"start": 3.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 72
+				},
+				{
+					"cmd": "note",
+					"pitch": 64,
+					"volume": 23,
+					"start": 3.875,
 					"duration": 0.125,
 					"gap": 0,
 					"instrument": 72
 				}
 			]
 		],
-		"totalDuration": 2
+		"totalDuration": 4
 	}
-
 	//////////////////////////////////////////////////////////
 
 	var abcChordSwing = 'X: 1\n' +
