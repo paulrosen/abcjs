@@ -242,7 +242,7 @@ var pluginTab = {
     isTabBig: false,
     tabSymbolOffset: -.95
   },
-  'banjoOpenG': {
+  'banjo': {
     name: 'StringTab',
     defaultTuning: ['D', 'G', 'B', 'd', 'g'],
     strOrder: [4, 0, 1, 2, 3],
