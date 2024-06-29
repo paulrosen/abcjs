@@ -22,9 +22,10 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params, staffNumber, tabS
   this.capo = params.capo;
   this.transpose = params.visualTranspose;
   this.hideTabSymbol = params.hideTabSymbol;
+  this.strOrder = params.strOrder;
   this.tablature = new StringTablature(this.nbLines,
     this.linePitch);
-  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning);
+  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning, tabSettings.strOrder);
   this.semantics = semantics;
 };
 
@@ -35,7 +36,7 @@ Plugin.prototype.render = function (renderer, line, staffIndex) {
   rndrer.doLayout();
 };
 
-function Plugin() {}
+function Plugin() { }
 
 //
 // Tablature plugin definition

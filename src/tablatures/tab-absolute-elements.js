@@ -65,7 +65,7 @@ function buildTabAbsolute(plugin, absX, relX) {
   tabYPos += plugin.tabSymbolOffset;
 
   // For tablature like whistle tab where you want the TAB symbol hidden
-  if (!plugin.hideTabSymbol){
+  if (!plugin.hideTabSymbol) {
 
     var tabAbsolute = new AbsoluteElement(element, 0, 0, "symbol", 0);
     tabAbsolute.x = absX;
@@ -75,7 +75,7 @@ function buildTabAbsolute(plugin, absX, relX) {
     if (tabAbsolute.abcelem.el_type == 'tab') {
       tabRelative.pitch = tabYPos;
     }
-    
+
   }
   return tabAbsolute;
 }
@@ -119,7 +119,7 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
     type: 'tabNumber'
   };
   var tabNoteRelative = new RelativeElement(
-    strNote, 0, 0, pitch+0.3, opt);
+    strNote, 0, 0, pitch + 0.3, opt);
   tabNoteRelative.x = relX;
   tabNoteRelative.isGrace = isGrace;
   tabNoteRelative.isAltered = curNote.note.isAltered;
@@ -132,7 +132,7 @@ function getXGrace(abs, index) {
     for (var ii = 0; ii < abs.extra.length; ii++) {
       if (abs.extra[ii].c.indexOf('noteheads') >= 0) {
         if (found === index) {
-          return abs.extra[ii].x + abs.extra[ii].w/2;
+          return abs.extra[ii].x + abs.extra[ii].w / 2;
         } else {
           found++;
         }
@@ -142,9 +142,9 @@ function getXGrace(abs, index) {
   return -1;
 }
 
-function graceInRest( absElem ) {
+function graceInRest(absElem) {
   if (absElem.abcelem) {
-    var elem = absElem.abcelem; 
+    var elem = absElem.abcelem;
     if (elem.rest) {
       return elem.gracenotes;
     }
@@ -157,16 +157,30 @@ function convertToNumber(plugin, pitches, graceNotes) {
   if (tabPos.error) {
     plugin._super.setError(tabPos.error);
     return tabPos; // give up on error here
-  }
+  };
+
+  //JTT: use string order here
+  if (tabPos.notes) {
+    for (let note of tabPos.notes) {
+      note.str = plugin.semantics.strings.strOrder[note.str];
+    }
+  };
+  if (tabPos.graces) {
+    for (let note of tabPos.graces) {
+      note.str = plugin.semantics.strings.strOrder[note.str];
+    }
+  };
+
   if (tabPos.graces && tabPos.notes) {
     // add graces to last note in notes
     var posNote = tabPos.notes.length - 1;
     tabPos.notes[posNote].graces = tabPos.graces;
-  }
+  };
+
   return tabPos;
 }
 
-function buildGraceRelativesForRest(plugin,abs,absChild,graceNotes,tabVoice) {
+function buildGraceRelativesForRest(plugin, abs, absChild, graceNotes, tabVoice) {
   for (var mm = 0; mm < graceNotes.length; mm++) {
     var defGrace = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [], grace: true };
     var graceX = getXGrace(absChild, mm);
@@ -187,9 +201,9 @@ TabAbsoluteElements.prototype.build = function (plugin,
   voiceIndex,
   staffIndex,
   keySig,
-  tabVoiceIndex ) {
+  tabVoiceIndex) {
   var staffSize = getInitialStaffSize(staffAbsolute);
-  var source = staffAbsolute[staffIndex+voiceIndex];
+  var source = staffAbsolute[staffIndex + voiceIndex];
   var dest = staffAbsolute[tabVoiceIndex];
   var tabPos = null;
   var defNote = null;
@@ -197,7 +211,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
     // keysig missing => provide one for tabs
     if (keySig != 'none') {
       source.children.splice(0, 0, keySig);
-    }  
+    }
   }
   for (var ii = 0; ii < source.children.length; ii++) {
     var absChild = source.children[ii];
@@ -206,7 +220,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
     // if (absChild.children.length > 0) {
     //   relX = absChild.children[0].x;
     // }
-    if ( (absChild.isClef) ) {
+    if ((absChild.isClef)) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
       if (absChild.abcelem.type.indexOf('-8') >= 0) plugin.semantics.strings.clefTranspose = -12
       if (absChild.abcelem.type.indexOf('+8') >= 0) plugin.semantics.strings.clefTranspose = 12
@@ -220,7 +234,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
       case 'bar':
         plugin.semantics.strings.measureAccidentals = {}
         var lastBar = false;
-        if (ii === source.children.length-1) {
+        if (ii === source.children.length - 1) {
           // used for final line bar drawing
           // for multi tabs / multi staves
           lastBar = true;
@@ -229,7 +243,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         if (cloned.abcelem.barNumber) {
           delete cloned.abcelem.barNumber;
           for (var bn = 0; bn < cloned.children.length; bn++) {
-            if (cloned.children[bn].type === "barNumber" ) {
+            if (cloned.children[bn].type === "barNumber") {
               cloned.children.splice(bn, 1);
               break;
             }
@@ -254,7 +268,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
           // build relative for grace
           defGrace = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [], grace: true };
           buildGraceRelativesForRest(plugin, abs, absChild, tabPos.graces, tabVoice);
-       }
+        }
         break;
       case 'note':
         var abs = cloneAbsolute(absChild);
@@ -264,7 +278,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
         var graceNotes = absChild.abcelem.gracenotes;
         abs.type = 'tabNumber';
         // to number conversion 
-        tabPos = convertToNumber(plugin, pitches, graceNotes);   
+        tabPos = convertToNumber(plugin, pitches, graceNotes);
         if (tabPos.error) return;
         if (tabPos.graces) {
           // add graces to last note in notes
@@ -278,14 +292,14 @@ TabAbsoluteElements.prototype.build = function (plugin,
           if (curNote.graces) {
             for (var mm = 0; mm < curNote.graces.length; mm++) {
               var defGrace = { el_type: "note", startChar: absChild.abcelem.startChar, endChar: absChild.abcelem.endChar, notes: [], grace: true };
-              var graceX = getXGrace(absChild , mm);
+              var graceX = getXGrace(absChild, mm);
               var curGrace = curNote.graces[mm];
               var tabGraceRelative = buildRelativeTabNote(plugin, graceX, defGrace, curGrace, true);
               abs.children.push(tabGraceRelative);
               tabVoice.push(defGrace);
             }
           }
-          var tabNoteRelative = buildRelativeTabNote(plugin, abs.x+absChild.heads[ll].dx, defNote, curNote, false);
+          var tabNoteRelative = buildRelativeTabNote(plugin, abs.x + absChild.heads[ll].dx, defNote, curNote, false);
           abs.children.push(tabNoteRelative);
         }
         if (defNote.notes.length > 0) {
