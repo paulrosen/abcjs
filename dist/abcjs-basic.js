@@ -241,6 +241,13 @@ var pluginTab = {
     defaultTuning: ['C,', 'G,', 'D', 'A', 'e'],
     isTabBig: false,
     tabSymbolOffset: -.95
+  },
+  'banjoOpenG': {
+    name: 'StringTab',
+    defaultTuning: ['D', 'G', 'B', 'd', 'g'],
+    str_order: [4, 0, 1, 2, 3],
+    isTabBig: false,
+    tabSymbolOffset: 0
   }
 };
 var abcTablatures = {
@@ -15893,7 +15900,7 @@ function toNumber(self, note) {
       if (note.quarter === '^') num -= 0.5;else if (note.quarter === "v") num += 0.5;
       return {
         num: Math.round(num),
-        str: self.str_order[i],
+        str: self.stringPitches.length - 1 - i,
         // reverse the strings because string 0 is on the bottom
         note: note
       };
@@ -16045,8 +16052,9 @@ function StringPatterns(plugin) {
   }
   // second position pattern per string
   this.secondPos = buildSecond(this);
-  this.str_order = plugin._super.params.str_order;
+  this.str_order = plugin.str_order;
 }
+;
 module.exports = StringPatterns;
 
 /***/ }),
@@ -16386,13 +16394,28 @@ module.exports = TabNotes;
   \***********************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var StringPatterns = __webpack_require__(/*! ./string-patterns */ "./src/tablatures/instruments/string-patterns.js");
-function TabStringPatterns(plugin, defaultTuning) {
+function TabStringPatterns(plugin, defaultTuning, defaultStrOrder) {
   this.tuning = plugin._super.params.tuning;
+  this.str_order = plugin._super.params.str_order;
   if (!this.tuning) {
     this.tuning = defaultTuning;
   }
   plugin.tuning = this.tuning;
+  if (!this.str_order) {
+    if (!defaultStrOrder) {
+      this.str_order = _toConsumableArray(Array(this.tuning.length).keys());
+    } else {
+      this.str_order = defaultStrOrder;
+    }
+  }
+  plugin.str_order = this.str_order;
   this.strings = new StringPatterns(plugin);
 }
 TabStringPatterns.prototype.notesToNumber = function (notes, graces) {
@@ -16435,8 +16458,9 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params, staffNumber, tabS
   this.capo = params.capo;
   this.transpose = params.visualTranspose;
   this.hideTabSymbol = params.hideTabSymbol;
+  this.str_order = params.str_order;
   this.tablature = new StringTablature(this.nbLines, this.linePitch);
-  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning);
+  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning, tabSettings.str_order);
   this.semantics = semantics;
 };
 Plugin.prototype.render = function (renderer, line, staffIndex) {
@@ -16466,6 +16490,9 @@ module.exports = AbcStringTab;
   \*************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 /**
  * Tablature Absolute elements factory
  */
@@ -16618,12 +16645,45 @@ function convertToNumber(plugin, pitches, graceNotes) {
     plugin._super.setError(tabPos.error);
     return tabPos; // give up on error here
   }
+  ;
 
+  //JTT: use string order here
+  if (tabPos.notes) {
+    var _iterator = _createForOfIteratorHelper(tabPos.notes),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var note = _step.value;
+        note.str = plugin.semantics.strings.str_order[note.str];
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+  ;
+  if (tabPos.graces) {
+    var _iterator2 = _createForOfIteratorHelper(tabPos.graces),
+      _step2;
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var _note = _step2.value;
+        _note.str = plugin.semantics.strings.str_order[_note.str];
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+  }
+  ;
   if (tabPos.graces && tabPos.notes) {
     // add graces to last note in notes
     var posNote = tabPos.notes.length - 1;
     tabPos.notes[posNote].graces = tabPos.graces;
   }
+  ;
   return tabPos;
 }
 function buildGraceRelativesForRest(plugin, abs, absChild, graceNotes, tabVoice) {

@@ -11,11 +11,12 @@ var StringTablature = require('../tablatures/instruments/tab-string');
 
 // Existing tab classes 
 var pluginTab = {
-  'violin': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0},
-  'fiddle': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0},
-  'mandolin': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0},
-  'guitar': { name: 'StringTab', defaultTuning: ['E,', 'A,', 'D', 'G' , 'B' , 'e'], isTabBig: true, tabSymbolOffset: 0},
-  'fiveString': { name: 'StringTab', defaultTuning: ['C,', 'G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: -.95},
+  'violin': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0 },
+  'fiddle': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0 },
+  'mandolin': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0 },
+  'guitar': { name: 'StringTab', defaultTuning: ['E,', 'A,', 'D', 'G', 'B', 'e'], isTabBig: true, tabSymbolOffset: 0 },
+  'fiveString': { name: 'StringTab', defaultTuning: ['C,', 'G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: -.95 },
+  'banjoOpenG': { name: 'StringTab', defaultTuning: ['D', 'G', 'B', 'd', 'g'], str_order: [4, 0, 1, 2, 3], isTabBig: false, tabSymbolOffset: 0 },
 };
 
 var abcTablatures = {
@@ -23,7 +24,7 @@ var abcTablatures = {
   inited: false,
   plugins: {},
 
-  
+
   /**
    * to be called once per plugin for registration 
    * @param {*} plugin 
@@ -109,12 +110,12 @@ var abcTablatures = {
 
     // chack tabs request for each staffs
     var staffLineCount = 0;
-    
+
     // Clear the suppression flag
-    if (tabs && (tabs.length > 0)){
+    if (tabs && (tabs.length > 0)) {
       var nTabs = tabs.length;
-      for (var kk=0;kk<nTabs;++kk){
-        if (tabs[kk] && tabs[kk].params.firstStaffOnly){
+      for (var kk = 0; kk < nTabs; ++kk) {
+        if (tabs[kk] && tabs[kk].params.firstStaffOnly) {
           tabs[kk].params.suppress = false;
         }
       }
@@ -123,17 +124,17 @@ var abcTablatures = {
     for (var ii = 0; ii < abcTune.lines.length; ii++) {
       var line = abcTune.lines[ii];
 
-      if (line.staff){
+      if (line.staff) {
         staffLineCount++;
       }
-      
+
       // MAE 27Nov2023
       // If tab param "firstStaffOnly", remove the tab label after the first staff
-      if (staffLineCount > 1){
-        if (tabs && (tabs.length > 0)){
+      if (staffLineCount > 1) {
+        if (tabs && (tabs.length > 0)) {
           var nTabs = tabs.length;
-          for (var kk=0;kk<nTabs;++kk){
-            if (tabs[kk].params.firstStaffOnly){
+          for (var kk = 0; kk < nTabs; ++kk) {
+            if (tabs[kk].params.firstStaffOnly) {
               // Set the staff draw suppression flag
               tabs[kk].params.suppress = true;
             }
@@ -147,7 +148,7 @@ var abcTablatures = {
         for (var jj = 0; jj < curStaff.length; jj++) {
 
           if (tabs[jj] && jj < maxStaves) {
-             // tablature requested for staff
+            // tablature requested for staff
             var tabPlugin = tabs[jj];
             if (tabPlugin.instance == null) {
               tabPlugin.instance = new tabPlugin.classz();
@@ -164,7 +165,7 @@ var abcTablatures = {
             tabPlugin.instance.render(renderer, line, jj);
           }
         }
-      }  
+      }
     }
   },
 
@@ -181,4 +182,4 @@ var abcTablatures = {
 };
 
 
-module.exports = abcTablatures ;
+module.exports = abcTablatures;

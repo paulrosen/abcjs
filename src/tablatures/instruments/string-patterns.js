@@ -158,7 +158,7 @@ function toNumber(self, note) {
       else if (note.quarter === "v") num += 0.5
       return {
         num: Math.round(num),
-        str: self.str_order[i], // reverse the strings because string 0 is on the bottom
+        str: self.stringPitches.length - 1 - i, // reverse the strings because string 0 is on the bottom
         note: note
       }
     }
@@ -316,8 +316,9 @@ function StringPatterns(plugin) {
   }
   // second position pattern per string
   this.secondPos = buildSecond(this);
-  this.str_order = plugin._super.params.str_order;
-}
+  this.str_order = plugin.str_order;
+};
+
 
 
 
