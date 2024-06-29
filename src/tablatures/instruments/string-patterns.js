@@ -316,7 +316,7 @@ function StringPatterns(plugin) {
   }
   // second position pattern per string
   this.secondPos = buildSecond(this);
-  this.str_order = plugin.str_order;
+  this.strOrder = plugin.strOrder;
 };
 
 

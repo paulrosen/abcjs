@@ -245,9 +245,9 @@ var pluginTab = {
   'banjoOpenG': {
     name: 'StringTab',
     defaultTuning: ['D', 'G', 'B', 'd', 'g'],
-    str_order: [4, 0, 1, 2, 3],
-    isTabBig: false,
-    tabSymbolOffset: 0
+    strOrder: [4, 0, 1, 2, 3],
+    isTabBig: true,
+    tabSymbolOffset: -.95
   }
 };
 var abcTablatures = {
@@ -16052,7 +16052,7 @@ function StringPatterns(plugin) {
   }
   // second position pattern per string
   this.secondPos = buildSecond(this);
-  this.str_order = plugin.str_order;
+  this.strOrder = plugin.strOrder;
 }
 ;
 module.exports = StringPatterns;
@@ -16403,19 +16403,19 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 var StringPatterns = __webpack_require__(/*! ./string-patterns */ "./src/tablatures/instruments/string-patterns.js");
 function TabStringPatterns(plugin, defaultTuning, defaultStrOrder) {
   this.tuning = plugin._super.params.tuning;
-  this.str_order = plugin._super.params.str_order;
+  this.strOrder = plugin._super.params.strOrder;
   if (!this.tuning) {
     this.tuning = defaultTuning;
   }
   plugin.tuning = this.tuning;
-  if (!this.str_order) {
+  if (!this.strOrder) {
     if (!defaultStrOrder) {
-      this.str_order = _toConsumableArray(Array(this.tuning.length).keys());
+      this.strOrder = _toConsumableArray(Array(this.tuning.length).keys());
     } else {
-      this.str_order = defaultStrOrder;
+      this.strOrder = defaultStrOrder;
     }
   }
-  plugin.str_order = this.str_order;
+  plugin.strOrder = this.strOrder;
   this.strings = new StringPatterns(plugin);
 }
 TabStringPatterns.prototype.notesToNumber = function (notes, graces) {
@@ -16458,9 +16458,9 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params, staffNumber, tabS
   this.capo = params.capo;
   this.transpose = params.visualTranspose;
   this.hideTabSymbol = params.hideTabSymbol;
-  this.str_order = params.str_order;
+  this.strOrder = params.strOrder;
   this.tablature = new StringTablature(this.nbLines, this.linePitch);
-  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning, tabSettings.str_order);
+  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning, tabSettings.strOrder);
   this.semantics = semantics;
 };
 Plugin.prototype.render = function (renderer, line, staffIndex) {
@@ -16654,7 +16654,7 @@ function convertToNumber(plugin, pitches, graceNotes) {
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var note = _step.value;
-        note.str = plugin.semantics.strings.str_order[note.str];
+        note.str = plugin.semantics.strings.strOrder[note.str];
       }
     } catch (err) {
       _iterator.e(err);
@@ -16669,7 +16669,7 @@ function convertToNumber(plugin, pitches, graceNotes) {
     try {
       for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
         var _note = _step2.value;
-        _note.str = plugin.semantics.strings.str_order[_note.str];
+        _note.str = plugin.semantics.strings.strOrder[_note.str];
       }
     } catch (err) {
       _iterator2.e(err);

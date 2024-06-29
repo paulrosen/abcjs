@@ -22,10 +22,10 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params, staffNumber, tabS
   this.capo = params.capo;
   this.transpose = params.visualTranspose;
   this.hideTabSymbol = params.hideTabSymbol;
-  this.str_order = params.str_order;
+  this.strOrder = params.strOrder;
   this.tablature = new StringTablature(this.nbLines,
     this.linePitch);
-  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning, tabSettings.str_order);
+  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning, tabSettings.strOrder);
   this.semantics = semantics;
 };
 
