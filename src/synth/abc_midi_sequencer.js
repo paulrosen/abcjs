@@ -388,6 +388,7 @@ var parseCommon = require("../parse/abc_common");
 											voices[voiceNumber].push({ el_type: elem.cmd, volume: elem.params[0] });
 											break;
 										case "swing":
+										case "gchord":
 										case "bassvol":
 										case "chordvol":
 											voices[voiceNumber].push({ el_type: elem.cmd, param: elem.params[0] });
@@ -409,18 +410,6 @@ var parseCommon = require("../parse/abc_common");
 					                        value: elem.params[0],
 					                        octaveShift: elem.params[1]
 					                      });
-					                      break;
-
-
-										// MAE 16 Jun 2024
-					                    case "gchord":
-					                      if (gUseGChord){
-					                        voices[voiceNumber].push({
-					                          el_type: elem.cmd,
-					                          param: elem.params[0],
-					                          gchordDivider: elem.params[1]
-					                        });
-					                      }
 					                      break;
 
 					                    // MAE 23 Jun 2024

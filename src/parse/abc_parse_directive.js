@@ -478,6 +478,7 @@ var parseDirective = {};
 		"noportamento"
 	];
 	var midiCmdParam1String = [
+		"gchord",
 		"ptstress",
 		"beatstring"
 	];
@@ -535,9 +536,6 @@ var parseDirective = {};
 		"gchorddurationscale"
 	]; 
 
-  	var midiCmdParam1StringOptionalIntegers = [
-  		"gchord"
-  	];
   	var midiCmdParam1Integer1OptionalString = [
   		"bassprog", "chordprog"
   	];
@@ -684,22 +682,6 @@ var parseDirective = {};
 				}
 			}
 		}
-	    else if (midiCmdParam1StringOptionalIntegers.indexOf(midi_cmd) >= 0) {
-	      // ONE STRING, OPTIONAL INT PARAMETERS
-	      // MAE FOOFOO 17 Jun 2024
-	      // Initially only for abctt:gchord
-	      if (midi.length > 0){
-	        var p = midi.shift();
-	        midi_params.push(p.token);
-	        if (midi.length > 0){
-	          while (midi.length > 0) {
-	            p = midi.shift();
-	            if (p.type !== "number") warn("Expected integer parameter in MIDI " + midi_cmd, restOfString, 0);
-	            midi_params.push(p.intt);
-	          }
-	        }
-	      }
-	    }
 	    else if (midiCmdParamVariableFloat.indexOf(midi_cmd) >= 0){
 	      if (midi.length < 1) warn("Expected least one float parameter in MIDI " + midi_cmd, restOfString, 0);else {
 	        var arr = [];
