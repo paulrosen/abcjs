@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="favicon.ico" type="image/x-icon" />
+	<link rel="stylesheet" href="examples-styles.css" />
+
+	<title>abcjs: Accompaniment Demo</title>
+
+	<link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
+	<style>
+		label {
+			font-weight: bold;
+		}
+		.options {
+			margin-bottom: 10px;
+		}
+		h2 {
+			display: inline;
+			font-size: 1em;
+		}
+		.code {
+			color: white;
+			background-color: black;
+			padding: 10px;
+			display: inline-block;
+			border-radius: 4px;
+		}
+	</style>
+
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var abcCooley = "T: Cooley's\n" +
+			"M: 4/4\n" +
+			"L: 1/8\n" +
+			"R: reel\n" +
+			"K: Emin\n" +
+			"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+			"EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\n" +
+			"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|";
+
+		var abcArpeggio = 
+			'X:9\n' +
+			'T:Nocturne \n' +
+			'C:Avetik Topchyan\n' +
+			'C:upd 11 June 2024\n' +
+			'M:4/4\n' +
+			'L:1/16\n' +
+			'Q:1/4=80\n' +
+			'K:Em\n' +
+			'P:A\n' +
+			'"Em"        B8         g3e3B2                   | \\n' +
+			'"Am"        c8         f3e3c2                   | \\n' +
+			'"Em"        B8         "C" c4 A2G2              | \\n' +
+			'"Am"        F4A2G2     "B7" G2^F2G2A2          :|  \n'
+
+		var abcJazz = 
+			'X:1\n' +
+			'T:At the Jazz Band Ball\n' +
+			'C:1918 Original Dixieland Jazz Band\n' +
+			'M:4/4\n' +
+			'L:1/8\n' +
+			'Q:1/4=160\n' +
+			'K:Bb\n' +
+			'P:Verse\n' +
+			'"Gm"GG2D GG2G|GBG2G4|z2^c2d3=c|BGB2G4|\n' +
+			'"F7"z2FFG2AB-|"Bb"BBA2"G7"G3F|"C7"=E2G2B2dc-|"F7"c4z=EF^F|\n' +
+			'"Gm"GG2D GG2G|GBG2G4|z2d^c d=cBG|BG2G-G4|\n' +
+			'"C7"z2cd cBG2|z2cd cBG2|c2^c2dc2=c-|"F7"c4z=EF^F||\n' +
+			'P:Chorus\n' +
+			'"G7"G2=B2dB2G-|G4zG_GF|"C7"=E2G2BG2d-|d8|\n' +
+			'"F7"z2d2dcAF|cdc2AFGF|"Bb"B2DF A2GF-|F4z=EF^F|\n' +
+			'"G7"GG=B2d2BG-|G4zG_GF|"C7"=EEG2BG2d-|d4zB2G|\n' +
+			'"Eb"B2BB "E°7"AG2G|"Bb"FF^F2"G7"G4|"C7"GB2G"F7"A2dB-|"Bb"B6z2|]\n'
+
+		var abcFleur =
+			'X: 1\n' +
+			'T: Petite Fleur\n' +
+			'M: 4/4\n' +
+			'L: 1/4\n' +
+			'Q: 1/4=120\n' +
+			'C: Sidney Bechet 1959\n' +
+			'K: Bb\n' +
+			'E3/2E/|: [P:A]"D7"D4-|D^F/A/ (3ced|"Gm"B4-|BD/G/ A/B/A/G/|\n' +
+			'"A7"A4-|"D7"A =E/^F/ (3GAF|"Gm"D4-|D"^break"zE3/2E/|\n'
+		
+		var synthControl;
+		var accompanimentStyle = 'boom-chick'
+		var stressStyle = 'even'
+		var durationStyle = 'even'
+		var mute = false	
+		var swing = false
+
+		var tunes = {
+			'boom-chick': abcCooley,
+			jazz: abcJazz,
+			arpeggio: abcArpeggio,
+			tango: abcFleur,
+		}
+
+		var accompaniments = {
+			'boom-chick': '',
+			jazz: '%%MIDI gchord bzczbzcz\n',
+			arpeggio: '%%MIDI gchord GHIJghij\n',
+			tango: '%%MIDI gchord bzzcbzbz\n',
+		}
+
+		var stresses = {
+			'even': '',
+			bass: '%%MIDI gchordstress 2 1 0.25 1 2 1 0.25 1\n',
+			chord: '%%MIDI gchordstress 0.25 1 2 1 0.25 1 2 1\n',
+		}
+
+		var durations = {
+			'even': '',
+			bass: '%%MIDI gchordduration 2 1 0.5 1 2 1 0.5 1\n',
+			chord: '%%MIDI gchordduration 0.5 1 2 1 0.5 1 2 1\n',
+			overlap: '%%MIDI gchordduration 3\n',
+		}
+
+		function addDirectives() {
+			var directives = accompaniments[accompanimentStyle] +
+			stresses[stressStyle] + durations[durationStyle]
+
+			var el = document.querySelector(".code")
+			el.innerHTML = directives ? directives : "% nothing selected"
+			return directives + tunes[accompanimentStyle]
+		}
+		function recreateAudio() {
+			var abcString = addDirectives()
+			if (ABCJS.synth.supportsAudio()) {
+				var visualObj = ABCJS.renderAbc("paper", abcString)[0];
+
+				const options = {
+					swing: swing ? 75 : 50,
+					bassprog: 58,
+					bassvol: 80,
+					chordprog: 25,
+					chordvol: 40,
+					program: 24,
+					pan: [ -0.5, 0.5 ],
+					voicesOff: mute
+				}
+
+				if (!synthControl) {
+					synthControl = new ABCJS.synth.SynthController();
+					synthControl.load("#audio", null, {displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true});
+				}
+				synthControl.setTune(visualObj, true, options).then(function (response) {
+					console.log("Audio successfully loaded.")
+				}).catch(function (error) {
+					console.warn("Audio problem:", error);
+				});
+			} else {
+				document.querySelector(".error").innerHTML = "<div class='audio-error'>Audio is not supported in this browser.</div>";
+			}
+		}
+
+		function load() {
+			recreateAudio()
+		}
+
+		function styleChange(newStyle) {
+			accompanimentStyle = newStyle
+			recreateAudio()
+		}
+
+		function stressChange(newStyle) {
+			stressStyle = newStyle
+			recreateAudio()
+		}
+
+		function durationChange(newStyle) {
+			durationStyle = newStyle
+			recreateAudio()
+		}
+
+		function muteMelody(a) {
+			var el = document.querySelector('input[name="melody"]')
+			mute = el.checked
+			recreateAudio()
+		}
+
+		function swingRhythm(a) {
+			var el = document.querySelector('input[name="swing"]')
+			swing = el.checked
+			recreateAudio()
+		}
+
+	</script>
+</head>
+
+<body onload="load()">
+	<header>
+		<img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+		<h1>Accompaniment</h1>
+	</header>
+	<main>
+		<p>This shows different options for tweaking the sound of the accompaniment.</p>
+		<div class="options">
+			<h2>Pattern:</h2>
+			<label><input type="radio" name="gchord" value="boom-chick" onclick="styleChange('boom-chick')" checked>Boom Chick (default)</label>
+			<label><input type="radio" name="gchord" value="jazz" onclick="styleChange('jazz')">Jazz</label>
+			<label><input type="radio" name="gchord" value="arpeggio" onclick="styleChange('arpeggio')">Arpeggio</label>
+			<label><input type="radio" name="gchord" value="tango" onclick="styleChange('tango')">Tango</label>
+		</div>
+		<div class="options">
+			<h2>Stress:</h2>
+			<label><input type="radio" name="stress" value="even" onclick="stressChange('even')" checked>Even (default)</label>
+			<label><input type="radio" name="stress" value="bass" onclick="stressChange('bass')">Bass heavy</label>
+			<label><input type="radio" name="stress" value="chord" onclick="stressChange('chord')">Chord heavy</label>
+		</div>
+		<div class="options">
+			<h2>Duration:</h2>
+			<label><input type="radio" name="duration" value="even" onclick="durationChange('even')" checked>Even (default)</label>
+			<label><input type="radio" name="duration" value="bass" onclick="durationChange('bass')">Long Bass</label>
+			<label><input type="radio" name="duration" value="chord" onclick="durationChange('chord')">Long Chord</label>
+			<label><input type="radio" name="duration" value="overlap" onclick="durationChange('overlap')">Overlapping</label>
+		</div>
+		<div class="options">
+			<h2>Melody:</h2>
+			<label><input type="checkbox" name="melody" onclick="muteMelody()">Mute Melody</label>
+			<label><input type="checkbox" name="swing" onclick="swingRhythm()">Swing Rhythm</label>
+		</div>
+		<div id="audio" class="abcjs-large"></div>
+		<div class="error"></div>
+		<p>Add this to your code:</p>
+		<pre class="code"></pre>
+		<div id="paper"></div>
+	</main>
+</body>
+
+</html>
