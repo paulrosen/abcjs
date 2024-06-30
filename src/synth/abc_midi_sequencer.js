@@ -435,11 +435,11 @@ var parseCommon = require("../parse/abc_common");
 					                    break;
 
 					                    // MAE 20 Jun 2024
-					                    case "gchorddurationscale":{
-					                      //console.log("Handle inline gchorddurationscale");
+					                    case "gchordduration":{
+					                      //console.log("Handle inline gchordduration");
 					                      if (gUseGChord){
 					                        voices[voiceNumber].push({
-					                          el_type: 'gchorddurationscale',
+					                          el_type: 'gchordduration',
 					                          param: elem.params[0]
 					                        });
 					                      }

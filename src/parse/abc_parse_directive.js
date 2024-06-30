@@ -533,7 +533,7 @@ var parseDirective = {};
 
 	var midiCmdParamVariableFloat = [
 		"gchordstress", 
-		"gchorddurationscale"
+		"gchordduration"
 	]; 
 
   	var midiCmdParam1Integer1OptionalString = [

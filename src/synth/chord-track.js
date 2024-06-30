@@ -79,7 +79,7 @@ var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter) {
   this.gchordstress = (midiOptions.gchordstress && (midiOptions.gchordstress.length === 1))? midiOptions.gchordstress[0] : undefined;
   
   // Is there a gchord duration scale?
-  this.gchorddurationscale = (midiOptions.gchorddurationscale && (midiOptions.gchorddurationscale.length === 1))? midiOptions.gchorddurationscale[0] : defaultDurationScale;
+  this.gchordduration = (midiOptions.gchordduration && (midiOptions.gchordduration.length === 1))? midiOptions.gchordduration[0] : defaultDurationScale;
 
 };
 ChordTrack.prototype.setMeter = function (meter) {
@@ -130,7 +130,7 @@ ChordTrack.prototype.paramChange = function (element) {
         this.overridePattern = parseGChord(element.param);
 
         // Generate a default duration scale based on the pattern
-        this.gchorddurationscale = generateDefaultDurationScale(element.param);
+        this.gchordduration = generateDefaultDurationScale(element.param);
 
       }
       break;
@@ -150,8 +150,8 @@ ChordTrack.prototype.paramChange = function (element) {
     case "gchordstress":
       this.gchordstress = element.param;
       break;
-    case "gchorddurationscale":
-      this.gchorddurationscale = element.param;
+    case "gchordduration":
+      this.gchordduration = element.param;
       break;
     case "bassprog":
       this.bassInstrument = element.value;
@@ -551,7 +551,7 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
 
   var thisGChordStressPattern = this.gchordstress;
 
-  var thisGChordDurationScale  = this.gchorddurationscale;
+  var thisGChordDuration  = this.gchordduration;
 
   // No stress pattern? Create a unity gain version
   if (!thisGChordStressPattern){
@@ -570,18 +570,18 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
   }
 
   // No duration scale pattern? Create a unity version
-  if (!thisGChordDurationScale){
+  if (!thisGChordDuration){
     arr = [];
     for (var i=0;i<thisPattern.length;++i){
       arr.push(1.0);
     }
-    thisGChordDurationScale = arr;
+    thisGChordDuration = arr;
   }
 
   // Duration scale too short? Fill it out.
-  if (thisGChordDurationScale.length < thisPattern.length){
+  if (thisGChordDuration.length < thisPattern.length){
 
-    thisGChordDurationScale = extendArray(thisGChordDurationScale,thisPattern.length);
+    thisGChordDuration = extendArray(thisGChordDuration,thisPattern.length);
 
   }
 
@@ -596,7 +596,7 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
   //   }
   // }
   // console.log(acc);
-  // console.log("duration: "+thisGChordDurationScale.join(" "));
+  // console.log("duration: "+thisGChordDuration.join(" "));
   // //console.log("stress:   "+thisGChordStressPattern.join(" "));
   
   if (this.overridePattern){
@@ -604,14 +604,14 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
     // console.log("resolveChords - gchordbars: "+this.gchordbars+" currentgchordbars: "+this.currentgchordbars);
     // console.log("before slice thisPattern: "+thisPattern.join(":"));
     // console.log("before slice thisGChordStressPattern: "+thisGChordStressPattern.join(":"));
-    // console.log("before slice thisGChordDurationScale: "+thisGChordDurationScale.join(":"));
+    // console.log("before slice thisGChordDuration: "+thisGChordDuration.join(":"));
 
     // Now offset for any gchordbars offset
     var theStart = this.currentgchordbars * originalNSlots;
     var theEnd = theStart + originalNSlots;
     thisPattern = thisPattern.slice(theStart,theEnd);
     thisGChordStressPattern = thisGChordStressPattern.slice(theStart,theEnd);
-    thisGChordDurationScale = thisGChordDurationScale.slice(theStart,theEnd);   
+    thisGChordDuration = thisGChordDuration.slice(theStart,theEnd);   
 
     this.currentgchordbars++;
     if (this.currentgchordbars == this.gchordbars){
@@ -620,7 +620,7 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
 
     // console.log("after slice thisPattern: "+thisPattern.join(":"));
     // console.log("after slice thisGChordStressPattern: "+thisGChordStressPattern.join(":"));
-    // console.log("after slice thisGChordDurationScale: "+thisGChordDurationScale.join(":"));
+    // console.log("after slice thisGChordDuration: "+thisGChordDuration.join(":"));
 
   }
 
@@ -630,7 +630,7 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
 
     var originalStressPattern = thisGChordStressPattern.slice();
 
-    var originalDurationScalePattern = thisGChordDurationScale.slice();
+    var originalDurationScalePattern = thisGChordDuration.slice();
 
     var originalPatternLength = originalPattern.length;
 
@@ -638,7 +638,7 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
 
     thisPattern = [];
     thisGChordStressPattern = [];
-    thisGChordDurationScale = [];
+    thisGChordDuration = [];
 
     var beatsPresent = ((endTime - startTime) / this.tempoChangeFactor * 8) * gchordDivider;
 
@@ -651,14 +651,14 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
 
           thisPattern.push(originalPattern[p]);
           thisGChordStressPattern.push(originalStressPattern[p]);
-          thisGChordDurationScale.push(originalDurationScalePattern[p]);
+          thisGChordDuration.push(originalDurationScalePattern[p]);
 
         }
         else{
 
            thisPattern.push("");
            thisGChordStressPattern.push(1.0);
-           thisGChordDurationScale.push(1.0);
+           thisGChordDuration.push(1.0);
         }
       }
 
@@ -669,7 +669,7 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
 
          thisPattern.push("");
          thisGChordStressPattern.push(1.0);
-         thisGChordDurationScale.push(1.0);
+         thisGChordDuration.push(1.0);
 
       }
     }
@@ -685,8 +685,8 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
           thisPattern.push("");
           thisGChordStressPattern.push(1.0);
           thisGChordStressPattern.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
           break;
         case 2:
           thisPattern.push("");
@@ -697,10 +697,10 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
           thisGChordStressPattern.push(1.0);
           thisGChordStressPattern.push(1.0);
           thisGChordStressPattern.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
           break;
         case 4:
           thisPattern.push("");
@@ -719,14 +719,14 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
           thisGChordStressPattern.push(1.0);
           thisGChordStressPattern.push(1.0);
           thisGChordStressPattern.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
-          thisGChordDurationScale.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
+          thisGChordDuration.push(1.0);
           break;
       }
     }
@@ -751,7 +751,7 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
       stress = 0;
     }
 
-    var durationScale = thisGChordDurationScale[p];
+    var durationScale = thisGChordDuration[p];
 
     if (durationScale < 0){
       durationScale = 0;
