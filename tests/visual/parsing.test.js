@@ -1,83 +1,57 @@
 describe("Parsing", function () {
-	var abcTitleNormal = "X:1\n" +
-	"T:Not Transformed\n" +
-	"K:C\n" +
-	"C";
+	var abc1 = "X:3\n{Azzz}e2\n"
 
-	var expectedTitleNormal = "Not Transformed"
+	var expected1 = [{
+		gracenotes: [{pitch: 5, name: 'A', duration: 0.125, verticalPos: 5}, {rest: {type: 'rest'}, duration: 0.125, verticalPos: 5}, {rest: {type: 'rest'}, duration: 0.125, verticalPos: 5}, {rest: {type: 'rest'}, duration: 0.125, verticalPos: 5}],
+		pitches: [{pitch: 9, name: 'e', verticalPos: 9, highestVert: 9}],
+		duration: 0.25,
+		el_type: "note",
+	}]
 
-	var abcTitleThe = "X:1\n" +
-	"T:Transformed, The\n" +
-	"K:C\n" +
-	"C";
 
-	var expectedTitleThe = "The Transformed"
+	var abc2 = "X: 789\nSx\n"
 
-	var abcTitleThe2 = "X:1\n" +
-	"T:Transformed,the\n" +
-	"K:C\n" +
-	"C";
+	var expected2 = [{
+		duration: 0.125,
+		el_type: "note",
+		rest: { type: 'invisible' }
+	}]
 
-	var expectedTitleThe2 = "The Transformed"
+	var abc3 = "X: 360\n[V:1]f|\\\n[V:1]f|\n"
 
-	var abcTitleA = "X:1\n" +
-	"T:Transformed, A\n" +
-	"K:C\n" +
-	"C";
+	var expected3 = []
 
-	var expectedTitleA = "A Transformed"
-
-	var abcTitleAn = "X:1\n" +
-	"T:Transformed, An\n" +
-	"K:C\n" +
-	"C";
-
-	var expectedTitleAn = "An Transformed"
-
-	var abcTitleA2 = "X:1\n" +
-	"T:Transformed,  a\n" +
-	"K:C\n" +
-	"C";
-
-	var expectedTitleA2 = "A Transformed"
-
-	var abcTitleNumberThe = "X:1\n" +
-	"T:24. Number Transform, The\n" +
-	"K:C\n" +
-	"C";
-
-	var expectedTitleNumberThe = "24. The Number Transform"
-
-	var abcTitleNumberA = "X:1\n" +
-	"T:24. Number Transform, A\n" +
-	"K:C\n" +
-	"C";
-
-	var expectedTitleNumberA = "24. A Number Transform"
-
-	var abcTitleMalformed = "X:1\n" +
-	"T:Mal , The Formed\n" +
-	"K:C\n" +
-	"C";
-
-	var expectedTitleMalformed = "Mal , The Formed"
-
-	it("puts 'the' at the front of the title", function () {
-		testTitle(abcTitleNormal, expectedTitleNormal, "TitleNormal");
-		testTitle(abcTitleThe, expectedTitleThe, "TitleThe");
-		testTitle(abcTitleThe2, expectedTitleThe2, "TitleThe2");
-		testTitle(abcTitleA, expectedTitleA, "TitleA");
-		testTitle(abcTitleAn, expectedTitleAn, "TitleAn");
-		testTitle(abcTitleA2, expectedTitleA2, "TitleA2");
-		testTitle(abcTitleNumberThe, expectedTitleNumberThe, "TitleNumberThe");
-		testTitle(abcTitleNumberA, expectedTitleNumberA, "TitleNumberA");
-		testTitle(abcTitleMalformed, expectedTitleMalformed, "TitleMalformed");
+	it("crashes", function () {
+		testParser(abc1, expected1, "abc1");
 	})
 
-	function testTitle(abc, expected, comment) {
-		var visualObj = abcjs.renderAbc("*", abc);
-		var title = visualObj[0].metaText.title
-		chai.assert.equal(title, expected, ": "+comment);
+	it("crash2", function () {
+		testParser(abc2, expected2, "abc2");
+	})
 
+	it("crash3", function () {
+		testParser(abc3, expected3, "abc3");
+	})
+
+	function testParser(abc, expected, comment) {
+		var visualObj = abcjs.renderAbc("paper", abc);
+		var line1 = visualObj[0].lines[0].staff[0].voices[0]
+		console.log(line1)
+		for (var i = 0; i < expected.length; i++) {
+			var expectedEl = expected[i]
+			var keys = Object.keys(expectedEl)
+			var foundEl = line1[i]
+			var foundKeys = Object.keys(foundEl)
+			foundKeys = foundKeys.filter(k => {
+				return k !== 'averagepitch' && k !== 'endChar' && k !== 'maxpitch' && k !== 'minpitch' && k !== 'startChar' && k !== 'abselem'
+			})
+			console.log(foundKeys)
+			chai.assert.deepStrictEqual(foundKeys, keys, 'keys mismatch ' +comment);
+			for (var j = 0; j < keys.length; j++) {
+				var expectedAttr = expectedEl[keys[j]]
+				var foundAttr = line1[i][keys[j]]
+				chai.assert.deepStrictEqual(foundAttr, expectedAttr, keys[j]+' '+i+' '+' '+' '+comment);
+			}
+		}
 	}
 })
