@@ -12,14 +12,19 @@ describe("Parsing", function () {
 	var abc2 = "X: 789\nSx\n"
 
 	var expected2 = [{
+		rest: { type: 'invisible' },
 		duration: 0.125,
 		el_type: "note",
-		rest: { type: 'invisible' }
 	}]
 
 	var abc3 = "X: 360\n[V:1]f|\\\n[V:1]f|\n"
 
-	var expected3 = []
+	var expected3 = [
+		{ pitches:[{ pitch: 10, name: 'f', verticalPos: 10, highestVert: 10}], duration: 0.125, el_type: 'note'},
+		{ type: 'bar_thin', el_type: 'bar'},
+		{ pitches:[{ pitch: 10, name: 'f', verticalPos: 10, highestVert: 10}], duration: 0.125, el_type: 'note'},
+		{ type: 'bar_thin', el_type: 'bar'},
+	]
 
 	it("crashes", function () {
 		testParser(abc1, expected1, "abc1");

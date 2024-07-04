@@ -494,8 +494,13 @@ var parseKeyVoice = {};
 	};
 
 	var setCurrentVoice = function(id) {
-		multilineVars.currentVoice = multilineVars.voices[id];
-		tuneBuilder.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
+		var currentVoice = multilineVars.voices[id]
+		if (multilineVars.currentVoice) {
+			if (multilineVars.currentVoice.index === currentVoice.index && multilineVars.currentVoice.staffNum === currentVoice.staffNum)
+				return // there was no change so don't reset it.
+		}
+		multilineVars.currentVoice = currentVoice;
+		tuneBuilder.setCurrentVoice(currentVoice.staffNum, currentVoice.index);
 	};
 
 	parseKeyVoice.parseVoice = function(line, i, e) {

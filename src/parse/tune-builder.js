@@ -1,6 +1,6 @@
 var parseKeyVoice = require('../parse/abc_parse_key_voice');
 var parseCommon = require('../parse/abc_common');
-var parseDirective = require('./abc_parse_directive');
+//var parseDirective = require('./abc_parse_directive');
 
 var TuneBuilder = function(tune) {
 	var self = this;
@@ -584,6 +584,9 @@ var TuneBuilder = function(tune) {
 		}
 		delete hashParams.end_beam;	// We don't want this temporary variable hanging around.
 		delete hashParams.force_end_beam_last;	// We don't want this temporary variable hanging around.
+		if (hashParams.rest && hashParams.rest.type === 'invisible') {
+			delete hashParams.decoration // the decorations on invisible rests should be invisible, too.
+		}
 		pushNote(hashParams);
 	};
 
@@ -913,7 +916,7 @@ var TuneBuilder = function(tune) {
 function isArrayOfStrings(arr) {
 	if (!arr) return false
 	if (typeof arr === "string") return false
-	var str = ''
+	//var str = ''
 	for (var i = 0; i < arr.length; i++) {
 		if (typeof arr[i] !== 'string')
 			return false
@@ -928,33 +931,33 @@ function simplifyMetaText(tune) {
 		tune.metaText.history = tune.metaText.history.join("\n")
 }
 
-function addRichTextToAnnotationsAndLyrics(tune) {
-	var lines = tune.lines
-	for (var i = 0; i < lines.length; i++) {
-		if (lines[i].staff !== undefined) {
-			for (var s = 0; s < lines[i].staff.length; s++) {
-				for (var v = 0; v < lines[i].staff[s].voices.length; v++) {
-					var voice = lines[i].staff[s].voices[v];
-					for (var n = 0; n < voice.length; n++) {
-						var element = voice[n]
-						if (element.chord) {
-							for (var c = 0; c < element.chord.length; c++) {
-								element.chord[c].name = parseDirective.parseFontChangeLine(element.chord[c].name)
-								console.log(element.chord[c].name)
-							}
-						}
-						if (element.lyric) {
-							for (var l = 0; l < element.lyric.length; l++) {
-								element.lyric[l].syllable = parseDirective.parseFontChangeLine(element.lyric[l].syllable)
-								console.log(element.lyric[l].syllable)
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+// function addRichTextToAnnotationsAndLyrics(tune) {
+// 	var lines = tune.lines
+// 	for (var i = 0; i < lines.length; i++) {
+// 		if (lines[i].staff !== undefined) {
+// 			for (var s = 0; s < lines[i].staff.length; s++) {
+// 				for (var v = 0; v < lines[i].staff[s].voices.length; v++) {
+// 					var voice = lines[i].staff[s].voices[v];
+// 					for (var n = 0; n < voice.length; n++) {
+// 						var element = voice[n]
+// 						if (element.chord) {
+// 							for (var c = 0; c < element.chord.length; c++) {
+// 								element.chord[c].name = parseDirective.parseFontChangeLine(element.chord[c].name)
+// 								console.log(element.chord[c].name)
+// 							}
+// 						}
+// 						if (element.lyric) {
+// 							for (var l = 0; l < element.lyric.length; l++) {
+// 								element.lyric[l].syllable = parseDirective.parseFontChangeLine(element.lyric[l].syllable)
+// 								console.log(element.lyric[l].syllable)
+// 							}
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
 
-}
+// }
 
 module.exports = TuneBuilder;
