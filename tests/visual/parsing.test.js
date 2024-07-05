@@ -26,6 +26,16 @@ describe("Parsing", function () {
 		{ type: 'bar_thin', el_type: 'bar'},
 	]
 
+	var abc4 = `X: 360
+[V:1]c|\\
+[V:2]A|\\
+[V:1]d|
+`
+
+	var expected4 = [
+
+	]
+
 	it("crashes", function () {
 		testParser(abc1, expected1, "abc1");
 	})
@@ -36,6 +46,10 @@ describe("Parsing", function () {
 
 	it("crash3", function () {
 		testParser(abc3, expected3, "abc3");
+	})
+
+	it("crash4", function () {
+		testParser(abc4, expected4, "abc4");
 	})
 
 	function testParser(abc, expected, comment) {
