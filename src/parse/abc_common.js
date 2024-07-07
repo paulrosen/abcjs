@@ -1,19 +1,11 @@
-//    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
+//    abc_common.js: Some common utility functions.
 
 var parseCommon = {};
-
-parseCommon.clone = function(source) {
-	var destination = {};
-	for (var property in source)
-		if (source.hasOwnProperty(property))
-			destination[property] = source[property];
-	return destination;
-};
 
 parseCommon.cloneArray = function(source) {
 	var destination = [];
 	for (var i = 0; i < source.length; i++) {
-		destination.push(parseCommon.clone(source[i]));
+		destination.push(Object.assign({},source[i]));
 	}
 	return destination;
 };
@@ -22,7 +14,7 @@ parseCommon.cloneHashOfHash = function(source) {
 	var destination = {};
 	for (var property in source)
 		if (source.hasOwnProperty(property))
-			destination[property] = parseCommon.clone(source[property]);
+			destination[property] = Object.assign({},source[property]);
 	return destination;
 };
 

@@ -48,7 +48,6 @@
 // Expanded:
 // MIDI is now { cmd, param }
 
-var parseCommon = require('../parse/abc_common');
 var JSONSchema = require('./jsonschema-b4');
 
 var ParserLint = function() {
@@ -76,7 +75,7 @@ var ParserLint = function() {
 	};
 
 	var appendPositioning = function(properties) {
-		var ret = parseCommon.clone(properties);
+		var ret = Object.assign({},properties);
 		ret.startChar = { type: 'number' }; //, output: 'hidden' };
 		ret.endChar = { type: 'number' }; //, output: 'hidden' };
 		return ret;
@@ -580,7 +579,7 @@ var ParserLint = function() {
 	};
 
 	var addProhibits = function(obj, arr) {
-		var ret = parseCommon.clone(obj);
+		var ret = Object.assign({},obj);
 		ret.prohibits = arr;
 		return ret;
 	};

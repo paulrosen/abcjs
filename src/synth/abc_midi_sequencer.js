@@ -315,7 +315,7 @@ var parseCommon = require("../parse/abc_common");
 										if (!e) e = voices[voiceNumber].length; // If there wasn't a first ending marker, then we copy everything.
 										// duplicate each of the elements - this has to be a deep copy.
 										for (var z = s; z < e; z++) {
-											var item = parseCommon.clone(voices[voiceNumber][z]);
+											var item = Object.assign({},voices[voiceNumber][z]);
 											if (item.pitches)
 												item.pitches = parseCommon.cloneArray(item.pitches);
 											voices[voiceNumber].push(item);

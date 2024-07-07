@@ -1,7 +1,6 @@
 var supportsAudio = require('./supports-audio');
 var registerAudioContext = require('./register-audio-context');
 var activeAudioContext = require('./active-audio-context');
-var parseCommon = require('../parse/abc_common');
 
 var loopImage = require('./images/loop.svg.js');
 var playImage = require('./images/play.svg.js');
@@ -23,7 +22,7 @@ function CreateSynthControl(parent, options) {
 	self.parent = parent;
 	self.options = {};
 	if (options)
-		self.options = parseCommon.clone(options);
+		self.options = Object.assign({},options);
 
 	// This can be called in the following cases:
 	// AC already registered and not suspended

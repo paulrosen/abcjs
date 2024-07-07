@@ -17,8 +17,6 @@
 //
 // If there is any note in the melody that has a rhythm head, then assume the melody controls the rhythm, so there is no chord added for that entire measure.
 
-var parseCommon = require("../parse/abc_common");
-
 var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter) {
 	this.chordTrack = [];
 	this.chordTrackFinished = false;
@@ -64,7 +62,7 @@ ChordTrack.prototype.setRhythmHead = function (isRhythmHead, elem) {
 	if (isRhythmHead) {
 		if (this.lastChord && this.lastChord.chick) {
 			for (var i2 = 0; i2 < this.lastChord.chick.length; i2++) {
-				var note2 = parseCommon.clone(elem.pitches[0]);
+				var note2 = Object.assign({},elem.pitches[0]);
 				note2.actualPitch = this.lastChord.chick[i2];
 				ePitches.push(note2);
 			}

@@ -341,6 +341,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 
 	this.letter_to_inline_header = function(line, i, startLine)
 	{
+		var needsNewLine = false
 		var ws = tokenizer.eatWhiteSpace(line, i);
 		i +=ws;
 		if (line.length >= i+5 && line[i] === '[' && line[i+2] === ':') {
@@ -396,9 +397,9 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 					break;
 				case "[V:":
 					if (e > 0) {
-						parseKeyVoice.parseVoice(line, i+3, e);
+						needsNewLine = parseKeyVoice.parseVoice(line, i+3, e);
 						//startNewLine();
-						return [ e-i+1+ws, line[i+1], line.substring(i+3, e)];
+						return [ e-i+1+ws, line[i+1], line.substring(i+3, e), needsNewLine];
 					}
 					break;
 				case "[r:":
@@ -413,6 +414,7 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 
 	this.letter_to_body_header = function(line, i)
 	{
+		var needsNewLine = false
 		if (line.length >= i+3) {
 			switch(line.substring(i, i+2))
 			{
@@ -447,9 +449,9 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 					else if (tempo.type === 'immediate') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, tempo.tempo);
 				return [ e, line[i], parseCommon.strip(line.substring(i+2))];
 				case "V:":
-					parseKeyVoice.parseVoice(line, i+2, line.length);
+					needsNewLine = parseKeyVoice.parseVoice(line, i+2, line.length);
 //						startNewLine();
-					return [ line.length, line[i], parseCommon.strip(line.substring(i+2))];
+					return [ line.length, line[i], parseCommon.strip(line.substring(i+2)), needsNewLine];
 				default:
 					// TODO: complain about unhandled header
 			}

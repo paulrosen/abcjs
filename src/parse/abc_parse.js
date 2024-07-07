@@ -440,7 +440,7 @@ var Parse = function() {
 		});
 		for (var i = 0; i < nextVoice.length; i++) {
 			var element = nextVoice[i];
-			var hint = parseCommon.clone(element);
+			var hint = Object.assign({},element);
 			voice.push(hint);
 			if (element.el_type === 'bar')
 					return;
