@@ -9,20 +9,34 @@ var create;
 
 	var baseDuration = 480*4; // nice and divisible, equals 1 whole note
 
-	create = function(abcTune, options) {
-		if (options === undefined) options = {};
-		var commands = abcTune.setUpAudio(options);
-		var midi = rendererFactory();
+  create = function create(abcTune, options) {
+    if (options === undefined) options = {};
+    var commands = abcTune.setUpAudio(options);
+    var midi = rendererFactory();
+    var title = abcTune.metaText ? abcTune.metaText.title : undefined;
+    if (title && title.length > 128) title = title.substring(0, 124) + '...';
+    var key = abcTune.getKeySignature();
+    var time = abcTune.getMeterFraction();
+    
+    // MAE 7 July 2024 - Fix for */8 meter tempos
+    var tempo = commands.tempo;
 
-		var title = abcTune.metaText ? abcTune.metaText.title : undefined;
-		if (title && title.length > 128)
-			title = title.substring(0,124) + '...';
-		var key = abcTune.getKeySignature();
-		var time = abcTune.getMeterFraction();
-		var beatsPerSecond = commands.tempo / 60;
-		//var beatLength = abcTune.getBeatLength();
-		midi.setGlobalInfo(commands.tempo, title, key, time);
+    var beatsPerSecond = tempo / 60;
 
+    // Fix tempo for */8 meters
+    if (time.den == 8){
+
+      // Compute the tempo based on the actual milliseconds per measure, scaled by the number of eight notes and halved to get tempo in bpm.
+      var msPerMeasure = abcTune.millisecondsPerMeasure();
+      
+      tempo = (60000 / (msPerMeasure/time.num)) / 2;
+      
+      beatsPerSecond = tempo/60;
+
+    }
+
+    //var beatLength = abcTune.getBeatLength();
+    midi.setGlobalInfo(tempo, title, key, time);
 		for (var i = 0; i < commands.tracks.length; i++) {
 			midi.startTrack();
 			var notePlacement = {};
