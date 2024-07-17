@@ -347,7 +347,8 @@ var pitchesToPerc = require('./pitches-to-perc');
 			return 0;
 
 		var volume;
-		if (nextVolume) {
+    	// MAE 21 Jun 2024 - This previously wasn't allowing zero volume to be applied
+		if (nextVolume != undefined) {
 			volume = nextVolume;
 			nextVolume = undefined;
 		} else if (!doBeatAccents) {
