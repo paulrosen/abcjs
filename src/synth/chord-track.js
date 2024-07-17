@@ -336,23 +336,32 @@ function resolvePitch(currentChord, type, firstBoom, newBass) {
 		ret.push(firstBoom ? currentChord.boom : currentChord.boom2)
 	else if (newBass)
 		ret.push(currentChord.boom)
+	var numChordNotes = currentChord.chick.length
 	if (type.indexOf('chick') >= 0) {
-		for (var i = 0; i < currentChord.chick.length; i++)
+		for (var i = 0; i < numChordNotes; i++)
 			ret.push(currentChord.chick[i])
 	}
 	switch (type) {
 		case 'DO': ret.push(currentChord.chick[0]); break;
 		case 'MI': ret.push(currentChord.chick[1]); break;
-		case 'SOL': ret.push(currentChord.chick[2]); break;
-		case 'TI': currentChord.chick.length > 3 ? ret.push(currentChord.chick[3]) : ret.push(currentChord.chick[0] + 12); break;
-		case 'TOP': currentChord.chick.length > 4 ? ret.push(currentChord.chick[4]) : ret.push(currentChord.chick[1] + 12); break;
+		case 'SOL': ret.push(extractNote(currentChord,2)); break;
+		case 'TI': ret.push(extractNote(currentChord,3)); break;
+		case 'TOP': ret.push(extractNote(currentChord,4)); break;
 		case 'do': ret.push(currentChord.chick[0]+12); break;
 		case 'mi': ret.push(currentChord.chick[1]+12); break;
-		case 'sol': ret.push(currentChord.chick[2]+12); break;
-		case 'ti': currentChord.chick.length > 3 ? ret.push(currentChord.chick[3] + 12) : ret.push(currentChord.chick[0] + 24); break;
-		case 'top': currentChord.chick.length > 4 ? ret.push(currentChord.chick[4] + 12) : ret.push(currentChord.chick[1] + 24); break;
+		case 'sol': ret.push(extractNote(currentChord,2)+12); break;
+		case 'ti': ret.push(extractNote(currentChord,3)+12); break;
+		case 'top': ret.push(extractNote(currentChord,4)+12); break;
 	}
 	return ret
+}
+
+function extractNote(chord, index) {
+	// This creates an arpeggio note no matter how many notes are in the chord - if it runs out of notes it continues in the next octave
+	var octave = Math.floor(index / chord.chick.length)
+	var note = chord.chick[index % chord.chick.length]
+	console.log(chord.chick, {index, octave, note}, index % chord.chick.length)
+	return note + octave * 12
 }
 
 function parseGChord(gchord) {
@@ -530,7 +539,12 @@ ChordTrack.prototype.chordIntervals = {
 	'maj7#5#11': [0, 4, 8, 11, 18],
 	'9(#5)': [0, 4, 8, 10, 14],
 	'13(#5)': [0, 4, 8, 10, 14, 21],
-	'13#5': [0, 4, 8, 10, 14, 21]
+	'13#5': [0, 4, 8, 10, 14, 21],
+	// MAE Power chords added 10 April 2024
+	'5': [0, 7],
+	'5(8)': [0, 7, 12],
+	'5add8': [0, 7, 12]
+
 };
 
 ChordTrack.prototype.rhythmPatterns = {
@@ -545,8 +559,12 @@ ChordTrack.prototype.rhythmPatterns = {
 	"6/4": ['boom', '', 'chick', '', 'boom', '', 'chick', '', 'boom', '', 'chick', ''],
 
 	"3/8": ['boom', '', 'chick'],
+	"5/8": ['boom', 'chick', 'chick', 'boom', 'chick'],
 	"6/8": ['boom', '', 'chick', 'boom', '', 'chick'],
+	"7/8": ['boom', 'chick', 'chick', 'boom', 'chick', 'boom', 'chick'],
 	"9/8": ['boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick'],
+	"10/8": ['boom', 'chick', 'chick', 'boom', 'chick', 'chick', 'boom', 'chick', 'boom', 'chick'],
+	"11/8": ['boom', 'chick', 'chick', 'boom', 'chick', 'chick', 'boom', 'chick', 'boom', 'chick', 'chick'],
 	"12/8": ['boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick'],
 };
 

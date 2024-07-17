@@ -6512,9 +6512,18 @@ describe("Audio flattener", function() {
 				},
 				{
 					"cmd": "note",
+					"pitch": 36,
+					"volume": 64,
+					"start": 36.625,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
 					"pitch": 48,
 					"volume": 48,
-					"start": 36.625,
+					"start": 36.75,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -6523,7 +6532,7 @@ describe("Audio flattener", function() {
 					"cmd": "note",
 					"pitch": 52,
 					"volume": 48,
-					"start": 36.625,
+					"start": 36.75,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -6532,7 +6541,7 @@ describe("Audio flattener", function() {
 					"cmd": "note",
 					"pitch": 55,
 					"volume": 48,
-					"start": 36.625,
+					"start": 36.75,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -6566,6 +6575,15 @@ describe("Audio flattener", function() {
 				},
 				{
 					"cmd": "note",
+					"pitch": 31,
+					"volume": 64,
+					"start": 37,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
 					"pitch": 48,
 					"volume": 48,
 					"start": 37.125,
@@ -6593,6 +6611,15 @@ describe("Audio flattener", function() {
 				},
 				{
 					"cmd": "note",
+					"pitch": 31,
+					"volume": 64,
+					"start": 37.25,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
 					"pitch": 48,
 					"volume": 48,
 					"start": 37.375,
@@ -6614,6 +6641,15 @@ describe("Audio flattener", function() {
 					"pitch": 55,
 					"volume": 48,
 					"start": 37.375,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 38,
+					"volume": 64,
+					"start": 37.5,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -6622,7 +6658,7 @@ describe("Audio flattener", function() {
 					"cmd": "note",
 					"pitch": 50,
 					"volume": 48,
-					"start": 37.5,
+					"start": 37.625,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -6631,7 +6667,7 @@ describe("Audio flattener", function() {
 					"cmd": "note",
 					"pitch": 54,
 					"volume": 48,
-					"start": 37.5,
+					"start": 37.625,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -6640,7 +6676,7 @@ describe("Audio flattener", function() {
 					"cmd": "note",
 					"pitch": 57,
 					"volume": 48,
-					"start": 37.5,
+					"start": 37.625,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -6710,6 +6746,15 @@ describe("Audio flattener", function() {
 				},
 				{
 					"cmd": "note",
+					"pitch": 35,
+					"volume": 64,
+					"start": 38.125,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
 					"pitch": 52,
 					"volume": 48,
 					"start": 38.25,
@@ -6737,26 +6782,8 @@ describe("Audio flattener", function() {
 				},
 				{
 					"cmd": "note",
-					"pitch": 55,
-					"volume": 48,
-					"start": 38.375,
-					"duration": 0.0625,
-					"gap": 0,
-					"instrument": 0
-				},
-				{
-					"cmd": "note",
-					"pitch": 59,
-					"volume": 48,
-					"start": 38.375,
-					"duration": 0.0625,
-					"gap": 0,
-					"instrument": 0
-				},
-				{
-					"cmd": "note",
-					"pitch": 62,
-					"volume": 48,
+					"pitch": 43,
+					"volume": 64,
 					"start": 38.375,
 					"duration": 0.0625,
 					"gap": 0,
@@ -6766,6 +6793,33 @@ describe("Audio flattener", function() {
 					"cmd": "note",
 					"pitch": 55,
 					"volume": 48,
+					"start": 38.5,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 59,
+					"volume": 48,
+					"start": 38.5,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 48,
+					"start": 38.5,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 48,
 					"start": 38.625,
 					"duration": 0.0625,
 					"gap": 0,
@@ -6785,6 +6839,15 @@ describe("Audio flattener", function() {
 					"pitch": 62,
 					"volume": 48,
 					"start": 38.625,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 38,
+					"volume": 64,
+					"start": 38.75,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -6821,6 +6884,15 @@ describe("Audio flattener", function() {
 					"pitch": 52,
 					"volume": 48,
 					"start": 38.875,
+					"duration": 0.0625,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 33,
+					"volume": 64,
+					"start": 39,
 					"duration": 0.0625,
 					"gap": 0,
 					"instrument": 0
@@ -7223,6 +7295,164 @@ describe("Audio flattener", function() {
 	
 	//////////////////////////////////////////////////////////
 
+	var abcPowerChord = 'X: 1\n' +
+	'L: 1/4\n' +
+	'M: 4/4\n' +
+	'K:C\n' +
+	'"C5"z4|\n' +
+	'%%MIDI gchord GHIJKghi\n' +
+	'"D5"z4|\n'
+
+	var expectedPowerChord = {
+		"tempo": 180,
+		"instrument": 0,
+		"tracks": [
+			[
+				{
+					"cmd": "program",
+					"channel": 0,
+					"instrument": 0
+				}
+			],
+			[
+				{
+					"cmd": "program",
+					"channel": 1,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 36,
+					"volume": 64,
+					"start": 0,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 48,
+					"volume": 48,
+					"start": 0.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 48,
+					"start": 0.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 31,
+					"volume": 64,
+					"start": 0.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 48,
+					"volume": 48,
+					"start": 0.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 55,
+					"volume": 48,
+					"start": 0.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 50,
+					"volume": 48,
+					"start": 1,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 57,
+					"volume": 48,
+					"start": 1.125,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 48,
+					"start": 1.25,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 69,
+					"volume": 48,
+					"start": 1.375,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 74,
+					"volume": 48,
+					"start": 1.5,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 62,
+					"volume": 48,
+					"start": 1.625,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 69,
+					"volume": 48,
+					"start": 1.75,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				},
+				{
+					"cmd": "note",
+					"pitch": 74,
+					"volume": 48,
+					"start": 1.875,
+					"duration": 0.125,
+					"gap": 0,
+					"instrument": 0
+				}
+			]
+		],
+		"totalDuration": 2
+	}
+
+	//////////////////////////////////////////////////////////
+
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
@@ -7381,6 +7611,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-change-gchord", function() {
 		doFlattenTest(abcChangeGChord, expectedChangeGChord);
+	})
+
+	it("flatten-power-chord", function() {
+		doFlattenTest(abcPowerChord, expectedPowerChord);
 	})
 
 })
