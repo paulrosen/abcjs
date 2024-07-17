@@ -344,13 +344,13 @@ function resolvePitch(currentChord, type, firstBoom, newBass) {
 		case 'DO': ret.push(currentChord.chick[0]); break;
 		case 'MI': ret.push(currentChord.chick[1]); break;
 		case 'SOL': ret.push(currentChord.chick[2]); break;
-		case 'TI': currentChord.chick.length > 3 ? ret.push(currentChord.chick[2]) : ret.push(currentChord.chick[0]+12); break;
-		case 'TOP': currentChord.chick.length > 4 ? ret.push(currentChord.chick[2]) : ret.push(currentChord.chick[1]+12); break;
+		case 'TI': currentChord.chick.length > 3 ? ret.push(currentChord.chick[3]) : ret.push(currentChord.chick[0] + 12); break;
+		case 'TOP': currentChord.chick.length > 4 ? ret.push(currentChord.chick[4]) : ret.push(currentChord.chick[1] + 12); break;
 		case 'do': ret.push(currentChord.chick[0]+12); break;
 		case 'mi': ret.push(currentChord.chick[1]+12); break;
 		case 'sol': ret.push(currentChord.chick[2]+12); break;
-		case 'ti': currentChord.chick.length > 3 ? ret.push(currentChord.chick[2]+12) : ret.push(currentChord.chick[0]+24); break;
-		case 'top': currentChord.chick.length > 4 ? ret.push(currentChord.chick[2]+12) : ret.push(currentChord.chick[1]+24); break;
+		case 'ti': currentChord.chick.length > 3 ? ret.push(currentChord.chick[3] + 12) : ret.push(currentChord.chick[0] + 24); break;
+		case 'top': currentChord.chick.length > 4 ? ret.push(currentChord.chick[4] + 12) : ret.push(currentChord.chick[1] + 24); break;
 	}
 	return ret
 }
