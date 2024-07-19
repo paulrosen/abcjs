@@ -485,8 +485,6 @@ var parseDirective = {};
 	var midiCmdParam1Integer = [
 		"bassvol",
 		"chordvol",
-		"bassprog",
-		"chordprog",
 		"c",
 		"channel",
 		"beatmod",
@@ -500,7 +498,7 @@ var parseDirective = {};
 		"transpose",
 		"rtranspose",
 		"vol",
-		"volinc"
+		"volinc",
 	];
 	var midiCmdParam1Integer1OptionalInteger = [
 		"program"
@@ -531,6 +529,10 @@ var parseDirective = {};
 		"drum",
 		"chordname"
 	];
+  	var midiCmdParam1Integer1OptionalString = [
+  		"bassprog", "chordprog"
+  	];
+
 
 	var parseMidiCommand = function(midi, tune, restOfString) {
 		var midi_cmd = midi.shift().token;
@@ -673,6 +675,44 @@ var parseDirective = {};
 				}
 			}
 		}
+	    else if (midiCmdParam1Integer1OptionalString.indexOf(midi_cmd) >= 0){
+
+	      // ONE INT PARAMETER, ONE OPTIONAL string
+	    	if (midi.length !== 1 && midi.length !== 2) 
+				warn("Expected one or two parameters in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi[0].type !== "number") 
+				warn("Expected integer parameter in MIDI " + midi_cmd, restOfString, 0);
+			else if (midi.length === 2 && midi[1].type !== "alpha") 
+				warn("Expected alpha parameter in MIDI " + midi_cmd, restOfString, 0);
+			else {
+	        	midi_params.push(midi[0].intt);
+
+	        // Currently only bassprog and chordprog with optional octave shifts use this path
+	        if (midi.length === 2){
+	          var cmd = midi[1].token;
+	          if (cmd.indexOf("octave=") != -1){
+	            cmd = cmd.replace("octave=","");
+	            cmd = parseInt(cmd);
+	            if (!isNaN(cmd)){
+	              // Limit range from -1 to 3 octaves
+	              if (cmd < -1){
+					warn("Expected octave= in MIDI " + midi_cmd + ' to be >= -1 (recv:'+cmd+')');
+	                cmd = -1;
+	              }
+	              if (cmd > 3){
+					warn("Expected octave= in MIDI " + midi_cmd + ' to be <= 3 (recv:'+cmd+')');
+	                cmd = 3;
+	              }
+	              midi_params.push(cmd);
+	            } else
+	            warn("Expected octave value in MIDI" + midi_cmd);
+	          }
+	          else{
+	            warn("Expected octave= in MIDI" + midi_cmd);
+	          }
+	        }
+	      }
+	    }
 
 		if (tuneBuilder.hasBeginMusic())
 			tuneBuilder.appendElement('midi', -1, -1, { cmd: midi_cmd, params: midi_params });

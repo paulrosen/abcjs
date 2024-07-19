@@ -125,3 +125,11 @@ To arbitrarily add the class "mark" to the next note, you can use the decoration
 K:C
 e!mark!f|g
 `' ></render-abc>
+
+### MIDI:
+
+And extra octave parameter is accepted in `bassprog` and `chordprog`:
+```
+%%MIDI bassprog 22 octave=-1
+%%MIDI chordprog 2 octave=1
+```

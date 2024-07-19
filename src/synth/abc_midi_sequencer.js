@@ -389,12 +389,21 @@ var parseCommon = require("../parse/abc_common");
 											break;
 										case "swing":
 										case "gchord":
-										case "bassprog":
-										case "chordprog":
 										case "bassvol":
 										case "chordvol":
 											voices[voiceNumber].push({ el_type: elem.cmd, param: elem.params[0] });
 											break;
+
+										case "bassprog": // MAE 22 May 2024
+										case "chordprog": // MAE 22 May 2024
+					                      //console.log("Handle inline bassprog");
+					                      voices[voiceNumber].push({
+					                        el_type: elem.cmd,
+					                        value: elem.params[0],
+					                        octaveShift: elem.params[1]
+					                      });
+					                      break;
+
 										default:
 											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);
 									}

@@ -7453,6 +7453,38 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcChordOctave = 'X: 1\n' +
+	'L: 1/4\n' +
+	'M: 4/4\n' +
+	'K:C\n' +
+	'%%MIDI bassprog 10 octave=-1\n' +
+	'%%MIDI chordprog 4 octave=1\n' +
+	'"C"z4|\n'
+
+	var expectedChordOctave = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0}
+			],
+			[
+				{"cmd":"program","channel":1,"instrument":4},
+				{"cmd":"note","pitch":24,"volume":64,"start":0,"duration":0.125,"gap":0,"instrument":10},
+				{"cmd":"note","pitch":60,"volume":48,"start":0.25,"duration":0.125,"gap":0,"instrument":4},
+				{"cmd":"note","pitch":64,"volume":48,"start":0.25,"duration":0.125,"gap":0,"instrument":4},
+				{"cmd":"note","pitch":67,"volume":48,"start":0.25,"duration":0.125,"gap":0,"instrument":4},
+				{"cmd":"note","pitch":19,"volume":64,"start":0.5,"duration":0.125,"gap":0,"instrument":10},
+				{"cmd":"note","pitch":60,"volume":48,"start":0.75,"duration":0.125,"gap":0,"instrument":4},
+				{"cmd":"note","pitch":64,"volume":48,"start":0.75,"duration":0.125,"gap":0,"instrument":4},
+				{"cmd":"note","pitch":67,"volume":48,"start":0.75,"duration":0.125,"gap":0,"instrument":4}
+			]
+		],
+		"totalDuration":1
+	}
+
+	//////////////////////////////////////////////////////////
+
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
@@ -7615,6 +7647,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-power-chord", function() {
 		doFlattenTest(abcPowerChord, expectedPowerChord);
+	})
+
+	it("bass-and-chord-octave", function() {
+		doFlattenTest(abcChordOctave, expectedChordOctave);
 	})
 
 })
