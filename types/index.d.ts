@@ -379,7 +379,7 @@ declare module 'abcjs' {
 		chordprog?: number;
 		chordvol?: number;
 		gchord?: string;
-}
+	}
 
 	export interface SynthVisualOptions {
 		displayLoop?: boolean;
