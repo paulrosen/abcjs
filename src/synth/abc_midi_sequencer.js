@@ -396,7 +396,6 @@ var parseCommon = require("../parse/abc_common");
 
 										case "bassprog": // MAE 22 May 2024
 										case "chordprog": // MAE 22 May 2024
-					                      //console.log("Handle inline bassprog");
 					                      voices[voiceNumber].push({
 					                        el_type: elem.cmd,
 					                        value: elem.params[0],

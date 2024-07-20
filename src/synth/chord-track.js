@@ -43,7 +43,13 @@ var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter) {
 	this.boomVolume = midiOptions.bassvol && midiOptions.bassvol.length === 1 ? midiOptions.bassvol[0] : 64;
 	this.chickVolume = midiOptions.chordvol && midiOptions.chordvol.length === 1 ? midiOptions.chordvol[0] : 48;
 
-	this.overridePattern = midiOptions.gchord ? parseGChord(midiOptions.gchord[0]) : undefined
+	// This allows for an initial %%MIDI gchord with no string
+	if (midiOptions.gchord && (midiOptions.gchord.length > 0)) {
+		this.overridePattern = parseGChord(midiOptions.gchord[0])
+	}
+	else {
+		this.overridePattern = undefined;
+	}
 };
 
 ChordTrack.prototype.setMeter = function (meter) {
@@ -93,7 +99,14 @@ ChordTrack.prototype.gChordOn = function (element) {
 ChordTrack.prototype.paramChange = function (element) {
 	switch (element.el_type) {
 		case "gchord":
-			this.overridePattern = parseGChord(element.param);
+			// Skips gchord elements that don't have pattern strings
+			if (element.param && element.param.length > 0) {
+				this.overridePattern = parseGChord(element.param);
+
+				// Generate a default duration scale based on the pattern
+				//this.gchordduration = generateDefaultDurationScale(element.param);
+			} else
+				this.overridePattern = undefined;
 			break;
 		case "bassprog":
 			this.bassInstrument = element.value;

@@ -7485,6 +7485,46 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcCancelGChord = 'X: 1\n' +
+	'L: 1/4\n' +
+	'M: 4/4\n' +
+	'K:C\n' +
+	'%%MIDI gchord ffffffff\n' +
+	'"C"z4|\n' +
+	'%%MIDI gchord\n' +
+	'"C"z4|\n'
+
+	var expectedCancelGChord = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0}
+			],[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":36,"volume":64,"start":0,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":0.125,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":0.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":0.375,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":0.5,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":0.625,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":0.75,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":0.875,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":36,"volume":64,"start":1,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":1.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":1.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":31,"volume":64,"start":1.5,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":1.75,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":52,"volume":48,"start":1.75,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1.75,"duration":0.125,"gap":0,"instrument":0}
+			]
+		],
+		"totalDuration":2
+	}
+
+	//////////////////////////////////////////////////////////
+
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
@@ -7651,6 +7691,10 @@ describe("Audio flattener", function() {
 
 	it("bass-and-chord-octave", function() {
 		doFlattenTest(abcChordOctave, expectedChordOctave);
+	})
+
+	it("cancel-gchord", function() {
+		doFlattenTest(abcCancelGChord, expectedCancelGChord);
 	})
 
 })
