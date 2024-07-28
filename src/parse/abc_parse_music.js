@@ -457,6 +457,9 @@ MusicParser.prototype.parseMusic = function(line) {
 											else
 												postChordDone = true;
 											break;
+										case '0':
+											chordDuration = 0;
+											break;
 										default:
 											postChordDone = true;
 											break;
@@ -554,7 +557,7 @@ MusicParser.prototype.parseMusic = function(line) {
 						// The first item on a line is a regular note value, each item after that represents a dot placed after the previous note.
 						// Only durations less than a whole note are tested because whole note durations have some tricky rules.
 
-            if (el.duration < 1 && durations.indexOf(el.duration) === -1 && el.duration !== 0) {
+						if (el.duration < 1 && durations.indexOf(el.duration) === -1 && el.duration !== 0) {
 							if (!el.rest || el.rest.type !== 'spacer')
 								warn("Duration not representable: " + line.substring(startI, i), line, i);
 						}

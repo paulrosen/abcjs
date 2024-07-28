@@ -17,6 +17,6 @@ describe("Parser Note", function() {
 		for (var i = 0; i < voice.length; i++) {
 			chai.assert.equal(voice[i].duration, expected[i], "element # "+i)
 		}
-		chai.assert.equal(warnings.length, 0, "warnings")
+		chai.assert.equal(warnings, undefined, "warnings")
 	}
 })
