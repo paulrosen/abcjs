@@ -499,6 +499,7 @@ var parseDirective = {};
 		"rtranspose",
 		"vol",
 		"volinc",
+		"gchordbars"	
 	];
 	var midiCmdParam1Integer1OptionalInteger = [
 		"program"

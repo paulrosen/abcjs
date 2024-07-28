@@ -403,6 +403,13 @@ var parseCommon = require("../parse/abc_common");
 					                      });
 					                      break;
 
+					                    // MAE 23 Jun 2024
+					                    case "gchordbars":
+					                        voices[voiceNumber].push({
+					                          el_type: elem.cmd,
+					                          param: elem.params[0]
+					                        });
+					                    break;
 										default:
 											console.log("MIDI seq: midi cmd not handled: ", elem.cmd, elem);
 									}
