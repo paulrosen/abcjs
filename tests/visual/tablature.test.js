@@ -695,14 +695,14 @@ describe("Tablature", function () {
 	var unusualFontSizeOutput = [
 		72,
 		138,
-		268,
-		334,
-		504,
-		570,
-		822,
-		888,
-		1239,
-		1305,
+		269,
+		335,
+		505,
+		571,
+		823,
+		889,
+		1242,
+		1308,
 	]
 
 	var weirdNoteConstruction = "X:1\n" +
@@ -738,10 +738,10 @@ describe("Tablature", function () {
 	var staffPlacementOutput = [
 		44,
 		145,
-		257,
-		362,
-		473,
-		578
+		258,
+		363,
+		475,
+		580
 	]
 
 	var accidentals2 = "X: 1\n" +
@@ -794,6 +794,19 @@ describe("Tablature", function () {
 		]
 	]
 
+	var lyrics = "X: 1\n" +
+		"M: 3/4\n" +
+		"L: 1/4\n" +
+		"K: G\n" +
+		"GAB|\n" +
+		"w: Tra la la\n" +
+		"w: Tra la la\n"
+
+	var lyricsOutput = [
+		41,
+		154,
+	]
+
 	var firstStaffOnly = "X:1\n" +
 		"%%stretchlast\n" +
 		"L:1/4\n" +
@@ -805,27 +818,27 @@ describe("Tablature", function () {
 		"|:\"Gbmaj7\"DEGB:|\n"
 
 	var firstStaffOnlyOutput1 = [
-		63,
-		129,
+		62,
+		128,
 		238,
 		304,
 		413,
 		479,
-		588,
-		654,
-		763,
-		829,
+		589,
+		655,
+		764,
+		830,
 	]
 
 	var firstStaffOnlyOutput2 = [
-		63,
-		129,
+		62,
+		128,
 		238,
 		304,
-		393,
-		459,
+		392,
+		458,
 		547,
-		613,
+		612,
 		701,
 		767,
 	]
@@ -1003,7 +1016,7 @@ describe("Tablature", function () {
 		chai.assert.equal(difference2, difference1, "Spacing between staves is not correct")
 	})
 
-	it("bracket width", function() {
+	it("bracket-width", function() {
 		var visualObj = doRender(bracketWidth, violinGuitarParams)
 		var name = document.querySelector(".abcjs-instrument-name")
 		var x = name.getAttribute("x")
@@ -1030,7 +1043,7 @@ describe("Tablature", function () {
 		var visualObj = doRender(clefNone, violinParams)
 	})
 
-	it("bracket", function() {
+	it("bracket-height", function() {
 		var visualObj = doRender(bracketPlacement, violinGuitarParams)
 		var lastStaff = document.querySelector(".abcjs-staff.abcjs-l0.abcjs-v3")
 		var dim = lastStaff.getBBox()
@@ -1055,6 +1068,10 @@ describe("Tablature", function () {
 	it("firstStaffOnly", function() {
 		doVerticalTest(firstStaffOnly, firstStaffOnlyOutput1, violinParams)
 		doVerticalTest(firstStaffOnly, firstStaffOnlyOutput2, firstStaffOnlyParams)
+	})
+
+	it("tab-lyrics", function() {
+		doVerticalTest(lyrics, lyricsOutput, violinParams)
 	})
 });
 

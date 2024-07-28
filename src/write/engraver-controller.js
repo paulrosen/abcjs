@@ -16,7 +16,7 @@ var Classes = require('./helpers/classes');
 var GetFontAndAttr = require('./helpers/get-font-and-attr');
 var GetTextSize = require('./helpers/get-text-size');
 var draw = require('./draw/draw');
-var tablatures = require('../api/abc_tablatures');
+var tablatures = require('../tablatures/abc_tablatures');
 var findSelectableElement = require('./interactive/find-selectable-element');
 
 /**

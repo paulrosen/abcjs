@@ -2,7 +2,7 @@
 
 var Parse = require('../parse/abc_parse');
 var bookParser = require('../parse/abc_parse_book');
-var tablatures = require('./abc_tablatures');
+var tablatures = require('../tablatures/abc_tablatures');
 
 
 var tunebook = {};
@@ -87,7 +87,6 @@ var tunebook = {};
 					// Init tablatures plugins
 					//
 					if (params.tablature) {
-						tablatures.init();
 						tune.tablatures = tablatures.preparePlugins(tune, currentTune, params);
 					}
 					var warnings = abcParser.getWarnings();
