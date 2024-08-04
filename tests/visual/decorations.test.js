@@ -10,9 +10,9 @@ describe("Decorations", function() {
 		"[V:B]!invertedfermata!A,B, !invertedfermata!C2 | !invertedfermata!cd !invertedfermata!e2 |!fermata!A,B, !fermata!C2 | !fermata!cd !fermata!e2 ||\n"
 
 	var expectedFermata = [
-		{ "pitch": -7, "note": "E" },
+		{ "pitch": -1, "note": "E" },
 		{ "pitch": 1, "note": "G" },
-		{ "pitch": -5, "note": "e" },
+		{ "pitch": 6, "note": "e" },
 		{ "pitch": 8, "note": "g" },
 		{ "pitch": 14, "note": "E" },
 		{ "pitch": 14, "note": "G" },
@@ -26,7 +26,7 @@ describe("Decorations", function() {
 		{ "pitch": 14, "note": "C" },
 		{ "pitch": 14, "note": "c" },
 		{ "pitch": 14, "note": "e" },
-		{ "pitch": -11, "note": "A," },
+		{ "pitch": -5, "note": "A," },
 		{ "pitch": -3, "note": "C" },
 		{ "pitch": -5, "note": "c" },
 		{ "pitch": -1, "note": "e" },

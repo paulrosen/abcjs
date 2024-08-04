@@ -1,11 +1,11 @@
 describe("Layout", function() {
 	var abcBarLinesTreble = "X:1\n%%barlabelfont Times-Bold 18 box\n%%setbarnb 42\n%%barnumbers 1\nM: 4/4\nL: 1/16\nK:D\nz8 |\n z8 |\n"
 
-	var expectedBarLinesTreble = [{x: 20, y: 85}]
+	var expectedBarLinesTreble = [{x: 20, y: 88}]
 
 	var abcBarLinesBass = "X:1\n%%barlabelfont Times-Bold 18 box\n%%setbarnb 42\n%%barnumbers 1\nM: 4/4\nL: 1/16\nK:D clef=bass\nz8 |\n z8 |\n"
 
-	var expectedBarLinesBass = [{x: 20, y: 82}]
+	var expectedBarLinesBass = [{x: 20, y: 84}]
 
 	var abcMinSpacing = "X:1\nL:1/8\nM:4/4\ncdef cdef|\ncdef cdef|cdef cdef|\ncdef cdef|cdef cdef|cdef cdef|\n";
 
@@ -101,7 +101,7 @@ describe("Layout", function() {
 
 	var abcChordLayout = '"F"c3c|"C7"c2df|1f4- & "F"xx"Bb"x"Bbm"x|"F"f3z:|2f4- & "Bb"!style=harmonic!d2 "F"!style=harmonic!c "C7"!style=harmonic!B|"F"f4 & !style=harmonic!A4||\n'
 
-	var expectedChordLayout = [{"x":54,"y":32},{"x":106,"y":32},{"x":344,"y":32},{"x":533,"y":32},{"x":190,"y":32},{"x":208,"y":32},{"x":254,"y":32},{"x":405,"y":32},{"x":455,"y":32},{"x":477,"y":32}];
+	var expectedChordLayout = [{"x":54,"y":32},{"x":106,"y":32},{"x":344,"y":32},{"x":533,"y":32},{"x":190,"y":32},{"x":208,"y":32},{"x":254,"y":32},{"x":405,"y":32},{"x":455,"y":32},{"x":476,"y":32}];
 
 	var abcStaccatoPlacement = "E.B .B"
 
@@ -110,7 +110,7 @@ describe("Layout", function() {
 	var abcRhythmPlacement = "R: reel\n" +
 		"C"
 
-	var expectedRhythmPlacement = [{ x: 20, y: 54 }]
+	var expectedRhythmPlacement = [{ x: 20, y: 53 }]
 
 	var lineTooWide = 
 		"T:The title should be centered\n" +
@@ -142,6 +142,22 @@ describe("Layout", function() {
 	"C4 | f4 | g3/2 a/ f3/4 e// d3/8 c/// B// A//|d3 c|\n" +
 	"^C (3^D^E^F ^G/^A/ | f4 | g3/2 a/ f3/4 e// d3/8 c/// B// A//|d3 c|\n" +
 	"\n"
+
+	var accentSpacing = "X:1\n" +
+		"L:1/4\n" +
+		"%%staffwidth 100\n" +
+		"K:C\n" +
+		"A/ !>!A/ |]\n" +
+		"w: L R|\n" +
+		"A/!>!A/ |]\n" + // the beam is pushing the dynamics down
+		"w: L R|\n"
+
+	var expectedAccentSpacing = [
+		{x: 49, y: 82},
+		{x: 91, y: 82},
+		{x: 49, y: 174},
+		{x: 91, y: 174},
+	]
 
 	it("line-too-wide", function() {
 		var visualObj = doLayoutTest(lineTooWide, {staffwidth: 500, expandToWidest: true }, expectedLineTooWide, 'staffwidth=500');
@@ -186,6 +202,10 @@ describe("Layout", function() {
 
 	it("rhythm-placement", function() {
 		doItemPlacementTest(abcRhythmPlacement, expectedRhythmPlacement, '[data-name="clefs.G"]');
+	})
+
+	it("accent-spacing", function() {
+		doItemPlacementTest(accentSpacing, expectedAccentSpacing, '[data-name="lyric"]');
 	})
 
 	it("measure-numbers", function() {
