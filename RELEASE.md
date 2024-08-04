@@ -1,3 +1,37 @@
+# Version 6.4.2
+
+## Bugs
+
+* Fix crash when there is a decoration on an invisible rest
+
+* Fix crash when the same voice is set on a line
+
+* Fix crash with rests in graces
+
+* Fix crash with decoration on invisible rests
+
+* Fix various crashes when declaring voices inline or after a line continuation
+
+* Fix for */8 rhythm tempos for MIDI export
+
+* Allow a midi volume of zero to mute a voice
+
+* Fix bug in selecting the correct note for chord arpeggios
+
+* Fix stemless chord parsing i.e. `[AB]0`
+
+* Don't put lower decorations too low on beamed notes that are beamed up
+
+## Features
+
+* add power chords
+
+* add patterns for 5/8, 7/8, 10/8 and 11/8
+
+* Add octave= parameter to bassprog and chordprog
+
+* allow an empty gchord to cancel a previously set gchord
+
 # Version 6.4.1
 
 ## Bugs

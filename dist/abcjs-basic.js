@@ -193,205 +193,6 @@ module.exports = animation;
 
 /***/ }),
 
-/***/ "./src/api/abc_tablatures.js":
-/*!***********************************!*\
-  !*** ./src/api/abc_tablatures.js ***!
-  \***********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-/*
- * Tablature Plugins
- * tablature are defined dynamically and registered inside abcjs
- * by calling abcTablatures.register(plugin) 
- * where plugin represents a plugin instance 
- * 
- */
-var StringTablature = __webpack_require__(/*! ../tablatures/instruments/tab-string */ "./src/tablatures/instruments/tab-string.js");
-
-/* extend the table below when adding a new instrument plugin */
-
-// Existing tab classes 
-var pluginTab = {
-  'violin': {
-    name: 'StringTab',
-    defaultTuning: ['G,', 'D', 'A', 'e'],
-    isTabBig: false,
-    tabSymbolOffset: 0
-  },
-  'fiddle': {
-    name: 'StringTab',
-    defaultTuning: ['G,', 'D', 'A', 'e'],
-    isTabBig: false,
-    tabSymbolOffset: 0
-  },
-  'mandolin': {
-    name: 'StringTab',
-    defaultTuning: ['G,', 'D', 'A', 'e'],
-    isTabBig: false,
-    tabSymbolOffset: 0
-  },
-  'guitar': {
-    name: 'StringTab',
-    defaultTuning: ['E,', 'A,', 'D', 'G', 'B', 'e'],
-    isTabBig: true,
-    tabSymbolOffset: 0
-  },
-  'fiveString': {
-    name: 'StringTab',
-    defaultTuning: ['C,', 'G,', 'D', 'A', 'e'],
-    isTabBig: false,
-    tabSymbolOffset: -.95
-  }
-};
-var abcTablatures = {
-  inited: false,
-  plugins: {},
-  /**
-   * to be called once per plugin for registration 
-   * @param {*} plugin 
-   */
-  register: function register(plugin) {
-    var name = plugin.name;
-    var tablature = plugin.tablature;
-    this.plugins[name] = tablature;
-  },
-  setError: function setError(tune, msg) {
-    if (tune.warnings) {
-      tune.warning.push(msg);
-    } else {
-      tune.warnings = [msg];
-    }
-  },
-  /**
-   * handle params for current processed score
-   * @param {*} tune current tune 
-   * @param {*} tuneNumber number in tune list
-   * @param {*} params params to be processed for tablature
-   * @return prepared tablatures plugin instances for current tune
-   */
-  preparePlugins: function preparePlugins(tune, tuneNumber, params) {
-    var returned = null;
-    var nbPlugins = 0;
-    if (params.tablature) {
-      // validate requested plugins 
-      var tabs = params.tablature;
-      returned = [];
-      for (var ii = 0; ii < tabs.length; ii++) {
-        var args = tabs[ii];
-        var instrument = args['instrument'];
-        if (instrument == null) {
-          this.setError(tune, "tablature 'instrument' is missing");
-          return returned;
-        }
-        var tabName = pluginTab[instrument];
-        var plugin = null;
-        if (tabName) {
-          plugin = this.plugins[tabName.name];
-        }
-        if (plugin) {
-          if (params.visualTranspose != 0) {
-            // populate transposition request to tabs
-            args.visualTranspose = params.visualTranspose;
-          }
-          args.abcSrc = params.tablature.abcSrc;
-          var pluginInstance = {
-            classz: plugin,
-            tuneNumber: tuneNumber,
-            params: args,
-            instance: null,
-            tabType: tabName
-          };
-          // proceed with tab plugin  init 
-          // plugin.init(tune, tuneNumber, args, ii);
-          returned.push(pluginInstance);
-          nbPlugins++;
-        } else if (instrument === '') {
-          // create a placeholder - there is no tab for this staff
-          returned.push(null);
-        } else {
-          // unknown tab plugin 
-          //this.emit_error('Undefined tablature plugin: ' + tabName)
-          this.setError(tune, 'Undefined tablature plugin: ' + instrument);
-          return returned;
-        }
-      }
-    }
-    return returned;
-  },
-  /**
-   * Call requested plugin
-   * @param {*} renderer 
-   * @param {*} abcTune 
-   */
-  layoutTablatures: function layoutTablatures(renderer, abcTune) {
-    var tabs = abcTune.tablatures;
-
-    // chack tabs request for each staffs
-    var staffLineCount = 0;
-
-    // Clear the suppression flag
-    if (tabs && tabs.length > 0) {
-      var nTabs = tabs.length;
-      for (var kk = 0; kk < nTabs; ++kk) {
-        if (tabs[kk] && tabs[kk].params.firstStaffOnly) {
-          tabs[kk].params.suppress = false;
-        }
-      }
-    }
-    for (var ii = 0; ii < abcTune.lines.length; ii++) {
-      var line = abcTune.lines[ii];
-      if (line.staff) {
-        staffLineCount++;
-      }
-
-      // MAE 27Nov2023
-      // If tab param "firstStaffOnly", remove the tab label after the first staff
-      if (staffLineCount > 1) {
-        if (tabs && tabs.length > 0) {
-          var nTabs = tabs.length;
-          for (var kk = 0; kk < nTabs; ++kk) {
-            if (tabs[kk].params.firstStaffOnly) {
-              // Set the staff draw suppression flag
-              tabs[kk].params.suppress = true;
-            }
-          }
-        }
-      }
-      var curStaff = line.staff;
-      if (curStaff) {
-        var maxStaves = curStaff.length;
-        for (var jj = 0; jj < curStaff.length; jj++) {
-          if (tabs[jj] && jj < maxStaves) {
-            // tablature requested for staff
-            var tabPlugin = tabs[jj];
-            if (tabPlugin.instance == null) {
-              tabPlugin.instance = new tabPlugin.classz();
-              // plugin.init(tune, tuneNumber, args, ii);
-              // call initer first
-              tabPlugin.instance.init(abcTune, tabPlugin.tuneNumber, tabPlugin.params, jj, tabPlugin.tabType);
-            }
-            // render next
-            tabPlugin.instance.render(renderer, line, jj);
-          }
-        }
-      }
-    }
-  },
-  /**
-   * called once internally to register internal plugins
-   */
-  init: function init() {
-    // just register plugin hosted by abcjs 
-    if (!this.inited) {
-      this.register(new StringTablature());
-      this.inited = true;
-    }
-  }
-};
-module.exports = abcTablatures;
-
-/***/ }),
-
 /***/ "./src/api/abc_timing_callbacks.js":
 /*!*****************************************!*\
   !*** ./src/api/abc_timing_callbacks.js ***!
@@ -714,7 +515,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 
 var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse.js");
 var bookParser = __webpack_require__(/*! ../parse/abc_parse_book */ "./src/parse/abc_parse_book.js");
-var tablatures = __webpack_require__(/*! ./abc_tablatures */ "./src/api/abc_tablatures.js");
+var tablatures = __webpack_require__(/*! ../tablatures/abc_tablatures */ "./src/tablatures/abc_tablatures.js");
 var tunebook = {};
 (function () {
   "use strict";
@@ -785,7 +586,6 @@ var tunebook = {};
           // Init tablatures plugins
           //
           if (params.tablature) {
-            tablatures.init();
             tune.tablatures = tablatures.preparePlugins(tune, currentTune, params);
           }
           var warnings = abcParser.getWarnings();
@@ -955,8 +755,6 @@ var Tune = __webpack_require__(/*! ../data/abc_tune */ "./src/data/abc_tune.js")
 var EngraverController = __webpack_require__(/*! ../write/engraver-controller */ "./src/write/engraver-controller.js");
 var Parse = __webpack_require__(/*! ../parse/abc_parse */ "./src/parse/abc_parse.js");
 var wrap = __webpack_require__(/*! ../parse/wrap_lines */ "./src/parse/wrap_lines.js");
-// var tablatures = require('./abc_tablatures');
-
 var resizeDivs = {};
 function resizeOuter() {
   var width = window.innerWidth;
@@ -2630,9 +2428,21 @@ var create;
     if (title && title.length > 128) title = title.substring(0, 124) + '...';
     var key = abcTune.getKeySignature();
     var time = abcTune.getMeterFraction();
-    var beatsPerSecond = commands.tempo / 60;
+
+    // MAE 7 July 2024 - Fix for */8 meter tempos
+    var tempo = commands.tempo;
+    var beatsPerSecond = tempo / 60;
+
+    // Fix tempo for */8 meters
+    if (time.den == 8) {
+      // Compute the tempo based on the actual milliseconds per measure, scaled by the number of eight notes and halved to get tempo in bpm.
+      var msPerMeasure = abcTune.millisecondsPerMeasure();
+      tempo = 60000 / (msPerMeasure / time.num) / 2;
+      beatsPerSecond = tempo / 60;
+    }
+
     //var beatLength = abcTune.getBeatLength();
-    midi.setGlobalInfo(commands.tempo, title, key, time);
+    midi.setGlobalInfo(tempo, title, key, time);
     for (var i = 0; i < commands.tracks.length; i++) {
       midi.startTrack();
       var notePlacement = {};
@@ -2718,27 +2528,20 @@ module.exports = create;
   \*********************************/
 /***/ (function(module) {
 
-//    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
+//    abc_common.js: Some common utility functions.
 
 var parseCommon = {};
-parseCommon.clone = function (source) {
-  var destination = {};
-  for (var property in source) {
-    if (source.hasOwnProperty(property)) destination[property] = source[property];
-  }
-  return destination;
-};
 parseCommon.cloneArray = function (source) {
   var destination = [];
   for (var i = 0; i < source.length; i++) {
-    destination.push(parseCommon.clone(source[i]));
+    destination.push(Object.assign({}, source[i]));
   }
   return destination;
 };
 parseCommon.cloneHashOfHash = function (source) {
   var destination = {};
   for (var property in source) {
-    if (source.hasOwnProperty(property)) destination[property] = parseCommon.clone(source[property]);
+    if (source.hasOwnProperty(property)) destination[property] = Object.assign({}, source[property]);
   }
   return destination;
 };
@@ -3230,7 +3033,7 @@ var Parse = function Parse() {
     });
     for (var i = 0; i < nextVoice.length; i++) {
       var element = nextVoice[i];
-      var hint = parseCommon.clone(element);
+      var hint = Object.assign({}, element);
       voice.push(hint);
       if (element.el_type === 'bar') return;
     }
@@ -4157,7 +3960,7 @@ var parseDirective = {};
   };
   var midiCmdParam0 = ["nobarlines", "barlines", "beataccents", "nobeataccents", "droneon", "droneoff", "drumon", "drumoff", "fermatafixed", "fermataproportional", "gchordon", "gchordoff", "controlcombo", "temperamentnormal", "noportamento"];
   var midiCmdParam1String = ["gchord", "ptstress", "beatstring"];
-  var midiCmdParam1Integer = ["bassvol", "chordvol", "bassprog", "chordprog", "c", "channel", "beatmod", "deltaloudness", "drumbars", "gracedivider", "makechordchannels", "randomchordattack", "chordattack", "stressmodel", "transpose", "rtranspose", "vol", "volinc"];
+  var midiCmdParam1Integer = ["bassvol", "chordvol", "c", "channel", "beatmod", "deltaloudness", "drumbars", "gracedivider", "makechordchannels", "randomchordattack", "chordattack", "stressmodel", "transpose", "rtranspose", "vol", "volinc", "gchordbars"];
   var midiCmdParam1Integer1OptionalInteger = ["program"];
   var midiCmdParam2Integer = ["ratio", "snt", "bendvelocity", "pitchbend", "control", "temperamentlinear"];
   var midiCmdParam4Integer = ["beat"];
@@ -4165,6 +3968,7 @@ var parseDirective = {};
   var midiCmdParam1String1Integer = ["portamento"];
   var midiCmdParamFraction = ["expand", "grace", "trim"];
   var midiCmdParam1StringVariableIntegers = ["drum", "chordname"];
+  var midiCmdParam1Integer1OptionalString = ["bassprog", "chordprog"];
   var parseMidiCommand = function parseMidiCommand(midi, tune, restOfString) {
     var midi_cmd = midi.shift().token;
     var midi_params = [];
@@ -4254,6 +4058,34 @@ var parseDirective = {};
           p = midi.shift();
           if (p.type !== "number") warn("Expected integer parameter in MIDI " + midi_cmd, restOfString, 0);
           midi_params.push(p.intt);
+        }
+      }
+    } else if (midiCmdParam1Integer1OptionalString.indexOf(midi_cmd) >= 0) {
+      // ONE INT PARAMETER, ONE OPTIONAL string
+      if (midi.length !== 1 && midi.length !== 2) warn("Expected one or two parameters in MIDI " + midi_cmd, restOfString, 0);else if (midi[0].type !== "number") warn("Expected integer parameter in MIDI " + midi_cmd, restOfString, 0);else if (midi.length === 2 && midi[1].type !== "alpha") warn("Expected alpha parameter in MIDI " + midi_cmd, restOfString, 0);else {
+        midi_params.push(midi[0].intt);
+
+        // Currently only bassprog and chordprog with optional octave shifts use this path
+        if (midi.length === 2) {
+          var cmd = midi[1].token;
+          if (cmd.indexOf("octave=") != -1) {
+            cmd = cmd.replace("octave=", "");
+            cmd = parseInt(cmd);
+            if (!isNaN(cmd)) {
+              // Limit range from -1 to 3 octaves
+              if (cmd < -1) {
+                warn("Expected octave= in MIDI " + midi_cmd + ' to be >= -1 (recv:' + cmd + ')');
+                cmd = -1;
+              }
+              if (cmd > 3) {
+                warn("Expected octave= in MIDI " + midi_cmd + ' to be <= 3 (recv:' + cmd + ')');
+                cmd = 3;
+              }
+              midi_params.push(cmd);
+            } else warn("Expected octave value in MIDI" + midi_cmd);
+          } else {
+            warn("Expected octave= in MIDI" + midi_cmd);
+          }
         }
       }
     }
@@ -5201,6 +5033,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     }
   };
   this.letter_to_inline_header = function (line, i, startLine) {
+    var needsNewLine = false;
     var ws = tokenizer.eatWhiteSpace(line, i);
     i += ws;
     if (line.length >= i + 5 && line[i] === '[' && line[i + 2] === ':') {
@@ -5247,9 +5080,9 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           break;
         case "[V:":
           if (e > 0) {
-            parseKeyVoice.parseVoice(line, i + 3, e);
+            needsNewLine = parseKeyVoice.parseVoice(line, i + 3, e);
             //startNewLine();
-            return [e - i + 1 + ws, line[i + 1], line.substring(i + 3, e)];
+            return [e - i + 1 + ws, line[i + 1], line.substring(i + 3, e), needsNewLine];
           }
           break;
         case "[r:":
@@ -5262,6 +5095,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
     return [0];
   };
   this.letter_to_body_header = function (line, i) {
+    var needsNewLine = false;
     if (line.length >= i + 3) {
       switch (line.substring(i, i + 2)) {
         case "I:":
@@ -5292,9 +5126,9 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           if (tempo.type === 'delaySet') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, this.calcTempo(tempo.tempo));else if (tempo.type === 'immediate') tuneBuilder.appendElement('tempo', multilineVars.iChar + i, multilineVars.iChar + line.length, tempo.tempo);
           return [e, line[i], parseCommon.strip(line.substring(i + 2))];
         case "V:":
-          parseKeyVoice.parseVoice(line, i + 2, line.length);
+          needsNewLine = parseKeyVoice.parseVoice(line, i + 2, line.length);
           //						startNewLine();
-          return [line.length, line[i], parseCommon.strip(line.substring(i + 2))];
+          return [line.length, line[i], parseCommon.strip(line.substring(i + 2)), needsNewLine];
         default:
         // TODO: complain about unhandled header
       }
@@ -5432,7 +5266,6 @@ module.exports = ParseHeader;
   \******************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 var parseDirective = __webpack_require__(/*! ./abc_parse_directive */ "./src/parse/abc_parse_directive.js");
 var transpose = __webpack_require__(/*! ./abc_transpose */ "./src/parse/abc_transpose.js");
 var parseKeyVoice = {};
@@ -5683,7 +5516,7 @@ var parseKeyVoice = {};
       mode: key.mode
     };
     key.accidentals.forEach(function (k) {
-      ret.accidentals.push(parseCommon.clone(k));
+      ret.accidentals.push(Object.assign({}, k));
     });
     return ret;
   };
@@ -5749,7 +5582,7 @@ var parseKeyVoice = {};
     }
   };
   parseKeyVoice.fixKey = function (clef, key) {
-    var fixedKey = parseCommon.clone(key);
+    var fixedKey = Object.assign({}, key);
     parseKeyVoice.addPosToKey(clef, fixedKey);
     return fixedKey;
   };
@@ -6180,8 +6013,13 @@ var parseKeyVoice = {};
     return ret;
   };
   var setCurrentVoice = function setCurrentVoice(id) {
-    multilineVars.currentVoice = multilineVars.voices[id];
-    tuneBuilder.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
+    var currentVoice = multilineVars.voices[id];
+    if (multilineVars.currentVoice) {
+      if (multilineVars.currentVoice.index === currentVoice.index && multilineVars.currentVoice.staffNum === currentVoice.staffNum) return; // there was no change so don't reset it.
+    }
+
+    multilineVars.currentVoice = currentVoice;
+    return tuneBuilder.setCurrentVoice(currentVoice.staffNum, currentVoice.index, id);
   };
   parseKeyVoice.parseVoice = function (line, i, e) {
     //First truncate the string to the first non-space character after V: through either the
@@ -6433,7 +6271,7 @@ var parseKeyVoice = {};
     if (staffInfo.subname) {
       if (s.subname) s.subname.push(staffInfo.subname);else s.subname = [staffInfo.subname];
     }
-    setCurrentVoice(id);
+    return setCurrentVoice(id);
   };
 })();
 module.exports = parseKeyVoice;
@@ -6446,7 +6284,6 @@ module.exports = parseKeyVoice;
   \**************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var parseCommon = __webpack_require__(/*! ./abc_common */ "./src/parse/abc_common.js");
 var parseKeyVoice = __webpack_require__(/*! ./abc_parse_key_voice */ "./src/parse/abc_parse_key_voice.js");
 var transpose = __webpack_require__(/*! ./abc_transpose */ "./src/parse/abc_transpose.js");
 var tokenizer;
@@ -6579,6 +6416,7 @@ MusicParser.prototype.parseMusic = function (line) {
     var retInlineHeader = header.letter_to_inline_header(line, i, delayStartNewLine);
     if (retInlineHeader[0] > 0) {
       i += retInlineHeader[0];
+      //console.log("inline header", retInlineHeader)
       if (retInlineHeader[1] === 'V') delayStartNewLine = true; // fixes bug on this: c[V:2]d
       // TODO-PER: Handle inline headers
       //multilineVars.start_new_line = false;
@@ -6858,6 +6696,9 @@ MusicParser.prototype.parseMusic = function (line) {
                       if (ch === '-' || ch === ')' || ch === ' ' || ch === '<' || ch === '>') i--; // Subtracting one because one is automatically added below
                       else postChordDone = true;
                       break;
+                    case '0':
+                      chordDuration = 0;
+                      break;
                     default:
                       postChordDone = true;
                       break;
@@ -6947,7 +6788,11 @@ MusicParser.prototype.parseMusic = function (line) {
               if (!el.rest || el.rest.type !== 'spacer') warn("Duration not representable: " + line.substring(startI, i), line, i);
             }
             multilineVars.addFormattingOptions(el, tune.formatting, 'note');
-            tuneBuilder.appendElement('note', startOfLine + startI, startOfLine + i, el);
+            var succeeded = tuneBuilder.appendElement('note', startOfLine + startI, startOfLine + i, el);
+            if (!succeeded) {
+              this.startNewLine();
+              tuneBuilder.appendElement('note', startOfLine + startI, startOfLine + i, el);
+            }
             multilineVars.measureNotEmpty = true;
             el = {};
           }
@@ -7049,7 +6894,10 @@ var letter_to_grace = function letter_to_grace(line, i) {
         // The grace note durations should not be affected by the default length: they should be based on 1/16, so if that isn't the default, then multiply here.
         note.duration = note.duration / (multilineVars.default_length * 8);
         if (acciaccatura) note.acciaccatura = true;
-        gracenotes.push(note);
+        if (note.rest) {
+          // don't allow rests inside gracenotes
+          warn("Rests not allowed as grace notes '" + gra[1][ii] + "' while parsing grace note", line, i);
+        } else gracenotes.push(note);
         if (inTie) {
           note.endTie = true;
           inTie = false;
@@ -7280,7 +7128,7 @@ MusicParser.prototype.startNewLine = function () {
     endChar: -1
   };
   if (multilineVars.partForNextLine.title) params.part = multilineVars.partForNextLine;
-  params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? parseCommon.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : parseCommon.clone(multilineVars.clef);
+  params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? Object.assign({}, multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : Object.assign({}, multilineVars.clef);
   var scoreTranspose = multilineVars.currentVoice ? multilineVars.currentVoice.scoreTranspose : 0;
   params.key = parseKeyVoice.standardKey(multilineVars.key.root + multilineVars.key.acc + multilineVars.key.mode, multilineVars.key.root, multilineVars.key.acc, scoreTranspose);
   params.key.mode = multilineVars.key.mode;
@@ -7334,6 +7182,11 @@ MusicParser.prototype.startNewLine = function () {
     if (multilineVars.currentVoice.color) params.color = multilineVars.currentVoice.color;
     if (multilineVars.currentVoice.style) params.style = multilineVars.currentVoice.style;
     if (multilineVars.currentVoice.transpose) params.clef.transpose = multilineVars.currentVoice.transpose;
+    params.currentVoice = multilineVars.currentVoice;
+    var voices = Object.keys(multilineVars.voices);
+    for (var mv = 0; mv < voices.length; mv++) {
+      if (params.currentVoice.staffNum === multilineVars.voices[voices[mv]].staffNum && params.currentVoice.index === multilineVars.voices[voices[mv]].index) params.currentVoiceName = voices[mv];
+    }
   }
   var isFirstVoice = multilineVars.currentVoice === undefined || multilineVars.currentVoice.staffNum === 0 && multilineVars.currentVoice.index === 0;
   if (multilineVars.barNumbers === 0 && isFirstVoice && multilineVars.currBarNumber !== 1) params.barNumber = multilineVars.currBarNumber;
@@ -9321,166 +9174,19 @@ module.exports = transposeChordName;
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var parseKeyVoice = __webpack_require__(/*! ../parse/abc_parse_key_voice */ "./src/parse/abc_parse_key_voice.js");
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
-var parseDirective = __webpack_require__(/*! ./abc_parse_directive */ "./src/parse/abc_parse_directive.js");
+//var parseCommon = require('../parse/abc_common');
+//var parseDirective = require('./abc_parse_directive');
+
 var TuneBuilder = function TuneBuilder(tune) {
   var self = this;
+  var voiceDefs = {};
+  var currentVoiceName = '';
+  tune.reset();
   this.setVisualTranspose = function (visualTranspose) {
     if (visualTranspose) tune.visualTranspose = visualTranspose;
   };
-  this.resolveOverlays = function () {
-    var madeChanges = false;
-    var durationsPerLines = [];
-    for (var i = 0; i < tune.lines.length; i++) {
-      var line = tune.lines[i];
-      if (line.staff) {
-        for (var j = 0; j < line.staff.length; j++) {
-          var staff = line.staff[j];
-          var overlayVoice = [];
-          for (var k = 0; k < staff.voices.length; k++) {
-            var voice = staff.voices[k];
-            overlayVoice.push({
-              hasOverlay: false,
-              voice: [],
-              snip: []
-            });
-            durationsPerLines[i] = 0;
-            var durationThisBar = 0;
-            var inOverlay = false;
-            var overlayDuration = 0;
-            var snipStart = -1;
-            for (var kk = 0; kk < voice.length; kk++) {
-              var event = voice[kk];
-              if (event.el_type === "overlay" && !inOverlay) {
-                madeChanges = true;
-                inOverlay = true;
-                snipStart = kk;
-                overlayVoice[k].hasOverlay = true;
-                if (overlayDuration === 0) overlayDuration = durationsPerLines[i];
-                // If this isn't the first line, we also need invisible rests on the previous lines.
-                // So, if the next voice doesn't appear in a previous line, create it
-                for (var ii = 0; ii < i; ii++) {
-                  if (durationsPerLines[ii] && tune.lines[ii].staff && staff.voices.length >= tune.lines[ii].staff[0].voices.length) {
-                    tune.lines[ii].staff[0].voices.push([{
-                      el_type: "note",
-                      duration: durationsPerLines[ii],
-                      rest: {
-                        type: "invisible"
-                      },
-                      startChar: event.startChar,
-                      endChar: event.endChar
-                    }]);
-                  }
-                }
-              } else if (event.el_type === "bar") {
-                if (inOverlay) {
-                  // delete the overlay events from this array without messing up this loop.
-                  inOverlay = false;
-                  overlayVoice[k].snip.push({
-                    start: snipStart,
-                    len: kk - snipStart
-                  });
-                  overlayVoice[k].voice.push(event); // Also end the overlay with the barline.
-                } else {
-                  // This keeps the voices lined up: if the overlay isn't in the first measure then we need a bunch of invisible rests.
-                  if (durationThisBar > 0) overlayVoice[k].voice.push({
-                    el_type: "note",
-                    duration: durationThisBar,
-                    rest: {
-                      type: "invisible"
-                    },
-                    startChar: event.startChar,
-                    endChar: event.endChar
-                  });
-                  overlayVoice[k].voice.push(event);
-                }
-                durationThisBar = 0;
-              } else if (event.el_type === "note") {
-                if (inOverlay) {
-                  overlayVoice[k].voice.push(event);
-                } else {
-                  durationThisBar += event.duration;
-                  durationsPerLines[i] += event.duration;
-                }
-              } else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose" || event.el_type === "color") {
-                // These types of events are duplicated on the overlay layer.
-                overlayVoice[k].voice.push(event);
-              }
-            }
-            if (overlayVoice[k].hasOverlay && overlayVoice[k].snip.length === 0) {
-              // there was no closing bar, so we didn't set the snip amount.
-              overlayVoice[k].snip.push({
-                start: snipStart,
-                len: voice.length - snipStart
-              });
-            }
-          }
-          for (k = 0; k < overlayVoice.length; k++) {
-            var ov = overlayVoice[k];
-            if (ov.hasOverlay) {
-              ov.voice.splice(0, 0, {
-                el_type: "stem",
-                direction: "down"
-              });
-              staff.voices.push(ov.voice);
-              for (var kkk = ov.snip.length - 1; kkk >= 0; kkk--) {
-                var snip = ov.snip[kkk];
-                staff.voices[k].splice(snip.start, snip.len);
-                staff.voices[k].splice(snip.start + 1, 0, {
-                  el_type: "stem",
-                  direction: "auto"
-                });
-                var indexOfLastBar = findLastBar(staff.voices[k], snip.start);
-                staff.voices[k].splice(indexOfLastBar, 0, {
-                  el_type: "stem",
-                  direction: "up"
-                });
-              }
-              // remove ending marks from the overlay voice so they are not repeated
-              for (kkk = 0; kkk < staff.voices[staff.voices.length - 1].length; kkk++) {
-                staff.voices[staff.voices.length - 1][kkk] = parseCommon.clone(staff.voices[staff.voices.length - 1][kkk]);
-                var el = staff.voices[staff.voices.length - 1][kkk];
-                if (el.el_type === 'bar' && el.startEnding) {
-                  delete el.startEnding;
-                }
-                if (el.el_type === 'bar' && el.endEnding) delete el.endEnding;
-              }
-            }
-          }
-        }
-      }
-    }
-    return madeChanges;
-  };
-  function findLastBar(voice, start) {
-    for (var i = start - 1; i > 0 && voice[i].el_type !== "bar"; i--) {}
-    return i;
-  }
-  function fixTitles(lines) {
-    // We might have name and subname defined. We now know what line everything is on, so we can determine which to use.
-    var firstMusicLine = true;
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      if (line.staff) {
-        for (var j = 0; j < line.staff.length; j++) {
-          var staff = line.staff[j];
-          if (staff.title) {
-            var hasATitle = false;
-            for (var k = 0; k < staff.title.length; k++) {
-              if (staff.title[k]) {
-                staff.title[k] = firstMusicLine ? staff.title[k].name : staff.title[k].subname;
-                if (staff.title[k]) hasATitle = true;else staff.title[k] = '';
-              } else staff.title[k] = '';
-            }
-            if (!hasATitle) delete staff.title;
-          }
-        }
-        firstMusicLine = false;
-      }
-    }
-  }
   this.cleanUp = function (barsperstaff, staffnonote, currSlur) {
-    this.closeLine(); // Close the last line.
+    closeLine(tune); // Close the last line.
     delete tune.runningFonts;
     simplifyMetaText(tune);
     //addRichTextToAnnotationsAndLyrics(tune)
@@ -9502,7 +9208,7 @@ var TuneBuilder = function TuneBuilder(tune) {
           } else {
             for (v = 0; v < tune.lines[i].staff[s].voices.length; v++) {
               if (tune.lines[i].staff[s].voices[v] === undefined) tune.lines[i].staff[s].voices[v] = []; // TODO-PER: There was a part missing in the abc music. How should we recover?
-              else if (this.containsNotes(tune.lines[i].staff[s].voices[v])) hasAny = true;
+              else if (containsNotes(tune.lines[i].staff[s].voices[v])) hasAny = true;
             }
           }
         }
@@ -9538,7 +9244,7 @@ var TuneBuilder = function TuneBuilder(tune) {
           for (s = 0; s < tune.lines[i].staff.length; s++) {
             var keepThis = false;
             for (v = 0; v < tune.lines[i].staff[s].voices.length; v++) {
-              if (this.containsNotesStrict(tune.lines[i].staff[s].voices[v])) {
+              if (containsNotesStrict(tune.lines[i].staff[s].voices[v])) {
                 keepThis = true;
               }
             }
@@ -9569,208 +9275,23 @@ var TuneBuilder = function TuneBuilder(tune) {
     }
 
     // If there are overlays, create new voices for them.
-    while (this.resolveOverlays()) {
+    while (resolveOverlays(tune)) {
       // keep resolving overlays as long as any are found.
     }
-    function cleanUpSlursInLine(line, staffNum, voiceNum) {
-      if (!currSlur[staffNum]) currSlur[staffNum] = [];
-      if (!currSlur[staffNum][voiceNum]) currSlur[staffNum][voiceNum] = [];
-      var x;
-      //			var lyr = null;	// TODO-PER: debugging.
-
-      var addEndSlur = function addEndSlur(obj, num, chordPos) {
-        if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
-          // There isn't an exact match for note position, but we'll take any other open slur.
-          for (x = 0; x < currSlur[staffNum][voiceNum].length; x++) {
-            if (currSlur[staffNum][voiceNum][x] !== undefined) {
-              chordPos = x;
-              break;
-            }
-          }
-          if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
-            var offNum = chordPos * 100 + 1;
-            obj.endSlur.forEach(function (x) {
-              if (offNum === x) --offNum;
-            });
-            currSlur[staffNum][voiceNum][chordPos] = [offNum];
-          }
-        }
-        var slurNum;
-        for (var i = 0; i < num; i++) {
-          slurNum = currSlur[staffNum][voiceNum][chordPos].pop();
-          obj.endSlur.push(slurNum);
-          //					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
-        }
-
-        if (currSlur[staffNum][voiceNum][chordPos].length === 0) delete currSlur[staffNum][voiceNum][chordPos];
-        return slurNum;
-      };
-      var addStartSlur = function addStartSlur(obj, num, chordPos, usedNums) {
-        obj.startSlur = [];
-        if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
-          currSlur[staffNum][voiceNum][chordPos] = [];
-        }
-        var nextNum = chordPos * 100 + 1;
-        for (var i = 0; i < num; i++) {
-          if (usedNums) {
-            usedNums.forEach(function (x) {
-              if (nextNum === x) ++nextNum;
-            });
-            usedNums.forEach(function (x) {
-              if (nextNum === x) ++nextNum;
-            });
-            usedNums.forEach(function (x) {
-              if (nextNum === x) ++nextNum;
-            });
-          }
-          currSlur[staffNum][voiceNum][chordPos].forEach(function (x) {
-            if (nextNum === x) ++nextNum;
-          });
-          currSlur[staffNum][voiceNum][chordPos].forEach(function (x) {
-            if (nextNum === x) ++nextNum;
-          });
-          currSlur[staffNum][voiceNum][chordPos].push(nextNum);
-          obj.startSlur.push({
-            label: nextNum
-          });
-          if (obj.dottedSlur) {
-            obj.startSlur[obj.startSlur.length - 1].style = 'dotted';
-            delete obj.dottedSlur;
-          }
-          //					lyr.syllable += ' ' + nextNum + '>';	// TODO-PER:debugging
-          nextNum++;
-        }
-      };
-      for (var i = 0; i < line.length; i++) {
-        var el = line[i];
-        //				if (el.lyric === undefined)	// TODO-PER: debugging
-        //					el.lyric = [{ divider: '-' }];	// TODO-PER: debugging
-        //				lyr = el.lyric[0];	// TODO-PER: debugging
-        //				lyr.syllable = '';	// TODO-PER: debugging
-        if (el.el_type === 'note') {
-          if (el.gracenotes) {
-            for (var g = 0; g < el.gracenotes.length; g++) {
-              if (el.gracenotes[g].endSlur) {
-                var gg = el.gracenotes[g].endSlur;
-                el.gracenotes[g].endSlur = [];
-                for (var ggg = 0; ggg < gg; ggg++) {
-                  addEndSlur(el.gracenotes[g], 1, 20);
-                }
-              }
-              if (el.gracenotes[g].startSlur) {
-                x = el.gracenotes[g].startSlur;
-                addStartSlur(el.gracenotes[g], x, 20);
-              }
-            }
-          }
-          if (el.endSlur) {
-            x = el.endSlur;
-            el.endSlur = [];
-            addEndSlur(el, x, 0);
-          }
-          if (el.startSlur) {
-            x = el.startSlur;
-            addStartSlur(el, x, 0);
-          }
-          if (el.pitches) {
-            var usedNums = [];
-            for (var p = 0; p < el.pitches.length; p++) {
-              if (el.pitches[p].endSlur) {
-                var k = el.pitches[p].endSlur;
-                el.pitches[p].endSlur = [];
-                for (var j = 0; j < k; j++) {
-                  var slurNum = addEndSlur(el.pitches[p], 1, p + 1);
-                  usedNums.push(slurNum);
-                }
-              }
-            }
-            for (p = 0; p < el.pitches.length; p++) {
-              if (el.pitches[p].startSlur) {
-                x = el.pitches[p].startSlur;
-                addStartSlur(el.pitches[p], x, p + 1, usedNums);
-              }
-            }
-            // Correct for the weird gracenote case where ({g}a) should match.
-            // The end slur was already assigned to the note, and needs to be moved to the first note of the graces.
-            if (el.gracenotes && el.pitches[0].endSlur && el.pitches[0].endSlur[0] === 100 && el.pitches[0].startSlur) {
-              if (el.gracenotes[0].endSlur) el.gracenotes[0].endSlur.push(el.pitches[0].startSlur[0].label);else el.gracenotes[0].endSlur = [el.pitches[0].startSlur[0].label];
-              if (el.pitches[0].endSlur.length === 1) delete el.pitches[0].endSlur;else if (el.pitches[0].endSlur[0] === 100) el.pitches[0].endSlur.shift();else if (el.pitches[0].endSlur[el.pitches[0].endSlur.length - 1] === 100) el.pitches[0].endSlur.pop();
-              if (currSlur[staffNum][voiceNum][1].length === 1) delete currSlur[staffNum][voiceNum][1];else currSlur[staffNum][voiceNum][1].pop();
-            }
-          }
-        }
-      }
-    }
-
-    // TODO-PER: This could be done faster as we go instead of as the last step.
-    function fixClefPlacement(el) {
-      parseKeyVoice.fixClef(el);
-    }
-    function wrapMusicLines(lines, barsperstaff) {
-      for (i = 0; i < lines.length; i++) {
-        if (lines[i].staff !== undefined) {
-          for (s = 0; s < lines[i].staff.length; s++) {
-            var permanentItems = [];
-            for (v = 0; v < lines[i].staff[s].voices.length; v++) {
-              var voice = lines[i].staff[s].voices[v];
-              var barNumThisLine = 0;
-              for (var n = 0; n < voice.length; n++) {
-                if (voice[n].el_type === 'bar') {
-                  barNumThisLine++;
-                  if (barNumThisLine >= barsperstaff) {
-                    // push everything else to the next line, if there is anything else,
-                    // and there is a next line. If there isn't a next line, create one.
-                    if (n < voice.length - 1) {
-                      var nextLine = getNextMusicLine(lines, i);
-                      if (!nextLine) {
-                        var cp = JSON.parse(JSON.stringify(lines[i]));
-                        lines.push(parseCommon.clone(cp));
-                        nextLine = lines[lines.length - 1];
-                        for (var ss = 0; ss < nextLine.staff.length; ss++) {
-                          for (var vv = 0; vv < nextLine.staff[ss].voices.length; vv++) {
-                            nextLine.staff[ss].voices[vv] = [];
-                          }
-                        }
-                      }
-                      var startElement = n + 1;
-                      var section = lines[i].staff[s].voices[v].slice(startElement);
-                      lines[i].staff[s].voices[v] = lines[i].staff[s].voices[v].slice(0, startElement);
-                      nextLine.staff[s].voices[v] = permanentItems.concat(section.concat(nextLine.staff[s].voices[v]));
-                      return true;
-                    }
-                  }
-                } else if (!voice[n].duration) {
-                  permanentItems.push(voice[n]);
-                }
-              }
-            }
-          }
-        }
-      }
-      return false;
-    }
-    function getNextMusicLine(lines, currentLine) {
-      currentLine++;
-      while (lines.length > currentLine) {
-        if (lines[currentLine].staff) return lines[currentLine];
-        currentLine++;
-      }
-      return null;
-    }
-    for (tune.lineNum = 0; tune.lineNum < tune.lines.length; tune.lineNum++) {
-      var staff = tune.lines[tune.lineNum].staff;
+    for (var i = 0; i < tune.lines.length; i++) {
+      var staff = tune.lines[i].staff;
       if (staff) {
         for (tune.staffNum = 0; tune.staffNum < staff.length; tune.staffNum++) {
-          if (staff[tune.staffNum].clef) fixClefPlacement(staff[tune.staffNum].clef);
+          if (staff[tune.staffNum].clef) parseKeyVoice.fixClef(staff[tune.staffNum].clef);
           for (tune.voiceNum = 0; tune.voiceNum < staff[tune.staffNum].voices.length; tune.voiceNum++) {
             var voice = staff[tune.staffNum].voices[tune.voiceNum];
-            cleanUpSlursInLine(voice, tune.staffNum, tune.voiceNum);
+            cleanUpSlursInLine(voice, tune.staffNum, tune.voiceNum, currSlur);
             for (var j = 0; j < voice.length; j++) {
-              if (voice[j].el_type === 'clef') fixClefPlacement(voice[j]);
+              if (voice[j].el_type === 'clef') parseKeyVoice.fixClef(voice[j]);
             }
             if (voice.length > 0 && voice[voice.length - 1].barNumber) {
               // Don't hang a bar number on the last bar line: it should go on the next line.
-              var nextLine = getNextMusicLine(tune.lines, tune.lineNum);
+              var nextLine = getNextMusicLine(tune.lines, i);
               if (nextLine) nextLine.staff[0].barNumber = voice[voice.length - 1].barNumber;
               delete voice[voice.length - 1].barNumber;
             }
@@ -9788,21 +9309,9 @@ var TuneBuilder = function TuneBuilder(tune) {
     delete tune.vskipPending;
     return currSlur;
   };
-  tune.reset();
-  this.getLastNote = function () {
-    if (tune.lines[tune.lineNum] && tune.lines[tune.lineNum].staff && tune.lines[tune.lineNum].staff[tune.staffNum] && tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum]) {
-      for (var i = tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum].length - 1; i >= 0; i--) {
-        var el = tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum][i];
-        if (el.el_type === 'note') {
-          return el;
-        }
-      }
-    }
-    return null;
-  };
   this.addTieToLastNote = function (dottedTie) {
     // TODO-PER: if this is a chord, which note?
-    var el = this.getLastNote();
+    var el = getLastNote(tune);
     if (el && el.pitches && el.pitches.length > 0) {
       el.pitches[0].startTie = {};
       if (dottedTie) el.pitches[0].startTie.style = 'dotted';
@@ -9810,59 +9319,10 @@ var TuneBuilder = function TuneBuilder(tune) {
     }
     return false;
   };
-  this.getDuration = function (el) {
-    if (el.duration) return el.duration;
-    //if (el.pitches && el.pitches.length > 0) return el.pitches[0].duration;
-    return 0;
-  };
-  this.closeLine = function () {
-    if (tune.potentialStartBeam && tune.potentialEndBeam) {
-      tune.potentialStartBeam.startBeam = true;
-      tune.potentialEndBeam.endBeam = true;
-    }
-    delete tune.potentialStartBeam;
-    delete tune.potentialEndBeam;
-  };
   this.appendElement = function (type, startChar, endChar, hashParams) {
-    var This = tune;
-    var pushNote = function pushNote(hp) {
-      var currStaff = This.lines[This.lineNum].staff[This.staffNum];
-      if (!currStaff) {
-        // TODO-PER: This prevents a crash, but it drops the element. Need to figure out how to start a new line, or delay adding this.
-        return;
-      }
-      if (hp.pitches !== undefined) {
-        var mid = currStaff.workingClef.verticalPos;
-        hp.pitches.forEach(function (p) {
-          p.verticalPos = p.pitch - mid;
-        });
-      }
-      if (hp.gracenotes !== undefined) {
-        var mid2 = currStaff.workingClef.verticalPos;
-        hp.gracenotes.forEach(function (p) {
-          p.verticalPos = p.pitch - mid2;
-        });
-      }
-      currStaff.voices[This.voiceNum].push(hp);
-    };
     hashParams.el_type = type;
     if (startChar !== null) hashParams.startChar = startChar;
     if (endChar !== null) hashParams.endChar = endChar;
-    var endBeamHere = function endBeamHere() {
-      This.potentialStartBeam.startBeam = true;
-      hashParams.endBeam = true;
-      delete This.potentialStartBeam;
-      delete This.potentialEndBeam;
-    };
-    var endBeamLast = function endBeamLast() {
-      if (This.potentialStartBeam !== undefined && This.potentialEndBeam !== undefined) {
-        // Do we have a set of notes to beam?
-        This.potentialStartBeam.startBeam = true;
-        This.potentialEndBeam.endBeam = true;
-      }
-      delete This.potentialStartBeam;
-      delete This.potentialEndBeam;
-    };
     if (type === 'note') {
       // && (hashParams.rest !== undefined || hashParams.end_beam === undefined)) {
       // Now, add the startBeam and endBeam where it is needed.
@@ -9871,25 +9331,25 @@ var TuneBuilder = function TuneBuilder(tune) {
       // this.potentialEndBeam either points to null or the start beam.
       // If we have a beam break (note is longer than a quarter, or an end_beam is on this element), then set the beam if we have one.
       // reset the variables for the next notes.
-      var dur = self.getDuration(hashParams);
+      var dur = getDuration(hashParams);
       if (dur >= 0.25) {
         // The beam ends on the note before this.
-        endBeamLast();
-      } else if (hashParams.force_end_beam_last && This.potentialStartBeam !== undefined) {
-        endBeamLast();
-      } else if (hashParams.end_beam && This.potentialStartBeam !== undefined) {
+        endBeamLast(tune);
+      } else if (hashParams.force_end_beam_last && tune.potentialStartBeam !== undefined) {
+        endBeamLast(tune);
+      } else if (hashParams.end_beam && tune.potentialStartBeam !== undefined) {
         // the beam is forced to end on this note, probably because of a space in the ABC
-        if (hashParams.rest === undefined) endBeamHere();else endBeamLast();
+        if (hashParams.rest === undefined) endBeamHere(hashParams, tune);else endBeamLast(tune);
       } else if (hashParams.rest === undefined) {
         // this a short note and we aren't about to end the beam
-        if (This.potentialStartBeam === undefined) {
+        if (tune.potentialStartBeam === undefined) {
           // We aren't collecting notes for a beam, so start here.
           if (!hashParams.end_beam) {
-            This.potentialStartBeam = hashParams;
-            delete This.potentialEndBeam;
+            tune.potentialStartBeam = hashParams;
+            delete tune.potentialEndBeam;
           }
         } else {
-          This.potentialEndBeam = hashParams; // Continue the beaming, look for the end next note.
+          tune.potentialEndBeam = hashParams; // Continue the beaming, look for the end next note.
         }
       }
 
@@ -9897,21 +9357,32 @@ var TuneBuilder = function TuneBuilder(tune) {
       //			if (hashParams.rest !== undefined)
       //			{
       //				hashParams.end_beam = true;
-      //				var el2 = this.getLastNote();
+      //				var el2 = getLastNote(tune);
       //				if (el2) el2.end_beam = true;
       //				// TODO-PER: implement exception mentioned in the comment.
       //			}
     } else {
       // It's not a note, so there definitely isn't beaming after it.
-      endBeamLast();
+      endBeamLast(tune);
     }
     delete hashParams.end_beam; // We don't want this temporary variable hanging around.
     delete hashParams.force_end_beam_last; // We don't want this temporary variable hanging around.
-    pushNote(hashParams);
+    if (hashParams.rest && hashParams.rest.type === 'invisible') {
+      delete hashParams.decoration; // the decorations on invisible rests should be invisible, too.
+    }
+
+    if (tune.lines.length <= tune.lineNum || tune.lines[tune.lineNum].staff.length <= tune.staffNum) {
+      //console.log("pushNote IGNORED", tune.lines[tune.lineNum])
+      // TODO-PER: This prevents a crash, but it drops the element. Need to figure out how to start a new line, or delay adding this.
+      return false;
+    }
+    pushNote(self, tune, hashParams, voiceDefs, currentVoiceName);
+    return true;
   };
   this.appendStartingElement = function (type, startChar, endChar, hashParams2) {
+    //console.log('appendStartingElement', hashParams2)
     // If we're in the middle of beaming, then end the beam.
-    this.closeLine();
+    closeLine(tune);
 
     // We only ever want implied naturals the first time.
     var impliedNaturals;
@@ -9922,58 +9393,54 @@ var TuneBuilder = function TuneBuilder(tune) {
     }
 
     // Clone the object because it will be sticking around for the next line and we don't want the extra fields in it.
-    var hashParams = parseCommon.clone(hashParams2);
-    if (tune.lines[tune.lineNum] && tune.lines[tune.lineNum].staff) {
-      // be sure that we are on a music type line before doing the following.
-      // If tune is the first item in tune staff, then we might have to initialize the staff, first.
-      if (tune.lines[tune.lineNum].staff.length <= tune.staffNum) {
-        tune.lines[tune.lineNum].staff[tune.staffNum] = {};
-        tune.lines[tune.lineNum].staff[tune.staffNum].clef = parseCommon.clone(tune.lines[tune.lineNum].staff[0].clef);
-        tune.lines[tune.lineNum].staff[tune.staffNum].key = parseCommon.clone(tune.lines[tune.lineNum].staff[0].key);
-        if (tune.lines[tune.lineNum].staff[0].meter) tune.lines[tune.lineNum].staff[tune.staffNum].meter = parseCommon.clone(tune.lines[tune.lineNum].staff[0].meter);
-        tune.lines[tune.lineNum].staff[tune.staffNum].workingClef = parseCommon.clone(tune.lines[tune.lineNum].staff[0].workingClef);
-        tune.lines[tune.lineNum].staff[tune.staffNum].voices = [[]];
-      }
-      // If tune is a clef type, then we replace the working clef on the line. This is kept separate from
-      // the clef in case there is an inline clef field. We need to know what the current position for
-      // the note is.
-      if (type === 'clef') {
-        tune.lines[tune.lineNum].staff[tune.staffNum].workingClef = hashParams;
-      }
+    var hashParams = Object.assign({}, hashParams2);
 
-      // These elements should not be added twice, so if the element exists on tune line without a note or bar before it, just replace the staff version.
-      var voice = tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum];
-      for (var i = 0; i < voice.length; i++) {
-        if (voice[i].el_type === 'note' || voice[i].el_type === 'bar') {
-          hashParams.el_type = type;
-          hashParams.startChar = startChar;
-          hashParams.endChar = endChar;
-          if (impliedNaturals) hashParams.accidentals = impliedNaturals.concat(hashParams.accidentals);
-          voice.push(hashParams);
-          return;
-        }
-        if (voice[i].el_type === type) {
-          hashParams.el_type = type;
-          hashParams.startChar = startChar;
-          hashParams.endChar = endChar;
-          if (impliedNaturals) hashParams.accidentals = impliedNaturals.concat(hashParams.accidentals);
-          voice[i] = hashParams;
-          return;
-        }
+    // be sure that we are on a music type line before doing the following.
+    if (!tune.lines[tune.lineNum]) return;
+    var staff = tune.lines[tune.lineNum].staff;
+    if (!staff) return;
+
+    // If tune is the first item in tune staff, then we might have to initialize the staff, first.
+    if (staff.length <= tune.staffNum) {
+      staff[tune.staffNum] = {};
+      staff[tune.staffNum].clef = Object.assign({}, staff[0].clef);
+      staff[tune.staffNum].key = Object.assign({}, staff[0].key);
+      if (staff[0].meter) staff[tune.staffNum].meter = Object.assign({}, staff[0].meter);
+      staff[tune.staffNum].workingClef = Object.assign({}, staff[0].workingClef);
+      staff[tune.staffNum].voices = [[]];
+    }
+    // If tune is a clef type, then we replace the working clef on the line. This is kept separate from
+    // the clef in case there is an inline clef field. We need to know what the current position for
+    // the note is.
+    if (type === 'clef') {
+      staff[tune.staffNum].workingClef = hashParams;
+    }
+
+    // These elements should not be added twice, so if the element exists on tune line without a note or bar before it, just replace the staff version.
+    var voice = staff[tune.staffNum].voices[tune.voiceNum];
+    for (var i = 0; i < voice.length; i++) {
+      if (voice[i].el_type === 'note' || voice[i].el_type === 'bar') {
+        hashParams.el_type = type;
+        hashParams.startChar = startChar;
+        hashParams.endChar = endChar;
+        if (impliedNaturals) hashParams.accidentals = impliedNaturals.concat(hashParams.accidentals);
+        voice.push(hashParams);
+        return;
       }
-      // We didn't see either that type or a note, so replace the element to the staff.
-      tune.lines[tune.lineNum].staff[tune.staffNum][type] = hashParams2;
+      if (voice[i].el_type === type) {
+        hashParams.el_type = type;
+        hashParams.startChar = startChar;
+        hashParams.endChar = endChar;
+        if (impliedNaturals) hashParams.accidentals = impliedNaturals.concat(hashParams.accidentals);
+        voice[i] = hashParams;
+        return;
+      }
     }
-  };
-  this.pushLine = function (hash) {
-    if (tune.vskipPending) {
-      hash.vskip = tune.vskipPending;
-      delete tune.vskipPending;
-    }
-    tune.lines.push(hash);
+    // We didn't see either that type or a note, so replace the element to the staff.
+    staff[tune.staffNum][type] = hashParams2;
   };
   this.addSubtitle = function (str, info) {
-    this.pushLine({
+    pushLine(tune, {
       subtitle: {
         text: str,
         startChar: info.startChar,
@@ -9985,12 +9452,12 @@ var TuneBuilder = function TuneBuilder(tune) {
     tune.vskipPending = num;
   };
   this.addNewPage = function (num) {
-    this.pushLine({
+    pushLine(tune, {
       newpage: num
     });
   };
   this.addSeparator = function (spaceAbove, spaceBelow, lineLength, info) {
-    this.pushLine({
+    pushLine(tune, {
       separator: {
         spaceAbove: Math.round(spaceAbove),
         spaceBelow: Math.round(spaceBelow),
@@ -10001,7 +9468,7 @@ var TuneBuilder = function TuneBuilder(tune) {
     });
   };
   this.addText = function (str, info) {
-    this.pushLine({
+    pushLine(tune, {
       text: {
         text: str,
         startChar: info.startChar,
@@ -10010,29 +9477,17 @@ var TuneBuilder = function TuneBuilder(tune) {
     });
   };
   this.addCentered = function (str) {
-    this.pushLine({
+    pushLine(tune, {
       text: [{
         text: str,
         center: true
       }]
     });
   };
-  this.containsNotes = function (voice) {
-    for (var i = 0; i < voice.length; i++) {
-      if (voice[i].el_type === 'note' || voice[i].el_type === 'bar') return true;
-    }
-    return false;
-  };
-  this.containsNotesStrict = function (voice) {
-    for (var i = 0; i < voice.length; i++) {
-      if (voice[i].el_type === 'note' && (voice[i].rest === undefined || voice[i].chord !== undefined)) return true;
-    }
-    return false;
-  };
 
   //	anyVoiceContainsNotes: function(line) {
   //		for (var i = 0; i < line.staff.voices.length; i++) {
-  //			if (this.containsNotes(line.staff.voices[i]))
+  //			if (containsNotes(line.staff.voices[i]))
   //				return true;
   //		}
   //		return false;
@@ -10048,95 +9503,18 @@ var TuneBuilder = function TuneBuilder(tune) {
     });
   };
   this.startNewLine = function (params) {
+    //console.log("startNewLine", tune.lineNum, params, voiceDefs)
     // If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.
     // If it does exist and has music, then increment the line number. If the new element doesn't exist, create it.
-    var This = tune;
-    this.closeLine(); // Close the previous line.
-    var createVoice = function createVoice(params) {
-      var thisStaff = This.lines[This.lineNum].staff[This.staffNum];
-      thisStaff.voices[This.voiceNum] = [];
-      if (!thisStaff.title) thisStaff.title = [];
-      thisStaff.title[This.voiceNum] = {
-        name: params.name,
-        subname: params.subname
-      };
-      if (params.style) self.appendElement('style', null, null, {
-        head: params.style
-      });
-      if (params.stem) self.appendElement('stem', null, null, {
-        direction: params.stem
-      });else if (This.voiceNum > 0) {
-        if (thisStaff.voices[0] !== undefined) {
-          var found = false;
-          for (var i = 0; i < thisStaff.voices[0].length; i++) {
-            if (thisStaff.voices[0].el_type === 'stem') found = true;
-          }
-          if (!found) {
-            var stem = {
-              el_type: 'stem',
-              direction: 'up'
-            };
-            thisStaff.voices[0].splice(0, 0, stem);
-          }
-        }
-        self.appendElement('stem', null, null, {
-          direction: 'down'
-        });
-      }
-      if (params.scale) self.appendElement('scale', null, null, {
-        size: params.scale
-      });
-      if (params.color) self.appendElement('color', null, null, {
-        color: params.color
-      });
-    };
-    var createStaff = function createStaff(params) {
-      if (params.key && params.key.impliedNaturals) {
-        params.key.accidentals = params.key.accidentals.concat(params.key.impliedNaturals);
-        delete params.key.impliedNaturals;
-      }
-      This.lines[This.lineNum].staff[This.staffNum] = {
-        voices: [],
-        clef: params.clef,
-        key: params.key,
-        workingClef: params.clef
-      };
-      if (params.stafflines !== undefined) {
-        This.lines[This.lineNum].staff[This.staffNum].clef.stafflines = params.stafflines;
-        This.lines[This.lineNum].staff[This.staffNum].workingClef.stafflines = params.stafflines;
-      }
-      if (params.staffscale) {
-        This.lines[This.lineNum].staff[This.staffNum].staffscale = params.staffscale;
-      }
-      if (params.annotationfont) self.setLineFont("annotationfont", params.annotationfont);
-      if (params.gchordfont) self.setLineFont("gchordfont", params.gchordfont);
-      if (params.tripletfont) self.setLineFont("tripletfont", params.tripletfont);
-      if (params.vocalfont) self.setLineFont("vocalfont", params.vocalfont);
-      if (params.bracket) This.lines[This.lineNum].staff[This.staffNum].bracket = params.bracket;
-      if (params.brace) This.lines[This.lineNum].staff[This.staffNum].brace = params.brace;
-      if (params.connectBarLines) This.lines[This.lineNum].staff[This.staffNum].connectBarLines = params.connectBarLines;
-      if (params.barNumber) This.lines[This.lineNum].staff[This.staffNum].barNumber = params.barNumber;
-      createVoice(params);
-      // Some stuff just happens for the first voice
-      if (params.part) self.appendElement('part', params.part.startChar, params.part.endChar, {
-        title: params.part.title
-      });
-      if (params.meter !== undefined) This.lines[This.lineNum].staff[This.staffNum].meter = params.meter;
-      if (This.vskipPending) {
-        This.lines[This.lineNum].vskip = This.vskipPending;
-        delete This.vskipPending;
-      }
-    };
-    var createLine = function createLine(params) {
-      This.lines[This.lineNum] = {
-        staff: []
-      };
-      createStaff(params);
-    };
-    if (tune.lines[tune.lineNum] === undefined) createLine(params);else if (tune.lines[tune.lineNum].staff === undefined) {
+    closeLine(tune); // Close the previous line.
+    if (params.currentVoiceName) {
+      currentVoiceName = params.currentVoiceName;
+      voiceDefs[params.currentVoiceName] = params;
+    }
+    if (tune.lines[tune.lineNum] === undefined) createLine(self, tune, params);else if (tune.lines[tune.lineNum].staff === undefined) {
       tune.lineNum++;
       this.startNewLine(params);
-    } else if (tune.lines[tune.lineNum].staff[tune.staffNum] === undefined) createStaff(params);else if (tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum] === undefined) createVoice(params);else if (!this.containsNotes(tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum])) {
+    } else if (tune.lines[tune.lineNum].staff[tune.staffNum] === undefined) createStaff(self, tune, params);else if (tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum] === undefined) createVoice(self, tune, params);else if (!containsNotes(tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum])) {
       // We don't need a new line but we might need to update parts of it.
       if (params.part) self.appendElement('part', params.part.startChar, params.part.endChar, {
         title: params.part.title
@@ -10148,21 +9526,6 @@ var TuneBuilder = function TuneBuilder(tune) {
   };
   this.setRunningFont = function (type, font) {
     // This is called at tune start to set the current default fonts so we know whether to record a change.
-    tune.runningFonts[type] = font;
-  };
-  this.setLineFont = function (type, font) {
-    // If we haven't encountered the font type yet then we are using the default font so it doesn't
-    // need to be noted. If we have encountered it, then only record it if it is different from the last time.
-    if (tune.runningFonts[type]) {
-      var isDifferent = false;
-      var keys = Object.keys(font);
-      for (var i = 0; i < keys.length; i++) {
-        if (tune.runningFonts[type][keys[i]] !== font[keys[i]]) isDifferent = true;
-      }
-      if (isDifferent) {
-        tune.lines[tune.lineNum].staff[tune.staffNum][type] = font;
-      }
-    }
     tune.runningFonts[type] = font;
   };
   this.setBarNumberImmediate = function (barNumber) {
@@ -10194,24 +9557,31 @@ var TuneBuilder = function TuneBuilder(tune) {
     return true;
   };
   this.getCurrentVoice = function () {
+    //console.log("getCurrentVoice", tune.lineNum)
     var currLine = tune.lines[tune.lineNum];
     if (!currLine) return null;
     var currStaff = currLine.staff[tune.staffNum];
     if (!currStaff) return null;
     if (currStaff.voices[tune.voiceNum] !== undefined) return currStaff.voices[tune.voiceNum];else return null;
   };
-  this.setCurrentVoice = function (staffNum, voiceNum) {
+  this.setCurrentVoice = function (staffNum, voiceNum, name) {
+    //console.log("setCurrentVoice", tune.lineNum, staffNum, voiceNum, name, voiceDefs)
     tune.staffNum = staffNum;
     tune.voiceNum = voiceNum;
+    currentVoiceName = name;
     for (var i = 0; i < tune.lines.length; i++) {
       if (tune.lines[i].staff) {
-        if (tune.lines[i].staff[staffNum] === undefined || tune.lines[i].staff[staffNum].voices[voiceNum] === undefined || !this.containsNotes(tune.lines[i].staff[staffNum].voices[voiceNum])) {
+        if (tune.lines[i].staff[staffNum] === undefined || tune.lines[i].staff[staffNum].voices[voiceNum] === undefined || !containsNotes(tune.lines[i].staff[staffNum].voices[voiceNum])) {
+          //console.log("cv2", i, tune.lines[i].staff[staffNum])
           tune.lineNum = i;
-          return;
+          if (!tune.lines[i].staff[staffNum] || !!tune.lines[i].staff[staffNum].voices[voiceNum]) return true;
+          return false;
         }
       }
     }
+    //console.log("cv3", i, tune.lineNum, tune.lines[tune.lineNum])
     tune.lineNum = i;
+    return false;
   };
   this.addMetaText = function (key, value, info) {
     if (tune.metaText[key] === undefined) {
@@ -10247,7 +9617,7 @@ var TuneBuilder = function TuneBuilder(tune) {
 function isArrayOfStrings(arr) {
   if (!arr) return false;
   if (typeof arr === "string") return false;
-  var str = '';
+  //var str = ''
   for (var i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'string') return false;
   }
@@ -10257,32 +9627,553 @@ function simplifyMetaText(tune) {
   if (isArrayOfStrings(tune.metaText.notes)) tune.metaText.notes = tune.metaText.notes.join("\n");
   if (isArrayOfStrings(tune.metaText.history)) tune.metaText.history = tune.metaText.history.join("\n");
 }
-function addRichTextToAnnotationsAndLyrics(tune) {
-  var lines = tune.lines;
-  for (var i = 0; i < lines.length; i++) {
-    if (lines[i].staff !== undefined) {
-      for (var s = 0; s < lines[i].staff.length; s++) {
-        for (var v = 0; v < lines[i].staff[s].voices.length; v++) {
-          var voice = lines[i].staff[s].voices[v];
-          for (var n = 0; n < voice.length; n++) {
-            var element = voice[n];
-            if (element.chord) {
-              for (var c = 0; c < element.chord.length; c++) {
-                element.chord[c].name = parseDirective.parseFontChangeLine(element.chord[c].name);
-                console.log(element.chord[c].name);
+
+// function addRichTextToAnnotationsAndLyrics(tune) {
+// 	var lines = tune.lines
+// 	for (var i = 0; i < lines.length; i++) {
+// 		if (lines[i].staff !== undefined) {
+// 			for (var s = 0; s < lines[i].staff.length; s++) {
+// 				for (var v = 0; v < lines[i].staff[s].voices.length; v++) {
+// 					var voice = lines[i].staff[s].voices[v];
+// 					for (var n = 0; n < voice.length; n++) {
+// 						var element = voice[n]
+// 						if (element.chord) {
+// 							for (var c = 0; c < element.chord.length; c++) {
+// 								element.chord[c].name = parseDirective.parseFontChangeLine(element.chord[c].name)
+// 								console.log(element.chord[c].name)
+// 							}
+// 						}
+// 						if (element.lyric) {
+// 							for (var l = 0; l < element.lyric.length; l++) {
+// 								element.lyric[l].syllable = parseDirective.parseFontChangeLine(element.lyric[l].syllable)
+// 								console.log(element.lyric[l].syllable)
+// 							}
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+
+// }
+
+function resolveOverlays(tune) {
+  var madeChanges = false;
+  var durationsPerLines = [];
+  for (var i = 0; i < tune.lines.length; i++) {
+    var line = tune.lines[i];
+    if (line.staff) {
+      for (var j = 0; j < line.staff.length; j++) {
+        var staff = line.staff[j];
+        var overlayVoice = [];
+        for (var k = 0; k < staff.voices.length; k++) {
+          var voice = staff.voices[k];
+          overlayVoice.push({
+            hasOverlay: false,
+            voice: [],
+            snip: []
+          });
+          durationsPerLines[i] = 0;
+          var durationThisBar = 0;
+          var inOverlay = false;
+          var overlayDuration = 0;
+          var snipStart = -1;
+          for (var kk = 0; kk < voice.length; kk++) {
+            var event = voice[kk];
+            if (event.el_type === "overlay" && !inOverlay) {
+              madeChanges = true;
+              inOverlay = true;
+              snipStart = kk;
+              overlayVoice[k].hasOverlay = true;
+              if (overlayDuration === 0) overlayDuration = durationsPerLines[i];
+              // If this isn't the first line, we also need invisible rests on the previous lines.
+              // So, if the next voice doesn't appear in a previous line, create it
+              for (var ii = 0; ii < i; ii++) {
+                if (durationsPerLines[ii] && tune.lines[ii].staff && staff.voices.length >= tune.lines[ii].staff[0].voices.length) {
+                  tune.lines[ii].staff[0].voices.push([{
+                    el_type: "note",
+                    duration: durationsPerLines[ii],
+                    rest: {
+                      type: "invisible"
+                    },
+                    startChar: event.startChar,
+                    endChar: event.endChar
+                  }]);
+                }
               }
+            } else if (event.el_type === "bar") {
+              if (inOverlay) {
+                // delete the overlay events from this array without messing up this loop.
+                inOverlay = false;
+                overlayVoice[k].snip.push({
+                  start: snipStart,
+                  len: kk - snipStart
+                });
+                overlayVoice[k].voice.push(event); // Also end the overlay with the barline.
+              } else {
+                // This keeps the voices lined up: if the overlay isn't in the first measure then we need a bunch of invisible rests.
+                if (durationThisBar > 0) overlayVoice[k].voice.push({
+                  el_type: "note",
+                  duration: durationThisBar,
+                  rest: {
+                    type: "invisible"
+                  },
+                  startChar: event.startChar,
+                  endChar: event.endChar
+                });
+                overlayVoice[k].voice.push(event);
+              }
+              durationThisBar = 0;
+            } else if (event.el_type === "note") {
+              if (inOverlay) {
+                overlayVoice[k].voice.push(event);
+              } else {
+                durationThisBar += event.duration;
+                durationsPerLines[i] += event.duration;
+              }
+            } else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose" || event.el_type === "color") {
+              // These types of events are duplicated on the overlay layer.
+              overlayVoice[k].voice.push(event);
             }
-            if (element.lyric) {
-              for (var l = 0; l < element.lyric.length; l++) {
-                element.lyric[l].syllable = parseDirective.parseFontChangeLine(element.lyric[l].syllable);
-                console.log(element.lyric[l].syllable);
+          }
+          if (overlayVoice[k].hasOverlay && overlayVoice[k].snip.length === 0) {
+            // there was no closing bar, so we didn't set the snip amount.
+            overlayVoice[k].snip.push({
+              start: snipStart,
+              len: voice.length - snipStart
+            });
+          }
+        }
+        for (k = 0; k < overlayVoice.length; k++) {
+          var ov = overlayVoice[k];
+          if (ov.hasOverlay) {
+            ov.voice.splice(0, 0, {
+              el_type: "stem",
+              direction: "down"
+            });
+            staff.voices.push(ov.voice);
+            for (var kkk = ov.snip.length - 1; kkk >= 0; kkk--) {
+              var snip = ov.snip[kkk];
+              staff.voices[k].splice(snip.start, snip.len);
+              staff.voices[k].splice(snip.start + 1, 0, {
+                el_type: "stem",
+                direction: "auto"
+              });
+              var indexOfLastBar = findLastBar(staff.voices[k], snip.start);
+              staff.voices[k].splice(indexOfLastBar, 0, {
+                el_type: "stem",
+                direction: "up"
+              });
+            }
+            // remove ending marks from the overlay voice so they are not repeated
+            for (kkk = 0; kkk < staff.voices[staff.voices.length - 1].length; kkk++) {
+              staff.voices[staff.voices.length - 1][kkk] = Object.assign({}, staff.voices[staff.voices.length - 1][kkk]);
+              var el = staff.voices[staff.voices.length - 1][kkk];
+              if (el.el_type === 'bar' && el.startEnding) {
+                delete el.startEnding;
               }
+              if (el.el_type === 'bar' && el.endEnding) delete el.endEnding;
             }
           }
         }
       }
     }
   }
+  return madeChanges;
+}
+;
+function findLastBar(voice, start) {
+  for (var i = start - 1; i > 0 && voice[i].el_type !== "bar"; i--) {}
+  return i;
+}
+function fixTitles(lines) {
+  // We might have name and subname defined. We now know what line everything is on, so we can determine which to use.
+  var firstMusicLine = true;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (line.staff) {
+      for (var j = 0; j < line.staff.length; j++) {
+        var staff = line.staff[j];
+        if (staff.title) {
+          var hasATitle = false;
+          for (var k = 0; k < staff.title.length; k++) {
+            if (staff.title[k]) {
+              staff.title[k] = firstMusicLine ? staff.title[k].name : staff.title[k].subname;
+              if (staff.title[k]) hasATitle = true;else staff.title[k] = '';
+            } else staff.title[k] = '';
+          }
+          if (!hasATitle) delete staff.title;
+        }
+      }
+      firstMusicLine = false;
+    }
+  }
+}
+function cleanUpSlursInLine(line, staffNum, voiceNum, currSlur) {
+  if (!currSlur[staffNum]) currSlur[staffNum] = [];
+  if (!currSlur[staffNum][voiceNum]) currSlur[staffNum][voiceNum] = [];
+  var x;
+  //			var lyr = null;	// TODO-PER: debugging.
+
+  var addEndSlur = function addEndSlur(obj, num, chordPos) {
+    if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
+      // There isn't an exact match for note position, but we'll take any other open slur.
+      for (x = 0; x < currSlur[staffNum][voiceNum].length; x++) {
+        if (currSlur[staffNum][voiceNum][x] !== undefined) {
+          chordPos = x;
+          break;
+        }
+      }
+      if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
+        var offNum = chordPos * 100 + 1;
+        obj.endSlur.forEach(function (x) {
+          if (offNum === x) --offNum;
+        });
+        currSlur[staffNum][voiceNum][chordPos] = [offNum];
+      }
+    }
+    var slurNum;
+    for (var i = 0; i < num; i++) {
+      slurNum = currSlur[staffNum][voiceNum][chordPos].pop();
+      obj.endSlur.push(slurNum);
+      //					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
+    }
+
+    if (currSlur[staffNum][voiceNum][chordPos].length === 0) delete currSlur[staffNum][voiceNum][chordPos];
+    return slurNum;
+  };
+  var addStartSlur = function addStartSlur(obj, num, chordPos, usedNums) {
+    obj.startSlur = [];
+    if (currSlur[staffNum][voiceNum][chordPos] === undefined) {
+      currSlur[staffNum][voiceNum][chordPos] = [];
+    }
+    var nextNum = chordPos * 100 + 1;
+    for (var i = 0; i < num; i++) {
+      if (usedNums) {
+        usedNums.forEach(function (x) {
+          if (nextNum === x) ++nextNum;
+        });
+        usedNums.forEach(function (x) {
+          if (nextNum === x) ++nextNum;
+        });
+        usedNums.forEach(function (x) {
+          if (nextNum === x) ++nextNum;
+        });
+      }
+      currSlur[staffNum][voiceNum][chordPos].forEach(function (x) {
+        if (nextNum === x) ++nextNum;
+      });
+      currSlur[staffNum][voiceNum][chordPos].forEach(function (x) {
+        if (nextNum === x) ++nextNum;
+      });
+      currSlur[staffNum][voiceNum][chordPos].push(nextNum);
+      obj.startSlur.push({
+        label: nextNum
+      });
+      if (obj.dottedSlur) {
+        obj.startSlur[obj.startSlur.length - 1].style = 'dotted';
+        delete obj.dottedSlur;
+      }
+      //					lyr.syllable += ' ' + nextNum + '>';	// TODO-PER:debugging
+      nextNum++;
+    }
+  };
+  for (var i = 0; i < line.length; i++) {
+    var el = line[i];
+    //				if (el.lyric === undefined)	// TODO-PER: debugging
+    //					el.lyric = [{ divider: '-' }];	// TODO-PER: debugging
+    //				lyr = el.lyric[0];	// TODO-PER: debugging
+    //				lyr.syllable = '';	// TODO-PER: debugging
+    if (el.el_type === 'note') {
+      if (el.gracenotes) {
+        for (var g = 0; g < el.gracenotes.length; g++) {
+          if (el.gracenotes[g].endSlur) {
+            var gg = el.gracenotes[g].endSlur;
+            el.gracenotes[g].endSlur = [];
+            for (var ggg = 0; ggg < gg; ggg++) {
+              addEndSlur(el.gracenotes[g], 1, 20);
+            }
+          }
+          if (el.gracenotes[g].startSlur) {
+            x = el.gracenotes[g].startSlur;
+            addStartSlur(el.gracenotes[g], x, 20);
+          }
+        }
+      }
+      if (el.endSlur) {
+        x = el.endSlur;
+        el.endSlur = [];
+        addEndSlur(el, x, 0);
+      }
+      if (el.startSlur) {
+        x = el.startSlur;
+        addStartSlur(el, x, 0);
+      }
+      if (el.pitches) {
+        var usedNums = [];
+        for (var p = 0; p < el.pitches.length; p++) {
+          if (el.pitches[p].endSlur) {
+            var k = el.pitches[p].endSlur;
+            el.pitches[p].endSlur = [];
+            for (var j = 0; j < k; j++) {
+              var slurNum = addEndSlur(el.pitches[p], 1, p + 1);
+              usedNums.push(slurNum);
+            }
+          }
+        }
+        for (p = 0; p < el.pitches.length; p++) {
+          if (el.pitches[p].startSlur) {
+            x = el.pitches[p].startSlur;
+            addStartSlur(el.pitches[p], x, p + 1, usedNums);
+          }
+        }
+        // Correct for the weird gracenote case where ({g}a) should match.
+        // The end slur was already assigned to the note, and needs to be moved to the first note of the graces.
+        if (el.gracenotes && el.pitches[0].endSlur && el.pitches[0].endSlur[0] === 100 && el.pitches[0].startSlur) {
+          if (el.gracenotes[0].endSlur) el.gracenotes[0].endSlur.push(el.pitches[0].startSlur[0].label);else el.gracenotes[0].endSlur = [el.pitches[0].startSlur[0].label];
+          if (el.pitches[0].endSlur.length === 1) delete el.pitches[0].endSlur;else if (el.pitches[0].endSlur[0] === 100) el.pitches[0].endSlur.shift();else if (el.pitches[0].endSlur[el.pitches[0].endSlur.length - 1] === 100) el.pitches[0].endSlur.pop();
+          if (currSlur[staffNum][voiceNum][1].length === 1) delete currSlur[staffNum][voiceNum][1];else currSlur[staffNum][voiceNum][1].pop();
+        }
+      }
+    }
+  }
+}
+function wrapMusicLines(lines, barsperstaff) {
+  for (i = 0; i < lines.length; i++) {
+    if (lines[i].staff !== undefined) {
+      for (s = 0; s < lines[i].staff.length; s++) {
+        var permanentItems = [];
+        for (v = 0; v < lines[i].staff[s].voices.length; v++) {
+          var voice = lines[i].staff[s].voices[v];
+          var barNumThisLine = 0;
+          for (var n = 0; n < voice.length; n++) {
+            if (voice[n].el_type === 'bar') {
+              barNumThisLine++;
+              if (barNumThisLine >= barsperstaff) {
+                // push everything else to the next line, if there is anything else,
+                // and there is a next line. If there isn't a next line, create one.
+                if (n < voice.length - 1) {
+                  var nextLine = getNextMusicLine(lines, i);
+                  if (!nextLine) {
+                    var cp = JSON.parse(JSON.stringify(lines[i]));
+                    lines.push(Object.assign({}, cp));
+                    nextLine = lines[lines.length - 1];
+                    for (var ss = 0; ss < nextLine.staff.length; ss++) {
+                      for (var vv = 0; vv < nextLine.staff[ss].voices.length; vv++) {
+                        nextLine.staff[ss].voices[vv] = [];
+                      }
+                    }
+                  }
+                  var startElement = n + 1;
+                  var section = lines[i].staff[s].voices[v].slice(startElement);
+                  lines[i].staff[s].voices[v] = lines[i].staff[s].voices[v].slice(0, startElement);
+                  nextLine.staff[s].voices[v] = permanentItems.concat(section.concat(nextLine.staff[s].voices[v]));
+                  return true;
+                }
+              }
+            } else if (!voice[n].duration) {
+              permanentItems.push(voice[n]);
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+function getNextMusicLine(lines, currentLine) {
+  currentLine++;
+  while (lines.length > currentLine) {
+    if (lines[currentLine].staff) return lines[currentLine];
+    currentLine++;
+  }
+  return null;
+}
+function getLastNote(tune) {
+  if (!tune.lines[tune.lineNum]) return null;
+  if (!tune.lines[tune.lineNum].staff) return null;
+  if (!tune.lines[tune.lineNum].staff[tune.staffNum]) return null;
+  var voice = tune.lines[tune.lineNum].staff[tune.staffNum].voices[tune.voiceNum];
+  if (!voice) return null;
+  for (var i = voice.length - 1; i >= 0; i--) {
+    var el = voice[i];
+    if (el.el_type === 'note') {
+      return el;
+    }
+  }
+  return null;
+}
+;
+function getDuration(el) {
+  if (el.duration) return el.duration;
+  return 0;
+}
+;
+function closeLine(tune) {
+  if (tune.potentialStartBeam && tune.potentialEndBeam) {
+    tune.potentialStartBeam.startBeam = true;
+    tune.potentialEndBeam.endBeam = true;
+  }
+  delete tune.potentialStartBeam;
+  delete tune.potentialEndBeam;
+}
+;
+function containsNotes(voice) {
+  for (var i = 0; i < voice.length; i++) {
+    if (voice[i].el_type === 'note' || voice[i].el_type === 'bar') return true;
+  }
+  return false;
+}
+;
+function containsNotesStrict(voice) {
+  for (var i = 0; i < voice.length; i++) {
+    if (voice[i].el_type === 'note' && (voice[i].rest === undefined || voice[i].chord !== undefined)) return true;
+  }
+  return false;
+}
+;
+function pushLine(tune, hash) {
+  if (tune.vskipPending) {
+    hash.vskip = tune.vskipPending;
+    delete tune.vskipPending;
+  }
+  tune.lines.push(hash);
+}
+;
+function pushNote(self, tune, hp, voiceDefs, currentVoiceName) {
+  //console.log("pushNote", tune.lineNum, tune.staffNum, hp.pitches ? JSON.stringify(hp.pitches) : hp.pitches)
+  var currStaff = tune.lines[tune.lineNum].staff[tune.staffNum];
+  if (hp.pitches !== undefined) {
+    var mid = currStaff.workingClef.verticalPos;
+    hp.pitches.forEach(function (p) {
+      p.verticalPos = p.pitch - mid;
+    });
+  }
+  if (hp.gracenotes !== undefined) {
+    var mid2 = currStaff.workingClef.verticalPos;
+    hp.gracenotes.forEach(function (p) {
+      p.verticalPos = p.pitch - mid2;
+    });
+  }
+  if (currStaff.voices.length <= tune.voiceNum) {
+    //console.log("should create?", currentVoiceName, voiceDefs)
+    if (!voiceDefs[currentVoiceName]) voiceDefs[currentVoiceName] = {};
+    createVoice(self, tune, voiceDefs[currentVoiceName]);
+  }
+  currStaff.voices[tune.voiceNum].push(hp);
+}
+function endBeamHere(hashParams, tune) {
+  tune.potentialStartBeam.startBeam = true;
+  hashParams.endBeam = true;
+  delete tune.potentialStartBeam;
+  delete tune.potentialEndBeam;
+}
+function endBeamLast(tune) {
+  if (tune.potentialStartBeam !== undefined && tune.potentialEndBeam !== undefined) {
+    // Do we have a set of notes to beam?
+    tune.potentialStartBeam.startBeam = true;
+    tune.potentialEndBeam.endBeam = true;
+  }
+  delete tune.potentialStartBeam;
+  delete tune.potentialEndBeam;
+}
+function setLineFont(tune, type, font) {
+  // If we haven't encountered the font type yet then we are using the default font so it doesn't
+  // need to be noted. If we have encountered it, then only record it if it is different from the last time.
+  if (tune.runningFonts[type]) {
+    var isDifferent = false;
+    var keys = Object.keys(font);
+    for (var i = 0; i < keys.length; i++) {
+      if (tune.runningFonts[type][keys[i]] !== font[keys[i]]) isDifferent = true;
+    }
+    if (isDifferent) {
+      tune.lines[tune.lineNum].staff[tune.staffNum][type] = font;
+    }
+  }
+  tune.runningFonts[type] = font;
+}
+function createVoice(self, tune, params) {
+  //console.log("createVoice", params)
+  var thisStaff = tune.lines[tune.lineNum].staff[tune.staffNum];
+  thisStaff.voices[tune.voiceNum] = [];
+  if (!thisStaff.title) thisStaff.title = [];
+  thisStaff.title[tune.voiceNum] = {
+    name: params.name,
+    subname: params.subname
+  };
+  if (params.style) self.appendElement('style', null, null, {
+    head: params.style
+  });
+  if (params.stem) self.appendElement('stem', null, null, {
+    direction: params.stem
+  });else if (tune.voiceNum > 0) {
+    if (thisStaff.voices[0] !== undefined) {
+      var found = false;
+      for (var i = 0; i < thisStaff.voices[0].length; i++) {
+        if (thisStaff.voices[0].el_type === 'stem') found = true;
+      }
+      if (!found) {
+        var stem = {
+          el_type: 'stem',
+          direction: 'up'
+        };
+        thisStaff.voices[0].splice(0, 0, stem);
+      }
+    }
+    self.appendElement('stem', null, null, {
+      direction: 'down'
+    });
+  }
+  if (params.scale) self.appendElement('scale', null, null, {
+    size: params.scale
+  });
+  if (params.color) self.appendElement('color', null, null, {
+    color: params.color
+  });
+}
+function createStaff(self, tune, params) {
+  if (params.key && params.key.impliedNaturals) {
+    params.key.accidentals = params.key.accidentals.concat(params.key.impliedNaturals);
+    delete params.key.impliedNaturals;
+  }
+  tune.lines[tune.lineNum].staff[tune.staffNum] = {
+    voices: [],
+    clef: params.clef,
+    key: params.key,
+    workingClef: params.clef
+  };
+  var staff = tune.lines[tune.lineNum].staff[tune.staffNum];
+  if (params.stafflines !== undefined) {
+    staff.clef.stafflines = params.stafflines;
+    staff.workingClef.stafflines = params.stafflines;
+  }
+  if (params.staffscale) {
+    staff.staffscale = params.staffscale;
+  }
+  if (params.annotationfont) setLineFont(tune, "annotationfont", params.annotationfont);
+  if (params.gchordfont) setLineFont(tune, "gchordfont", params.gchordfont);
+  if (params.tripletfont) setLineFont(tune, "tripletfont", params.tripletfont);
+  if (params.vocalfont) setLineFont(tune, "vocalfont", params.vocalfont);
+  if (params.bracket) staff.bracket = params.bracket;
+  if (params.brace) staff.brace = params.brace;
+  if (params.connectBarLines) staff.connectBarLines = params.connectBarLines;
+  if (params.barNumber) staff.barNumber = params.barNumber;
+  createVoice(self, tune, params);
+  // Some stuff just happens for the first voice
+  if (params.part) self.appendElement('part', params.part.startChar, params.part.endChar, {
+    title: params.part.title
+  });
+  if (params.meter !== undefined) staff.meter = params.meter;
+  if (tune.vskipPending) {
+    tune.lines[tune.lineNum].vskip = tune.vskipPending;
+    delete tune.vskipPending;
+  }
+}
+function createLine(self, tune, params) {
+  tune.lines[tune.lineNum] = {
+    staff: []
+  };
+  createStaff(self, tune, params);
 }
 module.exports = TuneBuilder;
 
@@ -11452,6 +11343,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
           case "chordprog":
           case "bassvol":
           case "chordvol":
+          case "gchordbars":
             chordTrack.paramChange(element);
             break;
           default:
@@ -11581,7 +11473,8 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
   function processVolume(beat, voiceOff) {
     if (voiceOff) return 0;
     var volume;
-    if (nextVolume) {
+    // MAE 21 Jun 2024 - This previously wasn't allowing zero volume to be applied
+    if (nextVolume != undefined) {
       volume = nextVolume;
       nextVolume = undefined;
     } else if (!doBeatAccents) {
@@ -12914,7 +12807,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                     if (!e) e = voices[voiceNumber].length; // If there wasn't a first ending marker, then we copy everything.
                     // duplicate each of the elements - this has to be a deep copy.
                     for (var z = s; z < e; z++) {
-                      var item = parseCommon.clone(voices[voiceNumber][z]);
+                      var item = Object.assign({}, voices[voiceNumber][z]);
                       if (item.pitches) item.pitches = parseCommon.cloneArray(item.pitches);
                       voices[voiceNumber].push(item);
                     }
@@ -13023,10 +12916,25 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                       break;
                     case "swing":
                     case "gchord":
-                    case "bassprog":
-                    case "chordprog":
                     case "bassvol":
                     case "chordvol":
+                      voices[voiceNumber].push({
+                        el_type: elem.cmd,
+                        param: elem.params[0]
+                      });
+                      break;
+                    case "bassprog": // MAE 22 May 2024
+                    case "chordprog":
+                      // MAE 22 May 2024
+                      voices[voiceNumber].push({
+                        el_type: elem.cmd,
+                        value: elem.params[0],
+                        octaveShift: elem.params[1]
+                      });
+                      break;
+
+                    // MAE 23 Jun 2024
+                    case "gchordbars":
                       voices[voiceNumber].push({
                         el_type: elem.cmd,
                         param: elem.params[0]
@@ -13304,7 +13212,7 @@ module.exports = centsToFactor;
 /*!**********************************!*\
   !*** ./src/synth/chord-track.js ***!
   \**********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/***/ (function(module) {
 
 //
 // The algorithm for chords is:
@@ -13325,7 +13233,6 @@ module.exports = centsToFactor;
 //
 // If there is any note in the melody that has a rhythm head, then assume the melody controls the rhythm, so there is no chord added for that entire measure.
 
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter) {
   this.chordTrack = [];
   this.chordTrackFinished = false;
@@ -13340,11 +13247,23 @@ var ChordTrack = function ChordTrack(numVoices, chordsOff, midiOptions, meter) {
   this.lastBarTime = 0;
   this.meter = meter;
   this.tempoChangeFactor = 1;
-  this.bassInstrument = midiOptions.bassprog && midiOptions.bassprog.length === 1 ? midiOptions.bassprog[0] : 0;
-  this.chordInstrument = midiOptions.chordprog && midiOptions.chordprog.length === 1 ? midiOptions.chordprog[0] : 0;
+
+  // MAE 17 Jun 2024 - To allow for bass and chord instrument octave shifts
+  this.bassInstrument = midiOptions.bassprog && midiOptions.bassprog.length >= 1 ? midiOptions.bassprog[0] : 0;
+  this.chordInstrument = midiOptions.chordprog && midiOptions.chordprog.length >= 1 ? midiOptions.chordprog[0] : 0;
+
+  // MAE For octave shifted bass and chords
+  this.bassOctaveShift = midiOptions.bassprog && midiOptions.bassprog.length === 2 ? midiOptions.bassprog[1] : 0;
+  this.chordOctaveShift = midiOptions.chordprog && midiOptions.chordprog.length === 2 ? midiOptions.chordprog[1] : 0;
   this.boomVolume = midiOptions.bassvol && midiOptions.bassvol.length === 1 ? midiOptions.bassvol[0] : 64;
   this.chickVolume = midiOptions.chordvol && midiOptions.chordvol.length === 1 ? midiOptions.chordvol[0] : 48;
-  this.overridePattern = midiOptions.gchord ? parseGChord(midiOptions.gchord[0]) : undefined;
+
+  // This allows for an initial %%MIDI gchord with no string
+  if (midiOptions.gchord && midiOptions.gchord.length > 0) {
+    this.overridePattern = parseGChord(midiOptions.gchord[0]);
+  } else {
+    this.overridePattern = undefined;
+  }
 };
 ChordTrack.prototype.setMeter = function (meter) {
   this.meter = meter;
@@ -13364,7 +13283,7 @@ ChordTrack.prototype.setRhythmHead = function (isRhythmHead, elem) {
   if (isRhythmHead) {
     if (this.lastChord && this.lastChord.chick) {
       for (var i2 = 0; i2 < this.lastChord.chick.length; i2++) {
-        var note2 = parseCommon.clone(elem.pitches[0]);
+        var note2 = Object.assign({}, elem.pitches[0]);
         note2.actualPitch = this.lastChord.chick[i2];
         ePitches.push(note2);
       }
@@ -13385,13 +13304,29 @@ ChordTrack.prototype.gChordOn = function (element) {
 ChordTrack.prototype.paramChange = function (element) {
   switch (element.el_type) {
     case "gchord":
-      this.overridePattern = parseGChord(element.param);
+      // Skips gchord elements that don't have pattern strings
+      if (element.param && element.param.length > 0) {
+        this.overridePattern = parseGChord(element.param);
+
+        // Generate a default duration scale based on the pattern
+        //this.gchordduration = generateDefaultDurationScale(element.param);
+      } else this.overridePattern = undefined;
       break;
     case "bassprog":
-      this.bassInstrument = element.param;
+      this.bassInstrument = element.value;
+      if (element.octaveShift != undefined && element.octaveShift != null) {
+        this.bassOctaveShift = element.octaveShift;
+      } else {
+        this.bassOctaveShift = 0;
+      }
       break;
     case "chordprog":
-      this.chordInstrument = element.param;
+      this.chordInstrument = element.value;
+      if (element.octaveShift != undefined && element.octaveShift != null) {
+        this.chordOctaveShift = element.octaveShift;
+      } else {
+        this.chordOctaveShift = 0;
+      }
       break;
     case "bassvol":
       this.boomVolume = element.param;
@@ -13459,22 +13394,28 @@ ChordTrack.prototype.interpretChord = function (name) {
     chordTranspose -= 12;
   }
   bass += chordTranspose;
+
+  // MAE 17 Jun 2024 - Supporting octave shifted bass and chords
+  var unshiftedBass = bass;
+  bass += this.bassOctaveShift * 12;
   var bass2 = bass - 5; // The alternating bass is a 4th below
   var chick;
   if (name.length === 1) chick = this.chordNotes(bass, '');
   var remaining = name.substring(1);
   var acc = remaining.substring(0, 1);
   if (acc === 'b' || acc === '♭') {
+    unshiftedBass--;
     bass--;
     bass2--;
     remaining = remaining.substring(1);
   } else if (acc === '#' || acc === '♯') {
+    unshiftedBass++;
     bass++;
     bass2++;
     remaining = remaining.substring(1);
   }
   var arr = remaining.split('/');
-  chick = this.chordNotes(bass, arr[0]);
+  chick = this.chordNotes(unshiftedBass, arr[0]);
   // If the 5th is altered then the bass is altered. Normally the bass is 7 from the root, so adjust if it isn't.
   if (chick.length >= 3) {
     var fifth = chick[2] - chick[0];
@@ -13491,6 +13432,9 @@ ChordTrack.prototype.interpretChord = function (name) {
         '♭': -1
       }[bassAcc] || 0;
       bass = this.basses[arr[1].substring(0, 1)] + bassShift + chordTranspose;
+
+      // MAE 22 May 2024 - Supporting octave shifted bass and chords
+      bass += this.bassOctaveShift * 12;
       bass2 = bass;
     }
   }
@@ -13506,6 +13450,9 @@ ChordTrack.prototype.chordNotes = function (bass, modifier) {
     if (modifier.slice(0, 2).toLowerCase() === 'ma' || modifier[0] === 'M') intervals = this.chordIntervals.M;else if (modifier[0] === 'm' || modifier[0] === '-') intervals = this.chordIntervals.m;else intervals = this.chordIntervals.M;
   }
   bass += 12; // the chord is an octave above the bass note.
+
+  // MAE 22 May 2024 - For chick octave shift
+  bass += this.chordOctaveShift * 12;
   var notes = [];
   for (var i = 0; i < intervals.length; i++) {
     notes.push(bass + intervals[i]);
@@ -13619,8 +13566,9 @@ function resolvePitch(currentChord, type, firstBoom, newBass) {
   var ret = [];
   if (!currentChord) return ret;
   if (type.indexOf('boom') >= 0) ret.push(firstBoom ? currentChord.boom : currentChord.boom2);else if (newBass) ret.push(currentChord.boom);
+  var numChordNotes = currentChord.chick.length;
   if (type.indexOf('chick') >= 0) {
-    for (var i = 0; i < currentChord.chick.length; i++) {
+    for (var i = 0; i < numChordNotes; i++) {
       ret.push(currentChord.chick[i]);
     }
   }
@@ -13632,13 +13580,13 @@ function resolvePitch(currentChord, type, firstBoom, newBass) {
       ret.push(currentChord.chick[1]);
       break;
     case 'SOL':
-      ret.push(currentChord.chick[2]);
+      ret.push(extractNote(currentChord, 2));
       break;
     case 'TI':
-      currentChord.chick.length > 3 ? ret.push(currentChord.chick[2]) : ret.push(currentChord.chick[0] + 12);
+      ret.push(extractNote(currentChord, 3));
       break;
     case 'TOP':
-      currentChord.chick.length > 4 ? ret.push(currentChord.chick[2]) : ret.push(currentChord.chick[1] + 12);
+      ret.push(extractNote(currentChord, 4));
       break;
     case 'do':
       ret.push(currentChord.chick[0] + 12);
@@ -13647,16 +13595,23 @@ function resolvePitch(currentChord, type, firstBoom, newBass) {
       ret.push(currentChord.chick[1] + 12);
       break;
     case 'sol':
-      ret.push(currentChord.chick[2] + 12);
+      ret.push(extractNote(currentChord, 2) + 12);
       break;
     case 'ti':
-      currentChord.chick.length > 3 ? ret.push(currentChord.chick[2] + 12) : ret.push(currentChord.chick[0] + 24);
+      ret.push(extractNote(currentChord, 3) + 12);
       break;
     case 'top':
-      currentChord.chick.length > 4 ? ret.push(currentChord.chick[2] + 12) : ret.push(currentChord.chick[1] + 24);
+      ret.push(extractNote(currentChord, 4) + 12);
       break;
   }
   return ret;
+}
+function extractNote(chord, index) {
+  // This creates an arpeggio note no matter how many notes are in the chord - if it runs out of notes it continues in the next octave
+  var octave = Math.floor(index / chord.chick.length);
+  var note = chord.chick[index % chord.chick.length];
+  //console.log(chord.chick, {index, octave, note}, index % chord.chick.length)
+  return note + octave * 12;
 }
 function parseGChord(gchord) {
   // TODO-PER: The spec is more complicated than this but for now this will not try to do anything with error cases like the wrong number of beats.
@@ -13854,7 +13809,11 @@ ChordTrack.prototype.chordIntervals = {
   'maj7#5#11': [0, 4, 8, 11, 18],
   '9(#5)': [0, 4, 8, 10, 14],
   '13(#5)': [0, 4, 8, 10, 14, 21],
-  '13#5': [0, 4, 8, 10, 14, 21]
+  '13#5': [0, 4, 8, 10, 14, 21],
+  // MAE Power chords added 10 April 2024
+  '5': [0, 7],
+  '5(8)': [0, 7, 12],
+  '5add8': [0, 7, 12]
 };
 ChordTrack.prototype.rhythmPatterns = {
   "2/2": ['boom', '', '', '', 'chick', '', '', ''],
@@ -13866,8 +13825,12 @@ ChordTrack.prototype.rhythmPatterns = {
   "5/4": ['boom', '', 'chick', '', 'chick', '', 'boom', '', 'chick', ''],
   "6/4": ['boom', '', 'chick', '', 'boom', '', 'chick', '', 'boom', '', 'chick', ''],
   "3/8": ['boom', '', 'chick'],
+  "5/8": ['boom', 'chick', 'chick', 'boom', 'chick'],
   "6/8": ['boom', '', 'chick', 'boom', '', 'chick'],
+  "7/8": ['boom', 'chick', 'chick', 'boom', 'chick', 'boom', 'chick'],
   "9/8": ['boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick'],
+  "10/8": ['boom', 'chick', 'chick', 'boom', 'chick', 'chick', 'boom', 'chick', 'boom', 'chick'],
+  "11/8": ['boom', 'chick', 'chick', 'boom', 'chick', 'chick', 'boom', 'chick', 'boom', 'chick', 'chick'],
   "12/8": ['boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick', 'boom', '', 'chick']
 };
 
@@ -13955,7 +13918,6 @@ module.exports = createNoteMap;
 var supportsAudio = __webpack_require__(/*! ./supports-audio */ "./src/synth/supports-audio.js");
 var registerAudioContext = __webpack_require__(/*! ./register-audio-context */ "./src/synth/register-audio-context.js");
 var activeAudioContext = __webpack_require__(/*! ./active-audio-context */ "./src/synth/active-audio-context.js");
-var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
 var loopImage = __webpack_require__(/*! ./images/loop.svg.js */ "./src/synth/images/loop.svg.js");
 var playImage = __webpack_require__(/*! ./images/play.svg.js */ "./src/synth/images/play.svg.js");
 var pauseImage = __webpack_require__(/*! ./images/pause.svg.js */ "./src/synth/images/pause.svg.js");
@@ -13971,7 +13933,7 @@ function CreateSynthControl(parent, options) {
   } else if (!(parent instanceof HTMLElement)) throw new Error("The first parameter must be a valid element or selector in the DOM.");
   self.parent = parent;
   self.options = {};
-  if (options) self.options = parseCommon.clone(options);
+  if (options) self.options = Object.assign({}, options);
 
   // This can be called in the following cases:
   // AC already registered and not suspended
@@ -15754,6 +15716,206 @@ module.exports = SynthSequence;
 
 /***/ }),
 
+/***/ "./src/tablatures/abc_tablatures.js":
+/*!******************************************!*\
+  !*** ./src/tablatures/abc_tablatures.js ***!
+  \******************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/*
+ * Tablature Plugins
+ * tablature are defined dynamically and registered inside abcjs
+ * by calling abcTablatures.register(plugin) 
+ * where plugin represents a plugin instance 
+ * 
+ */
+
+// This is the only entry point to the tablatures. It is called both after parsing a tune and just before engraving
+
+var TabString = __webpack_require__(/*! ./instruments/tab-string */ "./src/tablatures/instruments/tab-string.js");
+
+/* extend the table below when adding a new instrument plugin */
+
+// Existing tab classes 
+var pluginTab = {
+  'violin': {
+    name: 'StringTab',
+    defaultTuning: ['G,', 'D', 'A', 'e'],
+    isTabBig: false,
+    tabSymbolOffset: 0
+  },
+  'fiddle': {
+    name: 'StringTab',
+    defaultTuning: ['G,', 'D', 'A', 'e'],
+    isTabBig: false,
+    tabSymbolOffset: 0
+  },
+  'mandolin': {
+    name: 'StringTab',
+    defaultTuning: ['G,', 'D', 'A', 'e'],
+    isTabBig: false,
+    tabSymbolOffset: 0
+  },
+  'guitar': {
+    name: 'StringTab',
+    defaultTuning: ['E,', 'A,', 'D', 'G', 'B', 'e'],
+    isTabBig: true,
+    tabSymbolOffset: 0
+  },
+  'fiveString': {
+    name: 'StringTab',
+    defaultTuning: ['C,', 'G,', 'D', 'A', 'e'],
+    isTabBig: false,
+    tabSymbolOffset: -.95
+  }
+};
+var abcTablatures = {
+  inited: false,
+  plugins: {},
+  /**
+   * to be called once per plugin for registration 
+   * @param {*} plugin 
+   */
+  register: function register(plugin) {
+    var name = plugin.name;
+    var tablature = plugin.tablature;
+    this.plugins[name] = tablature;
+  },
+  setError: function setError(tune, msg) {
+    if (tune.warnings) {
+      tune.warning.push(msg);
+    } else {
+      tune.warnings = [msg];
+    }
+  },
+  /**
+   * handle params for current processed score
+   * @param {*} tune current tune 
+   * @param {*} tuneNumber number in tune list
+   * @param {*} params params to be processed for tablature
+   * @return prepared tablatures plugin instances for current tune
+   */
+  preparePlugins: function preparePlugins(tune, tuneNumber, params) {
+    // Called after parsing a tune and before engraving it
+    if (!this.inited) {
+      // TODO-PER: I don't think this is needed - the plugin array can be hard coded, right?
+      this.register(new TabString());
+      this.inited = true;
+    }
+    var returned = null;
+    var nbPlugins = 0;
+    if (params.tablature) {
+      // validate requested plugins 
+      var tabs = params.tablature;
+      returned = [];
+      for (var ii = 0; ii < tabs.length; ii++) {
+        var args = tabs[ii];
+        var instrument = args['instrument'];
+        if (instrument == null) {
+          this.setError(tune, "tablature 'instrument' is missing");
+          return returned;
+        }
+        var tabName = pluginTab[instrument];
+        var plugin = null;
+        if (tabName) {
+          plugin = this.plugins[tabName.name];
+        }
+        if (plugin) {
+          if (params.visualTranspose != 0) {
+            // populate transposition request to tabs
+            args.visualTranspose = params.visualTranspose;
+          }
+          args.abcSrc = params.tablature.abcSrc;
+          var pluginInstance = {
+            classz: plugin,
+            tuneNumber: tuneNumber,
+            params: args,
+            instance: null,
+            tabType: tabName
+          };
+          // proceed with tab plugin  init 
+          // plugin.init(tune, tuneNumber, args, ii);
+          returned.push(pluginInstance);
+          nbPlugins++;
+        } else if (instrument === '') {
+          // create a placeholder - there is no tab for this staff
+          returned.push(null);
+        } else {
+          // unknown tab plugin 
+          //this.emit_error('Undefined tablature plugin: ' + tabName)
+          this.setError(tune, 'Undefined tablature plugin: ' + instrument);
+          return returned;
+        }
+      }
+    }
+    return returned;
+  },
+  /**
+   * Call requested plugin
+   * @param {*} renderer 
+   * @param {*} abcTune 
+   */
+  layoutTablatures: function layoutTablatures(renderer, abcTune) {
+    var tabs = abcTune.tablatures;
+
+    // chack tabs request for each staffs
+    var staffLineCount = 0;
+
+    // Clear the suppression flag
+    if (tabs && tabs.length > 0) {
+      var nTabs = tabs.length;
+      for (var kk = 0; kk < nTabs; ++kk) {
+        if (tabs[kk] && tabs[kk].params.firstStaffOnly) {
+          tabs[kk].params.suppress = false;
+        }
+      }
+    }
+    for (var ii = 0; ii < abcTune.lines.length; ii++) {
+      var line = abcTune.lines[ii];
+      if (line.staff) {
+        staffLineCount++;
+      }
+
+      // MAE 27Nov2023
+      // If tab param "firstStaffOnly", remove the tab label after the first staff
+      if (staffLineCount > 1) {
+        if (tabs && tabs.length > 0) {
+          var nTabs = tabs.length;
+          for (var kk = 0; kk < nTabs; ++kk) {
+            if (tabs[kk].params.firstStaffOnly) {
+              // Set the staff draw suppression flag
+              tabs[kk].params.suppress = true;
+            }
+          }
+        }
+      }
+      var curStaff = line.staff;
+      if (curStaff) {
+        var maxStaves = curStaff.length;
+        for (var jj = 0; jj < curStaff.length; jj++) {
+          if (tabs[jj] && jj < maxStaves) {
+            // tablature requested for staff
+            var tabPlugin = tabs[jj];
+            if (tabPlugin.instance == null) {
+              //console.log("★★★★ Tab Init line: " + ii + " staff: " + jj)
+              tabPlugin.instance = new tabPlugin.classz();
+              // plugin.init(tune, tuneNumber, args, ii);
+              // call initer first
+              tabPlugin.instance.init(abcTune, tabPlugin.tuneNumber, tabPlugin.params, tabPlugin.tabType);
+            }
+            // render next
+            //console.log("★★★★ Tab Render line: " + ii + " staff: " + jj)
+            tabPlugin.instance.render(renderer, line, jj);
+          }
+        }
+      }
+    }
+  }
+};
+module.exports = abcTablatures;
+
+/***/ }),
+
 /***/ "./src/tablatures/instruments/string-patterns.js":
 /*!*******************************************************!*\
   !*** ./src/tablatures/instruments/string-patterns.js ***!
@@ -15763,14 +15925,14 @@ module.exports = SynthSequence;
 var _require = __webpack_require__(/*! ../../synth/note-to-midi */ "./src/synth/note-to-midi.js"),
   noteToMidi = _require.noteToMidi;
 var TabNote = __webpack_require__(/*! ./tab-note */ "./src/tablatures/instruments/tab-note.js");
-var TabNotes = __webpack_require__(/*! ./tab-notes */ "./src/tablatures/instruments/tab-notes.js");
+var tabNotes = __webpack_require__(/*! ./tab-notes */ "./src/tablatures/instruments/tab-notes.js");
 function buildCapo(self) {
   var capoTuning = null;
   var tuning = self.tuning;
   if (self.capo > 0) {
     capoTuning = [];
     for (var iii = 0; iii < tuning.length; iii++) {
-      var curNote = new TabNote.TabNote(tuning[iii]);
+      var curNote = new TabNote(tuning[iii]);
       for (var jjj = 0; jjj < self.capo; jjj++) {
         curNote = curNote.nextNote();
       }
@@ -15791,8 +15953,7 @@ function buildPatterns(self) {
     if (iii != tuning.length - 1) {
       nextNote = tuning[iii + 1];
     }
-    var tabNotes = new TabNotes(tuning[iii], nextNote);
-    var stringNotes = tabNotes.build();
+    var stringNotes = tabNotes(tuning[iii], nextNote);
     if (stringNotes.error) {
       return stringNotes;
     }
@@ -15841,7 +16002,7 @@ function handleChordNotes(self, notes) {
   var retNotes = [];
   for (var iiii = 0; iiii < notes.length; iiii++) {
     if (notes[iiii].endTie) continue;
-    var note = new TabNote.TabNote(notes[iiii].name, self.clefTranspose);
+    var note = new TabNote(notes[iiii].name, self.clefTranspose);
     note.checkKeyAccidentals(self.accidentals, self.measureAccidentals);
     var curPos = toNumber(self, note);
     retNotes.push(curPos);
@@ -15933,7 +16094,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
       }
     } else {
       if (!notes[0].endTie) {
-        note = new TabNote.TabNote(notes[0].name, this.clefTranspose);
+        note = new TabNote(notes[0].name, this.clefTranspose);
         note.checkKeyAccidentals(this.accidentals, this.measureAccidentals);
         number = toNumber(this, note);
         if (number) {
@@ -15950,7 +16111,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
   if (graces) {
     retGraces = [];
     for (var iiii = 0; iiii < graces.length; iiii++) {
-      note = new TabNote.TabNote(graces[iiii].name, this.clefTranspose);
+      note = new TabNote(graces[iiii].name, this.clefTranspose);
       note.checkKeyAccidentals(this.accidentals, this.measureAccidentals);
       number = toNumber(this, note);
       if (number) {
@@ -15977,8 +16138,7 @@ StringPatterns.prototype.toString = function () {
   return arr.join('');
 };
 StringPatterns.prototype.tabInfos = function (plugin) {
-  var _super = plugin._super;
-  var name = _super.params.label;
+  var name = plugin.params.label;
   if (name) {
     var tunePos = name.indexOf('%T');
     var tuning = "";
@@ -15996,8 +16156,7 @@ StringPatterns.prototype.tabInfos = function (plugin) {
 
 // MAE 27 Nov 2023
 StringPatterns.prototype.suppress = function (plugin) {
-  var _super = plugin._super;
-  var suppress = _super.params.suppress;
+  var suppress = plugin.params.suppress;
   if (suppress) {
     return true;
   }
@@ -16013,9 +16172,10 @@ StringPatterns.prototype.suppress = function (plugin) {
  * @param {*} highestNote 
  */
 function StringPatterns(plugin) {
+  //console.log("INIT StringPatterns constructor")
   var tuning = plugin.tuning;
   var capo = plugin.capo;
-  var highestNote = plugin._super.params.highestNote;
+  var highestNote = plugin.params.highestNote;
   this.linePitch = plugin.linePitch;
   this.highestNote = "a'";
   if (highestNote) {
@@ -16039,7 +16199,7 @@ function StringPatterns(plugin) {
   }
   this.strings = buildPatterns(this);
   if (this.strings.error) {
-    plugin._super.setError(this.strings.error);
+    plugin.setError(this.strings.error);
     plugin.inError = true;
     return;
   }
@@ -16063,6 +16223,7 @@ module.exports = StringPatterns;
  */
 
 function StringTablature(numLines, lineSpace) {
+  //console.log("INIT StringTablature constructor")
   this.numLines = numLines;
   this.lineSpace = lineSpace;
   this.verticalSize = this.numLines * this.lineSpace;
@@ -16079,6 +16240,7 @@ function StringTablature(numLines, lineSpace) {
  * @param {} line 
  */
 StringTablature.prototype.bypass = function (line) {
+  //console.log("RENDER StringTablature bypass")
   var voices = line.staffGroup.voices;
   if (voices.length > 0) {
     if (voices[0].isPercussion) return true;
@@ -16086,6 +16248,7 @@ StringTablature.prototype.bypass = function (line) {
   return false;
 };
 StringTablature.prototype.setRelative = function (child, relative, first) {
+  //console.log("RENDER StringTablature setRelative")
   switch (child.type) {
     case 'bar':
       relative.pitch = this.bar.pitch;
@@ -16126,8 +16289,9 @@ var _require = __webpack_require__(/*! ../../synth/note-to-midi */ "./src/synth/
  * Note structure for Tabs
  * 
  */
-var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
 function TabNote(note, clefTranspose) {
+  //console.log("INIT/RENDER TabNote constructor")
   var pitch = noteToMidi(note);
   if (clefTranspose) pitch += clefTranspose;
   var newNote = midiToNote(pitch);
@@ -16209,12 +16373,15 @@ function cloneNote(self) {
   return newTabNote;
 }
 TabNote.prototype.sameNoteAs = function (note) {
+  //console.log("INIT TabNote sameNoteAs")
   return note.pitch === this.pitch;
 };
 TabNote.prototype.isLowerThan = function (note) {
+  //console.log("INIT TabNote isLowerThan")
   return note.pitch > this.pitch;
 };
 TabNote.prototype.checkKeyAccidentals = function (accidentals, measureAccidentals) {
+  //console.log("RENDER TabNote checkKeyAccidentals")
   if (this.isAltered || this.natural) return;
   if (measureAccidentals[this.name.toUpperCase()]) {
     switch (measureAccidentals[this.name.toUpperCase()]) {
@@ -16259,6 +16426,7 @@ TabNote.prototype.checkKeyAccidentals = function (accidentals, measureAccidental
   }
 };
 TabNote.prototype.getAccidentalEquiv = function () {
+  //console.log("TabNote getAccidentalEquiv")
   var cloned = cloneNote(this);
   if (cloned.isSharp || cloned.isKeySharp) {
     cloned = cloned.nextNote();
@@ -16274,14 +16442,17 @@ TabNote.prototype.getAccidentalEquiv = function () {
   return cloned;
 };
 TabNote.prototype.nextNote = function () {
+  //console.log("INIT TabNote nextNote")
   var note = midiToNote(this.pitch + 1 + this.pitchAltered);
   return new TabNote(note);
 };
 TabNote.prototype.prevNote = function () {
+  //console.log("TabNote prevNote")
   var note = midiToNote(this.pitch - 1 + this.pitchAltered);
   return new TabNote(note);
 };
 TabNote.prototype.emitNoAccidentals = function () {
+  //console.log("TabNote emitNoAccidentals")
   var returned = this.name;
   if (this.isLower) {
     returned = returned.toLowerCase();
@@ -16295,6 +16466,7 @@ TabNote.prototype.emitNoAccidentals = function () {
   return returned;
 };
 TabNote.prototype.emit = function () {
+  //console.log("INIT/RENDER TabNote emit")
   var returned = this.name;
   if (this.isSharp || this.isKeySharp) {
     returned = '^' + returned;
@@ -16329,10 +16501,7 @@ TabNote.prototype.emit = function () {
   }
   return returned;
 };
-module.exports = {
-  'TabNote': TabNote,
-  'notes': notes
-};
+module.exports = TabNote;
 
 /***/ }),
 
@@ -16343,14 +16512,11 @@ module.exports = {
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var TabNote = __webpack_require__(/*! ./tab-note */ "./src/tablatures/instruments/tab-note.js");
-var notes = TabNote.notes;
-function TabNotes(fromNote, toNote) {
-  this.fromN = new TabNote.TabNote(fromNote);
-  this.toN = new TabNote.TabNote(toNote);
-}
-TabNotes.prototype.build = function () {
-  var fromN = this.fromN;
-  var toN = this.toN;
+var notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+function tabNotes(fromNote, toNote) {
+  //console.log("INIT TabNotes")
+  var fromN = new TabNote(fromNote);
+  var toN = new TabNote(toNote);
   // check that toN is not lower than fromN
   if (toN.isLowerThan(fromN)) {
     var from = fromN.emit();
@@ -16374,35 +16540,8 @@ TabNotes.prototype.build = function () {
     }
   }
   return buildReturned;
-};
-module.exports = TabNotes;
-
-/***/ }),
-
-/***/ "./src/tablatures/instruments/tab-string-patterns.js":
-/*!***********************************************************!*\
-  !*** ./src/tablatures/instruments/tab-string-patterns.js ***!
-  \***********************************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var StringPatterns = __webpack_require__(/*! ./string-patterns */ "./src/tablatures/instruments/string-patterns.js");
-function TabStringPatterns(plugin, defaultTuning) {
-  this.tuning = plugin._super.params.tuning;
-  if (!this.tuning) {
-    this.tuning = defaultTuning;
-  }
-  plugin.tuning = this.tuning;
-  this.strings = new StringPatterns(plugin);
 }
-TabStringPatterns.prototype.notesToNumber = function (notes, graces) {
-  var converter = this.strings;
-  return converter.notesToNumber(notes, graces);
-};
-TabStringPatterns.prototype.stringToPitch = function (stringNumber) {
-  var converter = this.strings;
-  return converter.stringToPitch(stringNumber);
-};
-module.exports = TabStringPatterns;
+module.exports = tabNotes;
 
 /***/ }),
 
@@ -16413,20 +16552,22 @@ module.exports = TabStringPatterns;
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var StringTablature = __webpack_require__(/*! ./string-tablature */ "./src/tablatures/instruments/string-tablature.js");
-var TabCommon = __webpack_require__(/*! ../tab-common */ "./src/tablatures/tab-common.js");
-var TabRenderer = __webpack_require__(/*! ../tab-renderer */ "./src/tablatures/tab-renderer.js");
-var TabStringPatterns = __webpack_require__(/*! ./tab-string-patterns */ "./src/tablatures/instruments/tab-string-patterns.js");
+var tabRenderer = __webpack_require__(/*! ../render/tab-renderer */ "./src/tablatures/render/tab-renderer.js");
+var StringPatterns = __webpack_require__(/*! ./string-patterns */ "./src/tablatures/instruments/string-patterns.js");
 
 /**
  * upon init mainly store provided instances for later usage
  * @param {*} abcTune  the parsed tune AST tree
-*  @param {*} tuneNumber  the parsed tune AST tree
+ * @param {*} tuneNumber  the parsed tune AST tree
  * @param {*} params  complementary args provided to Tablature Plugin
  */
-Plugin.prototype.init = function (abcTune, tuneNumber, params, staffNumber, tabSettings) {
-  var _super = new TabCommon(abcTune, tuneNumber, params);
+Plugin.prototype.init = function (abcTune, tuneNumber, params, tabSettings) {
+  //console.log("INIT AbcStringTab Plugin.init")
+  this.tune = abcTune;
+  this.params = params;
+  this.tuneNumber = tuneNumber;
+  this.inError = false;
   this.abcTune = abcTune;
-  this._super = _super;
   this.linePitch = 3;
   this.nbLines = tabSettings.defaultTuning.length;
   this.isTabBig = tabSettings.isTabBig;
@@ -16435,14 +16576,30 @@ Plugin.prototype.init = function (abcTune, tuneNumber, params, staffNumber, tabS
   this.transpose = params.visualTranspose;
   this.hideTabSymbol = params.hideTabSymbol;
   this.tablature = new StringTablature(this.nbLines, this.linePitch);
-  var semantics = new TabStringPatterns(this, tabSettings.defaultTuning);
-  this.semantics = semantics;
+  var tuning = params.tuning;
+  if (!tuning) {
+    tuning = tabSettings.defaultTuning;
+  }
+  this.tuning = tuning;
+  this.semantics = new StringPatterns(this);
+};
+Plugin.prototype.setError = function (error) {
+  //console.log("Plugin setError")
+  if (error) {
+    this.error = error;
+    this.inError = true;
+    if (this.tune.warnings) {
+      this.tune.warnings.push(error);
+    } else {
+      this.tune.warnings = [error];
+    }
+  }
 };
 Plugin.prototype.render = function (renderer, line, staffIndex) {
-  if (this._super.inError) return;
+  //console.log("RENDER AbcStringTab Plugin.render")
+  if (this.inError) return;
   if (this.tablature.bypass(line)) return;
-  var rndrer = new TabRenderer(this, renderer, line, staffIndex);
-  rndrer.doLayout();
+  tabRenderer(this, renderer, line, staffIndex);
 };
 function Plugin() {}
 
@@ -16459,17 +16616,17 @@ module.exports = AbcStringTab;
 
 /***/ }),
 
-/***/ "./src/tablatures/tab-absolute-elements.js":
-/*!*************************************************!*\
-  !*** ./src/tablatures/tab-absolute-elements.js ***!
-  \*************************************************/
+/***/ "./src/tablatures/render/tab-absolute-elements.js":
+/*!********************************************************!*\
+  !*** ./src/tablatures/render/tab-absolute-elements.js ***!
+  \********************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /**
  * Tablature Absolute elements factory
  */
-var AbsoluteElement = __webpack_require__(/*! ../write/creation/elements/absolute-element */ "./src/write/creation/elements/absolute-element.js");
-var RelativeElement = __webpack_require__(/*! ../write/creation/elements/relative-element */ "./src/write/creation/elements/relative-element.js");
+var AbsoluteElement = __webpack_require__(/*! ../../write/creation/elements/absolute-element */ "./src/write/creation/elements/absolute-element.js");
+var RelativeElement = __webpack_require__(/*! ../../write/creation/elements/relative-element */ "./src/write/creation/elements/relative-element.js");
 function isObject(a) {
   return a != null && a.constructor === Object;
 }
@@ -16556,6 +16713,7 @@ function lyricsDim(abs) {
   return null;
 }
 function TabAbsoluteElements() {
+  //console.log("RENDER TabAbsoluteElements constructor")
   this.accidentals = null;
 }
 function getInitialStaffSize(staffGroup) {
@@ -16614,7 +16772,7 @@ function graceInRest(absElem) {
 function convertToNumber(plugin, pitches, graceNotes) {
   var tabPos = plugin.semantics.notesToNumber(pitches, graceNotes);
   if (tabPos.error) {
-    plugin._super.setError(tabPos.error);
+    plugin.setError(tabPos.error);
     return tabPos; // give up on error here
   }
 
@@ -16647,6 +16805,7 @@ function buildGraceRelativesForRest(plugin, abs, absChild, graceNotes, tabVoice)
  * @param {*} staffAbsolute
  */
 TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice, voiceIndex, staffIndex, keySig, tabVoiceIndex) {
+  //console.log("RENDER TabAbsoluteElements build")
   var staffSize = getInitialStaffSize(staffAbsolute);
   var source = staffAbsolute[staffIndex + voiceIndex];
   var dest = staffAbsolute[tabVoiceIndex];
@@ -16667,17 +16826,17 @@ TabAbsoluteElements.prototype.build = function (plugin, staffAbsolute, tabVoice,
     // }
     if (absChild.isClef) {
       dest.children.push(buildTabAbsolute(plugin, absX, relX));
-      if (absChild.abcelem.type.indexOf('-8') >= 0) plugin.semantics.strings.clefTranspose = -12;
-      if (absChild.abcelem.type.indexOf('+8') >= 0) plugin.semantics.strings.clefTranspose = 12;
+      if (absChild.abcelem.type.indexOf('-8') >= 0) plugin.semantics.clefTranspose = -12;
+      if (absChild.abcelem.type.indexOf('+8') >= 0) plugin.semantics.clefTranspose = 12;
     }
     switch (absChild.type) {
       case 'staff-extra key-signature':
         // refresh key accidentals
         this.accidentals = absChild.abcelem.accidentals;
-        plugin.semantics.strings.accidentals = this.accidentals;
+        plugin.semantics.accidentals = this.accidentals;
         break;
       case 'bar':
-        plugin.semantics.strings.measureAccidentals = {};
+        plugin.semantics.measureAccidentals = {};
         var lastBar = false;
         if (ii === source.children.length - 1) {
           // used for final line bar drawing
@@ -16777,50 +16936,16 @@ module.exports = TabAbsoluteElements;
 
 /***/ }),
 
-/***/ "./src/tablatures/tab-common.js":
-/*!**************************************!*\
-  !*** ./src/tablatures/tab-common.js ***!
-  \**************************************/
-/***/ (function(module) {
-
-/**
- *
- * Common Class/Method available for all instruments
- *
- */
-
-function TabCommon(abcTune, tuneNumber, params) {
-  this.tune = abcTune;
-  this.params = params;
-  this.tuneNumber = tuneNumber;
-  this.inError = false;
-}
-TabCommon.prototype.setError = function (error) {
-  var tune = this.tune;
-  if (error) {
-    this.error = error;
-    this.inError = true;
-    if (tune.warnings) {
-      tune.warnings.push(error);
-    } else {
-      tune.warnings = [error];
-    }
-  }
-};
-module.exports = TabCommon;
-
-/***/ }),
-
-/***/ "./src/tablatures/tab-renderer.js":
-/*!****************************************!*\
-  !*** ./src/tablatures/tab-renderer.js ***!
-  \****************************************/
+/***/ "./src/tablatures/render/tab-renderer.js":
+/*!***********************************************!*\
+  !*** ./src/tablatures/render/tab-renderer.js ***!
+  \***********************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /* eslint-disable no-debugger */
-var VoiceElement = __webpack_require__(/*! ../write/creation/elements/voice-element */ "./src/write/creation/elements/voice-element.js");
-var TabAbsoluteElements = __webpack_require__(/*! ./tab-absolute-elements */ "./src/tablatures/tab-absolute-elements.js");
-var spacing = __webpack_require__(/*! ../write/helpers/spacing */ "./src/write/helpers/spacing.js");
+var VoiceElement = __webpack_require__(/*! ../../write/creation/elements/voice-element */ "./src/write/creation/elements/voice-element.js");
+var TabAbsoluteElements = __webpack_require__(/*! ./tab-absolute-elements */ "./src/tablatures/render/tab-absolute-elements.js");
+var spacing = __webpack_require__(/*! ../../write/helpers/spacing */ "./src/write/helpers/spacing.js");
 function initSpecialY() {
   return {
     tempoHeightAbove: 0,
@@ -16849,12 +16974,11 @@ function getLyricHeight(voice) {
   return maxLyricHeight; // add spacing
 }
 
-function buildTabName(self, dest) {
-  var stringSemantics = self.plugin.semantics.strings;
-  var controller = self.renderer.controller;
-  var textSize = controller.getTextSize;
-  var tabName = stringSemantics.tabInfos(self.plugin);
-  var suppress = stringSemantics.suppress(self.plugin);
+function buildTabName(plugin, renderer, dest) {
+  var stringSemantics = plugin.semantics;
+  var textSize = renderer.controller.getTextSize;
+  var tabName = stringSemantics.tabInfos(plugin);
+  var suppress = stringSemantics.suppress(plugin);
   var doDraw = true;
   if (suppress) {
     doDraw = false;
@@ -16871,27 +16995,6 @@ function buildTabName(self, dest) {
     return size.height;
   }
   return 0;
-}
-
-/**
- * Laying out tabs
- * @param {*} renderer
- * @param {*} line
- * @param {*} staffIndex
- * @param {*} tablatureLayout
- */
-function TabRenderer(plugin, renderer, line, staffIndex) {
-  this.renderer = renderer;
-  this.plugin = plugin;
-  this.line = line;
-  this.absolutes = new TabAbsoluteElements();
-  this.staffIndex = staffIndex;
-  this.tabStaff = {
-    clef: {
-      type: 'TAB'
-    }
-  };
-  this.tabSize = plugin.linePitch * plugin.nbLines;
 }
 function islastTabInStaff(index, staffGroup) {
   if (staffGroup[index].isTabStaff) {
@@ -16938,8 +17041,7 @@ function isMultiVoiceSingleStaff(staffs, parent) {
   }
   return false;
 }
-function getNextTabPos(self, staffGroup) {
-  var tabIndex = self.staffIndex;
+function getNextTabPos(tabIndex, staffGroup) {
   var startIndex = 0;
   var handledVoices = 0;
   var inProgress = true;
@@ -16988,30 +17090,38 @@ function checkVoiceKeySig(voices, ii) {
   }
   return voices[ii - 1].children[0];
 }
-TabRenderer.prototype.doLayout = function () {
-  var staffs = this.line.staff;
+function tabRenderer(plugin, renderer, line, staffIndex) {
+  //console.log("RENDER tabRenderer")
+  var absolutes = new TabAbsoluteElements();
+  var tabStaff = {
+    clef: {
+      type: 'TAB'
+    }
+  };
+  var tabSize = plugin.linePitch * plugin.nbLines;
+  var staffs = line.staff;
   if (staffs) {
     // give up on staffline=0 in key 
     var firstStaff = staffs[0];
     if (firstStaff) {
       if (firstStaff.clef) {
         if (firstStaff.clef.stafflines == 0) {
-          this.plugin._super.setError("No tablatures when stafflines=0");
+          plugin.setError("No tablatures when stafflines=0");
           return;
         }
       }
     }
-    staffs.splice(staffs.length, 0, this.tabStaff);
+    staffs.splice(staffs.length, 0, tabStaff);
   }
-  var staffGroup = this.line.staffGroup;
+  var staffGroup = line.staffGroup;
   var voices = staffGroup.voices;
   var firstVoice = voices[0];
   // take lyrics into account if any
   var lyricsHeight = getLyricHeight(firstVoice);
   var padd = 3;
-  var prevIndex = this.staffIndex;
+  var prevIndex = staffIndex;
   var previousStaff = staffGroup.staffs[prevIndex];
-  var tabTop = this.tabSize + padd - previousStaff.bottom - lyricsHeight;
+  var tabTop = tabSize + padd - previousStaff.bottom - lyricsHeight;
   if (previousStaff.isTabStaff) {
     tabTop = previousStaff.top;
   }
@@ -17019,44 +17129,44 @@ TabRenderer.prototype.doLayout = function () {
     bottom: -1,
     isTabStaff: true,
     specialY: initSpecialY(),
-    lines: this.plugin.nbLines,
-    linePitch: this.plugin.linePitch,
+    lines: plugin.nbLines,
+    linePitch: plugin.linePitch,
     dy: 0.15,
     top: tabTop
   };
-  var nextTabPos = getNextTabPos(this, staffGroup.staffs);
+  var nextTabPos = getNextTabPos(staffIndex, staffGroup.staffs);
   if (nextTabPos === -1) return;
   staffGroupInfos.parentIndex = nextTabPos - 1;
   staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
   // staffGroup.staffs.push(staffGroupInfos);
-  staffGroup.height += this.tabSize + padd;
+  staffGroup.height += tabSize + padd;
   var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos);
   var nbVoices = 1;
   if (isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff)) {
     nbVoices = parentStaff.voices.length;
   }
   // build from staff
-  this.tabStaff.voices = [];
+  tabStaff.voices = [];
   for (var ii = 0; ii < nbVoices; ii++) {
     var tabVoice = new VoiceElement(0, 0);
     if (ii > 0) tabVoice.duplicate = true;
-    var nameHeight = buildTabName(this, tabVoice) / spacing.STEP;
+    var nameHeight = buildTabName(plugin, renderer, tabVoice) / spacing.STEP;
     nameHeight = Math.max(nameHeight, 1); // If there is no label for the tab line, then there needs to be a little padding
     // This was pushing down the top staff by the tab label height
-    //staffGroup.staffs[this.staffIndex].top += nameHeight;
-    staffGroup.staffs[this.staffIndex].top += 1;
+    //staffGroup.staffs[staffIndex].top += nameHeight;
+    staffGroup.staffs[staffIndex].top += 1;
     staffGroup.height += nameHeight;
     tabVoice.staff = staffGroupInfos;
     var tabVoiceIndex = voices.length;
     voices.splice(voices.length, 0, tabVoice);
-    var keySig = checkVoiceKeySig(voices, ii + this.staffIndex);
-    this.tabStaff.voices[ii] = [];
-    this.absolutes.build(this.plugin, voices, this.tabStaff.voices[ii], ii, this.staffIndex, keySig, tabVoiceIndex);
+    var keySig = checkVoiceKeySig(voices, ii + staffIndex);
+    tabStaff.voices[ii] = [];
+    absolutes.build(plugin, voices, tabStaff.voices[ii], ii, staffIndex, keySig, tabVoiceIndex);
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
-};
+}
 
-module.exports = TabRenderer;
+module.exports = tabRenderer;
 
 /***/ }),
 
@@ -17990,7 +18100,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
   if (elem.decoration) {
     // TODO-PER: nostem is true if this is beamed. In that case we don't know where to place the decoration yet so just make a guess. This should be refactored to not place decorations until after the beams are determined.
     // This should probably be combined with moveDecorations()
-    var bottom = nostem ? Math.min(-3, abselem.bottom - 6) : abselem.bottom;
+    var bottom = nostem && dir !== 'up' ? Math.min(-3, abselem.bottom - 6) : abselem.bottom;
     this.decoration.createDecoration(voice, elem.decoration, abselem.top, notehead ? notehead.w : 0, abselem, roomtaken, dir, bottom, elem.positioning, this.hasVocals, this.accentAbove);
   }
   if (elem.barNumber) {
@@ -23519,7 +23629,7 @@ var Classes = __webpack_require__(/*! ./helpers/classes */ "./src/write/helpers/
 var GetFontAndAttr = __webpack_require__(/*! ./helpers/get-font-and-attr */ "./src/write/helpers/get-font-and-attr.js");
 var GetTextSize = __webpack_require__(/*! ./helpers/get-text-size */ "./src/write/helpers/get-text-size.js");
 var draw = __webpack_require__(/*! ./draw/draw */ "./src/write/draw/draw.js");
-var tablatures = __webpack_require__(/*! ../api/abc_tablatures */ "./src/api/abc_tablatures.js");
+var tablatures = __webpack_require__(/*! ../tablatures/abc_tablatures */ "./src/tablatures/abc_tablatures.js");
 var findSelectableElement = __webpack_require__(/*! ./interactive/find-selectable-element */ "./src/write/interactive/find-selectable-element.js");
 
 /**
@@ -26379,7 +26489,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.4.1';
+var version = '6.4.2';
 module.exports = version;
 
 /***/ })
