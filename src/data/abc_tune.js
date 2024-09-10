@@ -551,6 +551,8 @@ var Tune = function() {
 
 	this.getBpm = function(tempo) {
 		var bpm;
+		if (!tempo)
+			tempo = this.metaText ? this.metaText.tempo : null;
 		if (tempo) {
 			bpm = tempo.bpm;
 			var beatLength = this.getBeatLength();
