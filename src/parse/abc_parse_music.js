@@ -615,23 +615,38 @@ var letter_to_chord = function(line, i) {
 			chord[1] = chord[1].substring(1);
 			chord[2] = 'right';
 		} else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '@') {
-			// @-15,5.7
-			chord[1] = chord[1].substring(1);
-			var x = tokenizer.getFloat(chord[1]);
-			if (x.digits === 0)
-				warn("Missing first position in absolutely positioned annotation.", line , i);
-			chord[1] = chord[1].substring(x.digits);
-			if (chord[1][0] !== ',')
-				warn("Missing comma absolutely positioned annotation.", line , i);
-			chord[1] = chord[1].substring(1);
-			var y = tokenizer.getFloat(chord[1]);
-			if (y.digits === 0)
-				warn("Missing second position in absolutely positioned annotation.", line , i);
-			chord[1] = chord[1].substring(y.digits);
-			var ws = tokenizer.skipWhiteSpace(chord[1]);
-			chord[1] = chord[1].substring(ws);
-			chord[2] = null;
-			chord[3] = { x: x.value, y: y.value };
+		      // @-15,5.7		
+		      chord[1] = chord[1].substring(1);
+		      var x = tokenizer.getFloat(chord[1]);
+		      if (x.digits === 0){
+			warn("Missing first position in absolutely positioned annotation.", line, i);
+			chord[1] = chord[1].replace("@","");
+			chord[2] = 'above';
+			return chord;
+		      }
+		      chord[1] = chord[1].substring(x.digits);
+		      if (chord[1][0] !== ','){
+			warn("Missing comma absolutely positioned annotation.", line, i);
+			chord[1] = chord[1].replace("@","");
+			chord[2] = 'above';
+			return chord;
+		      }
+		      chord[1] = chord[1].substring(1);
+		      var y = tokenizer.getFloat(chord[1]);
+		      if (y.digits === 0){
+			warn("Missing second position in absolutely positioned annotation.", line, i);
+			chord[1] = chord[1].replace("@","");
+			chord[2] = 'above';
+			return chord;
+		      }
+		      chord[1] = chord[1].substring(y.digits);
+		      var ws = tokenizer.skipWhiteSpace(chord[1]);
+		      chord[1] = chord[1].substring(ws);
+		      chord[2] = null;
+		      chord[3] = {
+			x: x.value,
+			y: y.value
+		      };	
 		} else {
 			if (multilineVars.freegchord !== true) {
 				chord[1] = chord[1].replace(/([ABCDEFG0-9])b/g, "$1♭");
