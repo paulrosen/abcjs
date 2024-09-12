@@ -225,4 +225,30 @@ TieElem.prototype.avoidCollisionAbove = function () {
 	}
 };
 
+TieElem.prototype.getYBounds = function () {
+	var lineStartX = 10 // TODO-PER: I'm not sure where to get this number from but it probably doesn't matter much
+	var lineEndX = 1000 // TODO-PER: I'm not sure where to get this number from but it probably doesn't matter much
+	if (this.isTie) {
+		this.calcTieDirection();
+		this.calcX(lineStartX, lineEndX);
+		this.calcTieY();
+
+	} else {
+		this.calcSlurDirection();
+		this.calcX(lineStartX, lineEndX);
+		this.calcSlurY();
+	}
+	var top;
+	var bottom;
+	// TODO-PER: It's hard to tell how far the arc is, so I'm just using 3 as the max
+	if (this.above) {
+		bottom = Math.min(this.startY, this.endY)
+		top = bottom + 3
+	} else {
+		top = Math.min(this.startY, this.endY)
+		bottom = top - 3
+	}
+	return [ top, bottom ]
+};
+
 module.exports = TieElem;
