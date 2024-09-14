@@ -18,7 +18,7 @@ return /******/ (function() { // webpackBootstrap
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /**!
-Copyright (c) 2009-2023 Paul Rosen and Gregory Dyke
+Copyright (c) 2009-2024 Paul Rosen and Gregory Dyke
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -617,7 +617,6 @@ var tunebook = {};
         }
       }
     }
-
     return staves;
   }
   function measuresParser(staff, tune) {
@@ -1341,7 +1340,6 @@ var Tune = function Tune() {
     };
     return this.meter; // TODO-PER: is this saved value used anywhere? A get function shouldn't change state.
   };
-
   this.getKeySignature = function () {
     for (var i = 0; i < this.lines.length; i++) {
       var line = this.lines[i];
@@ -1496,7 +1494,6 @@ var Tune = function Tune() {
         // 	isTiedState = voiceTimeMilliseconds;
       }
     }
-
     return {
       isTiedState: isTiedState,
       duration: realDuration / timeDivider,
@@ -1667,6 +1664,7 @@ var Tune = function Tune() {
   }
   this.getBpm = function (tempo) {
     var bpm;
+    if (!tempo) tempo = this.metaText ? this.metaText.tempo : null;
     if (tempo) {
       bpm = tempo.bpm;
       var beatLength = this.getBeatLength();
@@ -3121,7 +3119,6 @@ var Parse = function Parse() {
       multilineVars.lineBreaks = switches.lineBreaks;
       //multilineVars.continueall = true;
     }
-
     header.reset(tokenizer, warn, multilineVars, tune);
     try {
       if (switches.format) {
@@ -3211,7 +3208,6 @@ var bookParser = function bookParser(book) {
     });
     pos += tune.length + 1; // We also lost a newline when splitting, so count that.
   });
-
   if (tunes.length > 1 && !parseCommon.startsWith(tunes[0].abc, 'X:')) {
     // If there is only one tune, the X: might be missing, otherwise assume the top of the file is "intertune"
     // There could be file-wide directives in this, if so, we need to insert it into each tune. We can probably get away with
@@ -4784,7 +4780,6 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           }
           return ret; // just to suppress warning
         };
-
         var parseFraction = function parseFraction() {
           // handles this much: parseNum slash decimal
           var ret = parseNum();
@@ -4815,7 +4810,6 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           //var tok = tokens.shift();
           //if (tok.token !== '+') throw "Extra characters in M: line";
         }
-
         if (multilineVars.havent_set_length === true) {
           multilineVars.default_length = totalLength < 0.75 ? 0.0625 : 0.125;
           multilineVars.havent_set_length = false;
@@ -5091,7 +5085,6 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
         // TODO: complain about unhandled header
       }
     }
-
     return [0];
   };
   this.letter_to_body_header = function (line, i) {
@@ -5133,7 +5126,6 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
         // TODO: complain about unhandled header
       }
     }
-
     return [0];
   };
   var metaTextHeaders = {
@@ -5600,7 +5592,6 @@ var parseKeyVoice = {};
       str: str.substring(i)
     }; // We get the note in the middle of the staff. We want the note that appears as the first ledger line below the staff.
   };
-
   var normalizeAccidentals = function normalizeAccidentals(accs) {
     for (var i = 0; i < accs.length; i++) {
       if (accs[i].note === 'b') accs[i].note = 'B';else if (accs[i].note === 'a') accs[i].note = 'A';else if (accs[i].note === 'F') accs[i].note = 'f';else if (accs[i].note === 'E') accs[i].note = 'e';else if (accs[i].note === 'D') accs[i].note = 'd';else if (accs[i].note === 'C') accs[i].note = 'c';else if (accs[i].note === 'G' && accs[i].acc === 'sharp') accs[i].note = 'g';else if (accs[i].note === 'g' && accs[i].acc === 'flat') accs[i].note = 'G';
@@ -6017,7 +6008,6 @@ var parseKeyVoice = {};
     if (multilineVars.currentVoice) {
       if (multilineVars.currentVoice.index === currentVoice.index && multilineVars.currentVoice.staffNum === currentVoice.staffNum) return; // there was no change so don't reset it.
     }
-
     multilineVars.currentVoice = currentVoice;
     return tuneBuilder.setCurrentVoice(currentVoice.staffNum, currentVoice.index, id);
   };
@@ -6233,7 +6223,6 @@ var parseKeyVoice = {};
           // 	console.log("parse voice", token, tune.metaText.title);
         }
       }
-
       start += tokenizer.eatWhiteSpace(line, start);
     }
 
@@ -6408,7 +6397,6 @@ MusicParser.prototype.parseMusic = function (line) {
     // delayStartNewLine = true;
     // TODO-PER: Handle inline headers
   }
-
   var overlayLevel = 0;
   while (i < line.length) {
     var startI = i;
@@ -6836,15 +6824,30 @@ var letter_to_chord = function letter_to_chord(line, i) {
       chord[1] = chord[1].substring(1);
       chord[2] = 'right';
     } else if (chord[0] > 0 && chord[1].length > 0 && chord[1][0] === '@') {
-      // @-15,5.7
+      // @-15,5.7		
       chord[1] = chord[1].substring(1);
       var x = tokenizer.getFloat(chord[1]);
-      if (x.digits === 0) warn("Missing first position in absolutely positioned annotation.", line, i);
+      if (x.digits === 0) {
+        warn("Missing first position in absolutely positioned annotation.", line, i);
+        chord[1] = chord[1].replace("@", "");
+        chord[2] = 'above';
+        return chord;
+      }
       chord[1] = chord[1].substring(x.digits);
-      if (chord[1][0] !== ',') warn("Missing comma absolutely positioned annotation.", line, i);
+      if (chord[1][0] !== ',') {
+        warn("Missing comma absolutely positioned annotation.", line, i);
+        chord[1] = chord[1].replace("@", "");
+        chord[2] = 'above';
+        return chord;
+      }
       chord[1] = chord[1].substring(1);
       var y = tokenizer.getFloat(chord[1]);
-      if (y.digits === 0) warn("Missing second position in absolutely positioned annotation.", line, i);
+      if (y.digits === 0) {
+        warn("Missing second position in absolutely positioned annotation.", line, i);
+        chord[1] = chord[1].replace("@", "");
+        chord[2] = 'above';
+        return chord;
+      }
       chord[1] = chord[1].substring(y.digits);
       var ws = tokenizer.skipWhiteSpace(chord[1]);
       chord[1] = chord[1].substring(ws);
@@ -7574,7 +7577,6 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     }
     return str.length; // It must have been all white space
   };
-
   var finished = function finished(str, i) {
     return i >= str.length;
   };
@@ -7635,7 +7637,6 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
       //			case 'f':return {len: i+1, token: 'F'};
       //			case 'g':return {len: i+1, token: 'G'};
     }
-
     return {
       len: 0
     };
@@ -8467,7 +8468,6 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
 
     // More chars: Ĳ ĳ Ď ď Đ đ Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĵ ĵ Ķ ķ ĸ Ĺ ĺ Ļ ļ Ľ ľ Ŀ ŀ Ł ł Ń ń Ņ ņ Ň ň ŉ Ŋ ŋ Ŕ ŕ Ŗ ŗ Ř ř Ś ś Ŝ ŝ Ş ş Š Ţ ţ Ť ť Ŧ ŧ Ŵ ŵ Ź ź Ż ż Ž
   };
-
   var charMap1 = {
     "#": "♯",
     "b": "♭",
@@ -9159,7 +9159,6 @@ function transposeChordName(chord, steps, preferFlats, freeGCchord) {
       }
     } else chord += bass; // Don't know what to do so do nothing
   }
-
   if (extra2) chord += extra2;
   return chord;
 }
@@ -9370,7 +9369,6 @@ var TuneBuilder = function TuneBuilder(tune) {
     if (hashParams.rest && hashParams.rest.type === 'invisible') {
       delete hashParams.decoration; // the decorations on invisible rests should be invisible, too.
     }
-
     if (tune.lines.length <= tune.lineNum || tune.lines[tune.lineNum].staff.length <= tune.staffNum) {
       //console.log("pushNote IGNORED", tune.lines[tune.lineNum])
       // TODO-PER: This prevents a crash, but it drops the element. Need to figure out how to start a new line, or delay adding this.
@@ -9838,7 +9836,6 @@ function cleanUpSlursInLine(line, staffNum, voiceNum, currSlur) {
       obj.endSlur.push(slurNum);
       //					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
     }
-
     if (currSlur[staffNum][voiceNum][chordPos].length === 0) delete currSlur[staffNum][voiceNum][chordPos];
     return slurNum;
   };
@@ -11088,7 +11085,6 @@ var strTranspose;
             return 0;
           // this should never happen
         }
-
       case '_':
         switch (thisAccidental) {
           case '__':
@@ -11105,7 +11101,6 @@ var strTranspose;
             return 0;
           // this should never happen
         }
-
       case '^':
         switch (thisAccidental) {
           case '__':
@@ -11123,11 +11118,9 @@ var strTranspose;
           // this should never happen
         }
     }
-
     return 0; // this should never happen
   }
 })();
-
 module.exports = strTranspose;
 
 /***/ }),
@@ -11452,7 +11445,6 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
       // console.log(JSON.stringify(voices))
     }
   }
-
   function getBeatFraction(meter) {
     switch (parseInt(meter.den, 10)) {
       case 2:
@@ -12228,7 +12220,6 @@ var rendererFactory;
     this.track += this.noteOnAndChannel;
     this.track += "%" + pitch.toString(16) + toHex(loudness, 2); //note
   };
-
   Midi.prototype.endNote = function (pitch) {
     this.track += toDurationHex(this.silencelength); // only need to shift by amount of silence (if there is any)
     this.silencelength = 0;
@@ -12242,7 +12233,6 @@ var rendererFactory;
     this.track += this.noteOffAndChannel;
     this.track += "%" + pitch.toString(16) + "%00"; //end note
   };
-
   Midi.prototype.addRest = function (length) {
     this.silencelength += length;
     if (this.silencelength < 0) this.silencelength = 0;
@@ -12279,7 +12269,6 @@ var rendererFactory;
     }
     return "%00%FF" + cmdType + toHex(nameArray.length / 3, 2) + nameArray; // Each byte is represented by three chars "%XX", so divide by 3 to get the length.
   }
-
   function keySignature(key) {
     //00 FF 5902 03 00 - key signature
     if (!key || !key.accidentals) return "";
@@ -13069,7 +13058,6 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
       }
     }
   }
-
   function chordVoiceOffThisBar(voices) {
     for (var i = 0; i < voices.length; i++) {
       var voice = voices[i];
@@ -13395,6 +13383,14 @@ ChordTrack.prototype.interpretChord = function (name) {
   }
   bass += chordTranspose;
 
+  // MAE 31 Aug 2024 - For visual transpose backup range issue
+  // If transposed below A or above G, bring it back in the normal backup range
+  if (bass < 33) {
+    bass += 12;
+  } else if (bass > 44) {
+    bass -= 12;
+  }
+
   // MAE 17 Jun 2024 - Supporting octave shifted bass and chords
   var unshiftedBass = bass;
   bass += this.bassOctaveShift * 12;
@@ -13533,7 +13529,6 @@ ChordTrack.prototype.resolveChords = function (startTime, endTime) {
       if (newBass) newBass = false;else isBoom = false; // only the first note in a chord is a bass note. This handles the case where bass and chord are played at the same time.
     }
   }
-
   return;
 };
 ChordTrack.prototype.processChord = function (elem) {
@@ -14589,7 +14584,6 @@ function CreateSynth() {
       self.directSource[trackNum].buffer = audioBuffer; // tell the source which sound to play
       self.directSource[trackNum].connect(activeAudioContext().destination); // connect the source to the context's destination (the speakers)
     });
-
     self.directSource.forEach(function (source) {
       source.start(0, seconds);
     });
@@ -16775,7 +16769,6 @@ function convertToNumber(plugin, pitches, graceNotes) {
     plugin.setError(tabPos.error);
     return tabPos; // give up on error here
   }
-
   if (tabPos.graces && tabPos.notes) {
     // add graces to last note in notes
     var posNote = tabPos.notes.length - 1;
@@ -16973,7 +16966,6 @@ function getLyricHeight(voice) {
   }
   return maxLyricHeight; // add spacing
 }
-
 function buildTabName(plugin, renderer, dest) {
   var stringSemantics = plugin.semantics;
   var textSize = renderer.controller.getTextSize;
@@ -17052,7 +17044,6 @@ function getNextTabPos(tabIndex, staffGroup) {
     if (!staffGroup[startIndex].isTabStaff) {
       nbVoices = staffGroup[startIndex].voices.length; // get number of staff voices
     }
-
     if (staffGroup[startIndex].isTabStaff) {
       handledVoices++;
       if (islastTabInStaff(startIndex, staffGroup)) {
@@ -17165,7 +17156,6 @@ function tabRenderer(plugin, renderer, line, staffIndex) {
   }
   linkStaffAndTabs(staffGroup.staffs); // crossreference tabs and staff
 }
-
 module.exports = tabRenderer;
 
 /***/ }),
@@ -17385,7 +17375,6 @@ AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, temp
     } else {
       voice.duplicate = true; // bar lines and other duplicate info need not be created
     }
-
     if (abcstaff.title && abcstaff.title[v]) {
       voice.header = abcstaff.title[v].replace(/\\n/g, "\n");
       voice.headerPosition = 6 + staffgroup.getTextSize.baselineToCenter(voice.header, "voicefont", 'staff-extra voice-name', v, abcstaff.voices.length) / spacing.STEP;
@@ -17399,13 +17388,11 @@ AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, temp
       voice.addChild(clef);
       this.startlimitelem = clef; // limit ties here
     }
-
     var keySig = createKeySignature(abcstaff.key, this.tuneNumber);
     if (keySig) {
       voice.addChild(keySig);
       this.startlimitelem = keySig; // limit ties here
     }
-
     if (abcstaff.meter) {
       if (abcstaff.meter.type === 'specified') {
         this.measureLength = abcstaff.meter.value[0].num / abcstaff.meter.value[0].den;
@@ -17414,7 +17401,6 @@ AbstractEngraver.prototype.createABCStaff = function (staffgroup, abcstaff, temp
       voice.addChild(ts);
       this.startlimitelem = ts; // limit ties here
     }
-
     if (voice.duplicate) voice.children = []; // we shouldn't reprint the above if we're reusing the same staff. We just created them to get the right spacing.
     var staffLines = abcstaff.clef.stafflines || abcstaff.clef.stafflines === 0 ? abcstaff.clef.stafflines : 5;
     staffgroup.addVoice(voice, s, staffLines);
@@ -17578,7 +17564,6 @@ AbstractEngraver.prototype.createABCElement = function (isFirstStaff, isSingleLi
         elemset[0] = absKey;
         this.startlimitelem = elemset[0]; // limit ties here
       }
-
       if (voice.duplicate && elemset.length > 0) elemset[0].invisible = true;
       break;
     case "stem":
@@ -17712,7 +17697,6 @@ AbstractEngraver.prototype.addGraceNotes = function (elem, voice, abselem, noteh
     if (hint) gracebeam.setHint();
     gracebeam.mainNote = abselem; // this gives us a reference back to the note this is attached to so that the stems can be attached somewhere.
   }
-
   var i;
   var graceoffsets = [];
   for (i = elem.gracenotes.length - 1; i >= 0; i--) {
@@ -17812,7 +17796,6 @@ function addRestToAbsElement(abselem, elem, duration, dot, isMultiVoice, stemdir
     if (duration < 0.5) restpitch = 7;else if (duration < 1) restpitch = 7; // half rest
     else restpitch = 5; // whole rest
   }
-
   switch (elem.rest.type) {
     case "whole":
       c = chartable.rest[0];
@@ -17951,7 +17934,6 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
         elem.pitches[p].highestVert = elem.pitches[pp - 1].verticalPos;
         if (getDuration(elem) < 1 && (stemdir === "up" || dir === "up")) elem.pitches[p].highestVert += 6; // If the stem is up, then compensate for the length of the stem
       }
-
       if (elem.startSlur) {
         if (!elem.pitches[p].startSlur) elem.pitches[p].startSlur = []; //TODO possibly redundant, provided array is not optional
         for (i = 0; i < elem.startSlur.length; i++) {
@@ -18121,7 +18103,6 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
       flatBeams: this.flatBeams
     }); // above is opposite from case of slurs
   }
-
   if (elem.endTriplet && this.triplet) {
     this.triplet.setCloseAnchor(notehead);
   }
@@ -18255,7 +18236,6 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
     abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
     dx += 6; //2 hardcoded, twice;
   }
-
   if (firstthin) {
     anchor = new RelativeElement(null, dx, 1, 2, {
       "type": "bar",
@@ -18304,7 +18284,6 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
     });
     abselem.addRight(anchor); // 3 is hardcoded
   }
-
   if (seconddots) {
     dx += 3; //3 hardcoded;
     abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
@@ -18638,7 +18617,6 @@ var createClef = function createClef(elem, tuneNumber) {
       //abselem.top += 2;
     }
   }
-
   return abselem;
 };
 function clefOffsets(clef) {
@@ -18830,7 +18808,6 @@ var createNoteHead = function createNoteHead(abselem, c, pitchelem, options) {
     }));
     extraLeft = glyphs.getSymbolWidth(symb) / 2; // TODO-PER: We need a little extra width if there is an accidental, but I'm not sure why it isn't the full width of the accidental.
   }
-
   return {
     notehead: notehead,
     accidentalshiftx: accidentalshiftx,
@@ -19621,7 +19598,6 @@ BeamElem.prototype.setStemDirection = function () {
     var middleLine = 6; // hardcoded 6 is B
     this.stemsUp = this.average < middleLine; // true is up, false is down;
   }
-
   delete this.count;
   this.total = 0;
 };
@@ -19635,7 +19611,6 @@ BeamElem.prototype.calcDir = function () {
     var middleLine = 6; // hardcoded 6 is B
     this.stemsUp = this.average < middleLine; // true is up, false is down;
   }
-
   var dir = this.stemsUp ? 'up' : 'down';
   for (var i = 0; i < this.elems.length; i++) {
     for (var j = 0; j < this.elems[i].heads.length; j++) {
@@ -19825,7 +19800,6 @@ BraceElem.prototype.continuing = function (voice) {
 BraceElem.prototype.getWidth = function () {
   return 10; // TODO-PER: right now the drawing function doesn't vary the width at all. If it does in the future then this will change.
 };
-
 BraceElem.prototype.isStartVoice = function (voice) {
   if (this.startVoice && this.startVoice.staff && this.startVoice.staff.voices.length > 0 && this.startVoice.staff.voices[0] === voice) return true;
   return false;
@@ -19850,7 +19824,6 @@ var CrescendoElem = function CrescendoElem(anchor1, anchor2, dir, positioning) {
   if (positioning === 'above') this.dynamicHeightAbove = 6;else this.dynamicHeightBelow = 6;
   this.pitch = undefined; // This will be set later
 };
-
 module.exports = CrescendoElem;
 
 /***/ }),
@@ -19870,7 +19843,6 @@ var DynamicDecoration = function DynamicDecoration(anchor, dec, position) {
   if (position === 'below') this.volumeHeightBelow = 6;else this.volumeHeightAbove = 6;
   this.pitch = undefined; // This will be set later
 };
-
 module.exports = DynamicDecoration;
 
 /***/ }),
@@ -19891,7 +19863,6 @@ var EndingElem = function EndingElem(text, anchor1, anchor2) {
   this.endingHeightAbove = 5;
   this.pitch = undefined; // This will be set later
 };
-
 module.exports = EndingElem;
 
 /***/ }),
@@ -19997,7 +19968,6 @@ var GlissandoElem = function GlissandoElem(anchor1, anchor2) {
   this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
   this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
 };
-
 module.exports = GlissandoElem;
 
 /***/ }),
@@ -20532,14 +20502,12 @@ TieElem.prototype.calcX = function (lineStartX, lineEndX) {
     if (this.anchor2) this.startX = this.anchor2.x - 20; // There is no element and no repeat mark: make a small arc
     else this.startX = lineStartX; // Don't have any guidance, so extend to beginning of line
   }
-
   if (!this.anchor1 && this.dotted) this.startX -= 3; // The arc needs to be long enough to tell that it is dotted.
 
   if (this.anchor2) this.endX = this.anchor2.x; // The normal case where there is a starting element to attach to.
   else if (this.endLimitX) this.endX = this.endLimitX.x; // if there is no start element, but there is a repeat mark before the start of the line.
   else this.endX = lineEndX; // There is no element and no repeat mark: extend to the beginning of the line.
 };
-
 TieElem.prototype.calcTieY = function () {
   // If the tie comes from another line, then one or both anchors will be missing.
   if (this.anchor1) this.startY = this.anchor1.pitch;else if (this.anchor2) this.startY = this.anchor2.pitch;else this.startY = this.above ? 14 : 0;
@@ -20602,6 +20570,30 @@ TieElem.prototype.avoidCollisionAbove = function () {
     if (maxInnerHeight > this.startY && maxInnerHeight > this.endY) this.startY = this.endY = maxInnerHeight - 1;
   }
 };
+TieElem.prototype.getYBounds = function () {
+  var lineStartX = 10; // TODO-PER: I'm not sure where to get this number from but it probably doesn't matter much
+  var lineEndX = 1000; // TODO-PER: I'm not sure where to get this number from but it probably doesn't matter much
+  if (this.isTie) {
+    this.calcTieDirection();
+    this.calcX(lineStartX, lineEndX);
+    this.calcTieY();
+  } else {
+    this.calcSlurDirection();
+    this.calcX(lineStartX, lineEndX);
+    this.calcSlurY();
+  }
+  var top;
+  var bottom;
+  // TODO-PER: It's hard to tell how far the arc is, so I'm just using 3 as the max
+  if (this.above) {
+    bottom = Math.min(this.startY, this.endY);
+    top = bottom + 3;
+  } else {
+    top = Math.min(this.startY, this.endY);
+    bottom = top - 3;
+  }
+  return [top, bottom];
+};
 module.exports = TieElem;
 
 /***/ }),
@@ -20652,7 +20644,6 @@ function TopText(metaText, metaTextInfo, formatting, lines, width, isPrint, padd
 
     //		TopText.prototype.addTextIf = function (marginLeft, text, font, klass, marginTop, marginBottom, anchor, getTextSize, absElemType, noMove) {
   }
-
   if (isPrint) this.rows.push({
     move: spacing.top
   });
@@ -21724,7 +21715,6 @@ function straightPath(renderer, xLeft, yTop, yBottom, type) {
   // right point
   -wCurve * 0.1, -hCurve * 0.3, -wCurve, -hCurve - spacing.STEP // left bottom
   );
-
   return renderer.paper.path({
     path: pathString,
     stroke: renderer.foregroundColor,
@@ -23003,7 +22993,6 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
       //				renderer.moveY(spacing.STEP, -staff.bottom);
     }
   }
-
   renderer.controller.classes.newMeasure();
 
   // connect all the staves together with a vertical line
@@ -23225,7 +23214,6 @@ function drawTempo(renderer, params) {
   //	});
   //return [tempoGroup];
 }
-
 module.exports = drawTempo;
 
 /***/ }),
@@ -23562,7 +23550,6 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
       renderer.controller.classes.incrMeasure();
     } else drawBeam(renderer, beam, selectables); // beams must be drawn first for proper printing of triplets, slurs and ties.
   }
-
   renderer.controller.classes.startMeasure();
   for (i = 0; i < params.otherchildren.length; i++) {
     child = params.otherchildren[i];
@@ -23671,7 +23658,6 @@ var EngraverController = function EngraverController(paper, params) {
     this.staffwidthScreen = 740; // TODO-PER: Not sure where this number comes from, but this is how it's always been.
     this.staffwidthPrint = 680; // The number of pixels in 8.5", after 1cm of margin has been removed.
   }
-
   this.listeners = [];
   if (params.clickListener) this.addSelectListener(params.clickListener);
   this.renderer = new Renderer(paper);
@@ -24581,7 +24567,6 @@ function getMousePosition(self, ev) {
     clickedOn = findElementByCoord(self, x, y);
     //console.log("clicked near", clickedOn, x, y, printEl(ev.target));
   }
-
   return {
     x: x,
     y: y,
@@ -24819,7 +24804,6 @@ function minStem(element, stemsUp, referencePitch, minStemHeight) {
     var elem = element.children[i];
     if (stemsUp && elem.top !== undefined && elem.c === "flags.ugrace") minStemHeight = Math.max(minStemHeight, elem.top - referencePitch);else if (!stemsUp && elem.bottom !== undefined && elem.c === "flags.ugrace") minStemHeight = Math.max(minStemHeight, referencePitch - elem.bottom + 7); // The extra 7 is because we are measuring the slash from the top.
   }
-
   return minStemHeight;
 }
 function calcSlant(leftAveragePitch, rightAveragePitch, numStems, isFlat) {
@@ -25224,7 +25208,6 @@ function calcHorizontalSpacing(isLastLine, stretchLast, targetWidth, lineWidth, 
       if (!stretch) return null; // don't stretch last line too much
     }
   }
-
   if (Math.abs(targetWidth - lineWidth) < 2) return null; // if we are already near the target width, we're done.
   var relSpace = spacingUnits * spacing;
   var constSpace = lineWidth - relSpace;
@@ -25289,7 +25272,6 @@ var setUpperAndLowerElements = function setUpperAndLowerElements(renderer, staff
       staff.originalTop = staff.top; // This is just being stored for debugging purposes.
       staff.originalBottom = staff.bottom; // This is just being stored for debugging purposes.
     }
-
     incTop(staff, positionY, 'lyricHeightAbove');
     incTop(staff, positionY, 'chordHeightAbove', staff.specialY.chordLines.above);
     if (staff.specialY.endingHeightAbove) {
@@ -25352,7 +25334,6 @@ var setUpperAndLowerElements = function setUpperAndLowerElements(renderer, staff
   }
   //console.log("Staff Height: ",heightInPitches,this.height);
 };
-
 var margin = 1;
 function incTop(staff, positionY, item, count) {
   if (staff.specialY[item]) {
@@ -25380,6 +25361,14 @@ function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
         break;
       case 'EndingElem':
         setUpperAndLowerEndingElements(positionY, abselem);
+        break;
+      case 'TieElem':
+        // If a tie element is the highest or lowest thing then space might need to make room for it.
+        var yBounds = abselem.getYBounds();
+        voice.staff.top = Math.max(voice.staff.top, yBounds[0]);
+        voice.staff.top = Math.max(voice.staff.top, yBounds[1]);
+        voice.staff.bottom = Math.min(voice.staff.bottom, yBounds[0]);
+        voice.staff.bottom = Math.min(voice.staff.bottom, yBounds[1]);
         break;
     }
   }
@@ -25609,7 +25598,6 @@ function finished(voices) {
 function getDurationIndex(element) {
   return element.durationindex - (element.children[element.i] && element.children[element.i].duration > 0 ? 0 : 0.0000005); // if the ith element doesn't have a duration (is not a note), its duration index is fractionally before. This enables CLEF KEYSIG TIMESIG PART, etc. to be laid out before we get to the first note of other voices
 }
-
 function isSameStaff(voice1, voice2) {
   if (!voice1 || !voice1.staff || !voice1.staff.voices || voice1.staff.voices.length === 0) return false;
   if (!voice2 || !voice2.staff || !voice2.staff.voices || voice2.staff.voices.length === 0) return false;
@@ -25707,7 +25695,6 @@ VoiceElement.beginLayout = function (startx, voice) {
   voice.nextx = startx; // x position where the next element of this voice should be placed assuming no other voices and no fixed width constraints
   voice.spacingduration = 0; // duration left to be laid out in current iteration (omitting additional spacing due to other aspects, such as bars, dots, sharps and flats)
 };
-
 VoiceElement.layoutEnded = function (voice) {
   return voice.i >= voice.children.length;
 };
@@ -25773,7 +25760,6 @@ VoiceElement.layoutOneItem = function (x, spacing, voice, minPadding, firstVoice
 
   return x; // where we end up having placed the child
 };
-
 VoiceElement.shiftRight = function (dx, voice) {
   var child = voice.children[voice.i];
   if (!child) return;
@@ -25936,7 +25922,6 @@ function setLane(absElems, numLanesAbove, numLanesBelow) {
     }
   }
 }
-
 function yAtNote(element, beam) {
   beam = beam.beams[0];
   return getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, element.x);
@@ -26095,7 +26080,6 @@ Renderer.prototype.initVerticalSpace = function () {
   <float> range is 0.0 to 1.0.
    */
 };
-
 Renderer.prototype.setVerticalSpace = function (formatting) {
   // conversion from pts to px 4/3
   if (formatting.staffsep !== undefined) this.spacing.staffSeparation = formatting.staffsep * 4 / 3;
@@ -26217,7 +26201,6 @@ Svg.prototype.insertStyles = function (styles) {
   this.svg.insertBefore(el, this.svg.firstChild); // prepend is not available on older browsers.
   //	this.svg.prepend(el);
 };
-
 Svg.prototype.setParentStyles = function (attr) {
   // This is needed to get the size right when there is scaling involved.
   for (var key in attr) {
@@ -26360,7 +26343,6 @@ Svg.prototype.guessWidth = function (text, attr) {
       height: attr['font-size'] + 2
     }; // Just a wild guess.
   }
-
   svg.removeChild(el);
   return size;
 };
@@ -26489,7 +26471,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.4.2';
+var version = '6.4.3';
 module.exports = version;
 
 /***/ })

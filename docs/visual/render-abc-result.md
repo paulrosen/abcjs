@@ -84,7 +84,7 @@ Durations have units where a whole note is 1. This returns how long a beat is. F
 
 This returns how many beats are in a measure. For example, 4/4 time returns `4`, 6/8 time returns `2` since a beat is three eighth notes.
 
-### getBpm()
+### getBpm(tempo?: TempoProperties)
 
 This is the starting beats per minute. Tempo changes could appear later in the tune, but this is the value that was set with the `Q:` statement, or if that statement doesn't exist, it is the default tempo of 180.
 

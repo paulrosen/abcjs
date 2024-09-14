@@ -1,3 +1,15 @@
+# Version 6.4.3
+
+## Bugs
+
+* If there is a slur or tie on the top or bottom of a line, make sure there is room for it.
+
+* Fix for crash on malformed @ positioned annotations
+
+* Fix call of getBpm() to use the specified tempo if it isn't supplied.
+
+* Bring bass note in range if transposed out-of-range by a visual transpose
+
 # Version 6.4.2
 
 ## Bugs

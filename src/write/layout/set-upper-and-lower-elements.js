@@ -128,6 +128,14 @@ function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 			case 'EndingElem':
 				setUpperAndLowerEndingElements(positionY, abselem);
 				break;
+			case 'TieElem':
+				// If a tie element is the highest or lowest thing then space might need to make room for it.
+				var yBounds = abselem.getYBounds()
+				voice.staff.top = Math.max(voice.staff.top, yBounds[0])
+				voice.staff.top = Math.max(voice.staff.top, yBounds[1])
+				voice.staff.bottom = Math.min(voice.staff.bottom, yBounds[0])
+				voice.staff.bottom = Math.min(voice.staff.bottom, yBounds[1])
+				break;
 		}
 	}
 }

@@ -198,6 +198,15 @@ ChordTrack.prototype.interpretChord = function (name) {
 	while (chordTranspose > 8)
 		chordTranspose -= 12;
 	bass += chordTranspose;
+	
+    	// MAE 31 Aug 2024 - For visual transpose backup range issue
+    	// If transposed below A or above G, bring it back in the normal backup range
+    	if (bass < 33){
+      		bass += 12;
+    	}
+    	else if (bass > 44){
+	     	 bass -= 12;
+    	}
 
 	// MAE 17 Jun 2024 - Supporting octave shifted bass and chords
 	var unshiftedBass = bass;
