@@ -2,7 +2,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
 import terser from '@rollup/plugin-terser';
-import pkg from "./package.json";
+import version from "./src/version.js";
 
 export default [
 	{
@@ -15,11 +15,6 @@ export default [
 				name: 'ABCJS',
 				sourcemap: true,
 			},
-			{
-				file: 'dist/abcjs-basic-node.js',
-				format: 'es',
-				sourcemap: true,
-			},
 		],
 		plugins: [
 			resolve(),
@@ -28,11 +23,9 @@ export default [
 			}),
 			typescript({ tsconfig: './tsconfig.json' }),
 			terser({
-				extractComments: {
-					filename: '[file].LICENSE',
-					condition: /^\*\**!/i,
-					banner: makeBanner(type)
-				},
+				format: {
+					preamble: makeBanner('basic')
+				}
 			}),
 		]
 	},
@@ -43,7 +36,7 @@ export default [
 			file: 'dist/abcjs-basic.js',
 			format: 'iife',
 			name: 'ABCJS',
-			sourcemap: true,
+			sourcemap: false,
 		},
 		plugins: [
 			resolve(),
@@ -68,12 +61,16 @@ export default [
 				include: ['*.js', 'src/**/*.js'],
 			}),
 			typescript({ tsconfig: './tsconfig.json' }),
-			terser(),
+			terser({
+				format: {
+					preamble: makeBanner('plugin')
+				}
+			}),
 		]
 	},
 ]
 
 function makeBanner(type) {
-	let banner = `abcjs_${type} v${pkg.version} Copyright © 2009-2024 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`
-	return banner + `/*! For license information please see abcjs_${type}.LICENSE`;
+	let banner = `// abcjs_${type} v${version} Copyright © 2009-2024 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n`
+	return banner + `// For license information please see LICENSE.md\n`;
 }

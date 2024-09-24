@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "npx tsc --watch",
     "ts": "npx tsc index.ts --watch",
+    "build": "npm run build:min && npm run build:node",
     "build:min": "npx rollup -c",
-    "build:node": "rm -r dist/src && rsync -zvah src/**/*.js dist/ && npx tsc index.ts",
+    "build:node": "rm -r dist/src && cp -r src/**/*.js dist/ && npx tsc index.ts && cp LICENSE.md dist/",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs"
   },
