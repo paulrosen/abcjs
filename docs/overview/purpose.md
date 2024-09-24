@@ -34,9 +34,10 @@ This library makes it easy to incorporate **sheet music** into your **websites**
 
 ## Browser/device support
 
-* The visual part of this library is supported from IE9 and newer, Safari 5.1 and newer, and all modern browsers.
-
-* This synth audio part of this library does not work on IE, but works on any system that supports `AudioContext.resume` and `Promises`. That is, any browser newer than Firefox 40, Safari 9.1, Edge 13, and Chrome 43.
+* Chrome 55 and newer (Nov 2016)
+* Firefox 52 and newer (Mar 2017)
+* Safari 11 and newer (Mar 2018)
+* Edge 79 and newer (Jan 2020)
 
 ## Supported by BrowserStack
 

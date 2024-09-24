@@ -439,4 +439,4 @@ function constructVLine(x1:number, y1:number, y2:number) {
 		" l " + 0 + " " + (-len) + " " + " z ";
 }
 
-module.exports = Svg;
+//module.exports = Svg;

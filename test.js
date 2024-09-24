@@ -22,7 +22,7 @@ THE SOFTWARE.
  **This text is from: http://opensource.org/licenses/MIT**
 !**/
 var abcjs = require('./index');
-var version = require('./version');
+var version = require('./src/version');
 var Parse = require('./src/parse/abc_parse');
 var EngraverController = require('./src/write/engraver-controller')
 
