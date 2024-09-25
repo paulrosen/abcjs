@@ -34,23 +34,22 @@ To build everything:
 npm run build
 ```
 
-This takes a little while and is probably building more things than you want.
-
-If you want to build a version that is convenient to debug:
-
+You can also build just the minimized versions with:
 ```bash
-npm run build:basic
+npm run build:min
 ```
 
-Then include the file `dist/abcjs-basic.js`.
-
-To build the same code as minimized for distribution:
-
+And the node version with:
 ```bash
-npm run build:basic-min
+npm run build:node
 ```
 
-And include the file `dist/abcjs-basic-min.js`.
+An easy way to debug tests is by running in watch mode:
+```bash
+npm run dev
+```
+
+That will keep the typescript files up to date while debugging tests.
 
 
 ## Greasemonkey
