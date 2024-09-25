@@ -4,7 +4,6 @@
 
 var spacing = require('./helpers/spacing');
 var Svg = require('./svg');
-Svg = Svg.Svg
 
 /**
  * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)

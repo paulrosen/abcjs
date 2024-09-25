@@ -202,11 +202,10 @@ export class Svg {
 				line.textContent = lines[i];
 			el.appendChild(line);
 		}
-		console.log("text", target, this.currentGroup, text)
 		if (target)
 			target.appendChild(el);
 		else
-			this.svg.append(el);
+			this.append(el);
 		return el;
 	}
 
@@ -236,7 +235,7 @@ export class Svg {
 		if (target)
 			target.appendChild(el);
 		else
-			this.svg.append(el);
+			this.append(el);
 		return el;
 	}
 
@@ -334,7 +333,6 @@ export class Svg {
 	}
 
 	closeGroup() {
-		console.log("close", this.currentGroup.map(g => g.children))
 		var g = this.currentGroup.shift();
 		if (g && g.children.length === 0) {
 			// If nothing was added to the group it is because all the elements were invisible. We don't need the group, then.
@@ -438,5 +436,3 @@ function constructVLine(x1:number, y1:number, y2:number) {
 		" l " + 1 + " " + 0 + " " +
 		" l " + 0 + " " + (-len) + " " + " z ";
 }
-
-//module.exports = Svg;

@@ -21,7 +21,7 @@
 
 <script src="../node_modules/@tarp/require/require.min.js"></script>
 <script>
-	Tarp.require({main: "../index.js"}).then(function (response) {
+	Tarp.require({main: "../dist/index.js"}).then(function (response) {
 		window.abcjs = response;
 		mocha.run();
 	});
