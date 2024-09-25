@@ -6,7 +6,6 @@
   "types": "types/index.d.ts",
   "scripts": {
     "dev": "npx tsc --watch",
-    "ts": "npx tsc index.ts --watch",
     "build": "npm run build:min && npm run build:node",
     "build:min": "npx rollup -c",
     "build:node": "./build-node.sh",
@@ -29,7 +28,8 @@
     "Gregory Dyke",
     "Jean-Yves Mengant",
     "Todd Brown",
-    "Thomas Chandelle"
+    "Thomas Chandelle",
+    "Michael Eskin"
   ],
   "license": "MIT",
   "bugs": {
