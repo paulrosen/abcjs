@@ -21,7 +21,7 @@ export default [
 			commonjs({
 				include: ['*.js', 'src/**/*.js'],
 			}),
-			typescript({ tsconfig: './tsconfig.json' }),
+			typescript({ tsconfig: './tsconfig-rollup.json' }),
 			terser({
 				format: {
 					preamble: makeBanner('basic')
@@ -43,7 +43,7 @@ export default [
 			commonjs({
 				include: ['*.js', 'src/**/*.js'],
 			}),
-			typescript({ tsconfig: './tsconfig.json' }),
+			typescript({ tsconfig: './tsconfig-rollup.json' }),
 		]
 	},
 	{
@@ -60,7 +60,7 @@ export default [
 			commonjs({
 				include: ['*.js', 'src/**/*.js'],
 			}),
-			typescript({ tsconfig: './tsconfig.json' }),
+			typescript({ tsconfig: './tsconfig-rollup.json' }),
 			terser({
 				format: {
 					preamble: makeBanner('plugin')

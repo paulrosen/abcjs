@@ -36,7 +36,7 @@ var ABCJS = (function () {
 	function requireVersion () {
 		if (hasRequiredVersion) return version_1;
 		hasRequiredVersion = 1;
-		var version = '7.0.0';
+		var version = '7.0.0-beta.1';
 
 		version_1 = version;
 		return version_1;
@@ -16939,15 +16939,15 @@ var ABCJS = (function () {
 		return abstractEngraver;
 	}
 
-	const svgNS = "http://www.w3.org/2000/svg";
-	class Svg {
-	    constructor(wrapper) {
+	var svgNS = "http://www.w3.org/2000/svg";
+	var Svg = /** @class */ (function () {
+	    function Svg(wrapper) {
 	        this.currentGroup = [];
 	        this.sizeCache = {};
 	        this.svg = createSvg();
 	        wrapper.appendChild(this.svg);
 	    }
-	    clear() {
+	    Svg.prototype.clear = function () {
 	        if (this.svg) {
 	            var wrapper = this.svg.parentNode;
 	            this.svg = createSvg();
@@ -16959,14 +16959,14 @@ var ABCJS = (function () {
 	                wrapper.appendChild(this.svg);
 	            }
 	        }
-	    }
-	    setTitle(title) {
+	    };
+	    Svg.prototype.setTitle = function (title) {
 	        var titleEl = document.createElement("title");
 	        var titleNode = document.createTextNode(title);
 	        titleEl.appendChild(titleNode);
 	        this.svg.insertBefore(titleEl, this.svg.firstChild);
-	    }
-	    setResponsiveWidth(w, h) {
+	    };
+	    Svg.prototype.setResponsiveWidth = function (w, h) {
 	        // this technique is from: http://thenewcode.com/744/Make-SVG-Responsive, thx to https://github.com/iantresman
 	        this.svg.setAttribute("viewBox", "0 0 " + w + " " + h);
 	        this.svg.setAttribute("preserveAspectRatio", "xMinYMin meet");
@@ -16994,15 +16994,15 @@ var ABCJS = (function () {
 	            this.svg.parentElement.style['vertical-align'] = "middle";
 	            this.svg.parentElement.style['overflow'] = "hidden";
 	        }
-	    }
-	    setSize(w, h) {
+	    };
+	    Svg.prototype.setSize = function (w, h) {
 	        this.svg.setAttribute('width', '' + w);
 	        this.svg.setAttribute('height', '' + h);
-	    }
-	    setAttribute(attr, value) {
+	    };
+	    Svg.prototype.setAttribute = function (attr, value) {
 	        this.svg.setAttribute(attr, value);
-	    }
-	    setScale(scale) {
+	    };
+	    Svg.prototype.setScale = function (scale) {
 	        if (scale !== 1) {
 	            this.svg.style.transform = "scale(" + scale + "," + scale + ")";
 	            //@ts-ignore Element implicitly has an 'any' type because index expression is not of type 'number'.ts(7015)
@@ -17027,14 +17027,14 @@ var ABCJS = (function () {
 	            //@ts-ignore Element implicitly has an 'any' type because index expression is not of type 'number'.ts(7015)
 	            this.svg.style['-webkit-transform'] = "";
 	        }
-	    }
-	    insertStyles(styles) {
+	    };
+	    Svg.prototype.insertStyles = function (styles) {
 	        var el = document.createElementNS(svgNS, "style");
 	        el.textContent = styles;
 	        this.svg.insertBefore(el, this.svg.firstChild); // prepend is not available on older browsers.
 	        //	this.svg.prepend(el);
-	    }
-	    setParentStyles(attr) {
+	    };
+	    Svg.prototype.setParentStyles = function (attr) {
 	        // This is needed to get the size right when there is scaling involved.
 	        for (var key in attr) {
 	            if (attr.hasOwnProperty(key)) {
@@ -17050,8 +17050,8 @@ var ABCJS = (function () {
 	            body.removeChild(this.dummySvg);
 	            this.dummySvg = undefined;
 	        }
-	    }
-	    rect(attr) {
+	    };
+	    Svg.prototype.rect = function (attr) {
 	        // This uses path instead of rect so that it can be hollow and the color changes with "fill" instead of "stroke".
 	        var lines = [];
 	        var x1 = parseInt(attr.x);
@@ -17063,8 +17063,8 @@ var ABCJS = (function () {
 	        lines.push(constructVLine(x2, y1, y2));
 	        lines.push(constructVLine(x1, y2, y1));
 	        return this.path({ path: lines.join(" "), stroke: "none", "data-name": attr["data-name"] });
-	    }
-	    dottedLine(attr) {
+	    };
+	    Svg.prototype.dottedLine = function (attr) {
 	        var el = document.createElementNS(svgNS, 'line');
 	        el.setAttribute("x1", attr.x1);
 	        el.setAttribute("x2", attr.x2);
@@ -17073,8 +17073,8 @@ var ABCJS = (function () {
 	        el.setAttribute("stroke", attr.stroke);
 	        el.setAttribute("stroke-dasharray", "5,5");
 	        this.svg.insertBefore(el, this.svg.firstChild);
-	    }
-	    rectBeneath(attr) {
+	    };
+	    Svg.prototype.rectBeneath = function (attr) {
 	        var el = document.createElementNS(svgNS, 'rect');
 	        el.setAttribute("x", '' + attr.x);
 	        el.setAttribute("width", '' + attr.width);
@@ -17089,8 +17089,8 @@ var ABCJS = (function () {
 	        if (attr['fill-opacity'])
 	            el.setAttribute("fill-opacity", attr['fill-opacity']);
 	        this.svg.insertBefore(el, this.svg.firstChild);
-	    }
-	    text(text, attr, target) {
+	    };
+	    Svg.prototype.text = function (text, attr, target) {
 	        var el = document.createElementNS(svgNS, 'text');
 	        el.setAttribute("stroke", "none");
 	        for (var key in attr) {
@@ -17127,14 +17127,13 @@ var ABCJS = (function () {
 	                line.textContent = lines[i];
 	            el.appendChild(line);
 	        }
-	        console.log("text", target, this.currentGroup, text);
 	        if (target)
 	            target.appendChild(el);
 	        else
-	            this.svg.append(el);
+	            this.append(el);
 	        return el;
-	    }
-	    richTextLine(phrases, x, y, klass, anchor, target) {
+	    };
+	    Svg.prototype.richTextLine = function (phrases, x, y, klass, anchor, target) {
 	        var el = document.createElementNS(svgNS, 'text');
 	        el.setAttribute("stroke", "none");
 	        el.setAttribute("class", klass);
@@ -17157,10 +17156,10 @@ var ABCJS = (function () {
 	        if (target)
 	            target.appendChild(el);
 	        else
-	            this.svg.append(el);
+	            this.append(el);
 	        return el;
-	    }
-	    guessWidth(text, attr) {
+	    };
+	    Svg.prototype.guessWidth = function (text, attr) {
 	        var svg = this.createDummySvg();
 	        var el = this.text(text, attr, svg);
 	        var size;
@@ -17177,8 +17176,8 @@ var ABCJS = (function () {
 	        }
 	        svg.removeChild(el);
 	        return size;
-	    }
-	    createDummySvg() {
+	    };
+	    Svg.prototype.createDummySvg = function () {
 	        if (!this.dummySvg) {
 	            this.dummySvg = createSvg();
 	            var styles = [
@@ -17193,8 +17192,8 @@ var ABCJS = (function () {
 	            body.appendChild(this.dummySvg);
 	        }
 	        return this.dummySvg;
-	    }
-	    getTextSize(text, attr, el) {
+	    };
+	    Svg.prototype.getTextSize = function (text, attr, el) {
 	        if (typeof text === 'number')
 	            text = '' + text;
 	        if (!text || text.match(/^\s+$/))
@@ -17230,8 +17229,8 @@ var ABCJS = (function () {
 	        if (key)
 	            this.sizeCache[key] = size;
 	        return size;
-	    }
-	    openGroup(options) {
+	    };
+	    Svg.prototype.openGroup = function (options) {
 	        options = options ? options : {};
 	        var el = document.createElementNS(svgNS, "g");
 	        if (options.klass)
@@ -17248,9 +17247,8 @@ var ABCJS = (function () {
 	            this.append(el);
 	        this.currentGroup.unshift(el);
 	        return el;
-	    }
-	    closeGroup() {
-	        console.log("close", this.currentGroup.map(g => g.children));
+	    };
+	    Svg.prototype.closeGroup = function () {
 	        var g = this.currentGroup.shift();
 	        if (g && g.children.length === 0) {
 	            // If nothing was added to the group it is because all the elements were invisible. We don't need the group, then.
@@ -17259,8 +17257,8 @@ var ABCJS = (function () {
 	            return null;
 	        }
 	        return g;
-	    }
-	    path(attr) {
+	    };
+	    Svg.prototype.path = function (attr) {
 	        var el = document.createElementNS(svgNS, "path");
 	        for (var key in attr) {
 	            if (attr.hasOwnProperty(key)) {
@@ -17274,8 +17272,8 @@ var ABCJS = (function () {
 	        }
 	        this.append(el);
 	        return el;
-	    }
-	    pathToBack(attr) {
+	    };
+	    Svg.prototype.pathToBack = function (attr) {
 	        var el = document.createElementNS(svgNS, "path");
 	        for (var key in attr) {
 	            if (attr.hasOwnProperty(key)) {
@@ -17289,39 +17287,40 @@ var ABCJS = (function () {
 	        }
 	        this.prepend(el);
 	        return el;
-	    }
-	    lineToBack(attr) {
+	    };
+	    Svg.prototype.lineToBack = function (attr) {
 	        var el = document.createElementNS(svgNS, 'line');
 	        var keys = Object.keys(attr);
 	        for (var i = 0; i < keys.length; i++)
 	            el.setAttribute(keys[i], attr[keys[i]]);
 	        this.prepend(el);
 	        return el;
-	    }
-	    append(el) {
+	    };
+	    Svg.prototype.append = function (el) {
 	        if (this.currentGroup.length > 0)
 	            this.currentGroup[0].appendChild(el);
 	        else
 	            this.svg.appendChild(el);
-	    }
-	    prepend(el) {
+	    };
+	    Svg.prototype.prepend = function (el) {
 	        // The entire group is prepended, so don't prepend the individual elements.
 	        if (this.currentGroup.length > 0)
 	            this.currentGroup[0].appendChild(el);
 	        else
 	            this.svg.insertBefore(el, this.svg.firstChild);
-	    }
-	    setAttributeOnElement(el, attr) {
+	    };
+	    Svg.prototype.setAttributeOnElement = function (el, attr) {
 	        for (var key in attr) {
 	            if (attr.hasOwnProperty(key)) {
 	                el.setAttributeNS(null, key, attr[key]);
 	            }
 	        }
-	    }
-	    moveElementToChild(parent, child) {
+	    };
+	    Svg.prototype.moveElementToChild = function (parent, child) {
 	        parent.appendChild(child);
-	    }
-	}
+	    };
+	    return Svg;
+	}());
 	function createSvg() {
 	    var svg = document.createElementNS(svgNS, "svg");
 	    svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
@@ -17344,7 +17343,6 @@ var ABCJS = (function () {
 	        " l " + 1 + " " + 0 + " " +
 	        " l " + 0 + " " + (-len) + " " + " z ";
 	}
-	//module.exports = Svg;
 
 	var svg = /*#__PURE__*/Object.freeze({
 		__proto__: null,
@@ -17365,7 +17363,6 @@ var ABCJS = (function () {
 
 		var spacing = requireSpacing();
 		var Svg = require$$1;
-		Svg = Svg.Svg;
 
 		/**
 		 * Implements the API for rendering ABCJS Abstract Rendering Structure to a canvas/paper (e.g. SVG, Raphael, etc)
