@@ -1,14 +1,11 @@
 .idea/*
-.vscode/
+.vscode/*
 tmp/*
 /node_modules
-/coverage
 to-*.sh
 docs/.vuepress/.cache/*
 docs/.vuepress/.temp/*
 docs/.vuepress/.dist/*
-dist/report.html
 dist/src/*
 dist/index.js
-.eslintrc.json
 .DS_Store

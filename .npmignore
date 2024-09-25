@@ -1,13 +1,18 @@
 .idea/
 .vscode/
-dist/*.html
-build-utils/
 docs/
 examples/
 font_generator/
 tests/
 tmp/
 
+dist/.gitkeep
+dist/abcjs-basic-min.js
+dist/abcjs-basic-min.js.map
+dist/abcjs-basic.js
+dist/abcjs-plugin-min.js
+dist/abcjs-plugin-min.js.map
+build-node.sh
 .babelrc
 .eslintrc
 .gitmodules
@@ -19,3 +24,4 @@ Dockerfile
 start-version.sh
 rollup.config.mjs
 to-*.sh
+plugin.js

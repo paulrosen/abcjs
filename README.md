@@ -10,11 +10,19 @@ Full documentation is here: [abcjs documentation](https://paulrosen.github.io/ab
 
 There is an organization that has a collection of useful projects related to abcjs called [abcjs-music](https://github.com/abcjs-music). See some examples there. If you have a project that you think would be of general interest and would like to add it to that organization, contact me.
 
-## Announcement: version 7.0.0
+## Announcement: version 7.0.0-beta.1
 
 This is a change to the build system. In theory, you shouldn't see any difference from the last version. However, if your build system or device/browser stops working, please let me know immediately!
 
 The minimum system requirements have changed. [See the requirements](https://paulrosen.github.io/abcjs/overview/purpose.html#browser-device-support)
+
+The new requirements (for now) are:
+
+* Chrome 55 and newer (Nov 2016)
+* Firefox 52 and newer (Mar 2017)
+* Safari 11 and newer (Mar 2018)
+* Edge 79 and newer (Jan 2020)
+
 
 ## Announcement: version 6.4.0
 

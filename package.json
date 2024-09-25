@@ -1,6 +1,6 @@
 {
   "name": "abcjs",
-  "version": "7.0.0",
+  "version": "7.0.0-beta.1",
   "description": "Renderer for abc music notation",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -9,7 +9,7 @@
     "ts": "npx tsc index.ts --watch",
     "build": "npm run build:min && npm run build:node",
     "build:min": "npx rollup -c",
-    "build:node": "rm -r dist/src && cp -r src/**/*.js dist/ && npx tsc index.ts && cp LICENSE.md dist/",
+    "build:node": "./build-node.sh",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs"
   },
