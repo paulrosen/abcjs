@@ -72,7 +72,8 @@
 		"children": [
 			"/developers/pull-requests.md",
 			"/developers/basic-architecture.md",
-			"/developers/releasing.md"
+			"/developers/releasing.md",
+			"/developers/build-system.md"
 		]
 	},
 	{
