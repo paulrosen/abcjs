@@ -26,7 +26,7 @@
 // TODO-PER: Where is that used? It looks like it might not be needed.
 // height: Set in the draw() method to the height actually used. Used by the calling function to know where to start the next staff group.
 // TODO-PER: This should actually be set in the layout method and passed back as a return value.
-var calcHeight = require('../calc-height');
+var calcHeight = require('../calc-height').calcHeight;
 
 var StaffGroupElement = function (getTextSize) {
 	this.getTextSize = getTextSize;

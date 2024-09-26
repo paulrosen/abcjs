@@ -1,5 +1,15 @@
 const svgNS = "http://www.w3.org/2000/svg";
 
+//TODO-PER: types
+interface TextAttr {
+	"font-size": number;
+	"font-style": string;
+	"font-family": string;
+	"font-weight": string;
+	"text-decoration": string;
+	"class": string;
+}
+
 export class Svg {
 	svg: SVGElement;
 	dummySvg: SVGElement | undefined ;
@@ -166,17 +176,17 @@ export class Svg {
 		this.svg.insertBefore(el, this.svg.firstChild);
 	}
 
-	text(text:string, attr:{[key:string]:string}, target?:SVGElement) {
-		var el = document.createElementNS(svgNS, 'text');
+	text(text:string, attr:TextAttr, target?:SVGElement) {
+		const el = document.createElementNS(svgNS, 'text');
 		el.setAttribute("stroke", "none");
-		for (var key in attr) {
-			if (attr.hasOwnProperty(key)) {
-				el.setAttribute(key, attr[key]);
-			}
-		}
+		Object.keys(attr).forEach(key => {
+			//@ts-ignore - temp
+			el.setAttribute(key, attr[key]);
+		})
 		var lines = ("" + text).split("\n");
 		for (var i = 0; i < lines.length; i++) {
 			var line = document.createElementNS(svgNS, 'tspan');
+			//@ts-ignore - temp
 			line.setAttribute("x", attr.x ? attr.x : '0');
 			if (i !== 0)
 				line.setAttribute("dy", "1.2em");
@@ -239,11 +249,11 @@ export class Svg {
 		return el;
 	}
 
-	guessWidth(text:string, attr:{[key:string]:string}) {
+	guessWidth(text:string, attr:TextAttr) {
 		var svg = this.createDummySvg();
 		var el = this.text(text, attr, svg);
 		var size;
-		var fontSize = parseInt(attr['font-size'], 10)
+		var fontSize = parseInt(''+attr['font-size'], 10)
 		try {
 			size = el.getBBox();
 			if (isNaN(size.height) || !size.height) // TODO-PER: I don't think this can happen unless there isn't a browser at all.
@@ -275,7 +285,7 @@ export class Svg {
 		return this.dummySvg;
 	}
 
-	getTextSize(text:number|string, attr:{[key:string]:string}, el: SVGElement|undefined) {
+	getTextSize(text:number|string, attr:TextAttr, el: SVGElement|undefined) {
 		if (typeof text === 'number')
 			text = '' + text;
 		if (!text || text.match(/^\s+$/))
