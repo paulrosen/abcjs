@@ -1,4 +1,10 @@
 //TODO-PER: collect the types
+//import {Classes} from "./classes";
+interface Classes {
+	generate: (str:string) => string
+}
+
+
 interface FO {
 	gchordfont: Font;
 	tripletfont: Font;
@@ -20,11 +26,9 @@ interface Font {
 
 export class GetFontAndAttr {
 	formatting: FO;
-	//@ts-ignore - temp
-	classes: any;
+	classes: Classes;
 
-	//@ts-ignore - temp
-	constructor(formatting : FO, classes) {
+	constructor(formatting : FO, classes: Classes) {
 		this.formatting = formatting;
 		this.classes = classes;
 	}
