@@ -1,12 +1,12 @@
-var setClass = function (elemset, addClass, removeClass, color) {
-	if (!elemset)
+export function setClass(elemSet: Array<SVGElement>, addClass: string, removeClass: string, color:string) {
+	if (!elemSet)
 		return;
-	for (var i = 0; i < elemset.length; i++) {
-		var el = elemset[i];
-		var attr = el.getAttribute("highlight");
+	for (let i = 0; i < elemSet.length; i++) {
+		const el = elemSet[i];
+		let attr = el.getAttribute("highlight");
 		if (!attr) attr = "fill";
 		el.setAttribute(attr, color);
-		var kls = el.getAttribute("class");
+		let kls = el.getAttribute("class");
 		if (!kls) kls = "";
 		kls = kls.replace(removeClass, "");
 		kls = kls.replace(addClass, "");
@@ -16,6 +16,4 @@ var setClass = function (elemset, addClass, removeClass, color) {
 		}
 		el.setAttribute("class", kls);
 	}
-};
-
-module.exports = setClass;
+}
