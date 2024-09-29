@@ -1,8 +1,8 @@
 //TODO-PER: collect the types
-//import {Classes} from "./classes";
-interface Classes {
-	generate: (str:string) => string
-}
+import {Classes} from "./classes";
+// interface Classes {
+// 	generate: (str:string) => string
+// }
 
 
 interface FO {
