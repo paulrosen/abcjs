@@ -415,10 +415,10 @@ var pitchesToPerc = require('./pitches-to-perc');
 
 		switch (noteModification) {
 			case "trill":
-				var note = 1;
+				var note = 2;
 				while (runningDuration > 0) {
 					currentTrack.push({ cmd: 'note', pitch: p.pitch+note, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
-					note = (note === 1) ? 0 : 1;
+					note = (note === 2) ? 0 : 2;
 					runningDuration -= shortestNote;
 					start += shortestNote;
 				}
@@ -427,7 +427,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+2, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
 				start += shortestNote;
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, gap: 0, instrument: currentInstrument });
@@ -436,18 +436,17 @@ var pitchesToPerc = require('./pitches-to-perc');
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
 				start += shortestNote;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch-2, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
 				start += shortestNote;
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, gap: 0, instrument: currentInstrument });
 				break;
 			case "turn":
-				shortestNote = p.duration / 5;
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*2, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*4, duration: shortestNote, gap: 0, instrument: currentInstrument });
+				shortestNote = p.duration / 4;
+				currentTrack.push({ cmd: 'note', pitch: p.pitch+2, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start+shortestNote*2, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				break;
 			case "roll":
 				while (runningDuration > 0) {
