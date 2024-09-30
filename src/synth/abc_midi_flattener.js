@@ -446,7 +446,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*2, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
-				currentTrack.push({ cmd: 'note', pitch: p.pitch+1, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
+				currentTrack.push({ cmd: 'note', pitch: p.pitch-1, volume: p.volume, start: start+shortestNote*3, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start+shortestNote*4, duration: shortestNote, gap: 0, instrument: currentInstrument });
 				break;
 			case "roll":
