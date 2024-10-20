@@ -149,6 +149,27 @@ describe("Parsing", function () {
 		]
 	]
 
+	var abcBarNumberSubtitle = "X:1\n" +
+		"T:song\n" +
+		"T:subtitle\n" +
+		"C:composer\n" +
+		"L:1/4\n" +
+		"M:2/4\n" +
+		"K:BbMaj\n" +
+		"%%barnumbers 5\n" +
+		"%%setbarnb 24\n" +
+		"Z24 | F2 |\n" +
+		"\n"
+
+	var expectedBarNumberSubtitle = [
+		[
+			{ el_type: 'note', duration: 12, rest: { type: 'multimeasure', text: 24 } },
+			{ el_type: 'bar', barNumber: 25, type: 'bar_thin'},
+			{ el_type: 'note', pitches: [{ pitch: 3, name: 'F', verticalPos: 3, highestVert: 9}], duration: 0.5},
+			{ el_type: 'bar', type: 'bar_thin'},
+		]
+	]
+
 	it("crashes", function () {
 		testParser(abc1, expected1, "abc1");
 	})
@@ -185,12 +206,16 @@ describe("Parsing", function () {
 		testParser(abc9, expected9, "abc9");
 	})
 
+	it("barNumSubtitle", function () {
+		testParser(abcBarNumberSubtitle, expectedBarNumberSubtitle, "BarNumberSubtitle");
+	})
+
 	function testParser(abc, expectedLines, comment) {
 		var visualObj = abcjs.renderAbc("paper", abc);
 		var testIndex = 0
 		for (var lineNum = 0; lineNum < visualObj[0].lines.length; lineNum++) {
 			var line = visualObj[0].lines[lineNum]
-			for (var staffNum = 0; staffNum < line.staff.length; staffNum++) {
+			for (var staffNum = 0; line.staff && staffNum < line.staff.length; staffNum++) {
 				for (var voiceNum = 0; voiceNum < line.staff[staffNum].voices.length; voiceNum++) {
 					var line1 = line.staff[staffNum].voices[voiceNum]
 					var expected = expectedLines[testIndex++]
