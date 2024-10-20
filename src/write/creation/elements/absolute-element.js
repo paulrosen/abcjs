@@ -177,22 +177,33 @@ AbsoluteElement.prototype.setLimit = function (member, child) {
 };
 
 AbsoluteElement.prototype._addChild = function (child) {
-	//	console.log("Relative:",child);
-	child.parent = this;
-	this.children[this.children.length] = child;
-	this.pushTop(child.top);
-	this.pushBottom(child.bottom);
-	this.setLimit('tempoHeightAbove', child);
-	this.setLimit('partHeightAbove', child);
-	this.setLimit('volumeHeightAbove', child);
-	this.setLimit('dynamicHeightAbove', child);
-	this.setLimit('endingHeightAbove', child);
-	this.setLimit('chordHeightAbove', child);
-	this.setLimit('lyricHeightAbove', child);
-	this.setLimit('lyricHeightBelow', child);
-	this.setLimit('chordHeightBelow', child);
-	this.setLimit('volumeHeightBelow', child);
-	this.setLimit('dynamicHeightBelow', child);
+  //  console.log("Relative:",child);
+  
+  // MAE 30 Sep 2024 - To avoid extra space for chords if there is only a bar number on the clef
+  var okToPushTop = true;
+  if ((this.abcelem.el_type == "clef") && (child.type == "barNumber")){
+    okToPushTop = false;
+  }
+
+  child.parent = this;
+  this.children[this.children.length] = child;
+
+  if (okToPushTop){
+    this.pushTop(child.top);
+  }
+  
+  this.pushBottom(child.bottom);
+  this.setLimit('tempoHeightAbove', child);
+  this.setLimit('partHeightAbove', child);
+  this.setLimit('volumeHeightAbove', child);
+  this.setLimit('dynamicHeightAbove', child);
+  this.setLimit('endingHeightAbove', child);
+  this.setLimit('chordHeightAbove', child);
+  this.setLimit('lyricHeightAbove', child);
+  this.setLimit('lyricHeightBelow', child);
+  this.setLimit('chordHeightBelow', child);
+  this.setLimit('volumeHeightBelow', child);
+  this.setLimit('dynamicHeightBelow', child);
 };
 
 AbsoluteElement.prototype.pushTop = function (top) {
