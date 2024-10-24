@@ -1,4 +1,10 @@
 describe("Miscellaneous", function () {
+	var abcMeasureNumbers = "X:1 \n" +
+		"L:1/4\n" +
+		"K:C\n" +
+		"%%barnumbers 1\n" +
+		"Z24 | F2 |\n"
+
 	var abcJazzChords = "X:1\n" +
 		"%%jazzchords\n" +
 		"K:C\n" +
@@ -232,6 +238,12 @@ describe("Miscellaneous", function () {
 			chai.assert.deepEqual(results[i], expectedSetFont[i], "index: " + i + "\n" + JSON.stringify(results[i])+"\n" + JSON.stringify(expectedSetFont[i]))
 		}
 	})
+
+	it('measure-numbers', function() {
+		var visualObj = abcjs.renderAbc("paper", abcMeasureNumbers, {add_classes:true});
+		var actual = visualObj[0].lines[0].staffGroup.voices[0].children[2].abcelem.barNumber
+		chai.assert.equal(actual, 25)
+	})
 })
 
 function extractText(visualObj) {
@@ -329,4 +341,3 @@ function draw(abc, expected) {
 		chai.assert.deepEqual(bb, expected[i])
 	}
 }
-
