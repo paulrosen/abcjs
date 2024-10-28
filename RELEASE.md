@@ -1,3 +1,19 @@
+# Version 6.4.4
+
+## Bugs
+
+* Fix measure numbering when there are multi-measure rests.
+
+* Fix crash when subtitle is right before setting the bar number.
+
+* Don't allow the measure number to overlap the treble clef.
+
+* Improved trill, mordent, and turn playback rendering.
+
+* Increased measure number offset for wide measure numbers and treble clef.
+
+* Not adding the top position if putting a measure number on the clef.
+
 # Version 6.4.3
 
 ## Bugs
@@ -2752,4 +2768,3 @@ Examples
 * Updated the example files to always use the latest version.
 
 * Fixed font displaying html file to note have the elements write on top of each other.
-
