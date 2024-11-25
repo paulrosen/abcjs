@@ -315,7 +315,7 @@ function CreateSynth() {
 
 			var noteMapTracks = createNoteMap(self.flattened);
 
-			if (self.options.swing)
+			if (self.options?.swing)
 				addSwing(noteMapTracks, self.options.swing, self.meterFraction, self.pickupLength)
 
 			if (self.sequenceCallback)
