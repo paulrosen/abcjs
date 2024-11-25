@@ -400,6 +400,8 @@ var pitchesToPerc = require('./pitches-to-perc');
 					ret.noteModification = "turn";
 				else if (elem.decoration[d] === 'roll')
 					ret.noteModification = "roll";
+				else if (elem.decoration[d] === 'pralltriller')
+					ret.noteModification = "pralltriller";
 			}
 		}
 		return ret;
@@ -424,6 +426,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 				}
 				break;
 			case "mordent":
+			case "pralltriller":
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
 				start += shortestNote;
