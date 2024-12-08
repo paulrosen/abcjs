@@ -835,6 +835,8 @@ var letter_to_accent = function(line, i) {
 		case 'R':return [1, 'roll'];
 		case 'S':return [1, 'segno'];
 		case 'T':return [1, 'trill'];
+		case 't':return [1, 'trillh'];
+		
 	}
 	return [0, 0];
 };

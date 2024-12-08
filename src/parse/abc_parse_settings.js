@@ -1,5 +1,6 @@
 module.exports.legalAccents = [
   'trill',
+  'trillh',
   'lowermordent',
   'uppermordent',
   'mordent',

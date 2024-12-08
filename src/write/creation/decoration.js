@@ -175,6 +175,7 @@ var stackedDecoration = function (decoration, width, abselem, yPos, positioning,
 		"mediumphrase": "scripts.mediumphrase",
 		"longphrase": "scripts.longphrase",
 		"trill": "scripts.trill",
+		"trillh": "scripts.trill",
 		"roll": "scripts.roll",
 		"irishroll": "scripts.roll",
 		"marcato": "scripts.umarcato",
@@ -183,7 +184,7 @@ var stackedDecoration = function (decoration, width, abselem, yPos, positioning,
 		"turn": "scripts.turn",
 		"uppermordent": "scripts.prall",
 		"pralltriller": "scripts.prall",
-		"mordent": "scripts.mordent",
+		"mordent": "scripts.prall",
 		"lowermordent": "scripts.mordent",
 		"downbow": "scripts.downbow",
 		"upbow": "scripts.upbow",
@@ -237,6 +238,7 @@ var stackedDecoration = function (decoration, width, abselem, yPos, positioning,
 			case "mediumphrase":
 			case "longphrase":
 			case "trill":
+			case "trillh":
 			case "roll":
 			case "irishroll":
 			case "marcato":
