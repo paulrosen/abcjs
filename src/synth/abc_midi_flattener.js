@@ -393,7 +393,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 				else if (elem.decoration[d] === 'lowermordent')
 					ret.noteModification = "lowermordent";
 				else if (elem.decoration[d] === 'uppermordent')
-					ret.noteModification = "mordent";
+					ret.noteModification = "pralltriller";
 				else if (elem.decoration[d] === 'mordent')
 					ret.noteModification = "mordent";
 				else if (elem.decoration[d] === 'turn')
@@ -445,7 +445,6 @@ var pitchesToPerc = require('./pitches-to-perc');
 			          start += shortestNote;
 			        }
 			        break;
-		case "mordent":
 			case "pralltriller":
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
@@ -455,6 +454,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 				start += shortestNote;
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, gap: 0, instrument: currentInstrument });
 				break;
+			case "mordent":
 			case "lowermordent":
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
