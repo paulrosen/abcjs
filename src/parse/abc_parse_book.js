@@ -25,11 +25,73 @@ var bookParser = function(book) {
 		// the tune is parsed all at once. The directives will be seen before the engraver begins processing.
 		var dir = tunes.shift();
 		var arrDir = dir.abc.split('\n');
-		arrDir.forEach(function(line) {
-			if (parseCommon.startsWith(line, '%%'))
-				directives += line + '\n';
+	
+		arrDir.forEach(function (line) {
+	
+			var theRegex = /^%%\S+font.*$/
+		
+			if (theRegex.test(line)){
+			  //console.log("Adding font line: "+line);
+			  directives += line + '\n'
+			}
+		
+			theRegex = /^%%\S+margin.*$/
+			if (theRegex.test(line)){
+			  //console.log("Adding margin line: "+line)
+			  directives += line + '\n';
+			}
+		
+			theRegex = /^%%staffwidth.*$/
+			if (theRegex.test(line)){
+			  //console.log("Adding staffwidth line: "+line)
+			  directives += line + '\n';
+			}   
+		
+			theRegex = /^%%stretchlast.*$/
+			if (theRegex.test(line)){
+			  //console.log("Adding stretchlast line: "+line)
+			  directives += line + '\n';
+			}  
+		
+			theRegex = /^%%barnumbers.*$/
+			if (theRegex.test(line)){
+			  //console.log("Adding barnumbers: "+line)
+			  directives += line + '\n';
+			} 
+		
+			theRegex = /^%%barsperstaff.*$/
+			if (theRegex.test(line)){
+			  //console.log("Adding barsperstaff: "+line)
+			  directives += line + '\n';
+			} 
+		
+			theRegex = /^%%\S+space.*$/
+			if (theRegex.test(line)){
+			  //console.log("Adding space line: "+line)
+			  directives += line + '\n';
+			}
+		
+			theRegex = /^%%\S+sep.*$/
+			if (theRegex.test(line)){
+			  //console.log("Adding sep line: "+line)
+			  directives += line + '\n';
+			}
+			
+			theRegex = /^%%measure\S+.*$/
+			if (theRegex.test(line)){
+			  //console.log("Adding measure line: "+line)
+			  directives += line + '\n';
+			}      
+		
+			theRegex = /^[ABCDFGHILMmNORrSUZ]:/
+			if (theRegex.test(line)){
+			  //console.log("Adding ABC *: line: "+line)
+			  directives += line + '\n';
+			}      
 		});
+
 	}
+
 	var header = directives;
 
 	// Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
