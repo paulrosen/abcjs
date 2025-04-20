@@ -298,6 +298,7 @@ declare module 'abcjs' {
 		tablature?: Array<Tablature>;
 		textboxpadding?: number;
 		timeBasedLayout?: { minPadding?:number, minWidth?:number, align?: 'left'|'center'};
+		useDefsForGlyphs?: boolean;
 		viewportHorizontal?: boolean;
 		viewportVertical?: boolean;
 		visualTranspose?: number;
