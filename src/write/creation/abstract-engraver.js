@@ -943,7 +943,8 @@ AbstractEngraver.prototype.addMeasureNumber = function (number, abselem) {
 	var dx = 0;
 	if (abselem.isClef) // If this is a clef rather than bar line, then the number shouldn't be centered because it could overlap the left side. This is an easy way to let it be centered but move it over, too.
 		dx += measureNumDim.width / 2
-	var vert = measureNumDim.width > 10 && abselem.abcelem.type === "treble" ? 13 : 11
+	// MAE 1 Oct 2024 - Change 13 to 13.5 since previously bar numbers were very slightly overlapping the top of the clef
+	var vert = measureNumDim.width > 10 && abselem.abcelem.type === "treble" ? 13.5 : 11
 	abselem.addFixed(new RelativeElement(number, dx, measureNumDim.width, vert + measureNumDim.height / spacing.STEP, { type: "barNumber", dim: this.getTextSize.attr("measurefont", 'bar-number') }));
 };
 
