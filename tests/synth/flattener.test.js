@@ -7525,6 +7525,41 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcIgnoreAlternateChords = 'X: 1\n' +
+		'M: 3/4\n' +
+		'L: 1/4\n' +
+		'K: Cb\n' +
+		'"Gm"zzz|"(Cm)"zzz|\n'
+
+	var expectedIgnoreAlternateChords = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0}
+			],[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":43,"volume":64,"start":0,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":0.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":0.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":0.5,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":58,"volume":48,"start":0.5,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":62,"volume":48,"start":0.5,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":36,"volume":64,"start":0.75,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":1,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":51,"volume":48,"start":1,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":48,"volume":48,"start":1.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":51,"volume":48,"start":1.25,"duration":0.125,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":55,"volume":48,"start":1.25,"duration":0.125,"gap":0,"instrument":0}
+			]
+		],
+		"totalDuration":1.5
+	}
+
+	//////////////////////////////////////////////////////////
+
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
 	})
@@ -7695,6 +7730,10 @@ describe("Audio flattener", function() {
 
 	it("cancel-gchord", function() {
 		doFlattenTest(abcCancelGChord, expectedCancelGChord);
+	})
+
+	it("ignore-alternate-chord", function() {
+		doFlattenTest(abcIgnoreAlternateChords, expectedIgnoreAlternateChords);
 	})
 
 })
