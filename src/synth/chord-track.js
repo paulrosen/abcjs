@@ -183,7 +183,7 @@ ChordTrack.prototype.interpretChord = function (name) {
 		return { chick: [] };
 	var root = name.substring(0, 1);
 	if (root === '(') {
-		name = name.substring(1, name.length - 2);
+		name = name.substring(1, name.length - 1);
 		if (name.length === 0)
 			return undefined;
 		root = name.substring(0, 1);
