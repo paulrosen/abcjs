@@ -26,7 +26,7 @@ function CreateSynth() {
 	self.audioBuffers = []; // cache of the buffers so starting play can be fast.
 	self.duration = undefined; // the duration of the tune in seconds.
 	self.isRunning = false; // whether there is currently a sound buffer running.
-	self.options = undefined
+	self.options = {} // Thx tomohirohiratsuka
 	self.pickupLength = 0
 
 	// Load and cache all needed sounds
