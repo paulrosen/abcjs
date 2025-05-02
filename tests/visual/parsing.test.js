@@ -149,6 +149,44 @@ describe("Parsing", function () {
 		]
 	]
 
+	var abcKeyWarn = "K:Gm\n" +
+		"G8|\n" +
+		"%%keywarn 0\n" +
+		"K:F\n" +
+		"F8|\n" +
+		"%%keywarn 1\n" +
+		"K:G\n" +
+		"G8| [K:F]F8|\n" +
+		"%%keywarn 0\n" +
+		"F8| [K:A]A8|\n"
+
+	var expectedKeyWarn = [
+		{"line":0,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":0,"staff":0,"type":"initial-key","name":"Gm","accidentals":"B flat,e flat"},
+		{"line":0,"staff":0,"type":"note","duration":1,"pitches":"G"},
+		{"line":0,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":1,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":1,"staff":0,"type":"initial-key","name":"F","accidentals":"B flat"},
+		{"line":1,"staff":0,"type":"note","duration":1,"pitches":"F"},
+		{"line":1,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":1,"staff":0,"type":"key","name":"G","accidentals":"B natural,f sharp"},
+		{"line":2,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":2,"staff":0,"type":"initial-key","name":"G","accidentals":"f sharp,B natural"},
+		{"line":2,"staff":0,"type":"note","duration":1,"pitches":"G"},
+		{"line":2,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":2,"staff":0,"type":"key","name":"F","accidentals":"f natural,B flat"},
+		{"line":2,"staff":0,"type":"note","duration":1,"pitches":"F"},
+		{"line":2,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":3,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":3,"staff":0,"type":"initial-key","name":"F","accidentals":"B flat,f natural"},
+		{"line":3,"staff":0,"type":"note","duration":1,"pitches":"F"},
+		{"line":3,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":3,"staff":0,"type":"key","name":"A","accidentals":"f sharp,c sharp,g sharp"},
+		{"line":3,"staff":0,"type":"note","duration":1,"pitches":"A"},
+		{"line":3,"staff":0,"type":"bar","style":"bar_thin"}
+	]
+
+
 	var abcBarNumberSubtitle = "X:1\n" +
 		"T:song\n" +
 		"T:subtitle\n" +
@@ -208,6 +246,12 @@ describe("Parsing", function () {
 
 	it("barNumSubtitle", function () {
 		testParser(abcBarNumberSubtitle, expectedBarNumberSubtitle, "BarNumberSubtitle");
+	})
+
+	it("keyWarn", function () {
+		const ret = flattenResults(abcKeyWarn)
+		//console.log(JSON.stringify(ret))
+		chai.assert.deepStrictEqual(ret, expectedKeyWarn, "KeyWarn");
 	})
 
 	function testParser(abc, expectedLines, comment) {

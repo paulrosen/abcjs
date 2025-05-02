@@ -938,6 +938,12 @@ var parseDirective = {};
 				}
 				multilineVars.currBarNumber = tuneBuilder.setBarNumberImmediate(tokens[0].intt);
 				break;
+			case "keywarn":
+				if (tokens.length !== 1 || tokens[0].type !== 'number' || (tokens[0].intt !== 1 && tokens[0].intt !== 0)) {
+					return 'Directive ' + cmd + ' requires 0 or 1 as a parameter.';
+				}
+				multilineVars[cmd] = tokens[0].intt === 1
+				break;
 			case "begintext":
 				var textBlock = '';
 				line = tokenizer.nextLine();

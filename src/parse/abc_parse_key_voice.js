@@ -292,7 +292,7 @@ var parseKeyVoice = {};
 					if (isInline)
 						multilineVars.globalTransposeOrigKeySig = savedOrigKey
 					multilineVars.key.mode = mode;
-					if (oldKey) {
+					if (oldKey && multilineVars.keywarn !== false) {
 						// Add natural in all places that the old key had an accidental.
 						var kk;
 						for (var k = 0; k < multilineVars.key.accidentals.length; k++) {
