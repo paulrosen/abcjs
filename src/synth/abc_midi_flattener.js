@@ -393,13 +393,17 @@ var pitchesToPerc = require('./pitches-to-perc');
 				else if (elem.decoration[d] === 'lowermordent')
 					ret.noteModification = "lowermordent";
 				else if (elem.decoration[d] === 'uppermordent')
-					ret.noteModification = "mordent";
+					ret.noteModification = "pralltriller";
 				else if (elem.decoration[d] === 'mordent')
 					ret.noteModification = "mordent";
 				else if (elem.decoration[d] === 'turn')
 					ret.noteModification = "turn";
 				else if (elem.decoration[d] === 'roll')
 					ret.noteModification = "roll";
+				else if (elem.decoration[d] === 'pralltriller')
+					ret.noteModification = "pralltriller";
+				else if (elem.decoration[d] === 'trillh') 
+					ret.noteModification = "trillh";
 			}
 		}
 		return ret;
@@ -423,7 +427,25 @@ var pitchesToPerc = require('./pitches-to-perc');
 					start += shortestNote;
 				}
 				break;
-			case "mordent":
+		      case "trillh":
+			        var note = 1;
+			        while (runningDuration > 0) {
+			          currentTrack.push({
+			            cmd: 'note',
+			            pitch: p.pitch + note,
+			            volume: p.volume,
+			            start: start,
+			            duration: shortestNote,
+			            gap: 0,
+			            instrument: currentInstrument,
+			            style: 'decoration'
+			          });
+			          note = note === 1 ? 0 : 1;
+			          runningDuration -= shortestNote;
+			          start += shortestNote;
+			        }
+			        break;
+			case "pralltriller":
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
 				start += shortestNote;
@@ -432,6 +454,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 				start += shortestNote;
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: runningDuration, gap: 0, instrument: currentInstrument });
 				break;
+			case "mordent":
 			case "lowermordent":
 				currentTrack.push({ cmd: 'note', pitch: p.pitch, volume: p.volume, start: start, duration: shortestNote, gap: 0, instrument: currentInstrument, style: 'decoration' });
 				runningDuration -= shortestNote;
