@@ -7557,8 +7557,38 @@ describe("Audio flattener", function() {
 		],
 		"totalDuration":1.5
 	}
-
 	//////////////////////////////////////////////////////////
+
+	var abcTrillTest = 'K:Gm\n' +
+		'tG tA tB | !trillh!G !trillh!A !trillh!B | !uppermordent!G !lowermordent!A !mordent!B |\n'
+
+	var expectedTrillTest = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":67,"volume":85,"start":0,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":70,"volume":85,"start":0.25,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":0.375,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":85,"start":0.5,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":70,"volume":95,"start":0.625,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":0.75,"duration":0.03125,"gap":0,"instrument":0,"style":"decoration"},
+				{"cmd":"note","pitch":69,"volume":105,"start":0.78125,"duration":0.03125,"gap":0,"instrument":0,"style":"decoration"},
+				{"cmd":"note","pitch":67,"volume":105,"start":0.8125,"duration":0.0625,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":69,"volume":85,"start":0.875,"duration":0.03125,"gap":0,"instrument":0,"style":"decoration"},
+				{"cmd":"note","pitch":67,"volume":85,"start":0.90625,"duration":0.03125,"gap":0,"instrument":0,"style":"decoration"},
+				{"cmd":"note","pitch":69,"volume":85,"start":0.9375,"duration":0.0625,"gap":0,"instrument":0},
+				{"cmd":"note","pitch":70,"volume":95,"start":1,"duration":0.03125,"gap":0,"instrument":0,"style":"decoration"},
+				{"cmd":"note","pitch":72,"volume":95,"start":1.03125,"duration":0.03125,"gap":0,"instrument":0,"style":"decoration"},
+				{"cmd":"note","pitch":70,"volume":95,"start":1.0625,"duration":0.0625,"gap":0,"instrument":0}
+			]
+		],
+		"totalDuration":1.125
+	}
+	//////////////////////////////////////////////////////////
+
 
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
@@ -7734,6 +7764,10 @@ describe("Audio flattener", function() {
 
 	it("ignore-alternate-chord", function() {
 		doFlattenTest(abcIgnoreAlternateChords, expectedIgnoreAlternateChords);
+	})
+
+	it("flatten-trill-test", function() {
+		doFlattenTest(abcTrillTest, expectedTrillTest);
 	})
 
 })
