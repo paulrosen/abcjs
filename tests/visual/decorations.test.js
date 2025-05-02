@@ -38,21 +38,29 @@ describe("Decorations", function() {
 
 	var abcTrills = "L:1/1\n" +
 		"K:none clef=none\n" +
-		"tD tE tF !trillh!G !trillh!A !trillh!B  !uppermordent!c !lowermordent!d !mordent!e \n"
+		"tD tE tF !trillh!G !trillh!A !trillh!B  !uppermordent!c !lowermordent!d !mordent!e Tf \n"
 
 	var expectedTrills = [
 		{"pitch":1,"note":"D","c":"noteheads.whole"},
+		{"pitch":15,"note":"D","c":"scripts.trill"},
 		{"pitch":2,"note":"E","c":"noteheads.whole"},
+		{"pitch":15,"note":"E","c":"scripts.trill"},
 		{"pitch":3,"note":"F","c":"noteheads.whole"},
+		{"pitch":15,"note":"F","c":"scripts.trill"},
 		{"pitch":4,"note":"G","c":"noteheads.whole"},
+		{"pitch":15,"note":"G","c":"scripts.trill"},
 		{"pitch":5,"note":"A","c":"noteheads.whole"},
+		{"pitch":15,"note":"A","c":"scripts.trill"},
 		{"pitch":6,"note":"B","c":"noteheads.whole"},
+		{"pitch":15,"note":"B","c":"scripts.trill"},
 		{"pitch":7,"note":"c","c":"noteheads.whole"},
 		{"pitch":13,"note":"c","c":"scripts.prall"},
 		{"pitch":8,"note":"d","c":"noteheads.whole"},
 		{"pitch":14,"note":"d","c":"scripts.mordent"},
 		{"pitch":9,"note":"e","c":"noteheads.whole"},
-		{"pitch":14,"note":"e","c":"scripts.mordent"}
+		{"pitch":14,"note":"e","c":"scripts.mordent"},
+		{"pitch":10,"note":"f","c":"noteheads.whole"},
+		{"pitch":15,"note":"f","c":"scripts.trill"}
 	]
 
 	it("fermata", function() {
