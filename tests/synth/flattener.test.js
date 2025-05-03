@@ -7604,6 +7604,36 @@ describe("Audio flattener", function() {
 	}
 	//////////////////////////////////////////////////////////
 
+	var abc8vaTest = 'K:C\n' +
+		'V:1\n' +
+		'V:2 octave=-2\n' +
+		'[V:1][K:C clef=treble] B\n' +
+		'[V:2][K:C clef=bass] B\n' +
+		'[V:1][K:C clef=treble+8] B\n' +
+		'[V:2][K:C clef=bass+8] B\n' +
+		'[V:1][K:C clef=treble] B\n' +
+		'[V:2][K:C clef=bass] B\n'
+
+	var expected8vaTest = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":71,"volume":85,"start":0,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":83,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":85,"start":0.25,"duration":0.125,"instrument":0,"gap":0}
+			],[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":47,"volume":85,"start":0,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":59,"volume":85,"start":0.125,"duration":0.125,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":47,"volume":85,"start":0.25,"duration":0.125,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":0.375
+	}
+	//////////////////////////////////////////////////////////
+
 
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
@@ -7783,6 +7813,10 @@ describe("Audio flattener", function() {
 
 	it("flatten-trill-test", function() {
 		doFlattenTest(abcTrillTest, expectedTrillTest);
+	})
+
+	it("flatten-treble+8", function() {
+		doFlattenTest(abc8vaTest, expected8vaTest);
 	})
 
 })
