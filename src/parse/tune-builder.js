@@ -9,7 +9,7 @@ var TuneBuilder = function (tune) {
 	tune.reset();
 
 	this.setVisualTranspose = function (visualTranspose) {
-		if (visualTranspose)
+		if (visualTranspose!==undefined)
 			tune.visualTranspose = visualTranspose;
 	};
 

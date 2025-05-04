@@ -1185,6 +1185,14 @@ var parseDirective = {};
 				}
 				break;
 
+			case "visualtranspose":
+				var halfSteps = tokenizer.getInt(restOfString)
+				if (halfSteps.digits === 0)
+					warn("Expected number of half steps in visualTranspose")
+				else
+					multilineVars.globalTranspose = halfSteps.value
+				break;
+
 			case "map":
 			case "playtempo":
 			case "auquality":
