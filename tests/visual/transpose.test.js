@@ -118,6 +118,21 @@ describe("Transpose", function() {
 
 	var expectedMissesAccidental = [{"key":"Bb","notes":[{"note":"C","pitch":0,"chord":"D♭dim7"},{"note":"=B,","pitch":-1},{"note":"_B,","pitch":-1},{"note":"B,","pitch":-1},{"note":"A,","pitch":-2},{}]}]
 
+	var abcDimChords = "L:1/4\n" +
+		"K:C\n" +
+		"\"Ebdim7\" C \"E°7\" C |"
+	var expectedDimChords1 = [{"key":"Db","notes":[{"note":"D","pitch":1,"chord":"Edim7"},{"note":"D","pitch":1,"chord":"F°7"},{}]}]
+	var expectedDimChords2 = [{"key":"D","notes":[{"note":"D","pitch":1,"chord":"Fdim7"},{"note":"D","pitch":1,"chord":"F♯°7"},{}]}]
+	var expectedDimChords3 = [{"key":"Eb","notes":[{"note":"E","pitch":2,"chord":"G♭dim7"},{"note":"E","pitch":2,"chord":"G°7"},{}]}]
+	var expectedDimChords4 = [{"key":"E","notes":[{"note":"E","pitch":2,"chord":"Gdim7"},{"note":"E","pitch":2,"chord":"G♯°7"},{}]}]
+	var expectedDimChords5 = [{"key":"F","notes":[{"note":"F","pitch":3,"chord":"A♭dim7"},{"note":"F","pitch":3,"chord":"A°7"},{}]}]
+	var expectedDimChords6 = [{"key":"F#","notes":[{"note":"F","pitch":3,"chord":"Adim7"},{"note":"F","pitch":3,"chord":"B♭°7"},{}]}]
+	var expectedDimChords7 = [{"key":"G","notes":[{"note":"G","pitch":4,"chord":"B♭dim7"},{"note":"G","pitch":4,"chord":"B°7"},{}]}]
+	var expectedDimChords8 = [{"key":"Ab","notes":[{"note":"A","pitch":5,"chord":"Bdim7"},{"note":"A","pitch":5,"chord":"C°7"},{}]}]
+	var expectedDimChords9 = [{"key":"A","notes":[{"note":"A","pitch":5,"chord":"Cdim7"},{"note":"A","pitch":5,"chord":"C♯°7"},{}]}]
+	var expectedDimChords10 = [{"key":"Bb","notes":[{"note":"B","pitch":6,"chord":"D♭dim7"},{"note":"B","pitch":6,"chord":"D°7"},{}]}]
+	var expectedDimChords11 = [{"key":"B","notes":[{"note":"B","pitch":6,"chord":"Ddim7"},{"note":"B","pitch":6,"chord":"E♭°7"},{}]}]
+
 	it("transpose-inline", function () {
 		transposeTest(abcInline, 3, expectedInline)
 	})
@@ -174,6 +189,20 @@ describe("Transpose", function() {
 
 	it("transpose-misses-accidental", function () {
 		transposeTestDirective(abcMissesAccidental, -2, expectedMissesAccidental)
+	})
+
+	it("transpose-dim-chords", function () {
+		transposeTest(abcDimChords, 1, expectedDimChords1)
+		transposeTest(abcDimChords, 2, expectedDimChords2)
+		transposeTest(abcDimChords, 3, expectedDimChords3)
+		transposeTest(abcDimChords, 4, expectedDimChords4)
+		transposeTest(abcDimChords, 5, expectedDimChords5)
+		transposeTest(abcDimChords, 6, expectedDimChords6)
+		transposeTest(abcDimChords, 7, expectedDimChords7)
+		transposeTest(abcDimChords, 8, expectedDimChords8)
+		transposeTest(abcDimChords, 9, expectedDimChords9)
+		transposeTest(abcDimChords, 10, expectedDimChords10)
+		transposeTest(abcDimChords, 11, expectedDimChords11)
 	})
 })
 

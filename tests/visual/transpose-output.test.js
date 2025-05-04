@@ -322,6 +322,30 @@ describe("Transpose Output", function () {
 		"K:F# dor\n" +
 		"F\n"
 
+	var abcMissesAccidental = "L:1/4\n" +
+		"K:C\n" +
+		"\"Ebdim7\" D ^C/ =C/- C B, |"
+
+	var abcMissesAccidentalExpected = "L:1/4\n" +
+		"K:Bb\n" +
+		"\"Dbdim7\" C =B,/ _B,/- B A, |"
+
+	var abcDimChords = "L:1/4\n" +
+		"K:C\n" +
+		"\"Ebdim7\" C \"E°7\" C |"
+
+	var abcDimChordsExpected1 = "L:1/4\nK:Db\n\"Edim7\" D \"F°7\" D |"
+	var abcDimChordsExpected2 = "L:1/4\nK:D\n\"Fdim7\" D \"F#°7\" D |"
+	var abcDimChordsExpected3 = "L:1/4\nK:Eb\n\"Gbdim7\" E \"G°7\" E |"
+	var abcDimChordsExpected4 = "L:1/4\nK:E\n\"Gdim7\" E \"G#°7\" E |"
+	var abcDimChordsExpected5 = "L:1/4\nK:F\n\"Abdim7\" F \"A°7\" F |"
+	var abcDimChordsExpected6 = "L:1/4\nK:Gb\n\"Adim7\" G \"Bb°7\" G |"
+	var abcDimChordsExpected7 = "L:1/4\nK:G\n\"Bbdim7\" G \"B°7\" G |"
+	var abcDimChordsExpected8 = "L:1/4\nK:Ab\n\"Bdim7\" A \"C°7\" A |"
+	var abcDimChordsExpected9 = "L:1/4\nK:A\n\"Cdim7\" A \"C#°7\" A |"
+	var abcDimChordsExpected10 = "L:1/4\nK:Bb\n\"Dbdim7\" B \"D°7\" B |"
+	var abcDimChordsExpected11 = "L:1/4\nK:B\n\"Ddim7\" B \"Eb°7\" B |"
+
 	it("output-cooley", function () {
 		outputTest(abcCooley, abcCooleyExpected0, 0, "★★ up 0 ★★")
 		outputTest(abcCooley, abcCooleyExpected1, 1, "★★ up 1 ★★")
@@ -408,6 +432,24 @@ describe("Transpose Output", function () {
 	it("output-dor-space", function () {
 		outputTest(abcDorWithSpace, abcDorWithSpaceExpected, -1)
 		outputTest(abcDorWithSpaceExpected, abcDorWithSpace, 1)
+	})
+
+	it("output-miss-accidental", function () {
+		outputTest(abcMissesAccidental, abcMissesAccidentalExpected, -2)
+	})
+
+	it("output-dim-chords", function () {
+		outputTest(abcDimChords, abcDimChordsExpected1, 1)
+		outputTest(abcDimChords, abcDimChordsExpected2, 2)
+		outputTest(abcDimChords, abcDimChordsExpected3, 3)
+		outputTest(abcDimChords, abcDimChordsExpected4, 4)
+		outputTest(abcDimChords, abcDimChordsExpected5, 5)
+		outputTest(abcDimChords, abcDimChordsExpected6, 6)
+		outputTest(abcDimChords, abcDimChordsExpected7, 7)
+		outputTest(abcDimChords, abcDimChordsExpected8, 8)
+		outputTest(abcDimChords, abcDimChordsExpected9, 9)
+		outputTest(abcDimChords, abcDimChordsExpected10, 10)
+		outputTest(abcDimChords, abcDimChordsExpected11, 11)
 	})
 
 	// it("output-temp", function () {

@@ -65,7 +65,7 @@ transpose.keySignature = function(multilineVars, keyName, root, acc, localTransp
 	var newKeyName = (keyName[0] === 'm' ? newKeyMinor[index] : newKey[index]);
 	var transposedKey = newKeyName + keyName;
 	var newKeySig = keyAccidentals(transposedKey);
-	if (newKeySig.length > 0 && newKeySig[0].acc === 'flat')
+	if (newKeySig.length === 0 || newKeySig[0].acc === 'flat') // key of C and all keys with flats should have chords with flats
 		multilineVars.localTransposePreferFlats = true;
 	var distance = transposedKey.charCodeAt(0) - baseKey.charCodeAt(0);
 	if (multilineVars.localTranspose > 0) {
