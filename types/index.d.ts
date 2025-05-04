@@ -61,7 +61,7 @@ declare module 'abcjs' {
 
 	export type NoteHeadType = 'normal' | 'harmonic' | 'rhythm' | 'x' | 'triangle';
 
-	export type Decorations = "trill" | "lowermordent" | "uppermordent" | "mordent" | "pralltriller" | "accent" |
+	export type Decorations = "trill" | "trillh" | "lowermordent" | "uppermordent" | "mordent" | "pralltriller" | "accent" |
 		"fermata" | "invertedfermata" | "tenuto" | "0" | "1" | "2" | "3" | "4" | "5" | "+" | "wedge" |
 		"open" | "thumb" | "snap" | "turn" | "roll" | "irishroll" | "breath" | "shortphrase" | "mediumphrase" | "longphrase" |
 		"segno" | "coda" | "D.S." | "D.C." | "fine" | "crescendo(" | "crescendo)" | "diminuendo(" | "diminuendo)" |"glissando(" | "glissando)" |

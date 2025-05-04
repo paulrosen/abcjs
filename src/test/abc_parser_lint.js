@@ -53,7 +53,7 @@ var JSONSchema = require('./jsonschema-b4');
 var ParserLint = function() {
 	"use strict";
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
-		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
+		"trill", "trillh", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
 		"open", "thumb", "snap", "turn", "roll", "irishroll", "breath", "shortphrase", "mediumphrase", "longphrase",
 		"segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)", "glissando(", "glissando)",
