@@ -111,6 +111,12 @@ describe("Transpose", function() {
 		]
 	}]
 
+	// issue #1073
+	var abcMissesAccidental = "L:1/4  \n" +
+		"K:C  \n" +
+		"\"Ebdim7\" D ^C/ =C/- C B, |"
+
+	var expectedMissesAccidental = [{"key":"Bb","notes":[{"note":"C","pitch":0,"chord":"D♭dim7"},{"note":"=B,","pitch":-1},{"note":"_B,","pitch":-1},{"note":"B,","pitch":-1},{"note":"A,","pitch":-2},{}]}]
 
 	it("transpose-inline", function () {
 		transposeTest(abcInline, 3, expectedInline)
@@ -164,6 +170,10 @@ describe("Transpose", function() {
 		transposeTest(abcNone, 4, expectedNone4)
 		transposeTest(abcNone, 1, expectedNone1)
 		transposeTest(abcNone, -1, expectedNone_1)
+	})
+
+	it("transpose-misses-accidental", function () {
+		transposeTestDirective(abcMissesAccidental, -2, expectedMissesAccidental)
 	})
 })
 

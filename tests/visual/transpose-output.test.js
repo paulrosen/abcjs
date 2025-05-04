@@ -314,6 +314,14 @@ describe("Transpose Output", function () {
 	var abcTempExpected = `T: Transpose Output
 `
 
+	var abcDorWithSpace = "X:1\n" +
+		"K:G dor\n" +
+		"G\n"
+
+	var abcDorWithSpaceExpected = "X:1\n" +
+		"K:F# dor\n" +
+		"F\n"
+
 	it("output-cooley", function () {
 		outputTest(abcCooley, abcCooleyExpected0, 0, "★★ up 0 ★★")
 		outputTest(abcCooley, abcCooleyExpected1, 1, "★★ up 1 ★★")
@@ -395,6 +403,11 @@ describe("Transpose Output", function () {
 
 	it("output-unusual", function () {
 		outputTest(abcUnusual, abcUnusualExpected, 2)
+	})
+
+	it("output-dor-space", function () {
+		outputTest(abcDorWithSpace, abcDorWithSpaceExpected, -1)
+		outputTest(abcDorWithSpaceExpected, abcDorWithSpace, 1)
 	})
 
 	// it("output-temp", function () {

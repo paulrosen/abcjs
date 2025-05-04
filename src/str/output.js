@@ -58,12 +58,12 @@ var strTranspose;
 		var count = arr[0].length
 		for (var i = 1; i < arr.length; i++) {
 			var segment = arr[i]
-			var match = segment.match(/^( *)([A-G])([#b]?)(\w*)/)
+			var match = segment.match(/^( *)([A-G])([#b]?)( ?)(\w*)/)
 			if (match) {
 				var start = count + 2 + match[1].length // move past the 'K:' and optional white space
-				var key = match[2] + match[3] + match[4] // key name, accidental, and mode
-				var destinationKey = newKey({ root: match[2], acc: match[3], mode: match[4] }, steps)
-				var dest = destinationKey.root + destinationKey.acc + destinationKey.mode
+				var key = match[2] + match[3] + match[4] + match[5] // key name, accidental, optional space, and mode
+				var destinationKey = newKey({ root: match[2], acc: match[3], mode: match[5] }, steps)
+				var dest = destinationKey.root + destinationKey.acc + match[4] + destinationKey.mode
 				changes.push({ start: start, end: start + key.length, note: dest })
 			}
 			count += segment.length + 2
