@@ -804,6 +804,8 @@ function wrapMusicLines(lines, barsperstaff) {
 }
 
 function getPrevMusicLine(lines, currentLine) {
+	if (lines.length <= currentLine)
+		return null
 	// If the current line doesn't have music, search backwards until one is found.
 	while (currentLine >= 0) {
 		if (lines[currentLine].staff)
