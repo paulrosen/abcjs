@@ -33,20 +33,12 @@ K:D
 
 
 
-		function load() {
-			ABCJS.renderAbc("paper", abc, { tablature: [{ instrument: "banjo", label: "Banjo (double C, capo 2)", tuning: ["C", "G", 'c', 'd', 'g'], capo: 2 }] });
-		}
 
 	</script>
 </head>
 
 <body onload="load()">
-	<header>
-		<img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
-		<h1>Basic abcjs</h1>
-	</header>
 	<div class="container">
-		<p>On page load, a hard-coded tune is displayed on the page.</p>
 		<div id="paper"></div>
 	</div>
 </body>
