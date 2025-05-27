@@ -101,7 +101,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
 		.catch(function (error) {
 			if (debugCallback)
 				debugCallback('placeNote catch: '+error.message)
-			return Promise.resolve()
+			return Promise.reject(error)
 		});
 }
 

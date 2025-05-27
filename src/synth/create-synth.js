@@ -299,82 +299,91 @@ function CreateSynth() {
 			return Promise.reject(new Error(notSupportedMessage));
 		if (self.debugCallback)
 			self.debugCallback("prime called");
-		return new Promise(function(resolve) {
-			var startTime = activeAudioContext().currentTime;
-			var tempoMultiplier = self.millisecondsPerMeasure / 1000 / self.meterSize;
-			self.duration = self.flattened.totalDuration * tempoMultiplier;
-			if(self.duration <= 0) {
-				self.audioBuffers = [];
-				return resolve({ status: "empty", seconds: 0});
-			}
-			self.duration += fadeTimeSec;
-			var totalSamples = Math.floor(activeAudioContext().sampleRate * self.duration);
 
-			// There might be a previous run that needs to be turned off.
-			self.stop();
+		return new Promise(function(resolve, reject) {
+			try {
+				var startTime = activeAudioContext().currentTime;
+				var tempoMultiplier = self.millisecondsPerMeasure / 1000 / self.meterSize;
+				self.duration = self.flattened.totalDuration * tempoMultiplier;
+				if (self.duration <= 0) {
+					self.audioBuffers = [];
+					return resolve({status: "empty", seconds: 0});
+				}
+				self.duration += fadeTimeSec;
+				var totalSamples = Math.floor(activeAudioContext().sampleRate * self.duration);
 
-			var noteMapTracks = createNoteMap(self.flattened);
+				// There might be a previous run that needs to be turned off.
+				self.stop();
 
-			if (self.options.swing)
-				addSwing(noteMapTracks, self.options.swing, self.meterFraction, self.pickupLength)
+				var noteMapTracks = createNoteMap(self.flattened);
 
-			if (self.sequenceCallback)
-				self.sequenceCallback(noteMapTracks, self.callbackContext);
+				if (self.options.swing)
+					addSwing(noteMapTracks, self.options.swing, self.meterFraction, self.pickupLength)
 
-			var panDistances = setPan(noteMapTracks.length, self.pan);
+				if (self.sequenceCallback)
+					self.sequenceCallback(noteMapTracks, self.callbackContext);
 
-			// Create a simple list of all the unique sounds in this music and where they should be placed.
-			// There appears to be a limit on how many audio buffers can be created at once so this technique limits the number needed.
-			var uniqueSounds = {};
-			noteMapTracks.forEach(function(noteMap, trackNumber) {
-				var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
-				noteMap.forEach(function(note) {
-					var key = note.instrument + ':' + note.pitch + ':' +note.volume + ':' + Math.round((note.end-note.start)*1000)/1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + (note.cents ? note.cents : 0);
-					if (self.debugCallback)
-						self.debugCallback("noteMapTrack "+key)
-					if (!uniqueSounds[key])
-						uniqueSounds[key] = [];
-					uniqueSounds[key].push(note.start);
+				var panDistances = setPan(noteMapTracks.length, self.pan);
+
+				// Create a simple list of all the unique sounds in this music and where they should be placed.
+				// There appears to be a limit on how many audio buffers can be created at once so this technique limits the number needed.
+				var uniqueSounds = {};
+				noteMapTracks.forEach(function (noteMap, trackNumber) {
+					var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
+					noteMap.forEach(function (note) {
+						var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + (note.cents ? note.cents : 0);
+						if (self.debugCallback)
+							self.debugCallback("noteMapTrack " + key)
+						if (!uniqueSounds[key])
+							uniqueSounds[key] = [];
+						uniqueSounds[key].push(note.start);
+					});
 				});
-			});
 
-			// Now that we know what we are trying to create, construct the audio buffer by creating each sound and placing it.
-			var allPromises = [];
-			var audioBuffer = activeAudioContext().createBuffer(2, totalSamples, activeAudioContext().sampleRate);
-			for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
-				var k = Object.keys(uniqueSounds)[key2];
-				var parts = k.split(":");
-				var cents = parts[6] !== undefined ? parseFloat(parts[6]) : 0;
-				parts = {instrument: parts[0], pitch: parseInt(parts[1], 10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5]), cents: cents};
-				allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd/1000, self.debugCallback));
-			}
-			self.audioBuffers = [audioBuffer];
+				// Now that we know what we are trying to create, construct the audio buffer by creating each sound and placing it.
+				var allPromises = [];
+				var audioBuffer = activeAudioContext().createBuffer(2, totalSamples, activeAudioContext().sampleRate);
+				for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
+					var k = Object.keys(uniqueSounds)[key2];
+					var parts = k.split(":");
+					var cents = parts[6] !== undefined ? parseFloat(parts[6]) : 0;
+					parts = {instrument: parts[0], pitch: parseInt(parts[1], 10), volume: parseInt(parts[2], 10), len: parseFloat(parts[3]), pan: parseFloat(parts[4]), tempoMultiplier: parseFloat(parts[5]), cents: cents};
+					allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd / 1000, self.debugCallback));
+				}
+				self.audioBuffers = [audioBuffer];
 
-			if (self.debugCallback) {
-				self.debugCallback("sampleRate = " + activeAudioContext().sampleRate);
-				self.debugCallback("totalSamples = " + totalSamples);
-				self.debugCallback("creationTime = " + Math.floor((activeAudioContext().currentTime - startTime)*1000) + "ms");
-			}
-			function resolveData(me) {
-				var duration = me && me.audioBuffers && me.audioBuffers.length > 0 ? me.audioBuffers[0].duration : 0;
-				return { status: activeAudioContext().state, duration: duration}
-			}
-			Promise.all(allPromises).then(function() {
-				// Safari iOS can mess with the audioContext state, so resume if needed.
-				if (activeAudioContext().state === "suspended") {
-					activeAudioContext().resume().then(function () {
-						resolve(resolveData(self));
-					})
-				} else if (activeAudioContext().state === "interrupted") {
-					activeAudioContext().suspend().then(function () {
+				if (self.debugCallback) {
+					self.debugCallback("sampleRate = " + activeAudioContext().sampleRate);
+					self.debugCallback("totalSamples = " + totalSamples);
+					self.debugCallback("creationTime = " + Math.floor((activeAudioContext().currentTime - startTime) * 1000) + "ms");
+				}
+
+				function resolveData(me) {
+					var duration = me && me.audioBuffers && me.audioBuffers.length > 0 ? me.audioBuffers[0].duration : 0;
+					return {status: activeAudioContext().state, duration: duration}
+				}
+
+				Promise.all(allPromises).then(function () {
+					// Safari iOS can mess with the audioContext state, so resume if needed.
+					if (activeAudioContext().state === "suspended") {
 						activeAudioContext().resume().then(function () {
 							resolve(resolveData(self));
 						})
-					})
-				} else {
-					resolve(resolveData(self));
-				}
-			});
+					} else if (activeAudioContext().state === "interrupted") {
+						activeAudioContext().suspend().then(function () {
+							activeAudioContext().resume().then(function () {
+								resolve(resolveData(self));
+							})
+						})
+					} else {
+						resolve(resolveData(self));
+					}
+				}).catch(function (error) {
+					reject(error)
+				});
+			} catch (error) {
+				reject(error)
+			}
 		});
 	};
 
