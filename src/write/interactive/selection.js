@@ -130,8 +130,14 @@ function keyboardSelection(ev) {
 function findElementInHistory(selectables, el) {
 	if (!el)
 		return -1;
+	// This should always exist, but it occasionally causes an exception, so check first.
+	var dataset = el.dataset
+	if (!dataset)
+		return -1
+	var index = dataset.index
 	for (var i = 0; i < selectables.length; i++) {
-		if (el.dataset.index === selectables[i].svgEl.dataset.index)
+		var svgDataset = selectables[i].svgEl.dataset
+		if (svgDataset && index === svgDataset.index)
 			return i;
 	}
 	return -1;
