@@ -644,13 +644,48 @@ var parseKeyVoice = {};
 					case 'tenor,,':
 					case 'alto,,':
 					case 'none,,':
+// MAE 26 May 2025 Start of additional clefs
+					case 'treble+8':
+					case 'treble-8':
+					case 'treble^8':
+					case 'treble_8':
+					case 'treble1':
+					case 'treble2':
+					case 'treble3':
+					case 'treble4':
+					case 'treble5':
+					case 'bass+8':
+					case 'bass-8':
+					case 'bass^8':
+					case 'bass_8':
+					case 'bass+16':
+					case 'bass-16':
+					case 'bass^16':
+					case 'bass_16':
+					case 'bass1':
+					case 'bass2':
+					case 'bass3':
+					case 'bass4':
+					case 'bass5':
+					case 'tenor1':
+					case 'tenor2':
+					case 'tenor3':
+					case 'tenor4':
+					case 'tenor5':
+					case 'alto1':
+					case 'alto2':
+					case 'alto3':
+					case 'alto4':
+					case 'alto5':
+					case 'alto+8':
+					case 'alto-8':
+					case 'alto^8':
+					case 'alto_8':
+// MAE 26 May 2025 End of additional clefs
+
 						// TODO-PER: handle the octave indicators on the clef by changing the middle property
 						var oct2 = 0;
-	//							for (var iii = 0; iii < token.token.length; iii++) {
-	//								if (token.token[iii] === ',') oct2 -= 7;
-	//								else if (token.token[iii] === "'") oct2 += 7;
-	//							}
-											  staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
+						staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
 						staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
 						multilineVars.voices[id].clef = token.token;
 						break;
