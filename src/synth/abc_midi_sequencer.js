@@ -442,7 +442,7 @@ var parseCommon = require("../parse/abc_common");
 				}
 
 				function setDynamics(elem) {
-					var volumes = {
+					var volumes = {//stressBeat1, stressBeatDown, stressBeatUp
 						'pppp': [15, 10, 5, 1],
 						'ppp': [30, 20, 10, 1],
 						'pp': [45, 35, 20, 1],
@@ -480,7 +480,14 @@ var parseCommon = require("../parse/abc_common");
 
 						if (dynamicType) {
 							currentVolume = volumes[dynamicType].slice(0);
-							voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0) });
+							let volumesPerNotePitch = [currentVolume];
+							if(Array.isArray(elem.decoration)){
+								volumesPerNotePitch = [];
+								elem.decoration.forEach(d=>{
+									volumesPerNotePitch.push(volumes[d].slice(0));
+								});
+							}
+							voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0), volumesPerNotePitch: volumesPerNotePitch, });
 							inCrescendo[k] = false;
 							inDiminuendo[k] = false;
 						}
