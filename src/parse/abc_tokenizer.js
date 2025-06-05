@@ -677,9 +677,17 @@ function getTitleNumber(str){
 }
 
 var thePatterns = [
-	{ match: /,\s*[Tt]he$/, replace: "The " },
-	{ match: /,\s*[Aa]$/, replace: "A " },
-	{ match: /,\s*[Aa]n$/, replace: "An " },
+	{ match: /,\s*The$/, replace: "The " },
+	{ match: /,\s*the$/, replace: "the " },
+	{ match: /,\s*A$/, replace: "A " },
+	{ match: /,\s*a$/, replace: "a " },
+	{ match: /,\s*An$/, replace: "An " },
+	{ match: /,\s*an$/, replace: "an " },
+	{ match: /,\s*Da$/, replace: "Da " },
+	{ match: /,\s*La$/, replace: "La " },
+	{ match: /,\s*Le$/, replace: "Le " },
+	{ match: /,\s*Les$/, replace: "Les " },
+	{ match: /,\s*Ye$/, replace: "Ye " },
 ]
 
 this.theReverser = function (str) {

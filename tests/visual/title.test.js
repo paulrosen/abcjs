@@ -18,7 +18,7 @@ describe("Title", function () {
 	"K:C\n" +
 	"C";
 
-	var expectedTitleThe2 = "The Transformed"
+	var expectedTitleThe2 = "the Transformed"
 
 	var abcTitleA = "X:1\n" +
 	"T:Transformed, A\n" +
@@ -39,7 +39,7 @@ describe("Title", function () {
 	"K:C\n" +
 	"C";
 
-	var expectedTitleA2 = "A Transformed"
+	var expectedTitleA2 = "a Transformed"
 
 	var abcTitleNumberThe = "X:1\n" +
 	"T:24. Number Transform, The\n" +
@@ -62,6 +62,37 @@ describe("Title", function () {
 
 	var expectedTitleMalformed = "Mal , The Formed"
 
+	var abcSubtitleAndFrench = "X:1\n" +
+		"T:20. Subtitles, The \n" +
+		"T:Sub, The\n" +
+		"T:Sub, the\n" +
+		"T:Sub, A\n" +
+		"T:Sub, a\n" +
+		"T:Sub, An\n" +
+		"T:Sub, an\n" +
+		"T:Sub, Da\n" +
+		"T:Sub, La\n" +
+		"T:Sub, Le\n" +
+		"T:Sub, Les\n" +
+		"T:Sub, Ye\n" +
+		"K:C\n" +
+		"C";
+
+	var expectedSubtitleAndFrench = [
+		"20. The Subtitles",
+		"The Sub",
+		"the Sub",
+		"A Sub",
+		"a Sub",
+		"An Sub",
+		"an Sub",
+		"Da Sub",
+		"La Sub",
+		"Le Sub",
+		"Les Sub",
+		"Ye Sub",
+	]
+
 	it("puts 'the' at the front of the title", function () {
 		testTitle(abcTitleNormal, expectedTitleNormal, "TitleNormal");
 		testTitle(abcTitleThe, expectedTitleThe, "TitleThe");
@@ -78,6 +109,24 @@ describe("Title", function () {
 		var visualObj = abcjs.renderAbc("*", abc);
 		var title = visualObj[0].metaText.title
 		chai.assert.equal(title, expected, ": "+comment);
+
+	}
+
+	it("tests reverser for subtitles", function () {
+		testSubTitle(abcSubtitleAndFrench, expectedSubtitleAndFrench);
+	})
+
+	function testSubTitle(abc, expected) {
+		var visualObj = abcjs.renderAbc("*", abc);
+		var titles = [visualObj[0].metaText.title]
+		for (var i = 0; i < visualObj[0].lines.length; i++) {
+			var line = visualObj[0].lines[i]
+			if (line.subtitle) {
+				titles.push(line.subtitle.text)
+			}
+		}
+		for (i = 0; i < titles.length; i++)
+			chai.assert.equal(titles[i], expected[i]);
 
 	}
 })
