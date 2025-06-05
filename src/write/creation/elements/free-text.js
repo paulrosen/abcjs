@@ -10,7 +10,12 @@ function FreeText(info, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
 	} else if (typeof text === 'string') {
 		this.rows.push({ move: hash.attr['font-size'] / 2 }); // TODO-PER: move down some - the y location should be the top of the text, but we output text specifying the center line.
 		this.rows.push({ left: paddingLeft, text: text, font: 'textfont', klass: 'defined-text', anchor: "start", startChar: info.startChar, endChar: info.endChar, absElemType: "freeText", name: "free-text" });
-		size = getTextSize.calc(text, 'textfont', 'defined-text');
+	    // MAE 9 May 2025 - Force blank text lines in a text block to have height
+	    function replaceStandaloneNewlinesForTextBlocks(input) {
+	      return input.replace(/^[ \t]*\n/gm, 'X\n');;
+	    }
+	    var textForSize = replaceStandaloneNewlinesForTextBlocks(text);
+	    size = getTextSize.calc(textForSize, 'textfont', 'defined-text'); // was text
 		this.rows.push({ move: size.height });
 	} else if (text) {
 		var maxHeight = 0;

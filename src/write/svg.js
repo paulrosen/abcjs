@@ -176,8 +176,14 @@ Svg.prototype.text = function (text, attr, target) {
 			el.setAttribute(key, attr[key]);
 		}
 	}
+	var isFreeText = (attr["data-name"] == "free-text");
 	var lines = ("" + text).split("\n");
 	for (var i = 0; i < lines.length; i++) {
+		if (isFreeText && (lines[i] == "")){
+	      // Don't draw empty lines
+	      continue;
+	    }
+
 		var line = document.createElementNS(svgNS, 'tspan');
 		line.setAttribute("x", attr.x ? attr.x : 0);
 		if (i !== 0)
@@ -200,8 +206,23 @@ Svg.prototype.text = function (text, attr, target) {
 				ts3.textContent = parts[2];
 				line.appendChild(ts3);
 			}
-		} else
-			line.textContent = lines[i];
+		}     
+		else 
+    	{
+	      // MAE 9 May 2025 - For improved block text
+	      if (isFreeText){
+	        // Fixes issue where blank lines in text blocks didn't take up any vertical
+	        if (lines[i].trim() == ""){
+	          line.innerHTML = "&nbsp;";
+	        }
+	        else{
+	          line.textContent = lines[i];
+	        }
+	      }
+	      else{
+	        line.textContent = lines[i];
+	      }
+    	}	
 		el.appendChild(line);
 	}
 	if (target)

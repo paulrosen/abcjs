@@ -948,10 +948,17 @@ var parseDirective = {};
 				var textBlock = '';
 				line = tokenizer.nextLine();
 				while(line && line.indexOf('%%endtext') !== 0) {
-					if (parseCommon.startsWith(line, "%%"))
-						textBlock += line.substring(2) + "\n";
-					else
-						textBlock += line + "\n";
+		          // MAE 9 May 2025 - for text blocks with just white space
+		          if (parseCommon.startsWith(line, "%%")){
+
+		            var theLine = line.substring(2);
+		            theLine = theLine.trim() + "\n";
+		            textBlock += theLine;
+
+		          }
+		          else{
+		            textBlock += line.trim() + "\n";
+		          }
 					line = tokenizer.nextLine();
 				}
 				tuneBuilder.addText(textBlock, { startChar: multilineVars.iChar, endChar: multilineVars.iChar+textBlock.length+7});

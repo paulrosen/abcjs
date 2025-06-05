@@ -182,6 +182,40 @@ describe("Miscellaneous", function () {
 		"K:C\n" +
 		"!>!A2!>!c2|T!>!A2T!>!c2|]\n"
 
+	var abcFreeTextBlank = 'X:1\n' +
+		'M: none\n' +
+		'L: 1/4\n' +
+		'K: C none stafflines=0\n' +
+		'%%begintext\n' +
+		'%%\n' +
+		'%%endtext\n' +
+		'B4'
+
+	var expectedFreeTextBlank = [10.5, 24, 68.5, 41.5]
+
+	var abcFreeTextSpace = 'X:1\n' +
+		'M: none\n' +
+		'L: 1/4\n' +
+		'K: C none stafflines=0\n' +
+		'%%begintext\n' +
+		'%% \n' +
+		'%%endtext\n' +
+		'B4'
+
+	var expectedFreeTextSpace = [10.5, 24, 68.5, 41.5]
+
+	var abcFreeTextNormal = 'X:1\n' +
+		'M: none\n' +
+		'L: 1/4\n' +
+		'K: C none stafflines=0\n' +
+		'%%begintext\n' +
+		'%% A\n' +
+		'%%endtext\n' +
+		'B4'
+
+	var expectedFreeTextNormal = [10.5, 24, 68.5, 41.5]
+
+
 	it("line-width", function () {
 		abcjs.renderAbc("paper", abcLineWidth, { add_classes: true});
 		var height = extractHeight()
@@ -244,7 +278,39 @@ describe("Miscellaneous", function () {
 		var actual = visualObj[0].lines[0].staffGroup.voices[0].children[2].abcelem.barNumber
 		chai.assert.equal(actual, 25)
 	})
+
+	it("free-text-blank", function () {
+		checkFreeText(abcFreeTextBlank, expectedFreeTextBlank);
+	})
+
+	it("free-text-space", function () {
+		checkFreeText(abcFreeTextSpace, expectedFreeTextSpace);
+	})
+
+	it("free-text-normal", function () {
+		checkFreeText(abcFreeTextNormal, expectedFreeTextNormal);
+	})
+
+
 })
+
+function checkFreeText(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc);
+	var text = visualObj[0].lines[0].nonMusic.rows
+	var ys = []
+	for (var i = 0; i < text.length; i++)
+		if (text[i].move !== undefined)
+			ys.push(text[i].move)
+	var note = visualObj[0].lines[1].staff[0].voices[0][0].abselem.elemset[0]
+	var bb = note.getBBox()
+	ys.push(Math.round(bb.y*10)/10)
+	var svg = document.querySelector('#paper svg')
+	var bbSvg = svg.getBBox()
+	ys.push(Math.round(bbSvg.height*10)/10)
+	console.log(ys)
+	chai.assert.deepEqual(ys, expected)
+}
+
 
 function extractText(visualObj) {
 	var textResults = []
@@ -271,8 +337,8 @@ function extractText(visualObj) {
 			textResults.push({key: 'subtitle', text:line.subtitle.text})
 		} else if (line.staff) {
 			var voice = line.staff[0].voices[0]
-		   for (var i = 0; i < voice.length; i++) {
-			   var elem = voice[i];
+		   for (var ii = 0; ii < voice.length; ii++) {
+			   var elem = voice[ii];
 			   if (elem.chord) {
 				   for (var j = 0; j < elem.chord.length; j++) {
 					   var chord = elem.chord[j]

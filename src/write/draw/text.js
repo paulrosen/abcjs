@@ -37,7 +37,14 @@ function renderText(renderer, params, alreadyInGroup) {
 		hash.attr.cursor = params.cursor;
 	}
 
-	var text = params.text.replace(/\n\n/g, "\n \n");
+	// MAE 9 May 2025 for free text blocks
+	var text;
+	if (params.name == "free-text"){
+		text = params.text.replace(/^[ \t]*\n/gm, ' \n');
+	}
+	else{
+		text = params.text.replace(/\n\n/g, "\n \n");
+	}
 	text = text.replace(/^\n/, "\xA0\n");
 
 	if (hash.font.box) {
