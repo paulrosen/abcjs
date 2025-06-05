@@ -195,7 +195,10 @@ var pitchesToPerc = require('./pitches-to-perc');
 						stressBeat1 = element.beats[0];
 						stressBeatDown = element.beats[1];
 						stressBeatUp = element.beats[2];
-						volumesPerNotePitch = element.volumesPerNotePitch;
+						if (!element.volumesPerNotePitch)
+							volumesPerNotePitch = []
+						else
+							volumesPerNotePitch = element.volumesPerNotePitch;
 						// TODO-PER: also use the last parameter - which changes which beats are strong.
 						break;
 					case "vol":
@@ -352,14 +355,14 @@ var pitchesToPerc = require('./pitches-to-perc');
 		let pitchStressBeat1 = stressBeat1;
 		let pitchStressBeatDown = stressBeatDown;
 		let pitchStressBeatUp = stressBeatUp;
-		if(pitchIndexOfNote != undefined && volumesPerNotePitch.length >= pitchIndexOfNote+1){
+		if(pitchIndexOfNote !== undefined && volumesPerNotePitch.length >= pitchIndexOfNote+1){
 			pitchStressBeat1 = volumesPerNotePitch[pitchIndexOfNote][0];
 			pitchStressBeatDown = volumesPerNotePitch[pitchIndexOfNote][1];
 			pitchStressBeatUp = volumesPerNotePitch[pitchIndexOfNote][2];
 		}
 		var volume;
     	// MAE 21 Jun 2024 - This previously wasn't allowing zero volume to be applied
-		if (nextVolume != undefined) {
+		if (nextVolume !== undefined) {
 			volume = nextVolume;
 			nextVolume = undefined;
 		} else if (!doBeatAccents) {
