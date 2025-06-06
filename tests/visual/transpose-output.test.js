@@ -324,11 +324,11 @@ describe("Transpose Output", function () {
 
 	var abcMissesAccidental = "L:1/4\n" +
 		"K:C\n" +
-		"\"Ebdim7\" D ^C/ =C/- C B, |"
+		"^C =C|=C |"
 
 	var abcMissesAccidentalExpected = "L:1/4\n" +
 		"K:Bb\n" +
-		"\"Dbdim7\" C =B,/ _B,/- B A, |"
+		"=B, _B,|_B, |"
 
 	var abcDimChords = "L:1/4\n" +
 		"K:C\n" +

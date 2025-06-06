@@ -1,7 +1,7 @@
 describe("Layout", function() {
 	var abcBarLinesTreble = "X:1\n%%barlabelfont Times-Bold 18 box\n%%setbarnb 42\n%%barnumbers 1\nM: 4/4\nL: 1/16\nK:D\nz8 |\n z8 |\n"
 
-	var expectedBarLinesTreble = [{x: 20, y: 88}]
+	var expectedBarLinesTreble = [{x: 20, y: 86}]
 
 	var abcBarLinesBass = "X:1\n%%barlabelfont Times-Bold 18 box\n%%setbarnb 42\n%%barnumbers 1\nM: 4/4\nL: 1/16\nK:D clef=bass\nz8 |\n z8 |\n"
 

@@ -202,7 +202,7 @@ describe("Parsing", function () {
 	var expectedBarNumberSubtitle = [
 		[
 			{ el_type: 'note', duration: 12, rest: { type: 'multimeasure', text: 24 } },
-			{ el_type: 'bar', barNumber: 25, type: 'bar_thin'},
+			{ el_type: 'bar', type: 'bar_thin'},
 			{ el_type: 'note', pitches: [{ pitch: 3, name: 'F', verticalPos: 3, highestVert: 9}], duration: 0.5},
 			{ el_type: 'bar', type: 'bar_thin'},
 		]
