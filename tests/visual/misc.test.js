@@ -221,6 +221,16 @@ describe("Miscellaneous", function () {
 
 	var expectedFreeTextNormal = [10.5, 24, 68.5, 41.5]
 
+	var abcBeamBr = "X: 1\n" +
+		"L: 1/8\n" +
+		"K: C none\n" +
+		"B!beambr1!B/BB/"
+
+	var expectedBeamBr = [
+		{"startX":15,"endX":96.81320343559642,"startY":-1,"endY":-1,"dy":-3.875},
+		{"startX":45,"endX":40,"startY":0.5,"endY":0.5,"dy":-3.875,"split":[45,52,45]},
+		{"startX":96.21320343559643,"endX":91.21320343559643,"startY":0.5,"endY":0.5,"dy":-3.875}
+	]
 
 	it("line-width", function () {
 		abcjs.renderAbc("paper", abcLineWidth, { add_classes: true});
@@ -301,6 +311,14 @@ describe("Miscellaneous", function () {
 
 	it("free-text-normal", function () {
 		checkFreeText(abcFreeTextNormal, expectedFreeTextNormal);
+	})
+
+	it("beam-br", function () {
+		var visualObj = abcjs.renderAbc("paper", abcBeamBr, {add_classes:true});
+		// The beam object is the same for all the notes so just look at the first one
+		var beams = visualObj[0].lines[0].staff[0].voices[0][0].abselem.beam.beams
+		var msg = 'found: '+ JSON.stringify(beams)
+		chai.assert.deepEqual(beams, expectedBeamBr, msg)
 	})
 
 
