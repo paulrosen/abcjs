@@ -570,7 +570,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 			for (var i=0; i<ePitches.length; i++) {
 				//here we can set the volume for each note in a chord, if specified
 				let pitchVelocity = velocity;
-				if(Array.isArray(elem.decoration) && elem.decoration.length > i){
+				if(!ret.velocity && Array.isArray(elem.decoration) && elem.decoration.length > i){
 					pitchVelocity = processVolume(timeToRealTime(elem.time), voiceOff, i)
 				}
 				var note = ePitches[i];
