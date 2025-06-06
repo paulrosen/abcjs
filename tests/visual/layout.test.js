@@ -159,6 +159,25 @@ describe("Layout", function() {
 		{x: 91, y: 174},
 	]
 
+	var abcVoiceEndings = "X:1\n" +
+		"T:endings\n" +
+		"%%score (1 2)\n" +
+		"L:1/8\n" +
+		"K:D \n" +
+		"V:1  \n" +
+		"%%voicecolor blue\n" +
+		"[1 \"D\"fdd2 fded:|\n" +
+		"[2 \"D\"dffe d3A|]\n" +
+		"V:2\n" +
+		"%%voicecolor red\n" +
+		"[1 A,2[A2C2E2] [D,3F,3A,3D3]:|\n" +
+		"[2 A,2[A2C2E2] [D,3F,3A,3D3]|]\n"
+
+	var expectedVoiceEndings = [
+		{"klass":"abcjs-ending abcjs-l0 abcjs-m0 abcjs-mm0 abcjs-v0","stroke":"blue","fill":"blue","strokeText":"none","fillText":null},
+		{"klass":"abcjs-ending abcjs-l1 abcjs-m0 abcjs-mm1 abcjs-v0","stroke":"blue","fill":"blue","strokeText":"none","fillText":null}
+	]
+
 	it("line-too-wide", function() {
 		var visualObj = doLayoutTest(lineTooWide, {staffwidth: 500, expandToWidest: true }, expectedLineTooWide, 'staffwidth=500');
 		var expected = ['', 313, '', '', 15, 611, '']
@@ -227,6 +246,26 @@ describe("Layout", function() {
 			line.setAttribute("stroke", "#0000ff50");
 			svg.appendChild(line);
 		}
+	})
+
+	it("voice-endings", function() {
+		abcjs.renderAbc("paper", abcVoiceEndings, { add_classes: true})
+		var endings = document.querySelectorAll("#paper .abcjs-ending")
+		//console.log(endings)
+		var output = []
+		for (var i = 0; i < endings.length; i++) {
+			var ending = endings[i]
+			var klass = ''+ending.classList
+			var path = ending.querySelector('path')
+			var text = ending.querySelector('text')
+			var stroke = path.getAttribute('stroke')
+			var fill = path.getAttribute('fill')
+			var strokeText = text.getAttribute('stroke')
+			var fillText = text.getAttribute('fill')
+			output.push({klass: klass, stroke: stroke, fill: fill, strokeText: strokeText, fillText: fillText})
+		}
+		console.log(JSON.stringify(output))
+		chai.assert.deepEqual(output, expectedVoiceEndings)
 	})
 
 })

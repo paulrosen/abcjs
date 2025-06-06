@@ -1026,13 +1026,16 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
 		abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
 	} // 2 is hardcoded
 
-	if (elem.startEnding && isFirstStaff) { // only put the first & second ending marks on the first staff
-		var textWidth = this.getTextSize.calc(elem.startEnding, "repeatfont", '').width;
-		abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
-		this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
-		voice.addOther(this.partstartelem);
+	if (elem.startEnding && isFirstStaff) {
+		// MAE 17 May 2025 - Fixes drawing issue
+		if (voice.voicenumber === 0){
+			// only put the first & second ending marks on the first staff
+			var textWidth = this.getTextSize.calc(elem.startEnding, "repeatfont", '').width;
+			abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
+			this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
+			voice.addOther(this.partstartelem);
+		}
 	}
-
 	// Add a little space to the left of the bar line so that nothing can crowd it.
 	abselem.extraw -= 5;
 
