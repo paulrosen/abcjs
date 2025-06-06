@@ -1132,6 +1132,17 @@ var parseDirective = {};
 				}
 				break;
 
+			case "maxstaves":
+				var nStaves = tokenizer.getInt(restOfString)
+				if (nStaves.digits === 0)
+					warn("Expected number of staves in maxstaves")
+				else{
+					if (nStaves.value > 0){
+						tune.formatting.maxStaves = nStaves.value;
+					}
+				}
+				break;
+
 			case "newpage":
 				var pgNum = tokenizer.getInt(restOfString);
 				tuneBuilder.addNewPage(pgNum.digits === 0 ? -1 : pgNum.value);

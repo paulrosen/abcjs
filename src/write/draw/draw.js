@@ -15,10 +15,18 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 	renderer.paper.closeGroup()
 	renderer.moveY(renderer.spacing.music);
 	var staffgroups = [];
+	var nStaves = 0;
 	for (var line = 0; line < abcTune.lines.length; line++) {
 		classes.incrLine();
 		var abcLine = abcTune.lines[line];
 		if (abcLine.staff) {
+			// MAE 26 May 2025 - for incipits staff count limiting
+			nStaves++;
+			if (abcTune.formatting.maxStaves){
+				if (nStaves > abcTune.formatting.maxStaves){
+					break;
+				}
+			}
 			if (classes.shouldAddClasses)
 				groupClasses.klass = "abcjs-staff-wrapper abcjs-l" + classes.lineNumber
 			renderer.paper.openGroup(groupClasses)

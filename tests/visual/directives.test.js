@@ -33,6 +33,31 @@ describe("Directives", function() {
 		doNoteTest(abcRemark, abcRemarkExpected)
 	})
 
+	var abcMaxStaves = "X: 1\n" +
+		"T: Incipit Test\n" +
+		"T: with Subtitle\n" +
+		"%%staffwidth 140\n" +
+		"%%maxStaves 2\n" +
+		"M: 4/4\n" +
+		"L: 1/4\n" +
+		"A4|\n" +
+		"B4|\n" +
+		"c4|\n" +
+		"d4|\n"
+
+	it("max-staves", function() {
+		var visualObj = abcjs.renderAbc("paper",abcMaxStaves)
+		chai.assert.equal(visualObj[0].lines.length, 5, "Max Staves");
+		var isDrawn = []
+		for (var i = 0; i < visualObj[0].lines.length; i++) {
+			var line = visualObj[0].lines[i]
+			if (line.staff) {
+				var el = line.staff[0].voices[0][0]
+				isDrawn.push(!!el.abselem)
+			}
+		}
+		chai.assert.deepStrictEqual(isDrawn, [true,true,false,false]);
+	})
 })
 
 function allTests(abc, directive, blankExpected, values, expectedArray) {
