@@ -5,6 +5,12 @@ describe("Miscellaneous", function () {
 		"%%barnumbers 1\n" +
 		"Z24 | F2 |\n"
 
+	var abcBarNumberCrash = "X:1\n" +
+		"T:Title\n" +
+		"%%barnumbers 1\n" +
+		"%%setbarnb 5\n" +
+		"ABCD ABCD | ABCD ABCD\n"
+
 	var abcJazzChords = "X:1\n" +
 		"%%jazzchords\n" +
 		"K:C\n" +
@@ -277,6 +283,12 @@ describe("Miscellaneous", function () {
 		var visualObj = abcjs.renderAbc("paper", abcMeasureNumbers, {add_classes:true});
 		var actual = visualObj[0].lines[0].staffGroup.voices[0].children[2].abcelem.barNumber
 		chai.assert.equal(actual, 25)
+	})
+
+	it('bar-number-crash', function() {
+		var visualObj = abcjs.renderAbc("paper", abcBarNumberCrash, {add_classes:true});
+		var actual = visualObj[0].lines[0].staffGroup.voices[0].children[9].abcelem.barNumber
+		chai.assert.equal(actual, 6)
 	})
 
 	it("free-text-blank", function () {
