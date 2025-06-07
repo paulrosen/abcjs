@@ -1,3 +1,45 @@
+# Version 6.5.0
+
+## Bugs
+
+* Don't print first ending marks for second voice on the same staff.
+
+* Fix spacing problem when there are empty free text blocks.
+
+* Add octave and other clefs to the list for voice line, i.e. `V:1 treble-8`
+
+* Test to be sure dataset exists for old browsers.
+
+* Report more exceptions when failing to create synth.
+
+* Don't use A#dim or D#dim when transposing.
+
+* Allow space in key name when transposing.
+
+* Fix crash when setting some directives before the first music line.
+
+* Fix canceling a treble+8 clef.
+
+* Fix playback of guitar chords in parentheses.
+
+* Don't crash if CreateSynth doesn't have options passed in.
+
+## Features
+
+* Allow notes in chords to be different volumes.
+
+* Add %%maxstaves directive for creating incipits.
+
+* Add more articles that can be reversed in titles.
+
+* Add %%visualTranspose directive.
+
+* Add %%keywarn support.
+
+* Add filtering of ABC file header.
+
+* Added trillh and pralltriller.
+
 # Version 6.4.4
 
 ## Bugs

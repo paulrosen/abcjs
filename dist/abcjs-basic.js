@@ -4319,11 +4319,24 @@ var parseDirective = {};
         }
         multilineVars.currBarNumber = tuneBuilder.setBarNumberImmediate(tokens[0].intt);
         break;
+      case "keywarn":
+        if (tokens.length !== 1 || tokens[0].type !== 'number' || tokens[0].intt !== 1 && tokens[0].intt !== 0) {
+          return 'Directive ' + cmd + ' requires 0 or 1 as a parameter.';
+        }
+        multilineVars[cmd] = tokens[0].intt === 1;
+        break;
       case "begintext":
         var textBlock = '';
         line = tokenizer.nextLine();
         while (line && line.indexOf('%%endtext') !== 0) {
-          if (parseCommon.startsWith(line, "%%")) textBlock += line.substring(2) + "\n";else textBlock += line + "\n";
+          // MAE 9 May 2025 - for text blocks with just white space
+          if (parseCommon.startsWith(line, "%%")) {
+            var theLine = line.substring(2);
+            theLine = theLine.trim() + "\n";
+            textBlock += theLine;
+          } else {
+            textBlock += line.trim() + "\n";
+          }
           line = tokenizer.nextLine();
         }
         tuneBuilder.addText(textBlock, {
@@ -4508,6 +4521,14 @@ var parseDirective = {};
           }
         }
         break;
+      case "maxstaves":
+        var nStaves = tokenizer.getInt(restOfString);
+        if (nStaves.digits === 0) warn("Expected number of staves in maxstaves");else {
+          if (nStaves.value > 0) {
+            tune.formatting.maxStaves = nStaves.value;
+          }
+        }
+        break;
       case "newpage":
         var pgNum = tokenizer.getInt(restOfString);
         tuneBuilder.addNewPage(pgNum.digits === 0 ? -1 : pgNum.value);
@@ -4567,6 +4588,10 @@ var parseDirective = {};
           if (!tune.formatting.percmap) tune.formatting.percmap = {};
           tune.formatting.percmap[percmap.key] = percmap.value;
         }
+        break;
+      case "visualtranspose":
+        var halfSteps = tokenizer.getInt(restOfString);
+        if (halfSteps.digits === 0) warn("Expected number of half steps in visualTranspose");else multilineVars.globalTranspose = halfSteps.value;
         break;
       case "map":
       case "playtempo":
@@ -5109,8 +5134,8 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           return [line.length];
         case "K:":
           var result = parseKeyVoice.parseKey(line.substring(i + 2), tuneBuilder.hasBeginMusic());
-          if (result.foundClef && tuneBuilder.hasBeginMusic()) tuneBuilder.appendStartingElement('clef', multilineVars.iChar + i, multilineVars.iChar + line.length, multilineVars.clef);
-          if (result.foundKey && tuneBuilder.hasBeginMusic()) tuneBuilder.appendStartingElement('key', multilineVars.iChar + i, multilineVars.iChar + line.length, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
+          if (result.foundClef && tuneBuilder.hasBeginMusic() && multilineVars.keywarn !== false) tuneBuilder.appendStartingElement('clef', multilineVars.iChar + i, multilineVars.iChar + line.length, multilineVars.clef);
+          if (result.foundKey && tuneBuilder.hasBeginMusic() && multilineVars.keywarn !== false) tuneBuilder.appendStartingElement('key', multilineVars.iChar + i, multilineVars.iChar + line.length, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
           return [line.length];
         case "P:":
           if (tuneBuilder.hasBeginMusic()) tuneBuilder.appendElement('part', multilineVars.iChar + i, multilineVars.iChar + line.length, {
@@ -5192,7 +5217,7 @@ var ParseHeader = function ParseHeader(tokenizer, warn, multilineVars, tune, tun
           // since the key is the last thing that can happen in the header, we can resolve the tempo now
           this.resolveTempo();
           var result = parseKeyVoice.parseKey(line.substring(2), false);
-          if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic()) {
+          if (!multilineVars.is_in_header && tuneBuilder.hasBeginMusic() && multilineVars.keywarn !== false) {
             if (result.foundClef) tuneBuilder.appendStartingElement('clef', startChar, endChar, multilineVars.clef);
             if (result.foundKey) tuneBuilder.appendStartingElement('key', startChar, endChar, parseKeyVoice.fixKey(multilineVars.clef, multilineVars.key));
           }
@@ -5724,7 +5749,7 @@ var parseKeyVoice = {};
           multilineVars.key = parseKeyVoice.deepCopyKey(parseKeyVoice.standardKey(key, retPitch.token, acc, keyCompensate));
           if (isInline) multilineVars.globalTransposeOrigKeySig = savedOrigKey;
           multilineVars.key.mode = mode;
-          if (oldKey) {
+          if (oldKey && multilineVars.keywarn !== false) {
             // Add natural in all places that the old key had an accidental.
             var kk;
             for (var k = 0; k < multilineVars.key.accidentals.length; k++) {
@@ -6135,12 +6160,47 @@ var parseKeyVoice = {};
           case 'tenor,,':
           case 'alto,,':
           case 'none,,':
+          // MAE 26 May 2025 Start of additional clefs
+          case 'treble+8':
+          case 'treble-8':
+          case 'treble^8':
+          case 'treble_8':
+          case 'treble1':
+          case 'treble2':
+          case 'treble3':
+          case 'treble4':
+          case 'treble5':
+          case 'bass+8':
+          case 'bass-8':
+          case 'bass^8':
+          case 'bass_8':
+          case 'bass+16':
+          case 'bass-16':
+          case 'bass^16':
+          case 'bass_16':
+          case 'bass1':
+          case 'bass2':
+          case 'bass3':
+          case 'bass4':
+          case 'bass5':
+          case 'tenor1':
+          case 'tenor2':
+          case 'tenor3':
+          case 'tenor4':
+          case 'tenor5':
+          case 'alto1':
+          case 'alto2':
+          case 'alto3':
+          case 'alto4':
+          case 'alto5':
+          case 'alto+8':
+          case 'alto-8':
+          case 'alto^8':
+          case 'alto_8':
+            // MAE 26 May 2025 End of additional clefs
+
             // TODO-PER: handle the octave indicators on the clef by changing the middle property
             var oct2 = 0;
-            //							for (var iii = 0; iii < token.token.length; iii++) {
-            //								if (token.token[iii] === ',') oct2 -= 7;
-            //								else if (token.token[iii] === "'") oct2 += 7;
-            //							}
             staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
             staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
             multilineVars.voices[id].clef = token.token;
@@ -7036,6 +7096,8 @@ var letter_to_accent = function letter_to_accent(line, i) {
       return [1, 'segno'];
     case 'T':
       return [1, 'trill'];
+    case 't':
+      return [1, 'trillh'];
   }
   return [0, 0];
 };
@@ -7513,7 +7575,7 @@ module.exports = MusicParser;
   \*****************************************/
 /***/ (function(module) {
 
-module.exports.legalAccents = ['trill', 'lowermordent', 'uppermordent', 'mordent', 'pralltriller', 'accent', 'fermata', 'invertedfermata', 'tenuto', '0', '1', '2', '3', '4', '5', '+', 'wedge', 'open', 'thumb', 'snap', 'turn', 'roll', 'breath', 'shortphrase', 'mediumphrase', 'longphrase', 'segno', 'coda', 'D.S.', 'D.C.', 'fine', 'beambr1', 'beambr2', 'slide', 'marcato', 'upbow', 'downbow', '/', '//', '///', '////', 'trem1', 'trem2', 'trem3', 'trem4', 'turnx', 'invertedturn', 'invertedturnx', 'trill(', 'trill)', 'arpeggio', 'xstem', 'mark', 'umarcato', 'style=normal', 'style=harmonic', 'style=rhythm', 'style=x', 'style=triangle', 'D.C.alcoda', 'D.C.alfine', 'D.S.alcoda', 'D.S.alfine', 'editorial', 'courtesy'];
+module.exports.legalAccents = ['trill', 'trillh', 'lowermordent', 'uppermordent', 'mordent', 'pralltriller', 'accent', 'fermata', 'invertedfermata', 'tenuto', '0', '1', '2', '3', '4', '5', '+', 'wedge', 'open', 'thumb', 'snap', 'turn', 'roll', 'breath', 'shortphrase', 'mediumphrase', 'longphrase', 'segno', 'coda', 'D.S.', 'D.C.', 'fine', 'beambr1', 'beambr2', 'slide', 'marcato', 'upbow', 'downbow', '/', '//', '///', '////', 'trem1', 'trem2', 'trem3', 'trem4', 'turnx', 'invertedturn', 'invertedturnx', 'trill(', 'trill)', 'arpeggio', 'xstem', 'mark', 'umarcato', 'style=normal', 'style=harmonic', 'style=rhythm', 'style=x', 'style=triangle', 'D.C.alcoda', 'D.C.alfine', 'D.S.alcoda', 'D.S.alfine', 'editorial', 'courtesy'];
 module.exports.volumeDecorations = ['p', 'pp', 'f', 'ff', 'mf', 'mp', 'ppp', 'pppp', 'fff', 'ffff', 'sfz'];
 module.exports.dynamicDecorations = ['crescendo(', 'crescendo)', 'diminuendo(', 'diminuendo)', 'glissando(', 'glissando)', '~(', '~)'];
 module.exports.accentPseudonyms = [['<', 'accent'], ['>', 'accent'], ['tr', 'trill'], ['plus', '+'], ['emphasis', 'accent'], ['^', 'umarcato'], ['marcato', 'umarcato']];
@@ -8731,14 +8793,38 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     }
   }
   var thePatterns = [{
-    match: /,\s*[Tt]he$/,
+    match: /,\s*The$/,
     replace: "The "
   }, {
-    match: /,\s*[Aa]$/,
+    match: /,\s*the$/,
+    replace: "the "
+  }, {
+    match: /,\s*A$/,
     replace: "A "
   }, {
-    match: /,\s*[Aa]n$/,
+    match: /,\s*a$/,
+    replace: "a "
+  }, {
+    match: /,\s*An$/,
     replace: "An "
+  }, {
+    match: /,\s*an$/,
+    replace: "an "
+  }, {
+    match: /,\s*Da$/,
+    replace: "Da "
+  }, {
+    match: /,\s*La$/,
+    replace: "La "
+  }, {
+    match: /,\s*Le$/,
+    replace: "Le "
+  }, {
+    match: /,\s*Les$/,
+    replace: "Les "
+  }, {
+    match: /,\s*Ye$/,
+    replace: "Ye "
   }];
   this.theReverser = function (str) {
     for (var i = 0; i < thePatterns.length; i++) {
@@ -8988,7 +9074,9 @@ transpose.keySignature = function (multilineVars, keyName, root, acc, localTrans
   var newKeyName = keyName[0] === 'm' ? newKeyMinor[index] : newKey[index];
   var transposedKey = newKeyName + keyName;
   var newKeySig = keyAccidentals(transposedKey);
-  if (newKeySig.length > 0 && newKeySig[0].acc === 'flat') multilineVars.localTransposePreferFlats = true;
+  if (newKeySig.length === 0 || newKeySig[0].acc === 'flat')
+    // key of C and all keys with flats should have chords with flats
+    multilineVars.localTransposePreferFlats = true;
   var distance = transposedKey.charCodeAt(0) - baseKey.charCodeAt(0);
   if (multilineVars.localTranspose > 0) {
     if (distance < 0) distance += 7;else if (distance === 0) {
@@ -9160,6 +9248,13 @@ function transposeChordName(chord, steps, preferFlats, freeGCchord) {
   } else {
     if (freeGCchord) chord = sharpChordsFree[index];else chord = sharpChords[index];
   }
+  var isDim = extra1 && (extra1.indexOf('dim') >= 0 || extra1.indexOf('°') >= 0);
+  console.log(isDim, chord, extra1);
+  // We never want A#dim or D#dim
+  if (isDim && chord === 'A#') chord = 'Bb';
+  if (isDim && chord === 'D#') chord = 'Eb';
+  if (isDim && chord === 'A♯') chord = 'B♭';
+  if (isDim && chord === 'D♯') chord = 'E♭';
   if (extra1) chord += extra1;
   if (bass) {
     var index = sharpChords.indexOf(bass);
@@ -9201,7 +9296,7 @@ var TuneBuilder = function TuneBuilder(tune) {
   var currentVoiceName = '';
   tune.reset();
   this.setVisualTranspose = function (visualTranspose) {
-    if (visualTranspose) tune.visualTranspose = visualTranspose;
+    if (visualTranspose !== undefined) tune.visualTranspose = visualTranspose;
   };
   this.cleanUp = function (barsperstaff, staffnonote, currSlur) {
     closeLine(tune); // Close the last line.
@@ -10000,6 +10095,7 @@ function wrapMusicLines(lines, barsperstaff) {
   return false;
 }
 function getPrevMusicLine(lines, currentLine) {
+  if (lines.length <= currentLine) return null;
   // If the current line doesn't have music, search backwards until one is found.
   while (currentLine >= 0) {
     if (lines[currentLine].staff) return lines[currentLine];
@@ -10745,16 +10841,16 @@ var strTranspose;
     var count = arr[0].length;
     for (var i = 1; i < arr.length; i++) {
       var segment = arr[i];
-      var match = segment.match(/^( *)([A-G])([#b]?)(\w*)/);
+      var match = segment.match(/^( *)([A-G])([#b]?)( ?)(\w*)/);
       if (match) {
         var start = count + 2 + match[1].length; // move past the 'K:' and optional white space
-        var key = match[2] + match[3] + match[4]; // key name, accidental, and mode
+        var key = match[2] + match[3] + match[4] + match[5]; // key name, accidental, optional space, and mode
         var destinationKey = newKey({
           root: match[2],
           acc: match[3],
-          mode: match[4]
+          mode: match[5]
         }, steps);
-        var dest = destinationKey.root + destinationKey.acc + destinationKey.mode;
+        var dest = destinationKey.root + destinationKey.acc + match[4] + destinationKey.mode;
         changes.push({
           start: start,
           end: start + key.length,
@@ -11202,6 +11298,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
   var stressBeat1 = 105;
   var stressBeatDown = 95;
   var stressBeatUp = 85;
+  var volumesPerNotePitch = [[stressBeat1, stressBeatDown, stressBeatUp]];
   var beatFraction = 0.25;
   var nextVolume;
   var nextVolumeDelta;
@@ -11243,6 +11340,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     stressBeat1 = 105;
     stressBeatDown = 95;
     stressBeatUp = 85;
+    volumesPerNotePitch = [];
     beatFraction = 0.25;
     nextVolume = undefined;
     nextVolumeDelta = undefined;
@@ -11353,6 +11451,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
             stressBeat1 = element.beats[0];
             stressBeatDown = element.beats[1];
             stressBeatUp = element.beats[2];
+            if (!element.volumesPerNotePitch) volumesPerNotePitch = [];else volumesPerNotePitch = element.volumesPerNotePitch;
             // TODO-PER: also use the last parameter - which changes which beats are strong.
             break;
           case "vol":
@@ -11496,21 +11595,29 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     var distanceFromStart = currTime - measureStart;
     return distanceFromStart / beatLength;
   }
-  function processVolume(beat, voiceOff) {
+  function processVolume(beat, voiceOff, pitchIndexOfNote) {
     if (voiceOff) return 0;
+    var pitchStressBeat1 = stressBeat1;
+    var pitchStressBeatDown = stressBeatDown;
+    var pitchStressBeatUp = stressBeatUp;
+    if (pitchIndexOfNote !== undefined && volumesPerNotePitch.length >= pitchIndexOfNote + 1) {
+      pitchStressBeat1 = volumesPerNotePitch[pitchIndexOfNote][0];
+      pitchStressBeatDown = volumesPerNotePitch[pitchIndexOfNote][1];
+      pitchStressBeatUp = volumesPerNotePitch[pitchIndexOfNote][2];
+    }
     var volume;
     // MAE 21 Jun 2024 - This previously wasn't allowing zero volume to be applied
-    if (nextVolume != undefined) {
+    if (nextVolume !== undefined) {
       volume = nextVolume;
       nextVolume = undefined;
     } else if (!doBeatAccents) {
-      volume = stressBeatDown;
+      volume = pitchStressBeatDown;
     } else if (pickupLength > beat) {
-      volume = stressBeatUp;
+      volume = pitchStressBeatUp;
     } else {
       //var barLength = meter.num / meter.den;
       var barBeat = calcBeat(lastBarTime, getBeatFraction(meter), beat);
-      if (barBeat === 0) volume = stressBeat1;else if (parseInt(barBeat, 10) === barBeat) volume = stressBeatDown;else volume = stressBeatUp;
+      if (barBeat === 0) volume = pitchStressBeat1;else if (parseInt(barBeat, 10) === barBeat) volume = pitchStressBeatDown;else volume = pitchStressBeatUp;
     }
     if (nextVolumeDelta) {
       volume += nextVolumeDelta;
@@ -11524,7 +11631,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
     var ret = {};
     if (elem.decoration) {
       for (var d = 0; d < elem.decoration.length; d++) {
-        if (elem.decoration[d] === 'staccato') ret.thisBreakBetweenNotes = 'staccato';else if (elem.decoration[d] === 'tenuto') ret.thisBreakBetweenNotes = 'tenuto';else if (elem.decoration[d] === 'accent') ret.velocity = Math.min(127, velocity * 1.5);else if (elem.decoration[d] === 'trill') ret.noteModification = "trill";else if (elem.decoration[d] === 'lowermordent') ret.noteModification = "lowermordent";else if (elem.decoration[d] === 'uppermordent') ret.noteModification = "mordent";else if (elem.decoration[d] === 'mordent') ret.noteModification = "mordent";else if (elem.decoration[d] === 'turn') ret.noteModification = "turn";else if (elem.decoration[d] === 'roll') ret.noteModification = "roll";
+        if (elem.decoration[d] === 'staccato') ret.thisBreakBetweenNotes = 'staccato';else if (elem.decoration[d] === 'tenuto') ret.thisBreakBetweenNotes = 'tenuto';else if (elem.decoration[d] === 'accent') ret.velocity = Math.min(127, velocity * 1.5);else if (elem.decoration[d] === 'trill') ret.noteModification = "trill";else if (elem.decoration[d] === 'lowermordent') ret.noteModification = "lowermordent";else if (elem.decoration[d] === 'uppermordent') ret.noteModification = "pralltriller";else if (elem.decoration[d] === 'mordent') ret.noteModification = "mordent";else if (elem.decoration[d] === 'turn') ret.noteModification = "turn";else if (elem.decoration[d] === 'roll') ret.noteModification = "roll";else if (elem.decoration[d] === 'pralltriller') ret.noteModification = "pralltriller";else if (elem.decoration[d] === 'trillh') ret.noteModification = "trillh";
       }
     }
     return ret;
@@ -11555,7 +11662,25 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
           start += shortestNote;
         }
         break;
-      case "mordent":
+      case "trillh":
+        var note = 1;
+        while (runningDuration > 0) {
+          currentTrack.push({
+            cmd: 'note',
+            pitch: p.pitch + note,
+            volume: p.volume,
+            start: start,
+            duration: shortestNote,
+            gap: 0,
+            instrument: currentInstrument,
+            style: 'decoration'
+          });
+          note = note === 1 ? 0 : 1;
+          runningDuration -= shortestNote;
+          start += shortestNote;
+        }
+        break;
+      case "pralltriller":
         currentTrack.push({
           cmd: 'note',
           pitch: p.pitch,
@@ -11590,6 +11715,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
           instrument: currentInstrument
         });
         break;
+      case "mordent":
       case "lowermordent":
         currentTrack.push({
           cmd: 'note',
@@ -11754,6 +11880,11 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
       }
       if (elem.elem) elem.elem.midiPitches = [];
       for (var i = 0; i < ePitches.length; i++) {
+        //here we can set the volume for each note in a chord, if specified
+        var pitchVelocity = velocity;
+        if (!ret.velocity && Array.isArray(elem.decoration) && elem.decoration.length > i) {
+          pitchVelocity = processVolume(timeToRealTime(elem.time), voiceOff, i);
+        }
         var note = ePitches[i];
         if (!note) continue;
         if (note.startSlur) slurCount += note.startSlur.length;
@@ -11766,7 +11897,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
         var p = {
           cmd: 'note',
           pitch: actualPitch,
-          volume: velocity,
+          volume: pitchVelocity,
           start: timeToRealTime(elem.time),
           duration: durationRounded(note.duration),
           instrument: currentInstrument,
@@ -12549,6 +12680,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
 
     // visit each voice completely in turn
     var voices = [];
+    var clefTransposeActive = [];
     var inCrescendo = [];
     var inDiminuendo = [];
     var durationCounter = [0];
@@ -12569,6 +12701,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
       if (line.staff) {
         var setDynamics = function setDynamics(elem) {
           var volumes = {
+            //stressBeat1, stressBeatDown, stressBeatUp
             'pppp': [15, 10, 5, 1],
             'ppp': [30, 20, 10, 1],
             'pp': [45, 35, 20, 1],
@@ -12585,9 +12718,17 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
             if (elem.decoration.indexOf('pppp') >= 0) dynamicType = 'pppp';else if (elem.decoration.indexOf('ppp') >= 0) dynamicType = 'ppp';else if (elem.decoration.indexOf('pp') >= 0) dynamicType = 'pp';else if (elem.decoration.indexOf('p') >= 0) dynamicType = 'p';else if (elem.decoration.indexOf('mp') >= 0) dynamicType = 'mp';else if (elem.decoration.indexOf('mf') >= 0) dynamicType = 'mf';else if (elem.decoration.indexOf('f') >= 0) dynamicType = 'f';else if (elem.decoration.indexOf('ff') >= 0) dynamicType = 'ff';else if (elem.decoration.indexOf('fff') >= 0) dynamicType = 'fff';else if (elem.decoration.indexOf('ffff') >= 0) dynamicType = 'ffff';
             if (dynamicType) {
               currentVolume = volumes[dynamicType].slice(0);
+              var volumesPerNotePitch = [currentVolume];
+              if (Array.isArray(elem.decoration)) {
+                volumesPerNotePitch = [];
+                elem.decoration.forEach(function (d) {
+                  volumesPerNotePitch.push(volumes[d].slice(0));
+                });
+              }
               voices[voiceNumber].push({
                 el_type: 'beat',
-                beats: currentVolume.slice(0)
+                beats: currentVolume.slice(0),
+                volumesPerNotePitch: volumesPerNotePitch
               });
               inCrescendo[k] = false;
               inDiminuendo[k] = false;
@@ -12665,15 +12806,31 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                 el_type: 'transpose',
                 transpose: staff.clef.transpose
               });
+              clefTransposeActive[voiceNumber] = false;
             }
             if (staff.clef && staff.clef.type) {
-              if (staff.clef.type.indexOf("-8") >= 0) voices[voiceNumber].push({
-                el_type: 'transpose',
-                transpose: -12
-              });else if (staff.clef.type.indexOf("+8") >= 0) voices[voiceNumber].push({
-                el_type: 'transpose',
-                transpose: 12
-              });
+              if (staff.clef.type.indexOf("-8") >= 0) {
+                voices[voiceNumber].push({
+                  el_type: 'transpose',
+                  transpose: -12
+                });
+                clefTransposeActive[voiceNumber] = true;
+              } else if (staff.clef.type.indexOf("+8") >= 0) {
+                voices[voiceNumber].push({
+                  el_type: 'transpose',
+                  transpose: 12
+                });
+                clefTransposeActive[voiceNumber] = true;
+              } else {
+                // if we had a previous treble+8 and now have a regular clef, then cancel the transposition
+                if (clefTransposeActive[voiceNumber]) {
+                  voices[voiceNumber].push({
+                    el_type: 'transpose',
+                    transpose: 0
+                  });
+                  clefTransposeActive[voiceNumber] = false;
+                }
+              }
             }
             if (abctune.formatting.midi && abctune.formatting.midi.drumoff) {
               // If there is a drum off command right at the beginning it is put in the metaText instead of the stream,
@@ -14166,7 +14323,7 @@ function CreateSynth() {
   self.audioBuffers = []; // cache of the buffers so starting play can be fast.
   self.duration = undefined; // the duration of the tune in seconds.
   self.isRunning = false; // whether there is currently a sound buffer running.
-  self.options = undefined;
+  self.options = {}; // Thx tomohirohiratsuka
   self.pickupLength = 0;
 
   // Load and cache all needed sounds
@@ -14394,87 +14551,93 @@ function CreateSynth() {
     self.isRunning = false;
     if (!self.audioBufferPossible) return Promise.reject(new Error(notSupportedMessage));
     if (self.debugCallback) self.debugCallback("prime called");
-    return new Promise(function (resolve) {
-      var startTime = activeAudioContext().currentTime;
-      var tempoMultiplier = self.millisecondsPerMeasure / 1000 / self.meterSize;
-      self.duration = self.flattened.totalDuration * tempoMultiplier;
-      if (self.duration <= 0) {
-        self.audioBuffers = [];
-        return resolve({
-          status: "empty",
-          seconds: 0
-        });
-      }
-      self.duration += fadeTimeSec;
-      var totalSamples = Math.floor(activeAudioContext().sampleRate * self.duration);
-
-      // There might be a previous run that needs to be turned off.
-      self.stop();
-      var noteMapTracks = createNoteMap(self.flattened);
-      if (self.options.swing) addSwing(noteMapTracks, self.options.swing, self.meterFraction, self.pickupLength);
-      if (self.sequenceCallback) self.sequenceCallback(noteMapTracks, self.callbackContext);
-      var panDistances = setPan(noteMapTracks.length, self.pan);
-
-      // Create a simple list of all the unique sounds in this music and where they should be placed.
-      // There appears to be a limit on how many audio buffers can be created at once so this technique limits the number needed.
-      var uniqueSounds = {};
-      noteMapTracks.forEach(function (noteMap, trackNumber) {
-        var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
-        noteMap.forEach(function (note) {
-          var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + (note.cents ? note.cents : 0);
-          if (self.debugCallback) self.debugCallback("noteMapTrack " + key);
-          if (!uniqueSounds[key]) uniqueSounds[key] = [];
-          uniqueSounds[key].push(note.start);
-        });
-      });
-
-      // Now that we know what we are trying to create, construct the audio buffer by creating each sound and placing it.
-      var allPromises = [];
-      var audioBuffer = activeAudioContext().createBuffer(2, totalSamples, activeAudioContext().sampleRate);
-      for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
-        var k = Object.keys(uniqueSounds)[key2];
-        var parts = k.split(":");
-        var cents = parts[6] !== undefined ? parseFloat(parts[6]) : 0;
-        parts = {
-          instrument: parts[0],
-          pitch: parseInt(parts[1], 10),
-          volume: parseInt(parts[2], 10),
-          len: parseFloat(parts[3]),
-          pan: parseFloat(parts[4]),
-          tempoMultiplier: parseFloat(parts[5]),
-          cents: cents
+    return new Promise(function (resolve, reject) {
+      try {
+        var resolveData = function resolveData(me) {
+          var duration = me && me.audioBuffers && me.audioBuffers.length > 0 ? me.audioBuffers[0].duration : 0;
+          return {
+            status: activeAudioContext().state,
+            duration: duration
+          };
         };
-        allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd / 1000, self.debugCallback));
-      }
-      self.audioBuffers = [audioBuffer];
-      if (self.debugCallback) {
-        self.debugCallback("sampleRate = " + activeAudioContext().sampleRate);
-        self.debugCallback("totalSamples = " + totalSamples);
-        self.debugCallback("creationTime = " + Math.floor((activeAudioContext().currentTime - startTime) * 1000) + "ms");
-      }
-      function resolveData(me) {
-        var duration = me && me.audioBuffers && me.audioBuffers.length > 0 ? me.audioBuffers[0].duration : 0;
-        return {
-          status: activeAudioContext().state,
-          duration: duration
-        };
-      }
-      Promise.all(allPromises).then(function () {
-        // Safari iOS can mess with the audioContext state, so resume if needed.
-        if (activeAudioContext().state === "suspended") {
-          activeAudioContext().resume().then(function () {
-            resolve(resolveData(self));
+        var startTime = activeAudioContext().currentTime;
+        var tempoMultiplier = self.millisecondsPerMeasure / 1000 / self.meterSize;
+        self.duration = self.flattened.totalDuration * tempoMultiplier;
+        if (self.duration <= 0) {
+          self.audioBuffers = [];
+          return resolve({
+            status: "empty",
+            seconds: 0
           });
-        } else if (activeAudioContext().state === "interrupted") {
-          activeAudioContext().suspend().then(function () {
+        }
+        self.duration += fadeTimeSec;
+        var totalSamples = Math.floor(activeAudioContext().sampleRate * self.duration);
+
+        // There might be a previous run that needs to be turned off.
+        self.stop();
+        var noteMapTracks = createNoteMap(self.flattened);
+        if (self.options.swing) addSwing(noteMapTracks, self.options.swing, self.meterFraction, self.pickupLength);
+        if (self.sequenceCallback) self.sequenceCallback(noteMapTracks, self.callbackContext);
+        var panDistances = setPan(noteMapTracks.length, self.pan);
+
+        // Create a simple list of all the unique sounds in this music and where they should be placed.
+        // There appears to be a limit on how many audio buffers can be created at once so this technique limits the number needed.
+        var uniqueSounds = {};
+        noteMapTracks.forEach(function (noteMap, trackNumber) {
+          var panDistance = panDistances && panDistances.length > trackNumber ? panDistances[trackNumber] : 0;
+          noteMap.forEach(function (note) {
+            var key = note.instrument + ':' + note.pitch + ':' + note.volume + ':' + Math.round((note.end - note.start) * 1000) / 1000 + ':' + panDistance + ':' + tempoMultiplier + ':' + (note.cents ? note.cents : 0);
+            if (self.debugCallback) self.debugCallback("noteMapTrack " + key);
+            if (!uniqueSounds[key]) uniqueSounds[key] = [];
+            uniqueSounds[key].push(note.start);
+          });
+        });
+
+        // Now that we know what we are trying to create, construct the audio buffer by creating each sound and placing it.
+        var allPromises = [];
+        var audioBuffer = activeAudioContext().createBuffer(2, totalSamples, activeAudioContext().sampleRate);
+        for (var key2 = 0; key2 < Object.keys(uniqueSounds).length; key2++) {
+          var k = Object.keys(uniqueSounds)[key2];
+          var parts = k.split(":");
+          var cents = parts[6] !== undefined ? parseFloat(parts[6]) : 0;
+          parts = {
+            instrument: parts[0],
+            pitch: parseInt(parts[1], 10),
+            volume: parseInt(parts[2], 10),
+            len: parseFloat(parts[3]),
+            pan: parseFloat(parts[4]),
+            tempoMultiplier: parseFloat(parts[5]),
+            cents: cents
+          };
+          allPromises.push(placeNote(audioBuffer, activeAudioContext().sampleRate, parts, uniqueSounds[k], self.soundFontVolumeMultiplier, self.programOffsets[parts.instrument], fadeTimeSec, self.noteEnd / 1000, self.debugCallback));
+        }
+        self.audioBuffers = [audioBuffer];
+        if (self.debugCallback) {
+          self.debugCallback("sampleRate = " + activeAudioContext().sampleRate);
+          self.debugCallback("totalSamples = " + totalSamples);
+          self.debugCallback("creationTime = " + Math.floor((activeAudioContext().currentTime - startTime) * 1000) + "ms");
+        }
+        Promise.all(allPromises).then(function () {
+          // Safari iOS can mess with the audioContext state, so resume if needed.
+          if (activeAudioContext().state === "suspended") {
             activeAudioContext().resume().then(function () {
               resolve(resolveData(self));
             });
-          });
-        } else {
-          resolve(resolveData(self));
-        }
-      });
+          } else if (activeAudioContext().state === "interrupted") {
+            activeAudioContext().suspend().then(function () {
+              activeAudioContext().resume().then(function () {
+                resolve(resolveData(self));
+              });
+            });
+          } else {
+            resolve(resolveData(self));
+          }
+        })["catch"](function (error) {
+          reject(error);
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   };
   function setPan(numTracks, panParam) {
@@ -15288,7 +15451,7 @@ function placeNote(outputAudioBuffer, sampleRate, sound, startArray, volumeMulti
     });
   })["catch"](function (error) {
     if (debugCallback) debugCallback('placeNote catch: ' + error.message);
-    return Promise.resolve();
+    return Promise.reject(error);
   });
 }
 var copyToChannel = function copyToChannel(toBuffer, fromBuffer, start) {
@@ -18338,13 +18501,15 @@ AbstractEngraver.prototype.createBarLine = function (voice, elem, isFirstStaff) 
   } // 2 is hardcoded
 
   if (elem.startEnding && isFirstStaff) {
-    // only put the first & second ending marks on the first staff
-    var textWidth = this.getTextSize.calc(elem.startEnding, "repeatfont", '').width;
-    abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
-    this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
-    voice.addOther(this.partstartelem);
+    // MAE 17 May 2025 - Fixes drawing issue
+    if (voice.voicenumber === 0) {
+      // only put the first & second ending marks on the first staff
+      var textWidth = this.getTextSize.calc(elem.startEnding, "repeatfont", '').width;
+      abselem.minspacing += textWidth + 10; // Give plenty of room for the ending number.
+      this.partstartelem = new EndingElem(elem.startEnding, anchor, null);
+      voice.addOther(this.partstartelem);
+    }
   }
-
   // Add a little space to the left of the bar line so that nothing can crowd it.
   abselem.extraw -= 5;
   if (elem.chord !== undefined) {
@@ -19137,6 +19302,7 @@ var stackedDecoration = function stackedDecoration(decoration, width, abselem, y
     "mediumphrase": "scripts.mediumphrase",
     "longphrase": "scripts.longphrase",
     "trill": "scripts.trill",
+    "trillh": "scripts.trill",
     "roll": "scripts.roll",
     "irishroll": "scripts.roll",
     "marcato": "scripts.umarcato",
@@ -19198,6 +19364,7 @@ var stackedDecoration = function stackedDecoration(decoration, width, abselem, y
       case "mediumphrase":
       case "longphrase":
       case "trill":
+      case "trillh":
       case "roll":
       case "irishroll":
       case "marcato":
@@ -19950,6 +20117,11 @@ function FreeText(info, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
       move: hash.attr['font-size'] * 2
     }); // move the distance of the line, plus the distance of the margin, which is also one line.
   } else if (typeof text === 'string') {
+    // MAE 9 May 2025 - Force blank text lines in a text block to have height
+    var replaceStandaloneNewlinesForTextBlocks = function replaceStandaloneNewlinesForTextBlocks(input) {
+      return input.replace(/^[ \t]*\n/gm, 'X\n');
+      ;
+    };
     this.rows.push({
       move: hash.attr['font-size'] / 2
     }); // TODO-PER: move down some - the y location should be the top of the text, but we output text specifying the center line.
@@ -19964,7 +20136,8 @@ function FreeText(info, vskip, getFontAndAttr, paddingLeft, width, getTextSize) 
       absElemType: "freeText",
       name: "free-text"
     });
-    size = getTextSize.calc(text, 'textfont', 'defined-text');
+    var textForSize = replaceStandaloneNewlinesForTextBlocks(text);
+    size = getTextSize.calc(textForSize, 'textfont', 'defined-text'); // was text
     this.rows.push({
       move: size.height
     });
@@ -21934,10 +22107,18 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
   renderer.paper.closeGroup();
   renderer.moveY(renderer.spacing.music);
   var staffgroups = [];
+  var nStaves = 0;
   for (var line = 0; line < abcTune.lines.length; line++) {
     classes.incrLine();
     var abcLine = abcTune.lines[line];
     if (abcLine.staff) {
+      // MAE 26 May 2025 - for incipits staff count limiting
+      nStaves++;
+      if (abcTune.formatting.maxStaves) {
+        if (nStaves > abcTune.formatting.maxStaves) {
+          break;
+        }
+      }
       if (classes.shouldAddClasses) groupClasses.klass = "abcjs-staff-wrapper abcjs-l" + classes.lineNumber;
       renderer.paper.openGroup(groupClasses);
       if (abcLine.vskip) {
@@ -22044,6 +22225,8 @@ function drawEnding(renderer, params, linestartx, lineendx, selectables) {
   pathString += sprintf("M %f %f L %f %f ", linestartx, y, lineendx, y);
   renderer.paper.openGroup({
     klass: renderer.controller.classes.generate("ending"),
+    // MAE 17 May 2025 - Ending numbers not being drawn in correct color
+    fill: renderer.foregroundColor,
     "data-name": "ending"
   });
   printPath(renderer, {
@@ -23325,7 +23508,14 @@ function renderText(renderer, params, alreadyInGroup) {
   if (params.cursor) {
     hash.attr.cursor = params.cursor;
   }
-  var text = params.text.replace(/\n\n/g, "\n \n");
+
+  // MAE 9 May 2025 for free text blocks
+  var text;
+  if (params.name == "free-text") {
+    text = params.text.replace(/^[ \t]*\n/gm, ' \n');
+  } else {
+    text = params.text.replace(/\n\n/g, "\n \n");
+  }
   text = text.replace(/^\n/, "\xA0\n");
   if (hash.font.box) {
     if (!alreadyInGroup) renderer.paper.openGroup({
@@ -24548,8 +24738,13 @@ function keyboardSelection(ev) {
 }
 function findElementInHistory(selectables, el) {
   if (!el) return -1;
+  // This should always exist, but it occasionally causes an exception, so check first.
+  var dataset = el.dataset;
+  if (!dataset) return -1;
+  var index = dataset.index;
   for (var i = 0; i < selectables.length; i++) {
-    if (el.dataset.index === selectables[i].svgEl.dataset.index) return i;
+    var svgDataset = selectables[i].svgEl.dataset;
+    if (svgDataset && index === svgDataset.index) return i;
   }
   return -1;
 }
@@ -26353,8 +26548,13 @@ Svg.prototype.text = function (text, attr, target) {
       el.setAttribute(key, attr[key]);
     }
   }
+  var isFreeText = attr["data-name"] == "free-text";
   var lines = ("" + text).split("\n");
   for (var i = 0; i < lines.length; i++) {
+    if (isFreeText && lines[i] == "") {
+      // Don't draw empty lines
+      continue;
+    }
     var line = document.createElementNS(svgNS, 'tspan');
     line.setAttribute("x", attr.x ? attr.x : 0);
     if (i !== 0) line.setAttribute("dy", "1.2em");
@@ -26376,7 +26576,19 @@ Svg.prototype.text = function (text, attr, target) {
         ts3.textContent = parts[2];
         line.appendChild(ts3);
       }
-    } else line.textContent = lines[i];
+    } else {
+      // MAE 9 May 2025 - For improved block text
+      if (isFreeText) {
+        // Fixes issue where blank lines in text blocks didn't take up any vertical
+        if (lines[i].trim() == "") {
+          line.innerHTML = "&nbsp;";
+        } else {
+          line.textContent = lines[i];
+        }
+      } else {
+        line.textContent = lines[i];
+      }
+    }
     el.appendChild(line);
   }
   if (target) target.appendChild(el);else this.append(el);
@@ -26555,7 +26767,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.4.4';
+var version = '6.5.0';
 module.exports = version;
 
 /***/ })
