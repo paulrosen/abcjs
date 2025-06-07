@@ -46,7 +46,7 @@ function transposeChordName(chord, steps, preferFlats, freeGCchord) {
 	}
 
 	var isDim = extra1 && (extra1.indexOf('dim') >= 0 || extra1.indexOf('°') >= 0)
-	console.log(isDim, chord, extra1)
+	//console.log(isDim, chord, extra1)
 	// We never want A#dim or D#dim
 	if (isDim && chord === 'A#') chord = 'Bb'
 	if (isDim && chord === 'D#') chord = 'Eb'
