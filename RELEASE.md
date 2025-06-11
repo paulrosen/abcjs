@@ -1,3 +1,11 @@
+# Version 6.5.1
+
+## Bugs
+
+* Fix regression crash in synth when there is both a dynamic decoration and other decoration on the same note.
+
+* Remove debugging statement.
+
 # Version 6.5.0
 
 ## Bugs

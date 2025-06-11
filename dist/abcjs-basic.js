@@ -9249,7 +9249,7 @@ function transposeChordName(chord, steps, preferFlats, freeGCchord) {
     if (freeGCchord) chord = sharpChordsFree[index];else chord = sharpChords[index];
   }
   var isDim = extra1 && (extra1.indexOf('dim') >= 0 || extra1.indexOf('°') >= 0);
-  console.log(isDim, chord, extra1);
+  //console.log(isDim, chord, extra1)
   // We never want A#dim or D#dim
   if (isDim && chord === 'A#') chord = 'Bb';
   if (isDim && chord === 'D#') chord = 'Eb';
@@ -12722,7 +12722,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
               if (Array.isArray(elem.decoration)) {
                 volumesPerNotePitch = [];
                 elem.decoration.forEach(function (d) {
-                  volumesPerNotePitch.push(volumes[d].slice(0));
+                  if (d in volumes) volumesPerNotePitch.push(volumes[d].slice(0));
                 });
               }
               voices[voiceNumber].push({
@@ -26767,7 +26767,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.5.0';
+var version = '6.5.1';
 module.exports = version;
 
 /***/ })
