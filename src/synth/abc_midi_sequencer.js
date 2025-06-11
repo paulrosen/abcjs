@@ -484,7 +484,8 @@ var parseCommon = require("../parse/abc_common");
 							if(Array.isArray(elem.decoration)){
 								volumesPerNotePitch = [];
 								elem.decoration.forEach(d=>{
-									volumesPerNotePitch.push(volumes[d].slice(0));
+									if (d in volumes)
+										volumesPerNotePitch.push(volumes[d].slice(0));
 								});
 							}
 							voices[voiceNumber].push({ el_type: 'beat', beats: currentVolume.slice(0), volumesPerNotePitch: volumesPerNotePitch, });

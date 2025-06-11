@@ -7668,6 +7668,25 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcVolumeCrash = 'X:11\n' +
+		'M:4/4\n' +
+		'L:1/8\n' +
+		'K:C\n' +
+	    '!segno!!f!d2\n'
+
+	var expectedVolumeCrash = {
+		"tempo": 180,
+		"instrument": 0,
+		"tracks": [
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":74,"volume":80,"start":0,"duration":0.25,"instrument":0,"gap":0},
+			]
+		],
+		"totalDuration":0.25
+	}
+	//////////////////////////////////////////////////////////
+
 
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
@@ -7855,6 +7874,10 @@ describe("Audio flattener", function() {
 
 	it("volume-in-chords", function() {
 		doFlattenTest(abcVolumeInChords, expectedVolumeInChords);
+	})
+
+	it("volume-crash", function() {
+		doFlattenTest(abcVolumeCrash, expectedVolumeCrash);
 	})
 
 })
