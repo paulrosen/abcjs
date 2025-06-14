@@ -257,6 +257,36 @@ Default: undefined
 
 Add a tablature-style staff below the standard music output. See [the tablature documentation](./tablature.md) for details.
 
+## useDefsForGlyphs
+Default: false
+
+When this option is set each glyph path will be defined only once. The singleton glyph path is added to a `<defs>` group on first use. Each instance of the glyph is a `<use>` element with its own attributes.
+
+```svg
+<svg>
+  <defs>
+    <path id="abcjs-noteheads.quarter" d="[...]" />
+  </defs>
+  <g>
+    <use data-name="noteheads.quarter"
+         xlink:href="#abcjs-noteheads.quarter"
+         x="100" y="200" />
+    <use data-name="noteheads.quarter"
+         xlink:href="#abcjs-noteheads.quarter"
+         x="120" y="200" />
+  </g>
+</svg>
+```
+
+This option produces a more compact SVG dom in the brower, requiring less path data to be parsed. If the SVG element is serialized to a file, the file size will also be smaller due to glyph path data not being duplicated.
+
+There should be no visual difference in the rendering of the SVG. If other dom handling relies on the structure providing a path element for each glyph the resulting dom may not be compatible.
+
+::: tip NOTE
+Used in combination with the `oneLinePerSvg` option there will be a `<defs>` block in only one of the resulting SVG staff line elements. The assumption is that the individual SVG elements will be part of the same container dom, so the `xlink:href` attribute will still be a valid dom element id.
+:::
+
+
 ## viewportHorizontal
 Default: false
  

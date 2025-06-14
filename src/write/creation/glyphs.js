@@ -132,13 +132,19 @@ var Glyphs = {
 	printSymbol: function (x, y, symb, paper, attrs) {
 		if (!glyphs[symb]) return null;
 		var pathArray = pathClone(glyphs[symb].d);
-		pathArray[0][1] += x;
-		pathArray[0][2] += y;
+		if (paper.useDefsForGlyphs) {
+			attrs.x = x.toFixed(3)
+			attrs.y = y.toFixed(3)
+			attrs.id = 'abcjs-' + symb
+		} else {
+			pathArray[0][1] += x;
+			pathArray[0][2] += y;
+		}
 		var path = "";
 		for (var i = 0; i < pathArray.length; i++)
 			path += pathArray[i].join(" ");
 		attrs.path = path;
-		return paper.path(attrs);
+		return paper.useDefsForGlyphs ? paper.use(attrs) : paper.path(attrs)
 	},
 
 	getPathForSymbol: function (x, y, symb, scalex, scaley) {

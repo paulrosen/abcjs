@@ -72,7 +72,7 @@ function drawRelativeElement(renderer, params, bartop) {
 }
 
 function scaleExistingElem(paper, elem, scaleX, scaleY, x, y) {
-	paper.setAttributeOnElement(elem, { style: "transform:scale(" + scaleX + "," + scaleY + ");transform-origin:" + x + "px " + y + "px;" });
+	paper.setAttributeOnElement(elem, { style: "transform:scale(" + scaleX + "," + scaleY + ");transform-origin:" + x.toFixed(3) + "px " + y.toFixed(3) + "px;" });
 }
 
 module.exports = drawRelativeElement;

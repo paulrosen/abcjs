@@ -63,6 +63,7 @@ var EngraverController = function (paper, params) {
 		this.addSelectListener(params.clickListener);
 
 	this.renderer = new Renderer(paper);
+	this.renderer.paper.useDefsForGlyphs = params.useDefsForGlyphs
 	this.renderer.setPaddingOverride(params);
 	if (params.showDebug)
 		this.renderer.showDebug = params.showDebug;
@@ -326,6 +327,7 @@ function splitSvgIntoLines(renderer, output, title, responsive, scale) {
 	if (responsive === 'resize')
 		output.style.paddingBottom = ''
 	var style = source.querySelector("style")
+	var defs = source.querySelector("defs")
 	var width = responsive === 'resize' ? source.viewBox.baseVal.width : source.getAttribute("width")
 	var sections = output.querySelectorAll("svg > g") // each section is a line, or the top matter or the bottom matter, or text that has been inserted.
 	var nextTop = 0 // There are often gaps between the elements for spacing, so the actual top and height needs to be inferred.
@@ -342,6 +344,9 @@ function splitSvgIntoLines(renderer, output, title, responsive, scale) {
 			divStyles += "height:" + (height * scale) + "px;"
 		wrapper.setAttribute("style", divStyles)
 		var svg = duplicateSvg(source)
+		// NOTE: the defs element is only needed once in the dom
+		// as each SVG line can reference ids from another svg
+		if (defs && i == 0) svg.appendChild(defs)
 		var fullTitle = "Sheet Music for \"" + title + "\" section " + (i + 1)
 		svg.setAttribute("aria-label", fullTitle)
 		if (responsive !== 'resize')
@@ -350,7 +355,7 @@ function splitSvgIntoLines(renderer, output, title, responsive, scale) {
 			svg.style.position = ''
 		// TODO-PER: Hack! Not sure why this is needed.
 		var viewBoxHeight = renderer.firefox112 ? height+1 : height
-		svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + viewBoxHeight)
+		svg.setAttribute("viewBox", "0 " + nextTop.toFixed(3) + " " + width.toFixed(3) + " " + viewBoxHeight.toFixed(3))
 		svg.appendChild(style.cloneNode(true))
 		var titleEl = document.createElement("title")
 		titleEl.innerText = fullTitle
@@ -372,6 +377,7 @@ function splitSvgIntoLines(renderer, output, title, responsive, scale) {
 function duplicateSvg(source) {
 	var svgNS = "http://www.w3.org/2000/svg";
 	var svg = document.createElementNS(svgNS, "svg");
+	svg.setAttribute('xmlns', svgNS)
 	for (var i = 0; i < source.attributes.length; i++) {
 		var attr = source.attributes[i];
 		if (attr.name !== "height" && attr.name != "aria-label")
