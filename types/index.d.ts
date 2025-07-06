@@ -1188,8 +1188,12 @@ declare module 'abcjs' {
 	//
 	// Editor
 	//
+	export class EditArea {
+		constructor(target: Selector);
+	}
+
 	export class Editor {
-		constructor(target: Selector, options: EditorOptions);
+		constructor(target: Selector | EditArea, options: EditorOptions);
 		paramChanged(options: AbcVisualParams): void;
 		synthParamChanged(options: SynthOptions): void;
 		setNotDirty(): void;
@@ -1198,11 +1202,6 @@ declare module 'abcjs' {
 		millisecondsPerMeasure(): number;
 		pauseMidi(shouldPause: boolean): void;
 		fireChanged():void;
-	}
-
-	export class EditArea {
-		constructor(target: Selector);
-
 	}
 
 	//
