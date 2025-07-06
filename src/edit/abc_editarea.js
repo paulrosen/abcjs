@@ -43,73 +43,76 @@ try {
 	// if we aren't in a browser, this code will crash, but it is not needed then either.
 }
 
-var EditArea = function(textareaid) {
-  if (typeof textareaid === "string")
-    this.textarea = document.getElementById(textareaid);
-  else
-    this.textarea = textareaid;
-  this.initialText = this.textarea.value;
-  this.isDragging = false;
+var EditArea = function (textareaid) {
+	this.isEditArea = true
+	if (typeof textareaid === "string") {
+		this.textarea = document.getElementById(textareaid);
+		if (!this.textarea)
+			this.textarea = document.querySelector(textareaid)
+	} else
+		this.textarea = textareaid;
+	this.initialText = this.textarea.value;
+	this.isDragging = false;
 }
 
-EditArea.prototype.addSelectionListener = function(listener) {
-  this.textarea.onmousemove = function(ev) {
-	  if (this.isDragging)
-	    listener.fireSelectionChanged();
-  };
+EditArea.prototype.addSelectionListener = function (listener) {
+	this.textarea.onmousemove = function (ev) {
+		if (this.isDragging)
+			listener.fireSelectionChanged();
+	};
 };
 
-EditArea.prototype.addChangeListener = function(listener) {
-  this.changelistener = listener;
-  this.textarea.onkeyup = function() {
-    listener.fireChanged();
-  };
-  this.textarea.onmousedown = function() {
-	this.isDragging = true;
-    listener.fireSelectionChanged();
-  };
-  this.textarea.onmouseup = function() {
-	this.isDragging = false;
-    listener.fireChanged();
-  };
-  this.textarea.onchange = function() {
-    listener.fireChanged();
-  };
+EditArea.prototype.addChangeListener = function (listener) {
+	this.changelistener = listener;
+	this.textarea.onkeyup = function () {
+		listener.fireChanged();
+	};
+	this.textarea.onmousedown = function () {
+		this.isDragging = true;
+		listener.fireSelectionChanged();
+	};
+	this.textarea.onmouseup = function () {
+		this.isDragging = false;
+		listener.fireChanged();
+	};
+	this.textarea.onchange = function () {
+		listener.fireChanged();
+	};
 };
 
 //TODO won't work under IE?
-EditArea.prototype.getSelection = function() {
-  return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
+EditArea.prototype.getSelection = function () {
+	return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
 };
 
-EditArea.prototype.setSelection = function(start, end) {
-	if(this.textarea.setSelectionRange)
-	   this.textarea.setSelectionRange(start, end);
-	else if(this.textarea.createTextRange) {
+EditArea.prototype.setSelection = function (start, end) {
+	if (this.textarea.setSelectionRange)
+		this.textarea.setSelectionRange(start, end);
+	else if (this.textarea.createTextRange) {
 		// For IE8
-	   var e = this.textarea.createTextRange();
-	   e.collapse(true);
-	   e.moveEnd('character', end);
-	   e.moveStart('character', start);
-	   e.select();
+		var e = this.textarea.createTextRange();
+		e.collapse(true);
+		e.moveEnd('character', end);
+		e.moveStart('character', start);
+		e.select();
 	}
-  this.textarea.focus();
+	this.textarea.focus();
 };
 
-EditArea.prototype.getString = function() {
-  return this.textarea.value;
+EditArea.prototype.getString = function () {
+	return this.textarea.value;
 };
 
-EditArea.prototype.setString = function(str) {
-  this.textarea.value = str;
-  this.initialText = this.getString();
-  if (this.changelistener) {
-    this.changelistener.fireChanged();
-  }
+EditArea.prototype.setString = function (str) {
+	this.textarea.value = str;
+	this.initialText = this.getString();
+	if (this.changelistener) {
+		this.changelistener.fireChanged();
+	}
 };
 
-EditArea.prototype.getElem = function() {
-  return this.textarea;
+EditArea.prototype.getElem = function () {
+	return this.textarea;
 };
 
 module.exports = EditArea;

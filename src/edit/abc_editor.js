@@ -96,51 +96,60 @@ function gatherAbcParams(params) {
 	return abcjsParams;
 }
 
-var Editor = function(editarea, params) {
+var Editor = function (editarea, params) {
 	// Copy all the options that will be passed through
 	this.abcjsParams = gatherAbcParams(params);
 
 	if (params.indicate_changed)
 		this.indicate_changed = true;
-  if (typeof editarea === "string") {
-    this.editarea = new EditArea(editarea);
-  } else {
-    this.editarea = editarea;
-  }
-  this.editarea.addSelectionListener(this);
-  this.editarea.addChangeListener(this);
 
-  if (params.canvas_id) {
-    this.div = params.canvas_id;
-  } else if (params.paper_id) {
-    this.div = params.paper_id;
-  } else {
-    this.div = document.createElement("DIV");
-    this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
-  }
-  if (typeof this.div === 'string')
-	  this.div = document.getElementById(this.div);
+	// If a string is passed in then it could either be an element's ID or a selector
+	// If an object is passed in then it could either be an EditArea or a textarea.
+	if (typeof editarea === "string") {
+		// EditArea handles both the ID and the selector
+		this.editarea = new EditArea(editarea);
+	} else {
+		// If an edit area was passed in, just use it
+		if (editarea.isEditArea)
+			this.editarea = editarea;
+		else
+			// Hopefully we were passed in a textarea or equivalent.
+			this.editarea = new EditArea(editarea)
+	}
+	this.editarea.addSelectionListener(this);
+	this.editarea.addChangeListener(this);
 
-  if (params.selectionChangeCallback) {
-  	this.selectionChangeCallback = params.selectionChangeCallback;
-  }
+	if (params.canvas_id) {
+		this.div = params.canvas_id;
+	} else if (params.paper_id) {
+		this.div = params.paper_id;
+	} else {
+		this.div = document.createElement("DIV");
+		this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
+	}
+	if (typeof this.div === 'string')
+		this.div = document.getElementById(this.div);
 
-  this.clientClickListener = this.abcjsParams.clickListener;
-  this.abcjsParams.clickListener = this.highlight.bind(this);
+	if (params.selectionChangeCallback) {
+		this.selectionChangeCallback = params.selectionChangeCallback;
+	}
 
-  if (params.synth) {
-  	if (supportsAudio()) {
-	    this.synth = {
-		    el: params.synth.el,
-		    cursorControl: params.synth.cursorControl,
-		    options: params.synth.options
-	    };
-    }
-  }
+	this.clientClickListener = this.abcjsParams.clickListener;
+	this.abcjsParams.clickListener = this.highlight.bind(this);
+
+	if (params.synth) {
+		if (supportsAudio()) {
+			this.synth = {
+				el: params.synth.el,
+				cursorControl: params.synth.cursorControl,
+				options: params.synth.options
+			};
+		}
+	}
 	// If the user wants midi, then store the elements that it will be written to. The element could either be passed in as an id,
 	// an element, or nothing. If nothing is passed in, then just put the midi on top of the generated music.
 	if (params.generate_midi) {
-	  	this.generate_midi = params.generate_midi;
+		this.generate_midi = params.generate_midi;
 		if (this.abcjsParams.generateDownload) {
 			if (typeof params.midi_download_id === 'string')
 				this.downloadMidi = document.getElementById(params.midi_download_id);
@@ -155,56 +164,57 @@ var Editor = function(editarea, params) {
 		}
 	}
 
-  if (params.warnings_id) {
-  	if (typeof(params.warnings_id) === "string")
-      this.warningsdiv = document.getElementById(params.warnings_id);
-  	else
-		this.warningsdiv = params.warnings_id;
-  } else if (params.generate_warnings) {
-	  this.warningsdiv = document.createElement("div");
-	  this.div.parentNode.insertBefore(this.warningsdiv, this.div);
-  }
+	if (params.warnings_id) {
+		if (typeof (params.warnings_id) === "string")
+			this.warningsdiv = document.getElementById(params.warnings_id);
+		else
+			this.warningsdiv = params.warnings_id;
+	} else if (params.generate_warnings) {
+		this.warningsdiv = document.createElement("div");
+		this.div.parentNode.insertBefore(this.warningsdiv, this.div);
+	}
 
-  this.onchangeCallback = params.onchange;
+	this.onchangeCallback = params.onchange;
+	this.redrawCallback = params.redrawCallback;
 
-  this.currentAbc = "";
-  this.tunes = [];
-  this.bReentry = false;
-  this.parseABC();
-  this.modelChanged();
+	this.currentAbc = "";
+	this.tunes = [];
+	this.bReentry = false;
+	this.parseABC();
+	this.modelChanged();
 
-  this.addClassName = function(element, className) {
-    var hasClassName = function(element, className) {
-      var elementClassName = element.className;
-      return (elementClassName.length > 0 && (elementClassName === className ||
-        new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
-    };
+	this.addClassName = function (element, className) {
+		var hasClassName = function (element, className) {
+			var elementClassName = element.className;
+			return (elementClassName.length > 0 && (elementClassName === className ||
+				new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
+		};
 
-    if (!hasClassName(element, className))
-      element.className += (element.className ? ' ' : '') + className;
-    return element;
-  };
+		if (!hasClassName(element, className))
+			element.className += (element.className ? ' ' : '') + className;
+		return element;
+	};
 
-  this.removeClassName = function(element, className) {
-    element.className = parseCommon.strip(element.className.replace(
-      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
-    return element;
-  };
+	this.removeClassName = function (element, className) {
+		element.className = parseCommon.strip(element.className.replace(
+			new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
+		return element;
+	};
 
-  this.setReadOnly = function(readOnly) {
-	  var readonlyClass = 'abc_textarea_readonly';
-	  var el = this.editarea.getElem();
-    if (readOnly) {
-      el.setAttribute('readonly', 'yes');
-	  this.addClassName(el, readonlyClass);
-	} else {
-      el.removeAttribute('readonly');
-	  this.removeClassName(el, readonlyClass);
-    }
-  };
+	this.setReadOnly = function (readOnly) {
+		var readonlyClass = 'abc_textarea_readonly';
+		var el = this.editarea.getElem();
+		if (readOnly) {
+			el.setAttribute('readonly', 'yes');
+			this.addClassName(el, readonlyClass);
+		} else {
+			el.removeAttribute('readonly');
+			this.removeClassName(el, readonlyClass);
+		}
+	};
 };
 
-Editor.prototype.redrawMidi = function() {
+Editor.prototype.redrawMidi = function () {
 	if (this.generate_midi && !this.midiPause) {
 		var event = new window.CustomEvent("generateMidi", {
 			detail: {
@@ -227,12 +237,14 @@ Editor.prototype.redrawMidi = function() {
 	}
 };
 
-Editor.prototype.modelChanged = function() {
-  if (this.bReentry)
-    return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
+Editor.prototype.modelChanged = function () {
+	if (this.bReentry)
+		return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
 	this.bReentry = true;
 	try {
 		this.timerId = null;
+		if (this.redrawCallback)
+			this.redrawCallback(true)
 		if (this.synth && this.synth.synthControl)
 			this.synth.synthControl.disable(true);
 
@@ -241,22 +253,24 @@ Editor.prototype.modelChanged = function() {
 			this.warnings = this.tunes[0].warnings;
 		}
 		this.redrawMidi();
-	} catch(error) {
+		if (this.redrawCallback)
+			this.redrawCallback(false)
+	} catch (error) {
 		console.error("ABCJS error: ", error);
 		if (!this.warnings)
 			this.warnings = [];
 		this.warnings.push(error.message);
 	}
 
-  if (this.warningsdiv) {
-    this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
-  }
-  this.updateSelection();
-  this.bReentry = false;
+	if (this.warningsdiv) {
+		this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
+	}
+	this.updateSelection();
+	this.bReentry = false;
 };
 
 // Call this to reparse in response to the client changing the parameters on the fly
-Editor.prototype.paramChanged = function(engraverParams) {
+Editor.prototype.paramChanged = function (engraverParams) {
 	if (engraverParams) {
 		for (var key in engraverParams) {
 			if (engraverParams.hasOwnProperty(key)) {
@@ -268,7 +282,7 @@ Editor.prototype.paramChanged = function(engraverParams) {
 	this.fireChanged();
 };
 
-Editor.prototype.synthParamChanged = function(options) {
+Editor.prototype.synthParamChanged = function (options) {
 	if (!this.synth)
 		return;
 	this.synth.options = {};
@@ -284,52 +298,53 @@ Editor.prototype.synthParamChanged = function(options) {
 };
 
 // return true if the model has changed
-Editor.prototype.parseABC = function() {
-  var t = this.editarea.getString();
-  if (t===this.currentAbc) {
-    this.updateSelection();
-    return false;
-  }
+Editor.prototype.parseABC = function () {
+	var t = this.editarea.getString();
+	if (t === this.currentAbc) {
+		this.updateSelection();
+		return false;
+	}
 
-  this.currentAbc = t;
-  return true;
+	this.currentAbc = t;
+	return true;
 };
 
-Editor.prototype.updateSelection = function() {
-  var selection = this.editarea.getSelection();
-  try {
-  	if (this.tunes.length > 0 && this.tunes[0].engraver)
-	  this.tunes[0].engraver.rangeHighlight(selection.start, selection.end);
-  } catch (e) {} // maybe printer isn't defined yet?
+Editor.prototype.updateSelection = function () {
+	var selection = this.editarea.getSelection();
+	try {
+		if (this.tunes.length > 0 && this.tunes[0].engraver)
+			this.tunes[0].engraver.rangeHighlight(selection.start, selection.end);
+	} catch (e) {
+	} // maybe printer isn't defined yet?
 	if (this.selectionChangeCallback)
 		this.selectionChangeCallback(selection.start, selection.end);
 };
 
 // Called when the textarea's selection is in the process of changing (after mouse down, dragging, or keyboard arrows)
-Editor.prototype.fireSelectionChanged = function() {
-  this.updateSelection();
+Editor.prototype.fireSelectionChanged = function () {
+	this.updateSelection();
 };
 
-Editor.prototype.setDirtyStyle = function(isDirty) {
+Editor.prototype.setDirtyStyle = function (isDirty) {
 	if (this.indicate_changed === undefined)
 		return;
-  var addClassName = function(element, className) {
-    var hasClassName = function(element, className) {
-      var elementClassName = element.className;
-      return (elementClassName.length > 0 && (elementClassName === className ||
-        new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
-    };
+	var addClassName = function (element, className) {
+		var hasClassName = function (element, className) {
+			var elementClassName = element.className;
+			return (elementClassName.length > 0 && (elementClassName === className ||
+				new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
+		};
 
-    if (!hasClassName(element, className))
-      element.className += (element.className ? ' ' : '') + className;
-    return element;
-  };
+		if (!hasClassName(element, className))
+			element.className += (element.className ? ' ' : '') + className;
+		return element;
+	};
 
-  var removeClassName = function(element, className) {
-    element.className = parseCommon.strip(element.className.replace(
-      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
-    return element;
-  };
+	var removeClassName = function (element, className) {
+		element.className = parseCommon.strip(element.className.replace(
+			new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
+		return element;
+	};
 
 	var readonlyClass = 'abc_textarea_dirty';
 	var el = this.editarea.getElem();
@@ -337,66 +352,66 @@ Editor.prototype.setDirtyStyle = function(isDirty) {
 		addClassName(el, readonlyClass);
 	} else {
 		removeClassName(el, readonlyClass);
-    }
+	}
 };
 
 // call when the textarea alerts us that the abc text is changed and needs re-parsing
-Editor.prototype.fireChanged = function() {
-  if (this.bIsPaused)
-    return;
-  if (this.parseABC()) {
-    var self = this;
-    if (this.timerId)	// If the user is still typing, cancel the update
-      clearTimeout(this.timerId);
-    this.timerId = setTimeout(function () {
-      self.modelChanged();
-    }, 300);	// Is this a good compromise between responsiveness and not redrawing too much?
-	  var isDirty = this.isDirty();
-	  if (this.wasDirty !== isDirty) {
-		  this.wasDirty = isDirty;
-		  this.setDirtyStyle(isDirty);
-	  }
-	  if (this.onchangeCallback)
-		  this.onchangeCallback(this);
-	  }
+Editor.prototype.fireChanged = function () {
+	if (this.bIsPaused)
+		return;
+	if (this.parseABC()) {
+		var self = this;
+		if (this.timerId)	// If the user is still typing, cancel the update
+			clearTimeout(this.timerId);
+		this.timerId = setTimeout(function () {
+			self.modelChanged();
+		}, 300);	// Is this a good compromise between responsiveness and not redrawing too much?
+		var isDirty = this.isDirty();
+		if (this.wasDirty !== isDirty) {
+			this.wasDirty = isDirty;
+			this.setDirtyStyle(isDirty);
+		}
+		if (this.onchangeCallback)
+			this.onchangeCallback(this);
+	}
 };
 
-Editor.prototype.setNotDirty = function() {
+Editor.prototype.setNotDirty = function () {
 	this.editarea.initialText = this.editarea.getString();
 	this.wasDirty = false;
 	this.setDirtyStyle(false);
 };
 
-Editor.prototype.isDirty = function() {
+Editor.prototype.isDirty = function () {
 	if (this.indicate_changed === undefined)
 		return false;
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
-Editor.prototype.highlight = function(abcelem, tuneNumber, classes, analysis, drag, mouseEvent) {
+Editor.prototype.highlight = function (abcelem, tuneNumber, classes, analysis, drag, mouseEvent) {
 	// TODO-PER: The marker appears to get off by one for each tune parsed. I'm not sure why, but adding the tuneNumber in corrects it for the time being.
 //	var offset = (tuneNumber !== undefined) ? this.startPos[tuneNumber] + tuneNumber : 0;
 
-  this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
+	this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
 	if (this.selectionChangeCallback)
 		this.selectionChangeCallback(abcelem.startChar, abcelem.endChar);
 	if (this.clientClickListener)
 		this.clientClickListener(abcelem, tuneNumber, classes, analysis, drag, mouseEvent);
 };
 
-Editor.prototype.pause = function(shouldPause) {
+Editor.prototype.pause = function (shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
 		this.fireChanged();
 };
 
-Editor.prototype.millisecondsPerMeasure = function() {
+Editor.prototype.millisecondsPerMeasure = function () {
 	if (!this.synth || !this.synth.synthControl || !this.synth.synthControl.visualObj)
 		return 0;
 	return this.synth.synthControl.visualObj.millisecondsPerMeasure();
 };
 
-Editor.prototype.pauseMidi = function(shouldPause) {
+Editor.prototype.pauseMidi = function (shouldPause) {
 	this.midiPause = shouldPause;
 	if (!shouldPause)
 		this.redrawMidi();
