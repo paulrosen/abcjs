@@ -331,6 +331,7 @@ declare module 'abcjs' {
 		warnings_id?: Selector;
 		onchange?: OnChange;
 		selectionChangeCallback?: SelectionChangeCallback;
+		redrawCallback?: RedrawCallback;
 		abcjsParams?: AbcVisualParams;
 		indicate_changed?: boolean;
 		synth?: EditorSynth;
@@ -1144,6 +1145,8 @@ declare module 'abcjs' {
 
 	export type SelectionChangeCallback = (startChar: number, endChar: number) => void;
 
+	export type RedrawCallback = (isBefore: boolean) => void;
+
 	// Audio
 	export interface CursorControl {
 		beatSubDivision?: number
@@ -1195,6 +1198,11 @@ declare module 'abcjs' {
 		millisecondsPerMeasure(): number;
 		pauseMidi(shouldPause: boolean): void;
 		fireChanged():void;
+	}
+
+	export class EditArea {
+		constructor(target: Selector);
+
 	}
 
 	//
