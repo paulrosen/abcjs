@@ -76,7 +76,7 @@ declare module 'abcjs' {
 	//
 	// Basic types
 	//
-	export type Selector = string | HTMLElement
+	export type Selector = string | Element
 
 	type NumberFunction = () => number;
 
