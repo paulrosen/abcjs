@@ -1,0 +1,32 @@
+X:1
+T:Plaisir d'amour (Arreglo para Flauta, Oboe y Cello)
+C:Jean-Paul-Égide Martini / Arreglo adaptado
+M:3/4
+L:1/4
+Q:1/4=60
+K:C
+
+V:Fl auto
+V:Oboe clef=treble
+V:Cello clef=bass
+
+% --- Flauta (melodía muy fácil)
+V:Fl
+| G E E | F D D | E C C | D B, B, |
+| C E D | F E D | E C C | z z z |
+| G E E | F D D | E C C | D B, B, |
+| C E D | F E D | C z z | z z z ||
+
+% --- Oboe (más avanzado)
+V:Oboe
+| c e g | a f d | e c' b | g e c |
+| d f a | g f e | d c' b | a g e |
+| c e g | a f d | e c' b | g e c |
+| d f a | g f e | c z z | z z z ||
+
+% --- Cello (bajo elaborado)
+V:Cello
+| C,, G, C, | F,, A,, D, | E,, B,, E, | G,, D, G, |
+| A,, E, A, | G,, B,, E, | A,, E, A, | C, z z |
+| C,, G, C, | F,, A,, D, | E,, B,, E, | G,, D, G, |
+| A,, E, A, | G,, B,, E, | C, z z | z z z ||
