@@ -321,7 +321,7 @@ declare module 'abcjs' {
 		synthControl?: SynthObjectController;
 		el: Selector;
 		cursorControl?: CursorControl;
-		options?: SynthOptions;
+		options?: SynthOptions & SynthVisualOptions;
 	}
 
 	export interface EditorOptions {
@@ -1202,6 +1202,7 @@ declare module 'abcjs' {
 		millisecondsPerMeasure(): number;
 		pauseMidi(shouldPause: boolean): void;
 		fireChanged():void;
+		getTunes():TuneObjectArray;
 	}
 
 	//
