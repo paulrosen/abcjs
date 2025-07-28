@@ -282,6 +282,10 @@ Editor.prototype.paramChanged = function (engraverParams) {
 	this.fireChanged();
 };
 
+Editor.prototype.getTunes = function () {
+	return this.tunes
+};
+
 Editor.prototype.synthParamChanged = function (options) {
 	if (!this.synth)
 		return;

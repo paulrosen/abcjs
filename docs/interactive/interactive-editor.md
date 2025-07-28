@@ -61,6 +61,7 @@ This is the object that is passed into the editor in the `synth` property. If th
 | `pause(bool)` | Stops the automatic rendering when the user is typing. |
 | `millisecondsPerMeasure()` | Called to return the number of milliseconds in a measure for the first tune in the editor. |
 | `synthParamChanged(options)` | Called to replace the options passed in when the editor is created. It replaces the options here: `{ synth: { options: originalOptions } }` |
+| `getTunes()` | returns an array of tune objects that represent the contents of the editor |
 
 ## Example
 
@@ -85,4 +86,3 @@ L: 1/8
 K: Emin
 |:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
 `"></abcjs-editor>
-
