@@ -761,11 +761,11 @@ function cleanUpSlursInLine(line, staffNum, voiceNum, currSlur) {
 }
 
 function wrapMusicLines(lines, barsperstaff) {
-	for (i = 0; i < lines.length; i++) {
+	for (var i = 0; i < lines.length; i++) {
 		if (lines[i].staff !== undefined) {
-			for (s = 0; s < lines[i].staff.length; s++) {
+			for (var s = 0; s < lines[i].staff.length; s++) {
 				var permanentItems = [];
-				for (v = 0; v < lines[i].staff[s].voices.length; v++) {
+				for (var v = 0; v < lines[i].staff[s].voices.length; v++) {
 					var voice = lines[i].staff[s].voices[v];
 					var barNumThisLine = 0;
 					for (var n = 0; n < voice.length; n++) {
