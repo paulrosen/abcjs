@@ -277,6 +277,7 @@ var strTranspose;
 	var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/*\d*)([\>\<\-\)\.\s\\]*)/
 	var regOptionalNote = /([_^=]*[A-Ga-g][,']*)?(\d*\/*\d*)?([\>\<\-\)]*)?/
 	var regSpace = /(\s*)$/
+	var regOptionalSpace = /(\s*)/
 
 	// This the relationship of the note to the tonic and an octave. So what is returned is a distance in steps from the tonic and the amount of adjustment from
 	// a normal scale. That is - in the key of D an F# is two steps from the tonic and no adjustment. A G# is three steps from the tonic and one half-step higher.
@@ -298,48 +299,60 @@ var strTranspose;
 	}
 
 	function replaceNote(abc, start, end, newPitch, index) {
-		// There may be more than just the note between the start and end - there could be spaces, there could be a chord symbol, there could be a decoration.
-		// This could also be a part of a chord. If so, then the particular note needs to be teased out.
-		var note = abc.substring(start, end)
-		var match = note.match(new RegExp(regNote.source + regSpace.source), '')
+		var note = abc.substring(start, end);
+		// Try single note first
+		var match = note.match(new RegExp(regNote.source + regSpace.source));
 		if (match) {
-			// This will match a single note
-			var noteLen = match[1].length
-			var trailingLen = match[2].length + match[3].length + match[4].length
-			var leadingLen = end - start - noteLen - trailingLen
-			start += leadingLen
-			end -= trailingLen
+			var noteLen = match[1].length;
+			var trailingLen = match[2].length + match[3].length + match[4].length;
+			var leadingLen = end - start - noteLen - trailingLen;
+			start += leadingLen;
+			end -= trailingLen;
 		} else {
-			// I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
-			var regPreBracket = /([^\[]*)/
-			var regOpenBracket = /\[/
-			var regCloseBracket = /\-?](\d*\/*\d*)?([\>\<\-\)]*)/
-			match = note.match(new RegExp(regPreBracket.source + regOpenBracket.source + regOptionalNote.source +
-				regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
-				regOptionalNote.source + regOptionalNote.source + regOptionalNote.source +
-				regOptionalNote.source + regCloseBracket.source + regSpace.source))
-
+			// Match chord
+			var regPreBracket = /([^\[]*)/;
+			var regOpenBracket = /\[/;
+			var regCloseBracket = /\-?](\d*\/*\d*)?([\>\<\-\)]*)/;
+			var regChord = new RegExp(
+				regPreBracket.source +
+				regOpenBracket.source +
+				"(?:" + regOptionalNote.source + "\\s*){1,8}" +
+				regCloseBracket.source +
+				regSpace.source
+			);
+			match = note.match(regChord);
 			if (match) {
-				// This will match a chord
-				// Get the number of chars used by the previous notes in this chord
-				var count = 1 + match[1].length // one character for the open bracket
-				for (var i = 0; i < index; i++) { // index is the iteration through the chord. This function gets called for each one.
-					if (match[i * 3 + 2])
-						count += match[i * 3 + 2].length
-					if (match[i * 3 + 3])
-						count += match[i * 3 + 3].length
-					if (match[i * 3 + 4])
-						count += match[i * 3 + 4].length
+				var beforeChordLen = match[1].length + 1; // text before + '['
+				var chordBody = note.slice(match[1].length + 1, note.lastIndexOf("]"));
+				// Collect notes inside chord
+				var chordNotes = [];
+				var regNoteWithSpace = new RegExp(regOptionalNote.source + "\\s*", "g");
+				for (const m of chordBody.matchAll(regNoteWithSpace)) {
+					let noteText = m[0].trim();
+					if (noteText !== "") {
+						chordNotes.push({ text: noteText, index: m.index });
+					}
 				}
-				start += count
-				var endLen = match[index * 3 + 2] ? match[index * 3 + 2].length : 0
-				// endLen += match[index * 3 + 3] ? match[index * 3 + 3].length : 0
-				// endLen += match[index * 3 + 4] ? match[index * 3 + 4].length : 0
-
-				end = start + endLen
+				if (index >= chordNotes.length) {
+					throw new Error("Chord index out of range for chord: " + note);
+				}
+				var chosen = chordNotes[index];
+				// Preserve duration and tie
+				let mDurTie = chosen.text.match(/^(.+?)(\d+\/?\d*)?(-)?$/);
+				let pitchPart = mDurTie ? mDurTie[1] : chosen.text;
+				let durationPart = mDurTie && mDurTie[2] ? mDurTie[2] : "";
+				let tiePart = mDurTie && mDurTie[3] ? mDurTie[3] : "";
+				// Replace note keeping duration and tie
+				newPitch = newPitch + durationPart + tiePart;
+				start += beforeChordLen + chosen.index;
+				end = start + chosen.text.length;
 			}
 		}
-		return { start: start, end: end, note: newPitch }
+		return {
+			start: start,
+			end: end,
+			note: newPitch
+		};
 	}
 
 	function replaceGrace(abc, start, end, newGrace, index) {

@@ -203,6 +203,14 @@ describe("Transpose Output", function () {
 		"K: E\n" +
 		'[EFG] [_EF^G] [=F=G_A] |\n'
 
+	var abcChordsSpaced = "T: Transpose Output\n" +
+		"K: D\n" +
+		'[D E  F] [ _D   E ^F ] [    _E=F             _G ] [ F2 ^F4  G3/2  ] |\n'
+
+	var abcChordsSpacedExpected = "T: Transpose Output\n" +
+		"K: E\n" +
+		'[E F  G] [ _E   F ^G ] [    =F=G             _A ] [ G2 ^G4  A3/2  ] |\n'
+
 	var abcChordSymbols = 'X:1\n' +
 		"T: Transpose Output\n" +
 		'K:C\n' +
@@ -379,6 +387,10 @@ describe("Transpose Output", function () {
 
 	it("output-transpose-chords", function () {
 		outputTest(abcChords, abcChordsExpected, 2)
+	})
+
+	it("output-transpose-chords-spaced", function () {
+		outputTest(abcChordsSpaced, abcChordsSpacedExpected, 2)
 	})
 
 	it("output-transpose-chord-symbols", function () {
