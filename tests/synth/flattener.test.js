@@ -7687,6 +7687,37 @@ describe("Audio flattener", function() {
 	}
 	//////////////////////////////////////////////////////////
 
+	var abcRepeat3 = 'X:1\n' +
+		'M:C\n' +
+		'L:1/8\n' +
+		'Q:1/4=130\n' +
+		'K:F\n' +
+		' C8 |1 D8 :|2 E8 :|3 F8 ||\n' +
+		'|: B8 |1,3 c8 :|2,4 d8 :| e8 ||\n'
+
+	var expectedRepeat3 = {
+		"tempo":130,"instrument":0,"tracks":[[
+			{"cmd":"program","channel":0,"instrument":0},
+			{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":62,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":60,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":64,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":60,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":65,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":70,"volume":105,"start":6,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":72,"volume":105,"start":7,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":70,"volume":105,"start":8,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":74,"volume":105,"start":9,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":70,"volume":105,"start":10,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":72,"volume":105,"start":11,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":70,"volume":105,"start":12,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":74,"volume":105,"start":13,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":70,"volume":105,"start":14,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":76,"volume":105,"start":15,"duration":1,"instrument":0,"gap":0},
+		]],"totalDuration":16}
+
+	//////////////////////////////////////////////////////////
+
 
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
@@ -7878,6 +7909,10 @@ describe("Audio flattener", function() {
 
 	it("volume-crash", function() {
 		doFlattenTest(abcVolumeCrash, expectedVolumeCrash);
+	})
+
+	it("repeat-3", function() {
+		doFlattenTest(abcRepeat3, expectedRepeat3);
 	})
 
 })

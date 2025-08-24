@@ -79,6 +79,7 @@ function doFlattenTest(abc, expected, options) {
 			delete flatten.tracks[ii][jj].endChar
 		}
 	}
+	//console.log(flatten.tracks[0].map(e => e.pitch))
 	console.log(JSON.stringify(flatten))
 	chai.assert.equal(flatten.tempo, expected.tempo, "Tempo")
 	chai.assert.equal(flatten.tracks.length, expected.tracks.length, "Number of Tracks")
