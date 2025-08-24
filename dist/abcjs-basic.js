@@ -1988,7 +1988,11 @@ try {
   // if we aren't in a browser, this code will crash, but it is not needed then either.
 }
 var EditArea = function EditArea(textareaid) {
-  if (typeof textareaid === "string") this.textarea = document.getElementById(textareaid);else this.textarea = textareaid;
+  this.isEditArea = true;
+  if (typeof textareaid === "string") {
+    this.textarea = document.getElementById(textareaid);
+    if (!this.textarea) this.textarea = document.querySelector(textareaid);
+  } else this.textarea = textareaid;
   this.initialText = this.textarea.value;
   this.isDragging = false;
 };
@@ -2156,10 +2160,17 @@ var Editor = function Editor(editarea, params) {
   // Copy all the options that will be passed through
   this.abcjsParams = gatherAbcParams(params);
   if (params.indicate_changed) this.indicate_changed = true;
+
+  // If a string is passed in then it could either be an element's ID or a selector
+  // If an object is passed in then it could either be an EditArea or a textarea.
   if (typeof editarea === "string") {
+    // EditArea handles both the ID and the selector
     this.editarea = new EditArea(editarea);
   } else {
-    this.editarea = editarea;
+    // If an edit area was passed in, just use it
+    if (editarea.isEditArea) this.editarea = editarea;else
+      // Hopefully we were passed in a textarea or equivalent.
+      this.editarea = new EditArea(editarea);
   }
   this.editarea.addSelectionListener(this);
   this.editarea.addChangeListener(this);
@@ -2209,6 +2220,7 @@ var Editor = function Editor(editarea, params) {
     this.div.parentNode.insertBefore(this.warningsdiv, this.div);
   }
   this.onchangeCallback = params.onchange;
+  this.redrawCallback = params.redrawCallback;
   this.currentAbc = "";
   this.tunes = [];
   this.bReentry = false;
@@ -2265,12 +2277,14 @@ Editor.prototype.modelChanged = function () {
   this.bReentry = true;
   try {
     this.timerId = null;
+    if (this.redrawCallback) this.redrawCallback(true);
     if (this.synth && this.synth.synthControl) this.synth.synthControl.disable(true);
     this.tunes = renderAbc(this.div, this.currentAbc, this.abcjsParams);
     if (this.tunes.length > 0) {
       this.warnings = this.tunes[0].warnings;
     }
     this.redrawMidi();
+    if (this.redrawCallback) this.redrawCallback(false);
   } catch (error) {
     console.error("ABCJS error: ", error);
     if (!this.warnings) this.warnings = [];
@@ -2294,6 +2308,9 @@ Editor.prototype.paramChanged = function (engraverParams) {
   }
   this.currentAbc = "";
   this.fireChanged();
+};
+Editor.prototype.getTunes = function () {
+  return this.tunes;
 };
 Editor.prototype.synthParamChanged = function (options) {
   if (!this.synth) return;
@@ -10052,11 +10069,11 @@ function cleanUpSlursInLine(line, staffNum, voiceNum, currSlur) {
   }
 }
 function wrapMusicLines(lines, barsperstaff) {
-  for (i = 0; i < lines.length; i++) {
+  for (var i = 0; i < lines.length; i++) {
     if (lines[i].staff !== undefined) {
-      for (s = 0; s < lines[i].staff.length; s++) {
+      for (var s = 0; s < lines[i].staff.length; s++) {
         var permanentItems = [];
-        for (v = 0; v < lines[i].staff[s].voices.length; v++) {
+        for (var v = 0; v < lines[i].staff[s].voices.length; v++) {
           var voice = lines[i].staff[s].voices[v];
           var barNumThisLine = 0;
           for (var n = 0; n < voice.length; n++) {
@@ -10777,6 +10794,9 @@ module.exports = {
   \***************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var keyAccidentals = __webpack_require__(/*! ../const/key-accidentals */ "./src/const/key-accidentals.js");
 var _require = __webpack_require__(/*! ../const/relative-major */ "./src/const/relative-major.js"),
   relativeMajor = _require.relativeMajor,
@@ -11073,6 +11093,7 @@ var strTranspose;
   var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/*\d*)([\>\<\-\)\.\s\\]*)/;
   var regOptionalNote = /([_^=]*[A-Ga-g][,']*)?(\d*\/*\d*)?([\>\<\-\)]*)?/;
   var regSpace = /(\s*)$/;
+  var regOptionalSpace = /(\s*)/;
 
   // This the relationship of the note to the tonic and an octave. So what is returned is a distance in steps from the tonic and the amount of adjustment from
   // a normal scale. That is - in the key of D an F# is two steps from the tonic and no adjustment. A G# is three steps from the tonic and one half-step higher.
@@ -11101,39 +11122,59 @@ var strTranspose;
     };
   }
   function replaceNote(abc, start, end, newPitch, index) {
-    // There may be more than just the note between the start and end - there could be spaces, there could be a chord symbol, there could be a decoration.
-    // This could also be a part of a chord. If so, then the particular note needs to be teased out.
     var note = abc.substring(start, end);
-    var match = note.match(new RegExp(regNote.source + regSpace.source), '');
+    // Try single note first
+    var match = note.match(new RegExp(regNote.source + regSpace.source));
     if (match) {
-      // This will match a single note
       var noteLen = match[1].length;
       var trailingLen = match[2].length + match[3].length + match[4].length;
       var leadingLen = end - start - noteLen - trailingLen;
       start += leadingLen;
       end -= trailingLen;
     } else {
-      // I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
+      // Match chord
       var regPreBracket = /([^\[]*)/;
       var regOpenBracket = /\[/;
       var regCloseBracket = /\-?](\d*\/*\d*)?([\>\<\-\)]*)/;
-      match = note.match(new RegExp(regPreBracket.source + regOpenBracket.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regOptionalNote.source + regCloseBracket.source + regSpace.source));
+      var regChord = new RegExp(regPreBracket.source + regOpenBracket.source + "(?:" + regOptionalNote.source + "\\s*){1,8}" + regCloseBracket.source + regSpace.source);
+      match = note.match(regChord);
       if (match) {
-        // This will match a chord
-        // Get the number of chars used by the previous notes in this chord
-        var count = 1 + match[1].length; // one character for the open bracket
-        for (var i = 0; i < index; i++) {
-          // index is the iteration through the chord. This function gets called for each one.
-          if (match[i * 3 + 2]) count += match[i * 3 + 2].length;
-          if (match[i * 3 + 3]) count += match[i * 3 + 3].length;
-          if (match[i * 3 + 4]) count += match[i * 3 + 4].length;
+        var beforeChordLen = match[1].length + 1; // text before + '['
+        var chordBody = note.slice(match[1].length + 1, note.lastIndexOf("]"));
+        // Collect notes inside chord
+        var chordNotes = [];
+        var regNoteWithSpace = new RegExp(regOptionalNote.source + "\\s*", "g");
+        var _iterator = _createForOfIteratorHelper(chordBody.matchAll(regNoteWithSpace)),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var m = _step.value;
+            var noteText = m[0].trim();
+            if (noteText !== "") {
+              chordNotes.push({
+                text: noteText,
+                index: m.index
+              });
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
         }
-        start += count;
-        var endLen = match[index * 3 + 2] ? match[index * 3 + 2].length : 0;
-        // endLen += match[index * 3 + 3] ? match[index * 3 + 3].length : 0
-        // endLen += match[index * 3 + 4] ? match[index * 3 + 4].length : 0
-
-        end = start + endLen;
+        if (index >= chordNotes.length) {
+          throw new Error("Chord index out of range for chord: " + note);
+        }
+        var chosen = chordNotes[index];
+        // Preserve duration and tie
+        var mDurTie = chosen.text.match(/^(.+?)(\d+\/?\d*)?(-)?$/);
+        var pitchPart = mDurTie ? mDurTie[1] : chosen.text;
+        var durationPart = mDurTie && mDurTie[2] ? mDurTie[2] : "";
+        var tiePart = mDurTie && mDurTie[3] ? mDurTie[3] : "";
+        // Replace note keeping duration and tie
+        newPitch = newPitch + durationPart + tiePart;
+        start += beforeChordLen + chosen.index;
+        end = start + chosen.text.length;
       }
     }
     return {
@@ -26767,7 +26808,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.5.1';
+var version = '6.5.2';
 module.exports = version;
 
 /***/ })

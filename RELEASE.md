@@ -1,3 +1,21 @@
+# Version 6.5.2
+
+## Bugs
+
+* Add test for bug with third ending sequencing
+
+* Fix problem with transposing chords that have spaces in them.
+
+* Fix undefined variables.
+
+* Fix typescript definitions
+
+## Features
+
+* Allow passing selector into the Editor in addition to ID. Add callbacks before and after drawing.
+
+* Expose the tunes array that the Editor has.
+
 # Version 6.5.1
 
 ## Bugs
