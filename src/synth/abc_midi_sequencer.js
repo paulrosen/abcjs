@@ -2,12 +2,13 @@
 
 var sequence;
 var parseCommon = require("../parse/abc_common");
+var Repeats = require("./repeats");
 
 (function() {
 	"use strict";
 
 	var measureLength = 1; // This should be set by the meter, but just in case that is missing, we'll take a guess.
-	// The abc is provided to us line by line. It might have repeats in it. We want to re arrange the elements to
+	// The abc is provided to us line by line. It might have repeats in it. We want to rearrange the elements to
 	// be an array of voices with all the repeats embedded, and no lines. Then it is trivial to go through the events
 	// one at a time and turn it into midi.
 
@@ -142,8 +143,7 @@ var parseCommon = require("../parse/abc_common");
 		var tempoChanges = {};
 		tempoChanges["0"] = { el_type: 'tempo', qpm: qpm, timing: 0 };
 		var currentVolume;
-		var startRepeatPlaceholder = []; // There is a place holder for each voice.
-		var skipEndingPlaceholder = []; // This is the place where the first ending starts.
+		var repeats = []
 		var startingDrumSet = false;
 		var lines = abctune.lines; //abctune.deline(); TODO-PER: can switch to this, then simplify the loops below.
 		for (var i = 0; i < lines.length; i++) {
@@ -166,6 +166,7 @@ var parseCommon = require("../parse/abc_common");
 							var voiceName = getTrackTitle(line.staff, voiceNumber);
 							if (voiceName)
 								voices[voiceNumber].unshift({el_type: "name", trackName: voiceName});
+							repeats[voiceNumber] = new Repeats(voices[voiceNumber])
 						}
 						// Negate any transposition for the percussion staff.
 						if (transpose && staff.clef.type === "perc")
@@ -316,31 +317,7 @@ var parseCommon = require("../parse/abc_common");
 										voices[voiceNumber].push({ el_type: 'bar' }); // We need the bar marking to reset the accidentals.
 									setDynamics(elem);
 									noteEventsInBar = 0;
-									// figure out repeats and endings --
-									// The important part is where there is a start repeat, and end repeat, or a first ending.
-									var endRepeat = (elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat");
-									var startEnding = (elem.startEnding === '1');
-									var startRepeat = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" || elem.type === "bar_right_repeat");
-									if (endRepeat) {
-										var s = startRepeatPlaceholder[voiceNumber];
-										if (!s) s = 0; // If there wasn't a left repeat, then we repeat from the beginning.
-										var e = skipEndingPlaceholder[voiceNumber];
-										if (!e) e = voices[voiceNumber].length; // If there wasn't a first ending marker, then we copy everything.
-										// duplicate each of the elements - this has to be a deep copy.
-										for (var z = s; z < e; z++) {
-											var item = Object.assign({},voices[voiceNumber][z]);
-											if (item.pitches)
-												item.pitches = parseCommon.cloneArray(item.pitches);
-											voices[voiceNumber].push(item);
-										}
-										// reset these in case there is a second repeat later on.
-										skipEndingPlaceholder[voiceNumber] = undefined;
-										startRepeatPlaceholder[voiceNumber] = undefined;
-									}
-									if (startEnding)
-										skipEndingPlaceholder[voiceNumber] = voices[voiceNumber].length;
-									if (startRepeat)
-										startRepeatPlaceholder[voiceNumber] = voices[voiceNumber].length;
+									repeats[voiceNumber].addBar(elem, voiceNumber)
 									rhythmHeadThisBar = false;
 									break;
 								case 'style':
@@ -524,6 +501,9 @@ var parseCommon = require("../parse/abc_common");
 				}
 			}
 		}
+		for (var r = 0; r < repeats.length; r++)
+			voices[r] = repeats[r].resolveRepeats()
+
 		// If there are tempo changes, make sure they are in all the voices. This must be done post process because all the elements in all the voices need to be created first.
 		insertTempoChanges(voices, tempoChanges);
 
