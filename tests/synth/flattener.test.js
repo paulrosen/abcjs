@@ -7724,8 +7724,9 @@ describe("Audio flattener", function() {
 			{"cmd":"note","pitch":80,"volume":105,"start":22,"duration":1,"instrument":0,"gap":0},
 			{"cmd":"note","pitch":84,"volume":105,"start":23,"duration":1,"instrument":0,"gap":0},
 			{"cmd":"note","pitch":85,"volume":105,"start":24,"duration":1,"instrument":0,"gap":0},
-			{"cmd":"note","pitch":86,"volume":105,"start":25,"duration":1,"instrument":0,"gap":0}
-		]],"totalDuration":26}
+			{"cmd":"note","pitch":80,"volume":105,"start":25,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":86,"volume":105,"start":26,"duration":1,"instrument":0,"gap":0}
+		]],"totalDuration":27}
 
 	//////////////////////////////////////////////////////////
 
