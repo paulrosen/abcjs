@@ -3,6 +3,7 @@
 /*global module */
 
 var svgNS = "http://www.w3.org/2000/svg";
+var xlinkNS = "http://www.w3.org/1999/xlink";
 
 function Svg(wrapper) {
 	this.svg = createSvg();
@@ -32,7 +33,7 @@ Svg.prototype.setTitle = function (title) {
 
 Svg.prototype.setResponsiveWidth = function (w, h) {
 	// this technique is from: http://thenewcode.com/744/Make-SVG-Responsive, thx to https://github.com/iantresman
-	this.svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+	this.svg.setAttribute("viewBox", "0 0 " + w.toFixed(3) + " " + h.toFixed(3));
 	this.svg.setAttribute("preserveAspectRatio", "xMinYMin meet");
 	this.svg.removeAttribute("height");
 	this.svg.removeAttribute("width");
@@ -362,6 +363,38 @@ Svg.prototype.closeGroup = function () {
 		return null;
 	}
 	return g;
+};
+
+Svg.prototype.use = function (attr) {
+	if (!attr.hasOwnProperty('id')) return; // caller must provide an id
+	if (!attr.hasOwnProperty('path')) return; // caller must provide a path
+	var defs = document.querySelector("defs");
+	if (!defs) {
+	    defs = document.createElementNS(svgNS, "defs"); 
+		this.svg.appendChild(defs);
+	}
+	var use = document.createElementNS(svgNS, "use");
+	var path = document.getElementById(attr.id);
+	if (!path) {
+		// first use of glyph - create its path element
+		path = document.createElementNS(svgNS, "path");
+		path.setAttributeNS(null, 'd', attr.path);
+		path.setAttributeNS(null, 'id', attr.id);
+		defs.append(path);
+	}
+	for (var key in attr) {
+		if (key === 'path') {
+			// ignore it here. it's already been added to the defs path element.
+		} else if (key === 'id') {
+			// link this <use> element to the corresponding glyph path def by id
+			use.setAttributeNS(xlinkNS, 'xlink:href', '#' + attr[key]);
+		} else if (key === 'klass') {
+			use.setAttributeNS(null, "class", attr[key]);
+		} else if (attr[key] !== undefined)
+			use.setAttributeNS(null, key, attr[key]);
+	}
+	this.append(use);
+	return use;
 };
 
 Svg.prototype.path = function (attr) {
