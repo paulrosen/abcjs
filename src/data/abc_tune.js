@@ -199,8 +199,8 @@ var Tune = function() {
 		var den = 4;
 		if (meter) {
 			if (meter.type === 'specified') {
-				if (meter.value && meter.value.length > 0 && meter.value[0].indexOf('+') > 0) {
-					var parts = meter.value[0].split('+')
+				if (meter.value && meter.value.length > 0 && meter.value[0].num.indexOf('+') > 0) {
+					var parts = meter.value[0].num.split('+')
 					num = 0;
 					for (var i = 0; i < parts.length; i++)
 						num += parseInt(parts[i],10)
