@@ -23,8 +23,8 @@ var create;
 
 		var beatsPerSecond = tempo / 60;
 
-		// Fix tempo for */8 meters
-		if (time.den == 8){
+		// Fix tempo for compound meters
+		if (time.den === 8 && time.num !== 5 && time.num !== 7){
 
 			// Compute the tempo based on the actual milliseconds per measure, scaled by the number of eight notes and halved to get tempo in bpm.
 			var msPerMeasure = abcTune.millisecondsPerMeasure();
