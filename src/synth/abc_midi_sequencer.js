@@ -657,7 +657,7 @@ var parseCommon = require("../parse/abc_common");
 				// TODO-PER: only taking the first meter, so the complex meters are not handled.
 				let num = 0
 				if (element.value && element.value.length > 0 && element.value[0].num.indexOf('+') > 0) {
-					var parts = meter.value[0].num.split('+')
+					var parts = element.value[0].num.split('+')
 					for (var i = 0; i < parts.length; i++)
 						num += parseInt(parts[i],10)
 				} else
