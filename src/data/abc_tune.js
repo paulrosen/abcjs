@@ -90,12 +90,17 @@ var Tune = function() {
 	this.getBeatLength = function() {
 		// This returns a fraction: for instance 1/4 for a quarter
 		// There are two types of meters: compound and regular. Compound meter has 3 beats counted as one.
+
+		// Irregular meters have the beat as an 1/8 note but the tempo as a 1/4.
+		// That keeps it a similar tempo to 4/4 but that may or may not be generally intuitive, so that might need to change.
 		var meter = this.getMeterFraction();
 		var multiplier = 1;
 		if (meter.num === 6 || meter.num === 9 || meter.num === 12)
 			multiplier = 3;
 		else if (meter.num === 3 && meter.den === 8)
 			multiplier = 3;
+		else if (meter.den === 8 && (meter.num === 5 || meter.num === 7))
+			multiplier = 2
 
 		return multiplier / meter.den;
 	};
@@ -194,7 +199,13 @@ var Tune = function() {
 		var den = 4;
 		if (meter) {
 			if (meter.type === 'specified') {
-				num = parseInt(meter.value[0].num, 10);
+				if (meter.value && meter.value.length > 0 && meter.value[0].num.indexOf('+') > 0) {
+					var parts = meter.value[0].num.split('+')
+					num = 0;
+					for (var i = 0; i < parts.length; i++)
+						num += parseInt(parts[i],10)
+				} else
+					num = parseInt(meter.value[0].num, 10);
 				den = parseInt(meter.value[0].den,10);
 			} else if (meter.type === 'cut_time') {
 				num = 2;

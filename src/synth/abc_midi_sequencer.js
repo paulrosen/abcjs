@@ -627,19 +627,29 @@ var Repeats = require("./repeats");
 		switch (element.type) {
 			case "common_time":
 				meter = { el_type: 'meter', num: 4, den: 4 };
+				measureLength = 4/4
 				break;
 			case "cut_time":
 				meter = { el_type: 'meter', num: 2, den: 2 };
+				measureLength = 2/2
 				break;
 			case "specified":
 				// TODO-PER: only taking the first meter, so the complex meters are not handled.
-				meter = { el_type: 'meter', num: element.value[0].num, den: element.value[0].den };
+				let num = 0
+				if (element.value && element.value.length > 0 && element.value[0].num.indexOf('+') > 0) {
+					var parts = element.value[0].num.split('+')
+					for (var i = 0; i < parts.length; i++)
+						num += parseInt(parts[i],10)
+				} else
+					num = parseInt(element.value[0].num, 10);
+				meter = { el_type: 'meter', num: num, den: element.value[0].den };
+				measureLength = num / parseInt(element.value[0].den,10)
 				break;
 			default:
 				// This should never happen.
 				meter = { el_type: 'meter' };
+				measureLength = 1
 		}
-		measureLength = meter.num/meter.den;
 		return meter;
 	}
 
