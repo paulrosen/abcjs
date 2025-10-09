@@ -191,6 +191,8 @@ describe("Timing", function() {
 		'C4 D6-| D4 z2 F2 F2 |\n';
 
 	var expected2_3_8 = [0, 1000, 2500, 3500, 5000, 6000, 7500, 8500, 10000]
+	var expected2_3_8_2 = [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000]
+	var expected2_3_8_3 = [0,333,667,1000,1333,1667,2000,2333,2667,3000,3333,3667,4000,4333,4667,5000]
 
 	var expectedBeatIrregularCallback = [
 		{beat: 0, left: 'NONE' },
@@ -214,6 +216,8 @@ describe("Timing", function() {
 		'C4 D4-| D4 z2 F2 |\n';
 
 	var expected4_4 = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000]
+	var expected4_4_2 = [0,500,1000,1500,2000,2500,3000,3500,4000,4500,5000,5500,6000,6500,7000,7500,8000,8500,9000,9500,10000,10500,11000,11500,12000,12500,13000,13500,14000,14500,15000,15500,16000]
+	var expected4_4_3 = [0,333,667,1000,1333,1667,2000,2333,2667,3000,3333,3667,4000,4333,4667,5000,5333,5667,6000,6333,6667,7000,7333,7667,8000]
 
 //////////////////////////////////////////////////////////
 
@@ -276,11 +280,11 @@ describe("Timing", function() {
 	});
 
 	it("2+3/8", function() {
-		return doBeatCallbackTest2(abc2_3_8, expected2_3_8)
+		return doBeatCallbackTest2(abc2_3_8, expected2_3_8, expected2_3_8_2, expected2_3_8_3)
 	});
 
 	it("4/4", function() {
-		return doBeatCallbackTest2(abc4_4, expected4_4)
+		return doBeatCallbackTest2(abc4_4, expected4_4, expected4_4_2, expected4_4_3)
 	});
 });
 
@@ -454,7 +458,7 @@ function doBeatCallbackTest(abc, expected) {
 	})
 }
 
-function doBeatCallbackTest2(abc, expected) {
+function doBeatCallbackTest2(abc, expected, expected2, expected3) {
 	var visualObj = abcjs.renderAbc("paper", abc, { staffwidth: 500, stretchlast: true})
 	var timing = new abcjs.TimingCallbacks(visualObj[0], {
 		beatSubdivisions: 1,
@@ -462,8 +466,26 @@ function doBeatCallbackTest2(abc, expected) {
 		qpm: 60,
 	})
 
-	const msg = "\nact:" + timing.beatStarts + "\nexp:" + expected + "\n"
+	let msg = "1/2\nact:" + timing.beatStarts + "\nexp:" + expected + "\n"
 	chai.assert.deepStrictEqual(timing.beatStarts,expected, msg);
+
+	timing = new abcjs.TimingCallbacks(visualObj[0], {
+		beatSubdivisions: 2,
+		extraMeasuresAtBeginning: 2,
+		qpm: 60,
+	})
+
+	msg = "2/2\nact:" + timing.beatStarts + "\nexp:" + expected2 + "\n"
+	chai.assert.deepStrictEqual(timing.beatStarts,expected2, msg);
+
+	timing = new abcjs.TimingCallbacks(visualObj[0], {
+		beatSubdivisions: 3,
+		extraMeasuresAtBeginning: 0,
+		qpm: 60,
+	})
+
+	msg = "3/0\nact:" + timing.beatStarts + "\nexp:" + expected3 + "\n"
+	chai.assert.deepStrictEqual(timing.beatStarts,expected3, msg);
 }
 
 function sleep(ms) {

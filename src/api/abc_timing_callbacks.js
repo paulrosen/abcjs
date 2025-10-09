@@ -49,37 +49,36 @@ var TimingCallbacks = function(target, params) {
 		var irregularMeter = ''
 		if (meter && meter.type === "specified" && meter.value && meter.value.length > 0 && meter.value[0].num.indexOf('+') > 0)
 			irregularMeter = meter.value[0].num
+		// for subdivisions = 1, then this should contain only whole numbers and the callbacks are irregular
+		// for subdivisions = 2, then this should be 1/8 notes. The beats should be something like: 0, 0.5, 1, 1.33, 1.66 2 (For M:2+3/8)
+		// etc for more subdivisions - they are just multiplied
 		self.beatStarts = []
-		if (irregularMeter) {
+		if (irregularMeter && self.beatSubdivisions === 1) {
 			var parts = irregularMeter.split("+")
 			for (var i = 0; i < parts.length; i++)
-				parts[i] = parseInt(parts[i],10)
+				parts[i] = parseInt(parts[i],10) / 2 // since we count a beat as a quarter note, but these numbers refer to 1/8 notes, we convert the beat length
 			var counter= 0
 			var currentBeat = 0
 			for (var k = 0; k < self.extraMeasuresAtBeginning; k++) {
 				for (var kk = 0; kk < parts.length; kk++) {
-					self.beatStarts.push(currentBeat)
+					self.beatStarts.push(Math.round(currentBeat))
 					var gap = parts[kk] * self.millisecondsPerBeat
 					currentBeat += gap
 				}
 			}
-			var last = currentBeat + self.lastMoment
-			while (currentBeat <= last) {
-				self.beatStarts.push(currentBeat)
+			while (currentBeat <= self.lastMoment) {
+				self.beatStarts.push(Math.round(currentBeat))
 				var gap2 = parts[counter] * self.millisecondsPerBeat
 				if (++counter >= parts.length) counter = 0
 				currentBeat += gap2
 			}
-			// dividing by two because we're counting 1/8 notes as a beat but the tempo is assuming 1/4 as the beat
-			for (i = 0; i < self.beatStarts.length; i++)
-				self.beatStarts[i] = self.beatStarts[i] / 2
 			self.totalBeats = self.beatStarts.length
 		} else {
 			//self.extraMeasuresAtBeginning
 			self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
 			// Add one so the last beat is the last moment
 			for (var j = 0; j < self.totalBeats+1; j++) {
-				self.beatStarts.push(j*self.millisecondsPerBeat)
+				self.beatStarts.push(Math.round(j*self.millisecondsPerBeat))
 			}
 		}
 		//console.log({noteTimings: self.noteTimings, beatStarts: self.beatStarts})
