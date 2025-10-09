@@ -140,49 +140,80 @@ describe("Timing", function() {
 		"K:C clef=bass\n" +
 		"!f!C,2D,2 E,4|G,6 A,2|G,4 E,4|]\n"
 
-var expectedBeatCallback = [
-	{beat: 0, left: 'NONE' },
-	{beat: 1, left: 'NONE' },
-	{beat: 2, left: 'NONE' },
-	{beat: 3, left: 'NONE' },
-	{beat: 4, left: 70 },
-	{beat: 5, left: 165 },
-	{beat: 6, left: 240 },
-	{beat: 4, left: 70 },
-	{beat: 5, left: 165 },
-	{beat: 6, left: 240 },
-	{beat: 7, left: 290 },
-	{beat: 8, left: 375 },
-	{beat: 9, left: 440 },
-	{beat: 10, left: 'NONE'},
-]
+	var expectedBeatCallback = [
+		{beat: 0, left: 'NONE' },
+		{beat: 1, left: 'NONE' },
+		{beat: 2, left: 'NONE' },
+		{beat: 3, left: 'NONE' },
+		{beat: 4, left: 70 },
+		{beat: 5, left: 165 },
+		{beat: 6, left: 240 },
+		{beat: 4, left: 135 },
+		{beat: 5, left: 165 },
+		{beat: 6, left: 240 },
+		{beat: 7, left: 290 },
+		{beat: 8, left: 375 },
+		{beat: 9, left: 440 },
+		{beat: 10, left: 'NONE'},
+	]
 
-var abcTieOverLineBreak = 'X:1\n' +
-'%%stretchlast 1\n' +
-'M:4/4\n' +
-'K:C\n' +
-'C4 D4-|\n' +
-'D4 F2-F2 |\n';
+	var abcTieOverLineBreak = 'X:1\n' +
+	'%%stretchlast 1\n' +
+	'M:4/4\n' +
+	'K:C\n' +
+	'C4 D4-|\n' +
+	'D4 F2-F2 |\n';
 
-var expectedTieOverLineBreak = [
-	{beat: 0, top: 23, left: 70 },
-	{beat: 0.5, top: 23, left: 105 },
-	{beat: 1, top: 23, left: 150 },
-	{beat: 1.5, top: 23, left: 195 },
-	{beat: 2, top: 23, left: 240 },
-	{beat: 2.5, top: 23, left: 275 },
-	{beat: 3, top: 23, left: 325 },
-	{beat: 3.5, top: 23, left: 370 },
-	{beat: 4, top: 115, left: 50 },
-	{beat: 4.5, top: 115, left: 85 },
-	{beat: 5, top: 115, left: 135 },
-	{beat: 5.5, top: 115, left: 185 },
-	{beat: 6, top: 115, left: 230 },
-	{beat: 6.5, top: 115, left: 270 },
-	{beat: 7, top: 115, left: 315 },
-	{beat: 7.5, top: 115, left: 365 },
-	{beat: 8, top: 'NONE', left: 'NONE' },
-]
+	var expectedTieOverLineBreak = [
+		{beat: 0, top: 23, left: 70 },
+		{beat: 0.5, top: 23, left: 105 },
+		{beat: 1, top: 23, left: 150 },
+		{beat: 1.5, top: 23, left: 195 },
+		{beat: 2, top: 23, left: 240 },
+		{beat: 2.5, top: 23, left: 275 },
+		{beat: 3, top: 23, left: 325 },
+		{beat: 3.5, top: 23, left: 370 },
+		{beat: 4, top: 115, left: 50 },
+		{beat: 4.5, top: 115, left: 85 },
+		{beat: 5, top: 115, left: 135 },
+		{beat: 5.5, top: 115, left: 185 },
+		{beat: 6, top: 115, left: 230 },
+		{beat: 6.5, top: 115, left: 270 },
+		{beat: 7, top: 115, left: 315 },
+		{beat: 7.5, top: 115, left: 365 },
+		{beat: 8, top: 'NONE', left: 'NONE' },
+	]
+
+	var abc2_3_8 = 'X:1\n' +
+		'%%stretchlast 1\n' +
+		'M:2+3/8\n' +
+		'K:C\n' +
+		'C4 D6-| D4 z2 F2 F2 |\n';
+
+	var expected2_3_8 = [0, 1000, 2500, 3500, 5000, 6000, 7500, 8500, 10000]
+
+	var expectedBeatIrregularCallback = [
+		{beat: 0, left: 'NONE' },
+		{beat: 1, left: 'NONE' },
+		{beat: 2, left: 'NONE' },
+		{beat: 3, left: 'NONE' },
+		{beat: 4, left: 85 },
+		{beat: 5, left: 165 },
+		{beat: 3, left: 'NONE' },
+		{beat: 4, left: 85 },
+		{beat: 5, left: 165 },
+		{beat: 6, left: 270 },
+		{beat: 7, left: 350 },
+		{beat: 8, left: 'NONE' },
+	]
+
+	var abc4_4 = 'X:1\n' +
+		'%%stretchlast 1\n' +
+		'M:4/4\n' +
+		'K:C\n' +
+		'C4 D4-| D4 z2 F2 |\n';
+
+	var expected4_4 = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000]
 
 //////////////////////////////////////////////////////////
 
@@ -231,11 +262,25 @@ var expectedTieOverLineBreak = [
 	});
 
 	it("beat-callback", function() {
+		this.timeout(3000);
 		return doBeatCallbackTest(abcBeatCallback, expectedBeatCallback)
+	});
+
+	it("beat-irregular-callback", function() {
+		this.timeout(3000);
+		return doBeatCallbackTest(abc2_3_8, expectedBeatIrregularCallback)
 	});
 
 	it("tieOverLineBreak", function() {
 		return doBeatCallbackTestTies(abcTieOverLineBreak, expectedTieOverLineBreak)
+	});
+
+	it("2+3/8", function() {
+		return doBeatCallbackTest2(abc2_3_8, expected2_3_8)
+	});
+
+	it("4/4", function() {
+		return doBeatCallbackTest2(abc4_4, expected4_4)
 	});
 });
 
@@ -395,8 +440,8 @@ function doBeatCallbackTest(abc, expected) {
 
 	timing.start()
 	return sleep(900).then(function () {
-		timing.setProgress(0.6, "seconds")
-		return sleep(900).then(function () {
+		timing.setProgress(0.7, "seconds")
+		return sleep(1300).then(function () {
 			var msg = []
 			for (var i = 0; i < Math.min(actual.length, expected.length); i++) {
 				var err = JSON.stringify(actual[i]) !== JSON.stringify(expected[i]) ? 'XXXX' : ''
@@ -407,6 +452,18 @@ function doBeatCallbackTest(abc, expected) {
 			return Promise.resolve();
 		})
 	})
+}
+
+function doBeatCallbackTest2(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc, { staffwidth: 500, stretchlast: true})
+	var timing = new abcjs.TimingCallbacks(visualObj[0], {
+		beatSubdivisions: 1,
+		extraMeasuresAtBeginning: 2,
+		qpm: 60,
+	})
+
+	const msg = "\nact:" + timing.beatStarts + "\nexp:" + expected + "\n"
+	chai.assert.deepStrictEqual(timing.beatStarts,expected, msg);
 }
 
 function sleep(ms) {

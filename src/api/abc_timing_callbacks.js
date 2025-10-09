@@ -38,7 +38,51 @@ var TimingCallbacks = function(target, params) {
 		// noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
 		self.millisecondsPerBeat = 1000 / (self.qpm / 60) / self.beatSubdivisions;
 		self.lastMoment = self.noteTimings[self.noteTimings.length-1].milliseconds;
-		self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
+
+		// For irregular time sigs that specify the beat divisions (that is, something like `M: 2+3/8`)
+		// Then the beat is not a regular pulse. To keep most of this logic easy, the beat will be specified
+		// as half as long, but the callback will happen according to the pattern. That is,
+		// for bpm=60 at the above time signature, internally the beat callback will happen at 120 bpm, but
+		// the callback function will be called at 2 sub beats, then 3 sub beats, etc.
+		// The beat number will be an integer for all of them and count up by one each time.
+		var meter = newTarget.getMeter()
+		var irregularMeter = ''
+		if (meter && meter.type === "specified" && meter.value && meter.value.length > 0 && meter.value[0].num.indexOf('+') > 0)
+			irregularMeter = meter.value[0].num
+		self.beatStarts = []
+		if (irregularMeter) {
+			var parts = irregularMeter.split("+")
+			for (var i = 0; i < parts.length; i++)
+				parts[i] = parseInt(parts[i],10)
+			var counter= 0
+			var currentBeat = 0
+			for (var k = 0; k < self.extraMeasuresAtBeginning; k++) {
+				for (var kk = 0; kk < parts.length; kk++) {
+					self.beatStarts.push(currentBeat)
+					var gap = parts[kk] * self.millisecondsPerBeat
+					currentBeat += gap
+				}
+			}
+			var last = currentBeat + self.lastMoment
+			while (currentBeat <= last) {
+				self.beatStarts.push(currentBeat)
+				var gap2 = parts[counter] * self.millisecondsPerBeat
+				if (++counter >= parts.length) counter = 0
+				currentBeat += gap2
+			}
+			// dividing by two because we're counting 1/8 notes as a beat but the tempo is assuming 1/4 as the beat
+			for (i = 0; i < self.beatStarts.length; i++)
+				self.beatStarts[i] = self.beatStarts[i] / 2
+			self.totalBeats = self.beatStarts.length
+		} else {
+			//self.extraMeasuresAtBeginning
+			self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
+			// Add one so the last beat is the last moment
+			for (var j = 0; j < self.totalBeats+1; j++) {
+				self.beatStarts.push(j*self.millisecondsPerBeat)
+			}
+		}
+		//console.log({noteTimings: self.noteTimings, beatStarts: self.beatStarts})
 	};
 
 	self.replaceTarget(target);
@@ -73,8 +117,9 @@ var TimingCallbacks = function(target, params) {
 			}
 			if (self.currentTime < self.lastMoment) {
 				requestAnimationFrame(self.doTiming);
-				if (self.currentBeat * self.millisecondsPerBeat < self.currentTime) {
+				if (self.currentBeat < self.beatStarts.length && self.beatStarts[self.currentBeat] <= self.currentTime) {
 					var ret = self.doBeatCallback(timestamp);
+					self.currentBeat++
 					if (ret !== null)
 						self.currentTime = ret;
 				}
@@ -82,6 +127,7 @@ var TimingCallbacks = function(target, params) {
 				// Because of timing issues (for instance, if the browser tab isn't active), the beat callbacks might not have happened when they are supposed to. To keep the client programs from having to deal with that, this will keep calling the loop until all of them have been sent.
 				if (self.beatCallback) {
 					var ret2 = self.doBeatCallback(timestamp);
+					self.currentBeat++
 					if (ret2 !== null)
 						self.currentTime = ret2;
 					requestAnimationFrame(self.doTiming);
@@ -185,8 +231,8 @@ var TimingCallbacks = function(target, params) {
 				debugInfo);
 			if (thisStartTime !== self.startTime) {
 				return timestamp - self.startTime;
-			} else
-				self.currentBeat++;
+			} // else
+			// 	self.currentBeat++;
 		}
 		return null;
 	};
@@ -285,7 +331,6 @@ var TimingCallbacks = function(target, params) {
 		var now = performance.now();
 		self.startTime = now - self.currentTime;
 
-		var oldEvent = self.currentEvent;
 		self.currentEvent = 0;
 		while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < self.currentTime) {
 			self.currentEvent++;
@@ -298,10 +343,18 @@ var TimingCallbacks = function(target, params) {
 			}
 		}
 
+		//console.log({jump:self.currentTime})
 		var oldBeat = self.currentBeat;
-		self.currentBeat = Math.floor(self.currentTime / self.millisecondsPerBeat);
-		if (self.beatCallback && oldBeat !== self.currentBeat) // If the movement caused the beat to change, then immediately report it to the client.
-			self.doBeatCallback(self.startTime+self.currentTime);
+		for (self.currentBeat = 0; self.currentBeat < self.beatStarts.length; self.currentBeat++) {
+			if (self.beatStarts[self.currentBeat] > self.currentTime)
+				break
+		}
+		self.currentBeat--
+		if (self.beatCallback && oldBeat !== self.currentBeat) {
+			// If the movement caused the beat to change, then immediately report it to the client.
+			self.doBeatCallback(self.startTime + self.currentTime);
+			self.currentBeat++
+		}
 
 		if (self.eventCallback && self.currentEvent >= 0 && self.noteTimings[self.currentEvent].type === 'event')
 			self.eventCallback(self.noteTimings[self.currentEvent]);
@@ -328,4 +381,3 @@ function getLineEndTimings(timings, anticipation) {
 }
 
 module.exports = TimingCallbacks;
-
