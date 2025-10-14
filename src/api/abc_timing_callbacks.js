@@ -247,7 +247,7 @@ var TimingCallbacks = function(target, params) {
 
 			var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
 			self.beatCallback(
-				self.currentBeat / self.beatSubdivisions,
+				self.beatStarts[self.currentBeat].b,
 				self.totalBeats / self.beatSubdivisions,
 				self.lastMoment,
 				position,
