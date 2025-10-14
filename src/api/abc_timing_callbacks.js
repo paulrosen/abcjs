@@ -105,7 +105,7 @@ var TimingCallbacks = function(target, params) {
 				self.beatStarts.push({b: j/self.beatSubdivisions, ts: Math.round(j * self.millisecondsPerBeat)})
 			}
 		}
-		console.log({lastMoment: self.lastMoment, beatStarts: self.beatStarts})
+		//console.log({lastMoment: self.lastMoment, beatStarts: self.beatStarts})
 	};
 
 	self.replaceTarget(target);
