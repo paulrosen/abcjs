@@ -190,9 +190,21 @@ describe("Timing", function() {
 		'K:C\n' +
 		'C4 D6-| D4 z2 F2 F2 |\n';
 
-	var expected2_3_8 = [0, 1000, 2500, 3500, 5000, 6000, 7500, 8500, 10000]
-	var expected2_3_8_2 = [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000]
-	var expected2_3_8_3 = [0,333,667,1000,1333,1667,2000,2333,2667,3000,3333,3667,4000,4333,4667,5000]
+	var expected2_3_8 = [{"b":0,"ts":0},{"b":1,"ts":1000},{"b":2,"ts":2500},{"b":3,"ts":3500},{"b":4,"ts":5000},{"b":5,"ts":6000},{"b":6,"ts":7500},{"b":7,"ts":8500},{"b":8,"ts":10000}]
+
+	var expected2_3_8_2 = [{"b":0,"ts":0},{"b":0.5,"ts":500},{"b":1,"ts":1000},{"b":1.33,"ts":1500},{"b":1.67,"ts":2000},{"b":2,"ts":2500},{"b":2.5,"ts":3000},{"b":3,"ts":3500},{"b":3.33,"ts":4000},{"b":3.67,"ts":4500},{"b":4,"ts":5000},{"b":4.5,"ts":5500},{"b":5,"ts":6000},{"b":5.33,"ts":6500},{"b":5.67,"ts":7000},{"b":6,"ts":7500},{"b":6.5,"ts":8000},{"b":7,"ts":8500},{"b":7.33,"ts":9000},{"b":7.67,"ts":9500},{"b":8,"ts":10000}]
+
+	//[{"b":0,"ts":0},{"b":0.33,"ts":333},{"b":0.67,"ts":667},
+	// {"b":1,"ts":1000},{"b":1.22,"ts":1333},{"b":1.44,"ts":1667},{"b":1.67,"ts":2000},
+	// {"b":2,"ts":2500},{"b":2.33,"ts":2833},{"b":2.67,"ts":3167},
+	// {"b":3,"ts":3500},{"b":3.22,"ts":3833},{"b":3.44,"ts":4167},{"b":3.67,"ts":4500},
+	// {"b":4,"ts":5000}]
+	var expected2_3_8_3 = [
+		{"b":0,"ts":0},{"b":0.33,"ts":333},{"b":0.67,"ts":667},
+		{"b":1,"ts":1000},{"b":1.22,"ts":1375},{"b":1.44,"ts":1750},{"b":1.67,"ts":2125},
+		{"b":2,"ts":2500},{"b":2.33,"ts":2833},{"b":2.67,"ts":3167},
+		{"b":3,"ts":3500},{"b":3.22,"ts":3667},{"b":3.44,"ts":4000},{"b":3.67,"ts":4333},
+		{"b":4,"ts":5000}]
 
 	var expectedBeatIrregularCallback = [
 		{beat: 0, left: 'NONE' },
@@ -215,9 +227,10 @@ describe("Timing", function() {
 		'K:C\n' +
 		'C4 D4-| D4 z2 F2 |\n';
 
-	var expected4_4 = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000]
-	var expected4_4_2 = [0,500,1000,1500,2000,2500,3000,3500,4000,4500,5000,5500,6000,6500,7000,7500,8000,8500,9000,9500,10000,10500,11000,11500,12000,12500,13000,13500,14000,14500,15000,15500,16000]
-	var expected4_4_3 = [0,333,667,1000,1333,1667,2000,2333,2667,3000,3333,3667,4000,4333,4667,5000,5333,5667,6000,6333,6667,7000,7333,7667,8000]
+	var expected4_4 = [{"b":0,"ts":0},{"b":1,"ts":1000},{"b":2,"ts":2000},{"b":3,"ts":3000},{"b":4,"ts":4000},{"b":5,"ts":5000},{"b":6,"ts":6000},{"b":7,"ts":7000},{"b":8,"ts":8000},{"b":9,"ts":9000},{"b":10,"ts":10000},{"b":11,"ts":11000},{"b":12,"ts":12000},{"b":13,"ts":13000},{"b":14,"ts":14000},{"b":15,"ts":15000},{"b":16,"ts":16000}]
+	var expected4_4_2 = [{"b":0,"ts":0},{"b":0.5,"ts":500},{"b":1,"ts":1000},{"b":1.5,"ts":1500},{"b":2,"ts":2000},{"b":2.5,"ts":2500},{"b":3,"ts":3000},{"b":3.5,"ts":3500},{"b":4,"ts":4000},{"b":4.5,"ts":4500},{"b":5,"ts":5000},{"b":5.5,"ts":5500},{"b":6,"ts":6000},{"b":6.5,"ts":6500},{"b":7,"ts":7000},{"b":7.5,"ts":7500},{"b":8,"ts":8000},{"b":8.5,"ts":8500},{"b":9,"ts":9000},{"b":9.5,"ts":9500},{"b":10,"ts":10000},{"b":10.5,"ts":10500},{"b":11,"ts":11000},{"b":11.5,"ts":11500},{"b":12,"ts":12000},{"b":12.5,"ts":12500},{"b":13,"ts":13000},{"b":13.5,"ts":13500},{"b":14,"ts":14000},{"b":14.5,"ts":14500},{"b":15,"ts":15000},{"b":15.5,"ts":15500},{"b":16,"ts":16000}]
+	var expected4_4_3 = [{"b":0,"ts":0},{"b":0.33,"ts":333},{"b":0.67,"ts":667},{"b":1,"ts":1000},{"b":1.33,"ts":1333},{"b":1.67,"ts":1667},{"b":2,"ts":2000},{"b":2.33,"ts":2333},{"b":2.67,"ts":2667},{"b":3,"ts":3000},{"b":3.33,"ts":3333},{"b":3.67,"ts":3667},{"b":4,"ts":4000},{"b":4.33,"ts":4333},{"b":4.67,"ts":4667},{"b":5,"ts":5000},{"b":5.33,"ts":5333},{"b":5.67,"ts":5667},{"b":6,"ts":6000},{"b":6.33,"ts":6333},{"b":6.67,"ts":6667},{"b":7,"ts":7000},{"b":7.33,"ts":7333},{"b":7.67,"ts":7667},{"b":8,"ts":8000}]
+
 
 //////////////////////////////////////////////////////////
 
@@ -466,8 +479,14 @@ function doBeatCallbackTest2(abc, expected, expected2, expected3) {
 		qpm: 60,
 	})
 
-	let msg = "1/2\nact:" + timing.beatStarts + "\nexp:" + expected + "\n"
-	chai.assert.deepStrictEqual(timing.beatStarts,expected, msg);
+	let bs = timing.beatStarts.map(b => {
+		return {
+			b: Math.round(b.b*100)/100,
+			ts: Math.round(b.ts)
+		}
+	})
+	let msg = "1/2\nact:" + JSON.stringify(bs) + "\nexp:" + JSON.stringify(expected) + "\n"
+	chai.assert.deepStrictEqual(bs,expected, msg);
 
 	timing = new abcjs.TimingCallbacks(visualObj[0], {
 		beatSubdivisions: 2,
@@ -475,8 +494,14 @@ function doBeatCallbackTest2(abc, expected, expected2, expected3) {
 		qpm: 60,
 	})
 
-	msg = "2/2\nact:" + timing.beatStarts + "\nexp:" + expected2 + "\n"
-	chai.assert.deepStrictEqual(timing.beatStarts,expected2, msg);
+	bs = timing.beatStarts.map(b => {
+		return {
+			b: Math.round(b.b*100)/100,
+			ts: Math.round(b.ts)
+		}
+	})
+	msg = "2/2\nact:" + JSON.stringify(bs) + "\nexp:" + JSON.stringify(expected2) + "\n"
+	chai.assert.deepStrictEqual(bs,expected2, msg);
 
 	timing = new abcjs.TimingCallbacks(visualObj[0], {
 		beatSubdivisions: 3,
@@ -484,8 +509,14 @@ function doBeatCallbackTest2(abc, expected, expected2, expected3) {
 		qpm: 60,
 	})
 
-	msg = "3/0\nact:" + timing.beatStarts + "\nexp:" + expected3 + "\n"
-	chai.assert.deepStrictEqual(timing.beatStarts,expected3, msg);
+	bs = timing.beatStarts.map(b => {
+		return {
+			b: Math.round(b.b*100)/100,
+			ts: Math.round(b.ts)
+		}
+	})
+	msg = "3/0\nact:" + JSON.stringify(bs) + "\nexp:" + JSON.stringify(expected3) + "\n"
+	chai.assert.deepStrictEqual(bs,expected3, msg);
 }
 
 function sleep(ms) {

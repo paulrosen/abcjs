@@ -12,6 +12,7 @@ var TimingCallbacks = function(target, params) {
 	self.lineEndCallback = params.lineEndCallback;   // This is called when the end of a line is approaching.
 	self.lineEndAnticipation = params.lineEndAnticipation ? parseInt(params.lineEndAnticipation, 10) : 0;   // How many milliseconds before the end should the call happen.
 	self.beatSubdivisions = params.beatSubdivisions ? parseInt(params.beatSubdivisions, 10) : 1; // how many callbacks per beat is desired.
+	if (!self.beatSubdivisions) self.beatSubdivisions = 1
 	self.joggerTimer = null;
 
 	self.replaceTarget = function(newTarget) {
@@ -53,35 +54,58 @@ var TimingCallbacks = function(target, params) {
 		// for subdivisions = 2, then this should be 1/8 notes. The beats should be something like: 0, 0.5, 1, 1.33, 1.66 2 (For M:2+3/8)
 		// etc for more subdivisions - they are just multiplied
 		self.beatStarts = []
-		if (irregularMeter && self.beatSubdivisions === 1) {
+		if (irregularMeter) {
+			var measureLength = self.noteTimings[self.noteTimings.length-1].millisecondsPerMeasure
+			var numMeasures = self.lastMoment / measureLength
 			var parts = irregularMeter.split("+")
 			for (var i = 0; i < parts.length; i++)
 				parts[i] = parseInt(parts[i],10) / 2 // since we count a beat as a quarter note, but these numbers refer to 1/8 notes, we convert the beat length
-			var counter= 0
-			var currentBeat = 0
-			for (var k = 0; k < self.extraMeasuresAtBeginning; k++) {
+			var currentTs = 0
+			var beatNumber = 0
+			// For the input: parts = [ 1, 1.5 ] and beatSubdivisions = 2
+			// beatNumbers = 0 0.5 1 1.33 1.67 2 2.5 3 3.33 3.67 ...
+			// when part=1 then there is 1 extra sub beat and it is 0.5
+			// when part=1.5 then there are 2 extra sub beats at 0.33 and 0.67
+			//
+			// beatSubdivision | numFor1 | numFor1.5
+			//        2        |    2    |     3
+			//        3        |    3    |     4.5
+			//        4        |    4    |     6
+			for (var measureNumber = 0; measureNumber < numMeasures; measureNumber++) {
+				var measureStartTs = measureNumber * measureLength
+				var subBeatCounter = 0
 				for (var kk = 0; kk < parts.length; kk++) {
-					self.beatStarts.push(Math.round(currentBeat))
-					var gap = parts[kk] * self.millisecondsPerBeat
-					currentBeat += gap
+					var beatLength = parts[kk] // This is either 1 or 1.5 (how many quarter notes in this beat)
+					if (self.beatSubdivisions === 1) {
+						if (self.beatSubdivisions === 1)
+							if (currentTs < self.lastMoment) {
+								self.beatStarts.push({b: beatNumber, ts: currentTs})
+							}
+							currentTs += beatLength * self.millisecondsPerBeat
+					} else {
+						var numDivisions = beatLength * self.beatSubdivisions
+						for (var k = 0; k < Math.floor(numDivisions); k++) {
+							var subBeat = k / numDivisions
+							var ts = Math.round(measureStartTs + subBeatCounter * self.millisecondsPerBeat)
+							if (ts < self.lastMoment) {
+								self.beatStarts.push({b: beatNumber + subBeat, ts: ts})
+							}
+							subBeatCounter++
+						}
+					}
+					beatNumber++
 				}
 			}
-			while (currentBeat <= self.lastMoment) {
-				self.beatStarts.push(Math.round(currentBeat))
-				var gap2 = parts[counter] * self.millisecondsPerBeat
-				if (++counter >= parts.length) counter = 0
-				currentBeat += gap2
-			}
+			self.beatStarts.push({b: numMeasures * parts.length, ts: self.lastMoment})
 			self.totalBeats = self.beatStarts.length
 		} else {
-			//self.extraMeasuresAtBeginning
 			self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
 			// Add one so the last beat is the last moment
 			for (var j = 0; j < self.totalBeats+1; j++) {
-				self.beatStarts.push(Math.round(j*self.millisecondsPerBeat))
+				self.beatStarts.push({b: j/self.beatSubdivisions, ts: Math.round(j * self.millisecondsPerBeat)})
 			}
 		}
-		//console.log({noteTimings: self.noteTimings, beatStarts: self.beatStarts})
+		console.log({lastMoment: self.lastMoment, beatStarts: self.beatStarts})
 	};
 
 	self.replaceTarget(target);
@@ -116,7 +140,7 @@ var TimingCallbacks = function(target, params) {
 			}
 			if (self.currentTime < self.lastMoment) {
 				requestAnimationFrame(self.doTiming);
-				if (self.currentBeat < self.beatStarts.length && self.beatStarts[self.currentBeat] <= self.currentTime) {
+				if (self.currentBeat < self.beatStarts.length && self.beatStarts[self.currentBeat].ts <= self.currentTime) {
 					var ret = self.doBeatCallback(timestamp);
 					self.currentBeat++
 					if (ret !== null)
@@ -345,7 +369,7 @@ var TimingCallbacks = function(target, params) {
 		//console.log({jump:self.currentTime})
 		var oldBeat = self.currentBeat;
 		for (self.currentBeat = 0; self.currentBeat < self.beatStarts.length; self.currentBeat++) {
-			if (self.beatStarts[self.currentBeat] > self.currentTime)
+			if (self.beatStarts[self.currentBeat].ts > self.currentTime)
 				break
 		}
 		self.currentBeat--
