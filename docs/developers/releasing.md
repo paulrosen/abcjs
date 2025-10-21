@@ -62,10 +62,4 @@ npm login
 
 [_] Update https://abcjs.net.
 
-[_] Release a new version of the [WordPress plugin](https://wordpress.org/plugins/abc-notation/).
-* Repo at: `svn checkout https://plugins.svn.wordpress.org/abc-notation/`
-* Make changes in `/trunk`
-* When ready to release, make tag with right-click trunk, subversion => Branch or Tag, then pick "any location" and change the location to `.../tags/x.x.x` with the version number.
-* check in all changed files.
-
 [_] Release a new version of the vscode extension.
