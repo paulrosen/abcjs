@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-7904f4d4","path":"/visual/dragging.html","title":"Selecting and Dragging Elements","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1598138962000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":2}]},"filePathRelative":"visual/dragging.md"}');export{e as data};

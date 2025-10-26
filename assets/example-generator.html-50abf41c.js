@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-c4d65034","path":"/overview/example-generator.html","title":"Example Generator","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1637939557000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":3}]},"filePathRelative":"overview/example-generator.md"}');export{e as data};

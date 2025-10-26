@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-4345fe94","path":"/deprecated/deprecated-api.html","title":"Deprecated API Calls","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1675695833000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":2}]},"filePathRelative":"deprecated/deprecated-api.md"}');export{e as data};

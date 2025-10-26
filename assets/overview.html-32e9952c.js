@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-cd41222c","path":"/visual/overview.html","title":"Overview (renderAbc)","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1675996147000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":4}]},"filePathRelative":"visual/overview.md"}');export{e as data};

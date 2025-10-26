@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
+  <title>abcjs: PDF Maker Demo</title>
+
+  <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    window.onload = function () {
+      new ABCJS.Editor("abc", {
+        canvas_id: "canvas",
+        generate_warnings: true,
+        warnings_id: "warnings",
+        synth: {
+          el: "#audio",
+          options: { displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true }
+        },
+        abcjsParams: {
+          responsive: "resize",
+          oneSvgPerLine: true
+        }
+      });
+    };
+  </script>
+  <style>
+    @media print {
+      header, footer, nav button, main section {
+        display: none;
+      }
+      main section.output {
+        display: block;
+      }
+        [fill="#ff0000"] {
+            fill: currentColor;
+        }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>PDF Maker</h1>
+  </header>
+  <div class="container">
+    <main>
+      <section>
+        <p>
+          This page demonstrates how to take the output of abcjs and make a nicely formatted PDF out of it. It does that by using the browser's built in print capability. The
+          browser's "Print Preview" dialog contains an option to "print to PDF".
+          (It is useful to use the "oneSvgPerLine" option when printing. This will keep the browser from breaking the music in the middle of a staff when there is a page break.)
+        </p>
+        <ul class="instructions">
+          <li>
+            Use the input dialog below to create the music you wish to print.</li>
+          <li>
+            Use the music player to test your input for typos.</li>
+          <li>
+            Click the "print" button to save as PDF.</li>
+        </ul>
+      </section>
+      <section class="input">
+        <textarea id="abc" spellcheck="false">
+X: 1
+T: Cooley's
+M: 4/4
+L: 1/8
+R: reel
+K: Emin
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
+EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
+|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
+eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
+EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
+|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
+eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
+EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
+|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
+eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
+EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
+|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
+eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
+        </textarea>
+
+        <div id="warnings"></div>
+        <div id="audio"></div>
+      </section>
+      <section class="output">
+        <nav>
+          <button onclick="window.print()">Print</button>
+        </nav>
+        <div id="canvas" class="visible-background"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

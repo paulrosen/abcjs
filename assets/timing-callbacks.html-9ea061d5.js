@@ -1,0 +1,1 @@
+const a=JSON.parse('{"key":"v-a7d8cb6c","path":"/animation/timing-callbacks.html","title":"Timing Callbacks","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1675996147000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":13}]},"filePathRelative":"animation/timing-callbacks.md"}');export{a as data};

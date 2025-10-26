@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-8daa1a0e","path":"/","title":"Javascript library for inserting music in the browser.","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1676327456000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":4}]},"filePathRelative":"README.md"}');export{e as data};

@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-1ffa2e1a","path":"/developers/basic-architecture.html","title":"Basic Architecture","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1679269174000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":7}]},"filePathRelative":"developers/basic-architecture.md"}');export{e as data};

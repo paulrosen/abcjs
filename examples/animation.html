@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+	<link rel="stylesheet" href="examples-styles.css"/>
+
+	<title>abcjs animation</title>
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+
+	<style media="screen" type="text/css">
+       .abcjs-cursor {
+            stroke: blue;
+        }
+       @media (prefers-color-scheme: dark) {
+           .abcjs-cursor {
+               stroke: #ffffff;
+           }
+       }
+       path {
+		   transition: opacity 1s;
+	   }
+	   .abcjs-note.hidden, .abcjs-beam-elem.hidden {
+		   opacity: 0;
+	   }
+	   .color {
+		   stroke: red;
+		   fill: red;
+	   }
+	</style>
+</head>
+
+<body onload="load()">
+<header>
+	<img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+	<h1>Animation</h1>
+</header>
+<div class="container">
+	<div class="cursor-nav">
+		<div>
+			<label><input type="checkbox" id="hide-finished-measures" checked>Hide Finished Measures</label>
+			<label><input type="checkbox" id="show-cursor" checked>Show Cursor</label>
+			<label><input type="checkbox" id="color-note" checked>Color Note</label>
+			<button id="do-animation">Start</button>
+		</div>
+	</div>
+	<div id="paper" class="paper"></div>
+	<div id="warnings"></div>
+</div>
+
+<script>
+	var abcString = "T: Cooley's\n" +
+		"M: 4/4\n" +
+		"L: 1/8\n" +
+		"R: reel\n" +
+		"K: Emin\n" +
+		"|:EBBA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+		"EBBA B2 EB|B2 AB defg|afe^c dBAF|1 DEFD E2 D2:|2 DEFD E2 gf||\n" +
+		"|:eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+		"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2 gf:|";
+
+	function load() {
+		var visualObj = ABCJS.renderAbc("paper", abcString, {add_classes: true});
+		var timingCallbacks = new ABCJS.TimingCallbacks(visualObj[0], {
+			beatCallback: beatCallback,
+			eventCallback: eventCallback,
+		});
+
+		function createCursor() {
+			var svg = document.querySelector("#paper svg");
+			var cursor = document.createElementNS("http://www.w3.org/2000/svg", "line");
+			cursor.setAttribute("class", "abcjs-cursor");
+			cursor.setAttributeNS(null, 'x1', 0);
+			cursor.setAttributeNS(null, 'y1', 0);
+			cursor.setAttributeNS(null, 'x2', 0);
+			cursor.setAttributeNS(null, 'y2', 0);
+			svg.appendChild(cursor);
+			return cursor;
+		}
+		var cursor = createCursor();
+
+		var button = document.getElementById("do-animation");
+		button.addEventListener("click", function() { startStop(); });
+		var hideFinishedMeasures = document.getElementById("hide-finished-measures");
+		var showCursor = document.getElementById("show-cursor");
+		var colorNote = document.getElementById("color-note");
+
+		var isRunning = false;
+		var buttonText = ["Start", "Stop"];
+
+		var pauseButtonControl = function () {
+			isRunning = !isRunning;
+			button.innerText = buttonText[isRunning ? 1 : 0];
+		};
+
+		var startStop = function() {
+			isRunning = !isRunning;
+			button.innerText = buttonText[isRunning ? 1 : 0];
+			if (isRunning)
+				timingCallbacks.start();
+			else
+				timingCallbacks.stop();
+		}
+
+		var restart = function() {
+			timingCallbacks.start();
+		}
+
+		function beatCallback(currentBeat,totalBeats,lastMoment,position, debugInfo) {
+			var x1, x2, y1, y2;
+			if (currentBeat === totalBeats) {
+				showAllMeasures();
+				x1 = 0;
+				x2 = 0;
+				y1 = 0;
+				y2 = 0;
+			} else {
+				x1 = position.left - 2;
+				x2 = position.left - 2;
+				y1 = position.top;
+				y2 = position.top + position.height;
+			}
+			if (showCursor.checked) {
+				cursor.setAttribute("x1", x1);
+				cursor.setAttribute("x2", x2);
+				cursor.setAttribute("y1", y1);
+				cursor.setAttribute("y2", y2);
+			}
+			if (colorNote.checked)
+				colorElements([]);
+		}
+
+		function hideMeasure(num) {
+			var els = document.querySelectorAll(".abcjs-mm"+num);
+			for (var i = 0; i < els.length; i++)
+				els[i].classList.add("hidden")
+		}
+		function showAllMeasures() {
+			var els = document.querySelectorAll(".hidden");
+			for (var i = 0; i < els.length; i++)
+				els[i].classList.remove("hidden")
+		}
+
+		var lastEls = [];
+		function colorElements(els) {
+			var i;
+			var j;
+			for (i = 0; i < lastEls.length; i++) {
+				for (j = 0; j < lastEls[i].length; j++) {
+					lastEls[i][j].classList.remove("color");
+				}
+			}
+			for (i = 0; i < els.length; i++) {
+				for (j = 0; j < els[i].length; j++) {
+					els[i][j].classList.add("color");
+				}
+			}
+			lastEls = els;
+		}
+
+		var lastMeasure = -1;
+		function eventCallback(ev) {
+			if (!ev) {
+				pauseButtonControl();
+				return;
+			}
+			if (ev.measureStart && hideFinishedMeasures.checked) {
+				if (lastMeasure > ev.measureNumber)
+					showAllMeasures();
+				else if (lastMeasure >= 0)
+					hideMeasure(lastMeasure);
+				lastMeasure = ev.measureNumber;
+			}
+			if (colorNote.checked) {
+				colorElements(ev.elements);
+			}
+		}
+	}
+
+</script>
+</body>
+</html>

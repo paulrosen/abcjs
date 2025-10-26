@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
+  <title>abcjs: Editor and Synth Demo</title>
+  <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var abcjsEditor;
+
+    window.onload = function () {
+      abcjsEditor = new ABCJS.Editor("abc", {
+        canvas_id: "paper",
+        warnings_id: "warnings",
+        synth: {
+          el: "#audio",
+          options: { displayLoop: true, displayRestart: true, displayPlay: true, displayProgress: true, displayWarp: true }
+        },
+        abcjsParams: {
+          add_classes: true,
+          clickListener: clickListener
+        },
+        selectionChangeCallback: selectionChangeCallback
+      });
+
+      document.getElementById("midi").addEventListener("click", downloadMidi);
+    };
+
+    function clickListener(abcElem, tuneNumber, classes, analysis, drag, mouseEvent) {
+      var lastClicked = abcElem.midiPitches;
+      if (!lastClicked)
+        return;
+
+      ABCJS.synth.playEvent(lastClicked, abcElem.midiGraceNotePitches, abcjsEditor.millisecondsPerMeasure()).then(function (response) {
+        console.log("note played");
+      }).catch(function (error) {
+        console.log("error playing note", error);
+      });
+    }
+
+    function selectionChangeCallback(start, end) {
+      if (abcjsEditor) {
+        var el = abcjsEditor.tunes[0].getElementFromChar(start);
+        console.log(el);
+      }
+    }
+
+    function downloadMidi() {
+   		var abc = document.getElementById("abc").value;
+   		var a = document.getElementById("midi-download");
+   		var midi = ABCJS.synth.getMidiFile(abc, { midiOutputType: "encoded" })
+		a.setAttribute("href", midi)
+		a.click();
+	}
+  </script>
+</head>
+<body>
+  <header>
+    <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>Synth with Editor</h1>
+  </header>
+  <div class="container">
+    <textarea id="abc" cols="80" rows="15" spellcheck="false">
+X: 1
+T: Cooley's
+M: 4/4
+L: 1/8
+R: reel
+K: Emin
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
+EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
+|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
+eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
+    </textarea>
+
+    <div id="warnings"></div>
+    <hr>
+    <div id="paper"></div>
+    <div id="audio"></div>
+	  <br>
+	  <button id="midi">Download MIDI</button>
+	  <a id="midi-download" download="example.mid"></a>
+  </div>
+</body>
+</html>

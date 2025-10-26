@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="favicon.ico" type="image/x-icon" />
+	<link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
+	<link rel="stylesheet" href="examples-styles.css" />
+
+	<title>Output Transposition</title>
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var editor;
+		var renderParams = { responsive: "resize", selectTypes: false };
+		var outputEl;
+		var abcEl;
+		var currentAbc = ""
+		window.onload = function () {
+			abcEl = document.querySelector("#abc");
+			outputEl = document.querySelector("#transposed");
+			visualTransposeEl = document.querySelector(".transpose");
+
+			editor = new ABCJS.Editor("abc", {
+				canvas_id: "paper",
+				warnings_id: "warnings",
+				abcjsParams: renderParams,
+			});
+
+			visualTransposeEl.addEventListener("change", paramChanged);
+			paramChanged(false);
+		};
+
+		function paramChanged(userAction) {
+			var visualObj = editor.tunes
+			var abc = abcEl.value
+			var steps = visualTransposeEl.value
+			var output = ABCJS.strTranspose(abc, visualObj, steps)
+			outputEl.innerText = output
+			var newVisualObj = ABCJS.renderAbc("paper2", output, renderParams)
+			if (userAction)
+				createSynth(newVisualObj[0])
+		}
+
+		var synthControl
+
+		function createSynth(visualObj) {
+			if (!synthControl) {
+				synthControl = new ABCJS.synth.SynthController();
+				synthControl.load("#audio", null, { displayRestart: true, displayPlay: true, displayProgress: true });
+			}
+			var midiBuffer = new ABCJS.synth.CreateSynth();
+			midiBuffer.init({
+				visualObj: visualObj,
+			}).then(function (response) {
+				synthControl.setTune(visualObj, true).then(function (response) {
+				}).catch(function (error) {
+					console.warn("Audio problem:", error);
+				});
+			}).catch(function (error) {
+				console.warn("Audio problem:", error);
+			});
+
+		}
+	</script>
+	<style>
+		@media only screen and (min-width: 700px) {
+			.container {
+				max-width: 1200px;
+			}
+		}
+
+		.input,
+		.output {
+			display: flex;
+			column-gap: 10px;
+		}
+
+		.input>div,
+		.output>div {
+			width: 50%;
+		}
+
+		#abc,
+		#transposed {
+			font-family: monaco, monospace;
+			font-size: 1em;
+			height: 300px;
+		}
+
+		#transposed {
+			border: 1px solid #888;
+			padding: 10px;
+			margin-top: 0;
+			overflow: auto;
+		}
+		label {
+			margin-top: 10px;
+			display: block;
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+		<h1>Output Transposition</h1>
+	</header>
+	<div class="container">
+		<main>
+			<p>This demonstrates transposing an ABC string and retrieving that transposed string. Type any valid ABC string in the "input string" area and choose your transposition in half-steps below the input string. The resultant ABC string, transposed audio, and transposed notation are shown on the right side of the page.</p>
+			<section class="input">
+				<div>
+					<h2>Input String</h2>
+					<textarea aria-label="ABC string" id="abc" spellcheck="false">
+X: 1
+T: Cooley's
+M: 4/4
+L: 1/8
+R: reel
+K: Em
+V: Melody
+|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|
+EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|
+|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|
+eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|
+</textarea>
+					<label>Transpose:
+						<input
+							class="transpose"
+							type="number"
+							min="-24"
+							max="24"
+							step="1"
+							value="0">
+					</label>
+				</div>
+				<div>
+					<h2>Output String</h2>
+					<pre id="transposed"></pre>
+					<div id="audio"></div>
+				</div>
+			</section>
+
+			<div id="warnings"></div>
+			<section class="output">
+				<div>
+					<h2>Original Output</h2>
+					<div id="paper" class="visible-background"></div>
+				</div>
+				<div>
+					<h2>Transposed Output</h2>
+					<div id="paper2" class="visible-background"></div>
+				</div>
+			</section>
+		</main>
+	</div>
+</body>
+
+</html>

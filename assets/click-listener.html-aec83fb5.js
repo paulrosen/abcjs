@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-765a94ec","path":"/visual/click-listener.html","title":"Click Listener","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1645660869000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":9}]},"filePathRelative":"visual/click-listener.md"}');export{e as data};

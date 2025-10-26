@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-1e9130d6","path":"/transposing/transposing.html","title":"Transposition","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1661127595000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":1}]},"filePathRelative":"transposing/transposing.md"}');export{t as data};

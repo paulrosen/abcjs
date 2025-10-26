@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
+	<title>abcjs: Analysis Demo</title>
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var abc = "%%staffwidth 600\n" +
+			"\n" +
+			"X:100\n" +
+			"T: Cooley's\n" +
+			"M: 4/4\n" +
+			"L: 1/8\n" +
+			"R: reel\n" +
+			"K: Emin\n" +
+			"|:D2|EB{c}BA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|^\n" +
+			"EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2:|\n" +
+			"|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|\n" +
+			"\n" +
+			"X:101\n" +
+			"T: Mary\n" +
+			"M: 4/4\n" +
+			"L: 1/4\n" +
+			"K: D\n" +
+			"fede|fff2|eee2|ffa2|\n" +
+			"fede|ffff|eefe|d4|@\n" +
+			"";
+
+		function load() {
+			var tuneBook = new ABCJS.TuneBook(abc)
+
+			var el = document.querySelector(".abc-string");
+			el.innerHTML = abc;
+
+			el = document.querySelector(".header");
+			el.innerHTML =  tuneBook.header;
+
+			el = document.querySelector(".num-tunes");
+			el.innerHTML =  tuneBook.tunes.length;
+
+			el = document.querySelector(".names");
+			var names = [];
+			for (var i = 0; i < tuneBook.tunes.length; i++)
+				names.push(tuneBook.tunes[i].title)
+			el.innerHTML =  names.join("<br>")
+
+			el = document.querySelector(".ids");
+			var ids = [];
+			for (var i = 0; i < tuneBook.tunes.length; i++)
+				ids.push(tuneBook.tunes[i].id)
+			el.innerHTML =  ids.join("<br>")
+
+			el = document.querySelector(".tune-101");
+			el.innerHTML =  JSON.stringify(tuneBook.getTuneById(101), null, "  ");
+
+			el = document.querySelector(".tune-cooleys");
+			el.innerHTML =  JSON.stringify(tuneBook.getTuneByTitle("Cooley's"), null, "  ");
+
+			el = document.querySelector(".parse");
+			var visualObj = ABCJS.parseOnly(abc)
+			el.innerHTML = "<h3>Cooley's</h3>" + visualObj[0].warnings + "<h3>Mary</h3>" + visualObj[1].warnings;
+		}
+
+	</script>
+	<style>
+		.cmd {
+            color: #1136f5;
+            font-weight: bold;
+		}
+		pre {
+            background: #f0f0f0;
+            white-space: pre-wrap;
+		}
+	</style>
+</head>
+<body onload="load()">
+  <header>
+    <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>Analyze tune book string</h1>
+  </header>
+  <div class="container">
+	  <p>Given the following ABC string, the following information can be gleaned from it.</p>
+	  <h2>ABC String</h2>
+	  <pre class="abc-string"></pre>
+	  <h2>Creation</h2>
+	  <p class="cmd">var tuneBook = new ABCJS.TuneBook(abc)</p>
+	  <h2>Header</h2>
+	  <p class="cmd">tuneBook.header</p>
+	  <pre class="header"></pre>
+	  <h2>Number Of Tunes</h2>
+	  <p class="cmd">tuneBook.tunes.length</p>
+	  <pre class="num-tunes"></pre>
+	  <h2>Tune Names</h2>
+	  <p class="cmd">tuneBook.tunes[i].title</p>
+	  <pre class="names"></pre>
+	  <h2>Tune Ids</h2>
+	  <p class="cmd">tuneBook.tunes[i].id</p>
+	  <pre class="ids"></pre>
+	  <h2>Tune "101"</h2>
+	  <p class="cmd">tuneBook.getTuneById(101)</p>
+	  <pre class="tune-101"></pre>
+	  <h2>Tune "Cooley's"</h2>
+	  <p class="cmd">tuneBook.getTuneByTitle("Cooley's")</p>
+	  <pre class="tune-cooleys"></pre>
+	  <h2>Parse Only - warnings</h2>
+	  <p class="cmd">var visualObj = ABCJS.parseOnly(abc)</p>
+	  <pre class="parse"></pre>
+  </div>
+</body>
+</html>

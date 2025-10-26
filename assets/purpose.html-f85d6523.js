@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-2c8a49f8","path":"/overview/purpose.html","title":"Purpose","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1717956216000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":5},{"name":"paulrosen","email":"junk@paulrosen.net","commits":1}]},"filePathRelative":"overview/purpose.md"}');export{e as data};

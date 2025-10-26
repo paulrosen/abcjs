@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
+  <link rel="stylesheet" href="examples-styles.css" />
+
+  <title>Swing with Editor</title>
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var editor;
+    var renderParams = { selectTypes: false };
+    var synthOptions = {};
+    var swingElement;
+    var codeEl;
+    var abcEl;
+    window.onload = function () {
+      abcEl = document.querySelector("#abc");
+      swingElement = document.querySelector(".swing-value");
+      codeEl = document.querySelector(".editor-code");
+
+      editor = new ABCJS.Editor("abc", {
+        canvas_id: "paper",
+        warnings_id: "warnings",
+        abcjsParams: renderParams,
+        synth: {
+          el: "#audio",
+          options: { displayRestart: true, displayPlay: true, displayProgress: true, options: {} }
+        }
+      });
+
+      swingElement.addEventListener("change", paramChanged);
+      paramChanged();
+    };
+
+    function paramChanged() {
+      var output = 'new ABCJS.Editor("abc", {\n' +
+        '  canvas_id: "paper",\n' +
+        '  warnings_id: "warnings",\n' +
+        '  abcjsParams: renderParams,\n' +
+        '  synth: {\n' +
+        '    el: "#audio",\n' +
+        '    options: {\n' +
+        '      displayRestart: true, displayPlay: true, displayProgress: true,\n' +
+        '      options: synthOptions\n' +
+        '    }\n' +
+        '  },\n' +
+        '});'
+
+      editor.paramChanged(renderParams);
+
+      synthOptions = { swing: parseFloat(swingElement.value, 10) };
+      editor.synthParamChanged(synthOptions);
+
+      output = output.replace("renderParams", JSON.stringify(renderParams));
+      output = output.replace("synthOptions", JSON.stringify(synthOptions));
+      codeEl.innerHTML = output;
+    }
+  </script>
+  <style>
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>abcjs swing with editor</h1>
+  </header>
+  <div class="container">
+    <main>
+      <p>This demonstrates the addition of swing in a tune.
+        The swing is added to the MIDI player, so it is not reflected in the sheet music.
+        The swing is represented as a percentage of the duration of the first note to the
+        duration of the pair of eighth notes.
+        The default is 50%, which is no swing; both eights have the same duration and the ratio is 1:1.
+        66% is a common value for triplet-swing, with a 2:1 ratio of the first note to the second.
+        Other common swing values are 60% which corresponds to a 3:2 ratio of the first note to the second and 57%
+        which corresponds to a 4:3 ratio.
+        The maximum value of swing is 75; in this case the first half of the pair is 3 times longer than the second
+        half.
+        resulting to a 3:1 ratio or a dotted-eighth followed by a sixteenth note.
+      </p>
+      <p>In the example below, change the value of the swing to see how it matches of differs from the explicit
+        triplets of dotted eighth and sixteenth notes.
+      </p>
+      <p>
+        Swing is supported in all X/4 and X/8 meters. In a X/8 meter the sixteenths swing.
+        You can try a X/8 meter by changing the meter in the ABC string to "M: 4/8
+        L: 1/16"
+        However, meter changes in the middle of a tune do not affect the main swing duration.
+      </p>
+      <section class="input">
+        <h2>ABC String</h2>
+        <textarea aria-label="ABC string" id="abc" spellcheck="false">
+M:4/4
+L:1/8
+Q:1/8=140
+"^swung notes"cc cc cc cc | "^triplets"(3:2:2c2c (3:2:2c2c (3:2:2c2c (3:2:2c2c | 
+"^swung notes"cc cc cc cc | "^dotted eighth and sixteenth"c>c c>c c>c c2 | 
+"^swung notes"zc cz cc zc |"^sixteenths are not affected in a 4/4"c/c/c/c/ z/c/c/z/ c/c/z/c/ c/z/c/c/ | 
+                  </textarea>
+        <fieldset>
+          <legend>Options</legend>
+          <h2>Swing Parameters</h2>
+          <label>Swing:
+            <input class="swing-value" type="number" min="50" max="75" step="1" value="60">
+          </label>
+        </fieldset>
+      </section>
+
+      <section class="output">
+        <h2>Output</h2>
+        <div id="audio"></div>
+        <div id="warnings"></div>
+        <div id="paper" class="visible-background"></div>
+      </section>
+
+      <section class="explanation">
+        <h2>Code Sample</h2>
+        <pre class="editor-code">
+        </pre>
+      </section>
+    </main>
+  </div>
+</body>
+
+</html>

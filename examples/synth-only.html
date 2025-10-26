@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
+  <title>abcjs: Synth Only Demo</title>
+
+  <link rel="stylesheet" type="text/css" href="../abcjs-audio.css">
+  <style>
+    label {
+      font-weight: bold;
+    }
+  </style>
+
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    function load() {
+      document.querySelector(".play").addEventListener("click", play);
+    }
+
+    function play() {
+      if (ABCJS.synth.supportsAudio()) {
+        var abc = document.querySelector("#source").value;
+        var visualObj = ABCJS.renderAbc("*", abc)[0];
+
+        var midiBuffer = new ABCJS.synth.CreateSynth();
+        midiBuffer.init({
+          //audioContext: new AudioContext(),
+          visualObj: visualObj,
+          // sequence: [],
+          // millisecondsPerMeasure: 1000,
+          // debugCallback: function(message) { console.log(message) },
+          options: {
+            // soundFontUrl: "https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/" ,
+            // sequenceCallback: function(noteMapTracks, callbackContext) { return noteMapTracks; },
+            // callbackContext: this,
+            // onEnded: function(callbackContext),
+            // pan: [ -0.5, 0.5 ]
+          }
+        }).then(function (response) {
+          console.log(response);
+          midiBuffer.prime().then(function (response) {
+            midiBuffer.start();
+          });
+        }).catch(function (error) {
+          console.warn("Audio problem:", error);
+        });
+      } else {
+        document.querySelector(".error").innerHTML = "<div class='audio-error'>Audio is not supported in this browser.</div>";
+      }
+    }
+
+  </script>
+</head>
+<body onload="load()">
+  <header>
+    <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>Synth (audio only)</h1>
+  </header>
+  <div class="container">
+    <main>
+      <p>This shows how to play notes without a visual representation.</p>
+      <p>Type valid ABC code in the textarea and click "Play" to hear it.</p>
+      <label>ABC code<textarea id="source" spellcheck="false">
+X:1
+L:1/4
+M:4/4
+K:G
+BAGA|BBB2|
+      </textarea></label>
+      <button class="play">Play</button>
+      <div class="error"></div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
+  <title>abcjs: Annotating</title>
+  <script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var abc = "T: New Exercise\n" +
+      "M: C\n" +
+      "L: 1/4\n" +
+      "K: C\n" +
+      'V:1 name="Alto\\n[species 2]\\n[Sop.]"\n'+
+      '"^1"c2"^2→"G2|B2d2|B2"^5→\\n6→".(A2|C4)|\n' +
+      'V:2 clef=treble-8 name="Tenor\\n[c.f.]\\n[Alt.]"\n' +
+      '"^4. Consecutive leaps - - -"c4|e4|d4|c4|\n' +
+      'w:H\n' +
+      'w:F\n' +
+      'w:I\n';
+
+    function load() {
+      ABCJS.renderAbc("paper", abc, { add_classes: true, staffwidth: 500 });
+      annotate();
+    }
+
+    function annotate() {
+      var red = "#FF3018";
+      var yellow = "#C9B203";
+
+      var els = document.querySelectorAll(".abcjs-annotation");
+      var list = [];
+      list[0] = { el: els[0], color: yellow};
+      list[1] = { el: els[1], color: yellow};
+      list[2] = { el: els[2], color: red};
+      list[3] = { el: els[3], color: red};
+      setFlagColors(list);
+
+      list = [];
+      list[0] = {
+        el1: document.querySelector(".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m0.abcjs-n1"),
+        pos1: "bottom",
+        el2: document.querySelector(".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m1.abcjs-n0"),
+        pos2: "top",
+        color: red,
+        text: "3"
+      }
+      list[1] = {
+        el1: document.querySelector(".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m2.abcjs-n1"),
+        pos1: "bottom",
+        el2: document.querySelector(".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m3.abcjs-n0"),
+        pos2: "top",
+        color: yellow,
+        text: "7"
+      }
+      list[2] = {
+        el1: document.querySelector(".abcjs-note.abcjs-l0.abcjs-v1.abcjs-m0.abcjs-n0"),
+        pos1: "bottom",
+        el2: document.querySelector(".abcjs-note.abcjs-l0.abcjs-v1.abcjs-m1.abcjs-n0"),
+        pos2: "top",
+        color: red,
+        text: "3"
+      }
+      list[3] = {
+        el1: document.querySelector(".abcjs-note.abcjs-l0.abcjs-v1.abcjs-m2.abcjs-n0"),
+        pos1: "bottom",
+        el2: document.querySelector(".abcjs-note.abcjs-l0.abcjs-v1.abcjs-m3.abcjs-n0"),
+        pos2: "top",
+        color: yellow,
+        text: "7"
+      }
+      setConnectors(list);
+
+      setWordsLine(0, [
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m0.abcjs-n0", text: "I" },
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m1.abcjs-n0", text: "III7", background: yellow },
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m2.abcjs-n0", text: "VII6" },
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m2.abcjs-n1", text: "II", background: yellow },
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m3.abcjs-n0", text: "I" },
+      ] );
+
+      setWordsLine(1, [
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m1.abcjs-n0", text: "8", color: yellow },
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m2.abcjs-n1", text: "9\n10", color: yellow },
+      ] );
+
+      setWordsLine(2, [
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m0.abcjs-n1", text: "5", background: red },
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m1.abcjs-n0", text: "5", background: red },
+        { el: ".abcjs-note.abcjs-l0.abcjs-v0.abcjs-m3.abcjs-n0", text: "1", background: yellow },
+      ] );
+    }
+
+    function setFlagColors(list) {
+      for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        item.el.style = "fill:" + item.color + ";";
+      }
+    }
+
+    function setConnectors(list) {
+      for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        var el1 = item.el1.getBBox();
+        var el2 = item.el2.getBBox();
+        var x1 = el1.x + el1.width + 3;
+        var y1 = item.pos1 === "top" ?  el1.y + 3 : el1.y + el1.height - 6;
+        var x2 = el2.x - 3;
+        var y2 = item.pos2 === "top" ?  el2.y + 3 : el2.y + el2.height;
+        drawLine({ x1: x1, y1: y1, x2: x2, y2: y2, stroke: item.color });
+        drawText({ text: item.text, x: x1 + (x2 - x1)/2, y: y1 + (y2 - y1)/2, fill: item.color })
+      }
+    }
+
+    function setWordsLine(line, list) {
+      var svg = document.querySelector("#paper svg");
+      var place = document.querySelector(".abcjs-lyric");
+      var pos = place.getBBox();
+      var y = 20 + pos.y + line * 20;
+      for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        var el = document.querySelector(item.el);
+        var x = el.getBBox().x + el.getBBox().width/2;
+        drawText({ x: x, y: y, fill: item.color, background: item.background, text: item.text });
+      }
+    }
+
+    var svgNS = "http://www.w3.org/2000/svg";
+
+    function drawLine(attr) {
+      var svg = document.querySelector("#paper svg");
+      var el = document.createElementNS(svgNS, 'line');
+      el.setAttribute("x1", attr.x1);
+      el.setAttribute("x2", attr.x2);
+      el.setAttribute("y1", attr.y1);
+      el.setAttribute("y2", attr.y2);
+      el.setAttribute("stroke", attr.stroke);
+      el.setAttribute("stroke-width", 2);
+      svg.appendChild(el);
+    }
+
+    function drawText(attr) {
+      var svg = document.querySelector("#paper svg");
+      var el = document.createElementNS(svgNS, 'text');
+      el.setAttribute("x", attr.x);
+      el.setAttribute("y", attr.y);
+      if (attr.fill) {
+        el.setAttribute("fill", attr.fill);
+        el.setAttribute("stroke", attr.fill);
+      }
+      el.textContent = attr.text;
+
+      svg.appendChild(el);
+    }
+
+  </script>
+  <style>
+    .abcjs-slur {
+            stroke-width: 2;
+            stroke: red;
+    }
+    .abcjs-lyric {
+      fill: none;
+    }
+    label {
+      display:block;
+    }
+  </style>
+</head>
+<body onload="load()">
+  <header>
+    <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>Annotation</h1>
+  </header>
+  <div class="container">
+    <p>
+      This is a simple example of how elements can be found on the page and how
+      annotations can be drawn.
+    </p>
+    <p>1) Note that annotations above the staves are written into the ABC notation using the syntax "^text".</p>
+    <p>2) Note that room is created for annotations below the staves by creating a w: line and then setting its fill to none on the stylesheet.</p>
+    <p>3) Note that the notes are retrieved by their unique class and their position is retrieved. When the music is changed,
+    this will automatically move the drawn lines to the right place.</p>
+    <div id="paper"></div>
+
+    <label for="abc">ABC Notation:</label>
+    <textarea id="abc" cols="50" rows="12" spellcheck="false">
+T: New Exercise
+M: C
+L: 1/4
+K: C
+V: 1 name="Alto\n[species 2]\n[Sop.]"
+"^1"c2"^2→"G2|B2d2|B2"^5→\n6→".(A2|C4)|
+V: 2 clef=treble-8 name="Tenor\n[c.f.]\n[Alt.]"
+"^4. Consecutive leaps - - -"c4|e4|d4|c4|
+W: Set this line's fill to none to make space for annotations below the staff.
+      </textarea>
+    <p>Note that \ is a character which must be escaped in JavaScript.</p>
+  </div>
+</body>
+</html>

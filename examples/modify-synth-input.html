@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="examples-styles.css"/>
+
+	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
+	<title>abcjs: Modify Synth Input Demo</title>
+
+	<style>
+		main {
+			max-width: 770px;
+			margin: 0 auto;
+		}
+		.abcjs-cursor {
+			stroke: red;
+		}
+	</style>
+
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var abc = "T: Cooley's\n" +
+			"%%barnumbers 1\n" +
+			"M: 4/4\n" +
+			"L: 1/8\n" +
+			"Q: 1/4=120\n" +
+			"R: reel\n" +
+			"K: Emin\n" +
+			"EBBA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+			"EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2 gf|\n" +
+			"|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2 D2||";
+
+		var synth = new ABCJS.synth.CreateSynth();
+
+		function load() {
+			// First draw the music - this supplies an object that has a lot of information about how to create the synth.
+			// NOTE: If you want just the sound without showing the music, use "*" instead of "paper" in the renderAbc call.
+			var visualObj = ABCJS.renderAbc("paper", abc, {
+				responsive: "resize" })[0];
+
+			var startAudioButton = document.querySelector(".activate-audio");
+			var stopAudioButton = document.querySelector(".stop-audio");
+			var explanationDiv = document.querySelector(".suspend-explanation");
+
+			startAudioButton.addEventListener("click", function() {
+				startAudioButton.setAttribute("style", "display:none;");
+				explanationDiv.setAttribute("style", "opacity: 0;");
+				if (ABCJS.synth.supportsAudio()) {
+					stopAudioButton.setAttribute("style", "");
+
+					// An audio context is needed - this can be passed in for two reasons:
+					// 1) So that you can share this audio context with other elements on your page.
+					// 2) So that you can create it during a user interaction so that the browser doesn't block the sound.
+					// Setting this is optional - if you don't set an audioContext, then abcjs will create one.
+					window.AudioContext = window.AudioContext ||
+						window.webkitAudioContext ||
+						navigator.mozAudioContext ||
+						navigator.msAudioContext;
+					var audioContext = new window.AudioContext();
+					audioContext.resume().then(function () {
+						// In theory the AC shouldn't start suspended because it is being initialized in a click handler, but iOS seems to anyway.
+
+						synth.init({
+							audioContext: audioContext,
+							visualObj: visualObj,
+							options: {
+								sequenceCallback: sequenceCallback
+							}
+						}).then(function () {
+							synth.prime().then(function () {
+								synth.start();
+							});
+						}).catch(function (error) {
+							console.log("Audio Failed", error);
+						});
+					});
+				} else {
+					var audioError = document.querySelector(".audio-error");
+					audioError.setAttribute("style", "");
+				}
+			});
+
+			stopAudioButton.addEventListener("click", function() {
+				startAudioButton.setAttribute("style", "");
+				explanationDiv.setAttribute("style", "");
+				stopAudioButton.setAttribute("style", "display:none;");
+				synth.stop();
+			});
+
+			function sequenceCallback(tracks) {
+				// The beats are 0.25 long so the amount of swing needs to be between 0 and 0.125,
+				// but practically it needs to be a bit smaller so that it doesn't sound like a grace note.
+				var swing = 0.1 - 0.1 / document.getElementById("swing").value;
+				document.getElementById("coefficient").innerText = swing;
+				var track = tracks[0];
+				for (var i = 0; i < track.length; i++) {
+					var event = track[i];
+					if (event.start % 0.25) {
+						// This is the off beat
+						event.start += swing;
+					} else {
+						// This is the beat
+						event.end += swing;
+					}
+				}
+			}
+		}
+	</script>
+</head>
+<body onload="load()">
+  <header>
+    <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>Modify Synth Input</h1>
+  </header>
+  <div class="container">
+    <main> 
+      <p>Demonstration of changing the synth on the fly if you want to make adjustments.</p>
+      <p>This example adds some "swing" to the tune.</p>
+        <p><label>Amount of swing (1 to 6): <input id="swing" type="number" min="1" max="6" value="2"></label></p>
+        <p><label>Calculated swing coefficient:</label> <code id="coefficient">??</code></p>
+      <div id="paper"></div>
+      <p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
+        following button is needed to do the initialization:</p>
+      <button class="activate-audio">Activate Audio Context And Play</button>
+      <button class="stop-audio" style="display:none;">Stop Audio</button>
+      <div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
+    </main>
+  </div>
+</body>
+</html>

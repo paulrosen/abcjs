@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-6498f79a","path":"/developers/pull-requests.html","title":"Pull Requests","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1603614451000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":2}]},"filePathRelative":"developers/pull-requests.md"}');export{e as data};

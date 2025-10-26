@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="examples-styles.css"/>
+
+	<title>abcjs: Play On Repeat Demo</title>
+
+	<style>
+		main {
+			max-width: 770px;
+			margin: 0 auto;
+		}
+		.abcjs-cursor {
+			stroke: red;
+		}
+	</style>
+
+	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var abc = "T: Cooley's\n" +
+			"%%barnumbers 1\n" +
+			"M: 4/4\n" +
+			"L: 1/8\n" +
+			"R: reel\n" +
+			"K: Emin\n" +
+			"EBBA B2 EB|~B2 AB dBAG|FDAD BDAD|FDAD dAFD|\n" +
+			"EBBA B2 EB|B2 AB defg|afe^c dBAF|DEFD E2 gf|\n" +
+			"|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
+			"eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2 D2||";
+		var NUM_MEASURES = 16;
+		var NUM_BEATS_PER_MEASURE = 4;
+		var synth = new ABCJS.synth.CreateSynth();
+		var startMeasure;
+		var endMeasure;
+		var timingCallbacks;
+
+		function load() {
+			// First draw the music - this supplies an object that has a lot of information about how to create the synth.
+			// NOTE: If you want just the sound without showing the music, use "*" instead of "paper" in the renderAbc call.
+			var visualObj = ABCJS.renderAbc("paper", abc, {
+				responsive: "resize" })[0];
+
+			var startAudioButton = document.querySelector(".activate-audio");
+			var stopAudioButton = document.querySelector(".stop-audio");
+			var explanationDiv = document.querySelector(".suspend-explanation");
+			startMeasure = document.querySelector("#start-measure");
+			endMeasure = document.querySelector("#end-measure");
+
+			startAudioButton.addEventListener("click", function() {
+				startAudioButton.setAttribute("style", "display:none;");
+				explanationDiv.setAttribute("style", "opacity: 0;");
+				if (ABCJS.synth.supportsAudio()) {
+					stopAudioButton.setAttribute("style", "");
+
+					// An audio context is needed - this can be passed in for two reasons:
+					// 1) So that you can share this audio context with other elements on your page.
+					// 2) So that you can create it during a user interaction so that the browser doesn't block the sound.
+					// Setting this is optional - if you don't set an audioContext, then abcjs will create one.
+					window.AudioContext = window.AudioContext ||
+						window.webkitAudioContext ||
+						navigator.mozAudioContext ||
+						navigator.msAudioContext;
+					var audioContext = new window.AudioContext();
+					audioContext.resume().then(function () {
+						// In theory the AC shouldn't start suspended because it is being initialized in a click handler, but iOS seems to anyway.
+
+						synth.init({
+							audioContext: audioContext,
+							visualObj: visualObj
+						}).then(function () {
+							timingCallbacks = new ABCJS.TimingCallbacks(visualObj, {
+								beatCallback: cursorControl.onBeat,
+								eventCallback: cursorControl.onEvent
+							});
+							cursorControl.onStart();
+							synth.prime().then(function () {
+								var start = (startMeasure.value - 1) / NUM_MEASURES;
+								synth.seek(start);
+								timingCallbacks.setProgress(start);
+								synth.start();
+								timingCallbacks.start();
+							});
+						}).catch(function (error) {
+							console.log("Audio Failed", error);
+						});
+					});
+				} else {
+					var audioError = document.querySelector(".audio-error");
+					audioError.setAttribute("style", "");
+				}
+			});
+
+			stopAudioButton.addEventListener("click", function() {
+				startAudioButton.setAttribute("style", "");
+				explanationDiv.setAttribute("style", "");
+				stopAudioButton.setAttribute("style", "display:none;");
+				synth.stop();
+				timingCallbacks.stop();
+			});
+		}
+
+		function CursorControl() {
+			var self = this;
+
+			self.onStart = function() {
+				var svg = document.querySelector("#paper svg");
+				var cursor = document.createElementNS("http://www.w3.org/2000/svg", "line");
+				cursor.setAttribute("class", "abcjs-cursor");
+				cursor.setAttributeNS(null, 'x1', 0);
+				cursor.setAttributeNS(null, 'y1', 0);
+				cursor.setAttributeNS(null, 'x2', 0);
+				cursor.setAttributeNS(null, 'y2', 0);
+				svg.appendChild(cursor);
+
+			};
+			self.onBeat = function(beatNumber, totalBeats, totalTime) {
+				console.log(beatNumber)
+				var end = (endMeasure.value-1) * NUM_BEATS_PER_MEASURE;
+				if (beatNumber >= end) {
+					var start = (startMeasure.value-1) / NUM_MEASURES;
+					synth.seek(start);
+					timingCallbacks.setProgress(start);
+				}
+			};
+			self.onEvent = function(ev) {
+				if (ev.measureStart && ev.left === null)
+					return; // this was the second part of a tie across a measure line. Just ignore it.
+
+				var lastSelection = document.querySelectorAll("#paper svg .highlight");
+				for (var k = 0; k < lastSelection.length; k++)
+					lastSelection[k].classList.remove("highlight");
+
+				for (var i = 0; i < ev.elements.length; i++ ) {
+					var note = ev.elements[i];
+					for (var j = 0; j < note.length; j++) {
+						note[j].classList.add("highlight");
+					}
+				}
+
+				var cursor = document.querySelector("#paper svg .abcjs-cursor");
+				if (cursor) {
+					cursor.setAttribute("x1", ev.left - 2);
+					cursor.setAttribute("x2", ev.left - 2);
+					cursor.setAttribute("y1", ev.top);
+					cursor.setAttribute("y2", ev.top + ev.height);
+				}
+			};
+			self.onFinished = function() {
+				var els = document.querySelectorAll("svg .highlight");
+				for (var i = 0; i < els.length; i++ ) {
+					els[i].classList.remove("highlight");
+				}
+				var cursor = document.querySelector("#paper svg .abcjs-cursor");
+				if (cursor) {
+					cursor.setAttribute("x1", 0);
+					cursor.setAttribute("x2", 0);
+					cursor.setAttribute("y1", 0);
+					cursor.setAttribute("y2", 0);
+				}
+			};
+		}
+
+		var cursorControl = new CursorControl();
+	</script>
+</head>
+<body onload="load()">
+  <header>
+    <img src="https://paulrosen.github.io/abcjs/img/abcjs_comp_extended_08.svg" alt="abcjs logo">
+    <h1>Play on Repeat</h1>
+  </header>
+  <div class="container">
+    <main>
+      <p>Demonstration of playing a selection of a tune in a loop. Set the start and end measures on the fly using the inputs.</p>
+      <div>
+      <label>Start Measure: <input type="number" min="1" max="16" id="start-measure" value="5"></label>
+      <label>End Measure: <input type="number" min="1" max="16" id="end-measure" value="8"></label>
+      </div>
+      <div id="paper"></div>
+      <p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a user action. This prevents auto-playing web sites. Therefore, the
+        following button is needed to do the initialization:</p>
+      <button class="activate-audio">Activate Audio Context And Play</button>
+      <button class="stop-audio" style="display:none;">Stop Audio</button>
+      <div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1 @@
+const a=JSON.parse('{"key":"v-2ab39f40","path":"/upgrading/midijs.html","title":"MIDI.JS Usage","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1676255011000,"contributors":[{"name":"Paul Rosen","email":"paul@paulrosen.net","commits":4}]},"filePathRelative":"upgrading/midijs.md"}');export{a as data};

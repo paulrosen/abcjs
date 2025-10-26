@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>abcjs: Plugin Demo</title>
+
+	<script src="../../dist/abcjs-plugin-min.js" type="text/javascript"></script>
+
+	<script type="text/javascript">
+		window.ABCJS.plugin.render_before = true;
+		window.ABCJS.plugin.midi_options = {program: 41};
+		//window.ABCJS.plugin.debug = true;
+	</script>
+
+	<style type="text/css">
+		.abcrendered {
+			background-color: #FCF9BB;
+		}
+	</style>
+</head>
+
+<body>
+This one shows no newline before the music starts:
+<pre>X:0
+T: No Score
+C: The Traditional Tune Archive
+M:
+K:
+x
+</pre>
+
+<div class="content"><br /><br />X:1<br />T: 1 Speed the Plough<br />M:4/4<br />L:1/8<br />C:Trad<br />K:G<br />|:GABc dedB|dedB dedB|c2ec B2dB|c2A2A2BA|<br />|GABc dedB|dedB dedB|c2ec B2dB|A2F2G4:|<br />|:g2gf g2Bd|g2fe dBGB|c2ec B2dB|c2A2A2df|<br />|g2gfg2Bd|g2fe dBGB|c2ec B2dB|A2F2G4:|<br /><br />Chris</div>
+
+from thesession:
+<p>
+X: 1<br />
+T: Me Mother Won't Let Me Marry<br />
+M: 6/8<br />
+L: 1/8<br />
+R: jig<br />
+K: Dmaj<br />
+DFA B2A|FGF F2E|DFA B2A|G3-G2 F|<br />
+
+EGE EFG|c2c c2B|A^GA B2A|F3-F2 E|<br />
+
+DFA B2A|F=GF F2E|DFA B2A|G3-G2 F|<br />
+
+E2E EFG|c2c c2B|A^GA ABc|d3 e2 z|]<br />
+
+f2f f2e|d2d d2e|ded c2d|e3-e2 f|<br />
+
+g2g g2e|c2c c2B|A^GA B2A|F3-F2 d|<br />
+
+f2f f2e|d2d d2e|ded c2d|e3-e2 f|<br />
+
+g2g g2e|c2c c2B|A^GA ABc|d3-d2 z|]<br />
+
+</p>
+
+In this document, small bits of abc are interpreted
+<br>
+X: 1<br>
+T: 2 body child<br>
+A<br><br>
+
+<div>
+X: 1<br>T: 3 div child<br>A<br><br>
+  <div>
+  X: 1<br>T: 4 div div child<br>A<br><br>
+  </div>
+</div>
+<p style="margin-left:40px; border:1px solid black;"> This also works when in a paragraph<br>
+X: 1<br>
+T: 5 Here is a title<br>
+K: Emin<br>
+CDEFGABcdefgab<br>
+</p>
+<p>On a new line inside a pre
+	<pre>
+X: 1
+T: 6 Cooley's
+M: 4/4
+L: 1/8
+K: Emin
+|:D2|EB
+</pre>
+<div class="content">X:1<br />T: 7 begin<br />G<br /><br />This is mid-line.<br />X:1<br />T:8 middle<br />G<br /><br />X:1<br />T:9 blank lines on either side<br />G<br /><br />in the middle it should work<br />X:1<br />T:10 end<br />G</div>
+<span class="postbody">X:1
+<br />
+T:11 begin
+<br />
+K:G
+<br />
+G
+<br />
+
+<br />
+Here is some text between tunes.
+<br />
+X:1
+<br />
+T:12 middle
+<br />
+G
+<br />
+
+<br />
+
+X:1
+<br />
+T:13 blank lines on either side
+<br />
+G
+<br />
+
+<br />
+in the middle it should work
+<br />
+X:1
+<br />
+T:14 end
+<br />
+G
+</span>
+
+<textarea name="wpTextbox1" id="wpTextbox1" cols="80" rows="25" tabindex="1" accesskey=",">X:1
+T:Ciaran � Raghallaigh
+T:Master Seamus
+C:Charlie Lennon
+M:4/4
+L:1/8
+Z:Ted Hastings
+K:G
+B,C|DB, ~B,2 DGBG|FC ~C2 EGcG|FD ~D2 FAdc|edcd BGEG|
+DG,B,D GB,DG|ECDE GCEG|FADF AcBA|1 GFAF G2:|2 GEDB, G,2||
+Bc|dggf gdBd|eccB ceag|fddc dfc'b|agfe dcBc|
+d2 Bd gdBd|~c2 Bc ABAF|EccB cBAG|FDCA, G,2:||
+</textarea>
+</body>
+</html>
