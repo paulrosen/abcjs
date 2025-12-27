@@ -6,6 +6,7 @@ var ParseHeader = require('./abc_parse_header');
 var ParseMusic = require('./abc_parse_music');
 var Tokenizer = require('./abc_tokenizer');
 var wrap = require('./wrap_lines');
+var chordGrid = require('./chord-grid');
 
 var Tune = require('../data/abc_tune');
 var TuneBuilder = require('../parse/tune-builder');
@@ -53,6 +54,8 @@ var Parse = function() {
 			t.lineBreaks = tune.lineBreaks;
 		if (tune.visualTranspose)
 			t.visualTranspose = tune.visualTranspose;
+		if (tune.chordGrid)
+			t.chordGrid = tune.chordGrid
 		return t;
 	};
 
@@ -593,6 +596,23 @@ var Parse = function() {
 		}
 
 		wrap.wrapLines(tune, multilineVars.lineBreaks, multilineVars.barNumbers);
+		if (switches.chordGrid) {
+			try {
+				tune.chordGrid = chordGrid(tune)
+			} catch(err) {
+				switch (err.message) {
+					case "notCommonTime":
+						warn("Chord grid only works for 4/4 time.", 0,0)
+						break;
+					case "noChords":
+						warn("No chords are found in the tune.", 0,0)
+						break;
+					default:
+						warn(err.message, 0,0)
+				}
+
+			}
+		}
 	};
 };
 

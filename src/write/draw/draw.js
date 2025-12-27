@@ -3,8 +3,9 @@ var setPaperSize = require('./set-paper-size');
 var nonMusic = require('./non-music');
 var spacing = require('../helpers/spacing');
 var Selectables = require('./selectables');
+var drawChordGrid = require('./chord-grid');
 
-function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset) {
+function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset, chordGrid) {
 	var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
 	var groupClasses = {}
 	if (classes.shouldAddClasses)
@@ -14,6 +15,11 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 	nonMusic(renderer, abcTune.topText, selectables);
 	renderer.paper.closeGroup()
 	renderer.moveY(renderer.spacing.music);
+
+	if (chordGrid && abcTune.chordGrid) {
+		drawChordGrid(renderer, abcTune.chordGrid, renderer.padding.left, width, abcTune.formatting.gchordfont)
+	}
+
 	var staffgroups = [];
 	var nStaves = 0;
 	for (var line = 0; line < abcTune.lines.length; line++) {

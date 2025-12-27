@@ -266,6 +266,7 @@ declare module 'abcjs' {
 		add_classes?: boolean;
 		afterParsing?: AfterParsing;
 		ariaLabel?: string;
+		chordGrid?:'noMusic'|'withMusic';
 		clickListener?: ClickListener;
 		dragColor?: string;
 		dragging?: boolean;
@@ -872,6 +873,29 @@ declare module 'abcjs' {
 		}
 	}
 
+	interface ChordGridSubtitle {
+		type: "subtitle";
+		subtitle: string;
+	}
+	interface ChordGridText {
+		type: "text";
+		text: string;
+	}
+	interface ChordGridMeasure {
+		chord: [string,string,string,string];
+		hasStartRepeat?:boolean;
+		hasEndRepeat?:boolean;
+		noBorder?:boolean; // for when the line isn't complete, this is a placeholder
+		ending?:number; // This bar starts an ending
+		annotations?: Array<string>;
+	}
+	interface ChordGridPart {
+		type: "part";
+		name: string;
+		lines: Array<ChordGridMeasure>;
+	}
+	type ChordGrid = ChordGridSubtitle | ChordGridText | ChordGridPart;
+
 	export interface TuneObject {
 		formatting: Formatting;
 		engraver?: EngraverController;
@@ -881,6 +905,7 @@ declare module 'abcjs' {
 		metaTextInfo: MetaTextInfo;
 		version: string;
 		warnings?: Array<string>;
+		chordGrid?: Array<ChordGrid>;
 
 		getTotalTime: NumberFunction;
 		getTotalBeats: NumberFunction;

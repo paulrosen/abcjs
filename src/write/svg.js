@@ -168,7 +168,7 @@ Svg.prototype.rectBeneath = function (attr) {
 	this.svg.insertBefore(el, this.svg.firstChild);
 };
 
-Svg.prototype.text = function (text, attr, target) {
+Svg.prototype.text = function (text, attr, target, spanAttr) {
 	var el = document.createElementNS(svgNS, 'text');
 	el.setAttribute("stroke", "none");
 	for (var key in attr) {
@@ -185,6 +185,13 @@ Svg.prototype.text = function (text, attr, target) {
 	    }
 
 		var line = document.createElementNS(svgNS, 'tspan');
+		if (spanAttr) {
+			for (var skey in spanAttr) {
+				if (spanAttr.hasOwnProperty(skey)) {
+					line.setAttribute(skey, spanAttr[skey]);
+				}
+			}
+		}
 		line.setAttribute("x", attr.x ? attr.x : 0);
 		if (i !== 0)
 			line.setAttribute("dy", "1.2em");

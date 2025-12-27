@@ -74,6 +74,8 @@ var EngraverController = function (paper, params) {
 		this.germanAlphabet = params.germanAlphabet;
 	if (params.lineThickness)
 		this.lineThickness = params.lineThickness;
+	if (params.chordGrid)
+		this.chordGrid = params.chordGrid;
 	this.renderer.controller = this; // TODO-GD needed for highlighting
 	this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
 	if (params.ariaLabel !== undefined)
@@ -251,7 +253,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 
 	var origJazzChords = this.jazzchords
 	var scale = this.setupTune(abcTune, tuneNumber);
-  
+
 	// Create all of the element objects that will appear on the page.
 	this.constructTuneElements(abcTune);
   
@@ -300,7 +302,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
 	}
   
 	// Do all the writing to the SVG
-	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset);
+	var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset, this.chordGrid);
 	this.staffgroups = ret.staffgroups;
 	this.selectables = ret.selectables;
 	if (this.oneSvgPerLine) {
