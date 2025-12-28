@@ -33,7 +33,7 @@ P:Chorus
 "Bb"FGBd-d4|"F7"zEFA c2d2|"Bb"dB-"Eb7"B6-|"Bb"B2z2z4:|
 `
 
-	const expectedAfter = []
+	const expectedAfter = [{"type":"part","name":"Verse","lines":[[{"chord":["B♭","","",""]},{"chord":["C7","","F7",""]},{"chord":["B♭7","","",""]},{"chord":["E♭","","G7","Cm"]},{"chord":["Edim","","",""]},{"chord":["B♭","","G7",""]},{"chord":["C9","","F7",""]},{"chord":["B♭","","B♭+",""]}]]},{"type":"part","name":"Chorus","lines":[[{"chord":["E♭","","",""],"hasStartRepeat":true},{"chord":["E♭m","","",""]},{"chord":["B♭","","",""]},{"chord":["G7","","",""]},{"chord":["C9","","",""]},{"chord":["F7","","",""]},{"chord":["B♭","","",""]},{"chord":["","","",""]}],[{"chord":["E♭","","",""]},{"chord":["E♭m","","",""]},{"chord":["B♭","","",""]},{"chord":["G7","","",""]},{"chord":["Cm","","G7",""]},{"chord":["Cm","","Cm7♭5",""]},{"chord":["B♭","","D7",""]},{"chord":["Gm","","Edim",""]}],[{"chord":["B♭","","",""]},{"chord":["F7","","",""]},{"chord":["B♭","E♭7","",""]},{"chord":["B♭","","",""],"hasEndRepeat":true}]]}]
 
 	const abcAint = `X:1
 M:4/4

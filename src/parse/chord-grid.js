@@ -65,6 +65,7 @@ function flattenVoices(staves) {
 	staves.forEach((staff, staffNum) => {
 		if (staff.voices) {
 			staff.voices.forEach((voice, voiceNum) => {
+				let currentPartNum = 0
 				let beatNum = 0
 				let measureNum = 0
 				voice.forEach(element => {
@@ -77,8 +78,10 @@ function flattenVoices(staves) {
 									lines: [measures]
 								})
 								measures = []
-							} else
+							} else {
+								currentPartNum++
 								measureNum = 0
+							}
 						}
 						partName = element.title
 					} else if (element.el_type === 'note') {
@@ -140,19 +143,21 @@ function flattenVoices(staves) {
 								measures.push(currentBar)
 							else {
 								// Add the found items of interest to the original array
-								if (!measures[measureNum].chord[0] && currentBar.chord[0])
-									measures[measureNum].chord[0] = currentBar.chord[0]
-								if (!measures[measureNum].chord[1] && currentBar.chord[1])
-									measures[measureNum].chord[1] = currentBar.chord[1]
-								if (!measures[measureNum].chord[2] && currentBar.chord[2])
-									measures[measureNum].chord[2] = currentBar.chord[2]
-								if (!measures[measureNum].chord[3] && currentBar.chord[3])
-									measures[measureNum].chord[3] = currentBar.chord[3]
+								// We have the extra [0] in there because lines is an array of lines (but we just use the [0] for constructing, we split it apart at the end)
+								const bar = parts[currentPartNum].lines[0][measureNum]
+								if (!bar.chord[0] && currentBar.chord[0])
+									bar.chord[0] = currentBar.chord[0]
+								if (!bar.chord[1] && currentBar.chord[1])
+									bar.chord[1] = currentBar.chord[1]
+								if (!bar.chord[2] && currentBar.chord[2])
+									bar.chord[2] = currentBar.chord[2]
+								if (!bar.chord[3] && currentBar.chord[3])
+									bar.chord[3] = currentBar.chord[3]
 								if (currentBar.annotations) {
-									if (!measures[measureNum].annotations)
-										measures[measureNum].annotations = currentBar.annotations
+									if (!bar.annotations)
+										bar.annotations = currentBar.annotations
 									else
-										measures[measureNum].annotations = measures[measureNum].annotations.concat(currentBar.annotations)
+										bar.annotations = bar.annotations.concat(currentBar.annotations)
 								}
 								measureNum++
 							}
@@ -162,13 +167,15 @@ function flattenVoices(staves) {
 						beatNum = 0
 					}
 				})
+				if (staffNum === 0 && voiceNum === 0) {
+					parts.push({
+						type: "part",
+						name: partName,
+						lines: [measures]
+					})
+				}
 			})
 		}
-	})
-	parts.push({
-		type: "part",
-		name: partName,
-		lines: [measures]
 	})
 	if (!lastChord)
 		throw new Error("noChords")
