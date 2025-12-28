@@ -47,7 +47,7 @@ GA>c edcc |: "C"A3G- G4 | zGA>c "C7"edcG|"F"A3A- A4 |zGG>G AGAG|
 "G7"g3d- d4 | zee>g ecAG|1"C"(_e/d/c-"F"c6) | "G7" zGA>c edcc :|2"C"(_e/d/cc2-) "F"c4- |"C"c4 zcdc ||
 `
 
-	const expectedAint = []
+	const expectedAint = [{"type":"part","name":"Verse","lines":[[{"chord":["C","","",""],"hasStartRepeat":true},{"chord":["C","","C7",""]},{"chord":["F","","",""]},{"chord":["","","",""]},{"chord":["G7","","",""]},{"chord":["","","",""]},{"chord":["C","F","",""],"ending":"1"},{"chord":["G7","","",""],"hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["C","","F",""],"ending":"2"},{"chord":["C","","",""]}]]}]
 
 	const abcAll = `X:1
 M: 4/4
@@ -132,7 +132,7 @@ GGce|g2_b2|"F"a4-|a3c|
 "D7"ed^cd|"G7"f2e2|"C"c4-|czz2|]
 `
 
-	const expectedBill = []
+	const expectedBill = [{"type":"subtitle","subtitle":"First Half"},{"type":"part","name":"","lines":[[{"chord":["C","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["G7","","",""]},{"chord":["","","",""]}],[{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["G7","","G+",""]},{"chord":["C","","",""]},{"chord":["","","",""]}]]},{"type":"subtitle","subtitle":"Second Half"},{"type":"part","name":"","lines":[[{"chord":["C","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["F","","",""]},{"chord":["","","",""]}]]},{"type":"text","text":"extra text is shown and causes a part break"},{"type":"part","name":"","lines":[[{"chord":["F","","",""]},{"chord":["F♯°7","","",""]},{"chord":["C","","",""]},{"chord":["A7","","",""]},{"chord":["D7","","",""]},{"chord":["G7","","",""]},{"chord":["C","","",""]},{"chord":["","","",""]}]]}]
 
 	const abcWaltz = `X: 35
 T:Mollie's Garden

@@ -61,6 +61,7 @@ function flattenVoices(staves) {
 	let measures = []
 	let currentBar = {chord: ['', '', '', '']}
 	let lastChord = ""
+	let nextBarEnding = ""
 	staves.forEach((staff, staffNum) => {
 		if (staff.voices) {
 			staff.voices.forEach((voice, voiceNum) => {
@@ -115,10 +116,16 @@ function flattenVoices(staves) {
 						} else
 							beatNum += element.duration * 4
 					} else if (element.el_type === 'bar') {
+						if (nextBarEnding) {
+							currentBar.ending = nextBarEnding
+							nextBarEnding = ""
+						}
 						if (element.type === 'bar_dbl_repeat' || element.type === 'bar_left_repeat')
 							currentBar.hasStartRepeat = true
 						if (element.type === 'bar_dbl_repeat' || element.type === 'bar_right_repeat')
 							currentBar.hasEndRepeat = true
+						if (element.startEnding)
+							nextBarEnding = element.startEnding
 						if (beatNum >= 4) {
 							if (currentBar.chord[0] === '') {
 								// If there isn't a chord change at the beginning, repeat the last chord found
@@ -163,6 +170,16 @@ function addLineBreaks(chartLines, barsPerLine) {
 			const oldLines = line.lines[0]
 			for (let i = 0; i < oldLines.length; i += barsPerLine) {
 				newLines.push(oldLines.slice(i, i + barsPerLine))
+			}
+			// TODO-PER: The following probably doesn't handle all cases. Rethink it.
+			for (let i = 0; i < newLines.length; i++) {
+				if (newLines[i][0].ending) {
+					const toAdd = newLines[0].length - newLines[i].length
+					const thisLine = []
+					for (let j = 0; j < toAdd; j++)
+						thisLine.push({noBorder: true, chord: ['', '', '', '']})
+					newLines[i] = thisLine.concat(newLines[i])
+				}
 			}
 			line.lines = newLines
 		}

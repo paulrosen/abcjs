@@ -58,17 +58,28 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 					part.lines.forEach((line, lineNum) => {
 						line.forEach((measure, barNum) => {
 							const RECT_WIDTH = 1
-							renderer.paper.rect({x:leftMargin+barNum*colWidth,y:renderer.y+lineNum*ROW_HEIGHT,width:colWidth,height:ROW_HEIGHT})
-							renderer.paper.rect({x:leftMargin+barNum*colWidth+RECT_WIDTH,y:renderer.y+lineNum*ROW_HEIGHT+RECT_WIDTH,width:colWidth-RECT_WIDTH*2,height:ROW_HEIGHT-RECT_WIDTH*2})
-							if (measure.hasStartRepeat)
-								drawStartRepeat(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum)
-							if (measure.hasEndRepeat)
-								drawEndRepeat(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum)
-							drawMeasure(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum, measure.chord, chordFont)
-							if (measure.annotations && measure.annotations.length > 0) {
-								drawAnnotations(renderer, renderer.y, leftMargin+barNum*colWidth, measure.annotations)
-							}
+							if (!measure.noBorder) {
+								renderer.paper.rect({x: leftMargin + barNum * colWidth, y: renderer.y + lineNum * ROW_HEIGHT, width: colWidth, height: ROW_HEIGHT})
+								renderer.paper.rect({x: leftMargin + barNum * colWidth + RECT_WIDTH, y: renderer.y + lineNum * ROW_HEIGHT + RECT_WIDTH, width: colWidth - RECT_WIDTH * 2, height: ROW_HEIGHT - RECT_WIDTH * 2})
+								if (measure.hasStartRepeat)
+									drawStartRepeat(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum)
+								if (measure.hasEndRepeat)
+									drawEndRepeat(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum)
 
+								if (measure.ending) {
+									renderText(renderer, {
+										x: leftMargin + barNum * colWidth,
+										y: renderer.y + lineNum * ROW_HEIGHT,
+										text: measure.ending,
+										"text-anchor": "start",
+										type: {face: "Arial, sans-serif", size: 16, style: "normal", weight: "normal", decoration: "none"},
+									})
+								}
+								drawMeasure(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum, measure.chord, chordFont)
+								if (measure.annotations && measure.annotations.length > 0) {
+									drawAnnotations(renderer, renderer.y, leftMargin + barNum * colWidth, measure.annotations)
+								}
+							}
 						})
 					})
 					renderer.moveY(ROW_HEIGHT * part.lines.length + PART_MARGIN_BOTTOM)
