@@ -92,7 +92,7 @@ C |: "F6"F3/ E/"Dm7"FA|"Gm7"G3/ F/"C7"GA/G/|
 "Dm7"F3/D/"Gm7"D"C7"C|1"F6"F3"C7"C :|2F4 && "Ab6"x2 "GbΔ7"x"F6"x|]
 `
 
-	const expectedAuld = []
+	const expectedAuld = [{"type":"part","name":"","lines":[[{"chord":["F6","","Dm7",""],"hasStartRepeat":true},{"chord":["Gm7","","C7",""]},{"chord":["F6","","F7","B7♯5"]},{"chord":["B♭Δ7","","","B°7"]},{"chord":["FΔ7","","Dm7",""]},{"chord":["Gm7","","C7","C♯°7"]},{"chord":["Dm7","","Gm7","C7"]},{"chord":["F6","","","C7♯5"]}],[{"chord":["FΔ7","","Dm7",""]},{"chord":["Gm7","","C7","G♭7♯5"]},{"chord":["FΔ7","","F7","B7♯5"]},{"chord":["B♭Δ7","","","B°7"]},{"chord":["FΔ7","","Dm7",""]},{"chord":["Gm7","","C7","C♯°7"]},{"chord":["Dm7","","Gm7","C7"]},{"chord":["F6","","","C7"],"ending":"1","hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["A♭6","","G♭Δ7","F6"],"ending":"2"}]]}]
 
 	const abcBasin = `X:1
 M: 4/4
@@ -110,7 +110,7 @@ V:2 cue=on
 xx|:x8|DDE2=EF3|x8|"Bb"BF_AG "F7"FG3|
 `
 
-	const expectedBasin = []
+	const expectedBasin = [{"type":"part","name":"Intro and Outro","lines":[[{"chord":["B♭","","",""],"hasStartRepeat":true},{"chord":["","","",""]},{"chord":["B♭","","F7",""]},{"chord":["B♭","","F7",""]},{"chord":["B♭","","B♭7",""]},{"chord":["E♭","","E♭m",""]},{"chord":["B♭","break","",""]},{"chord":["F7","","B♭","F+7"],"ending":"1","hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["F7","","B♭",""],"ending":"2"}]]}]
 
 	const abcBill = `X:1
 T:Bill Bailey

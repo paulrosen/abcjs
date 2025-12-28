@@ -70,12 +70,15 @@ function flattenVoices(staves) {
 				voice.forEach(element => {
 					if (element.el_type === 'part') {
 						if (measures.length > 0) {
-							parts.push({
-								type: "part",
-								name: partName,
-								lines: [measures]
-							})
-							measures = []
+							if (staffNum === 0 && voiceNum === 0) {
+								parts.push({
+									type: "part",
+									name: partName,
+									lines: [measures]
+								})
+								measures = []
+							} else
+								measureNum = 0
 						}
 						partName = element.title
 					} else if (element.el_type === 'note') {
@@ -133,8 +136,26 @@ function flattenVoices(staves) {
 									currentBar.chord[0] = findLastChord(measures)
 								}
 							}
-							measures.push(currentBar)
-							measureNum++
+							if (staffNum === 0 && voiceNum === 0)
+								measures.push(currentBar)
+							else {
+								// Add the found items of interest to the original array
+								if (!measures[measureNum].chord[0] && currentBar.chord[0])
+									measures[measureNum].chord[0] = currentBar.chord[0]
+								if (!measures[measureNum].chord[1] && currentBar.chord[1])
+									measures[measureNum].chord[1] = currentBar.chord[1]
+								if (!measures[measureNum].chord[2] && currentBar.chord[2])
+									measures[measureNum].chord[2] = currentBar.chord[2]
+								if (!measures[measureNum].chord[3] && currentBar.chord[3])
+									measures[measureNum].chord[3] = currentBar.chord[3]
+								if (currentBar.annotations) {
+									if (!measures[measureNum].annotations)
+										measures[measureNum].annotations = currentBar.annotations
+									else
+										measures[measureNum].annotations = measures[measureNum].annotations.concat(currentBar.annotations)
+								}
+								measureNum++
+							}
 							currentBar = {chord: ['', '', '', '']}
 						} else
 							currentBar.chord = ['', '', '', '']
