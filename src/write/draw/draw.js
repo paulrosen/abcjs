@@ -16,52 +16,59 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 	renderer.paper.closeGroup()
 	renderer.moveY(renderer.spacing.music);
 
+	let suppressMusic = false
 	if (chordGrid && abcTune.chordGrid) {
 		drawChordGrid(renderer, abcTune.chordGrid, renderer.padding.left, width, abcTune.formatting.gchordfont)
+		if (chordGrid === 'noMusic')
+			suppressMusic = true
 	}
 
 	var staffgroups = [];
 	var nStaves = 0;
-	for (var line = 0; line < abcTune.lines.length; line++) {
-		classes.incrLine();
-		var abcLine = abcTune.lines[line];
-		if (abcLine.staff) {
-			// MAE 26 May 2025 - for incipits staff count limiting
-			nStaves++;
-			if (abcTune.formatting.maxStaves){
-				if (nStaves > abcTune.formatting.maxStaves){
-					break;
+	if (!suppressMusic) {
+		for (var line = 0; line < abcTune.lines.length; line++) {
+			classes.incrLine();
+			var abcLine = abcTune.lines[line];
+			if (abcLine.staff) {
+				// MAE 26 May 2025 - for incipits staff count limiting
+				nStaves++;
+				if (abcTune.formatting.maxStaves) {
+					if (nStaves > abcTune.formatting.maxStaves) {
+						break;
+					}
 				}
+				if (classes.shouldAddClasses)
+					groupClasses.klass = "abcjs-staff-wrapper abcjs-l" + classes.lineNumber
+				renderer.paper.openGroup(groupClasses)
+				if (abcLine.vskip) {
+					renderer.moveY(abcLine.vskip);
+				}
+				if (staffgroups.length >= 1)
+					addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
+				var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
+				staffgroup.line = lineOffset + line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
+				staffgroups.push(staffgroup);
+				renderer.paper.closeGroup()
+			} else if (abcLine.nonMusic) {
+				if (classes.shouldAddClasses)
+					groupClasses.klass = "abcjs-non-music"
+				renderer.paper.openGroup(groupClasses)
+				nonMusic(renderer, abcLine.nonMusic, selectables);
+				renderer.paper.closeGroup()
 			}
-			if (classes.shouldAddClasses)
-				groupClasses.klass = "abcjs-staff-wrapper abcjs-l" + classes.lineNumber
-			renderer.paper.openGroup(groupClasses)
-			if (abcLine.vskip) {
-				renderer.moveY(abcLine.vskip);
-			}
-			if (staffgroups.length >= 1)
-				addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
-			var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
-			staffgroup.line = lineOffset + line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
-			staffgroups.push(staffgroup);
-			renderer.paper.closeGroup()
-		} else if (abcLine.nonMusic) {
-			if (classes.shouldAddClasses)
-				groupClasses.klass = "abcjs-non-music"
-			renderer.paper.openGroup(groupClasses)
-			nonMusic(renderer, abcLine.nonMusic, selectables);
-			renderer.paper.closeGroup()
 		}
 	}
 
 	classes.reset();
-	if (abcTune.bottomText && abcTune.bottomText.rows && abcTune.bottomText.rows.length > 0) {
-		if (classes.shouldAddClasses)
-			groupClasses.klass = "abcjs-meta-bottom"
-		renderer.paper.openGroup(groupClasses)
-		renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
-		nonMusic(renderer, abcTune.bottomText, selectables);
-		renderer.paper.closeGroup()
+	if (!suppressMusic) {
+		if (abcTune.bottomText && abcTune.bottomText.rows && abcTune.bottomText.rows.length > 0) {
+			if (classes.shouldAddClasses)
+				groupClasses.klass = "abcjs-meta-bottom"
+			renderer.paper.openGroup(groupClasses)
+			renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
+			nonMusic(renderer, abcTune.bottomText, selectables);
+			renderer.paper.closeGroup()
+		}
 	}
 	setPaperSize(renderer, maxWidth, scale, responsive);
 	return { staffgroups: staffgroups, selectables: selectables.getElements() };
