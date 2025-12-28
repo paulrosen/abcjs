@@ -49,7 +49,7 @@ function chordGrid(visualObj) {
 			chartLines = chartLines.concat(parts)
 		}
 	})
-	addLineBreaks(chartLines, 8)
+	addLineBreaks(chartLines)
 	console.log(JSON.stringify(chartLines))
 	return chartLines
 
@@ -184,11 +184,15 @@ function findLastChord(measures) {
 	}
 }
 
-function addLineBreaks(chartLines, barsPerLine) {
+function addLineBreaks(chartLines) {
 	chartLines.forEach(line => {
 		if (line.type === "part") {
 			const newLines = []
 			const oldLines = line.lines[0]
+			let is12bar = false
+			if (oldLines.length === 12 || (oldLines.length >= 12 && oldLines[11].hasEndRepeat))
+				is12bar = true
+			const barsPerLine = is12bar ? 4 : 8 // Only do 4 bars per line for 12-bar blues
 			for (let i = 0; i < oldLines.length; i += barsPerLine) {
 				newLines.push(oldLines.slice(i, i + barsPerLine))
 			}
