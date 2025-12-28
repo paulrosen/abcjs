@@ -49,6 +49,7 @@ function chordGrid(visualObj) {
 			chartLines = chartLines.concat(parts)
 		}
 	})
+	collapseIdenticalEndings(chartLines)
 	addLineBreaks(chartLines)
 	console.log(JSON.stringify(chartLines))
 	return chartLines
@@ -189,6 +190,56 @@ function findLastChord(measures) {
 				return measures[m].chord[c]
 		}
 	}
+}
+
+function collapseIdenticalEndings(chartLines) {
+	chartLines.forEach(line => {
+		if (line.type === "part") {
+			const partLine = line.lines[0]
+			const ending1 = partLine.findIndex(bar => {
+				return bar.ending === '1'
+			})
+			const ending2 = partLine.findIndex(bar => {
+				return bar.ending === '2'
+			})
+			if (ending1 >= 0 && ending2 >= 0) {
+				// If the endings are not the same length, don't collapse
+				if (ending2 - ending1 === partLine.length - ending2) {
+					let matches = true
+					for (let i = 0; i < ending2 - ending1 && matches; i++) {
+						const measureLhs = partLine[ending1+i]
+						const measureRhs = partLine[ending2+i]
+						if (measureLhs.chord[0] !== measureRhs.chord[0])
+							matches = false
+						if (measureLhs.chord[1] !== measureRhs.chord[1])
+							matches = false
+						if (measureLhs.chord[2] !== measureRhs.chord[2])
+							matches = false
+						if (measureLhs.chord[3] !== measureRhs.chord[3])
+							matches = false
+						if (measureLhs.annotations && !measureRhs.annotations)
+							matches = false
+						if (!measureLhs.annotations && measureRhs.annotations)
+							matches = false
+						if (measureLhs.annotations && measureRhs.annotations) {
+							if (measureLhs.annotations.length !== measureRhs.annotations.length)
+								matches = false
+							else {
+								for (let j = 0; j < measureLhs.annotations.length; j++) {
+									if (measureLhs.annotations[j] !== measureRhs.annotations[j])
+										matches = false
+								}
+							}
+						}
+					}
+					if (matches) {
+						delete partLine[ending1].ending
+						partLine.splice(ending2, partLine.length - ending2)
+					}
+				}
+			}
+		}
+	})
 }
 
 function addLineBreaks(chartLines) {

@@ -64,7 +64,7 @@ P:B
 "Eb7"zg2f- f_dB2|zg2f- fBBB|"Bb7"_d2 "^N.C."B2B2Bc-|c2z2zF GB-!mark!||
 `
 
-	const expectedAll = []
+	const expectedAll = [{"type":"part","name":"A","lines":[[{"chord":["B♭7","","",""],"hasStartRepeat":true},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]}],[{"chord":["E♭7","","",""]},{"chord":["","","",""]},{"chord":["B♭7","","",""]},{"chord":["B♭7","","G7",""]}],[{"chord":["Cm7","","",""]},{"chord":["F7","","",""]},{"chord":["B♭7","","E♭7",""]},{"chord":["B♭7","","F7",""],"hasEndRepeat":true}]]},{"type":"part","name":"B","lines":[[{"chord":["B♭7","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["E♭7","","",""]},{"chord":["","","",""]},{"chord":["B♭7","N.C.","",""]},{"chord":["","","",""]}]]}]
 
 	const abcAnd = `X:1
 L:1/4
