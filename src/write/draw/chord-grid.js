@@ -172,8 +172,6 @@ function renderChord(renderer, x, y, size, chord, family) {
 }
 
 function drawSingleChord(renderer, left, top, width, height, chord, family) {
-	if (!chord)
-		chord = "%"
 	renderChord(renderer, left+width/2, top+height/2, 24, chord, family)
 }
 

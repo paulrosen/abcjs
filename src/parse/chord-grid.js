@@ -59,7 +59,7 @@ function chordGrid(visualObj) {
 	})
 	collapseIdenticalEndings(chartLines)
 	addLineBreaks(chartLines)
-	console.log(JSON.stringify(chartLines))
+	addPercents(chartLines)
 	return chartLines
 
 }
@@ -89,9 +89,10 @@ function flattenVoices(staves) {
 									lines: [measures]
 								})
 								measures = []
-							} else {
-								currentPartNum++
-								measureNum = 0
+							// } else {
+							// 	currentPartNum++
+							// 	measureNum = 0
+							// 	measures = parts[currentPartNum].lines[0]
 							}
 						}
 						partName = element.title
@@ -169,20 +170,28 @@ function flattenVoices(staves) {
 							else {
 								// Add the found items of interest to the original array
 								// We have the extra [0] in there because lines is an array of lines (but we just use the [0] for constructing, we split it apart at the end)
-								const bar = parts[currentPartNum].lines[0][measureNum]
-								if (!bar.chord[0] && currentBar.chord[0])
-									bar.chord[0] = currentBar.chord[0]
-								if (!bar.chord[1] && currentBar.chord[1])
-									bar.chord[1] = currentBar.chord[1]
-								if (!bar.chord[2] && currentBar.chord[2])
-									bar.chord[2] = currentBar.chord[2]
-								if (!bar.chord[3] && currentBar.chord[3])
-									bar.chord[3] = currentBar.chord[3]
-								if (currentBar.annotations) {
-									if (!bar.annotations)
-										bar.annotations = currentBar.annotations
-									else
-										bar.annotations = bar.annotations.concat(currentBar.annotations)
+								let index = measureNum
+								let partIndex = 0
+								while (index >= parts[partIndex].lines[0].length && partIndex < parts.length) {
+									index -= parts[partIndex].lines[0].length
+									partIndex++
+								}
+								if (partIndex < parts.length && index < parts[partIndex].lines[0].length) {
+									const bar = parts[partIndex].lines[0][index]
+									if (!bar.chord[0] && currentBar.chord[0])
+										bar.chord[0] = currentBar.chord[0]
+									if (!bar.chord[1] && currentBar.chord[1])
+										bar.chord[1] = currentBar.chord[1]
+									if (!bar.chord[2] && currentBar.chord[2])
+										bar.chord[2] = currentBar.chord[2]
+									if (!bar.chord[3] && currentBar.chord[3])
+										bar.chord[3] = currentBar.chord[3]
+									if (currentBar.annotations) {
+										if (!bar.annotations)
+											bar.annotations = currentBar.annotations
+										else
+											bar.annotations = bar.annotations.concat(currentBar.annotations)
+									}
 								}
 								measureNum++
 							}
@@ -305,6 +314,37 @@ function addLineBreaks(chartLines) {
 				}
 			}
 			line.lines = newLines
+		}
+	})
+}
+
+function addPercents(chartLines) {
+	chartLines.forEach(part => {
+		if (part.lines) {
+			let lastMeasureSingle = false
+			let lastChord = ""
+			part.lines.forEach(line => {
+				line.forEach(measure => {
+					if (!measure.noBorder) {
+						const chords = measure.chord
+						if (!chords[0] && !chords[1] && !chords[2] && !chords[3]) {
+							// if there are no chords specified for this measure
+							if (lastMeasureSingle)
+								chords[0] = '%'
+							else
+								chords[0] = lastChord
+						} else if (!chords[1] && !chords[2] && !chords[3]) {
+							// if there is a single chord for this measure
+							lastMeasureSingle = true
+							lastChord = chords[0]
+						} else {
+							// if the measure is complicated - in that case the next measure won't get %
+							lastMeasureSingle = false
+							lastChord = chords[3] || chords[2] || chords[1]
+						}
+					}
+				})
+			})
 		}
 	})
 }

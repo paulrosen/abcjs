@@ -11,7 +11,7 @@ function delineTune(inputLines, options) {
 	var currentTripletFont = [];
 	var currentAnnotationFont = [];
 	for (var i = 0; i < inputLines.length; i++) {
-		var inputLine = inputLines[i];
+		var inputLine = cloneLine(inputLines[i]);
 		if (inputLine.staff) {
 			if (inMusicLine && !inputLine.vskip) {
 				var outputLine = outputLines[outputLines.length-1];

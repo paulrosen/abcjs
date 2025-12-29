@@ -33,7 +33,7 @@ P:Chorus
 "Bb"FGBd-d4|"F7"zEFA c2d2|"Bb"dB-"Eb7"B6-|"Bb"B2z2z4:|
 `
 
-	const expectedAfter = [{"type":"part","name":"Verse","lines":[[{"chord":["B♭","","",""]},{"chord":["C7","","F7",""]},{"chord":["B♭7","","",""]},{"chord":["E♭","","G7","Cm"]},{"chord":["Edim","","",""]},{"chord":["B♭","","G7",""]},{"chord":["C9","","F7",""]},{"chord":["B♭","","B♭+",""]}]]},{"type":"part","name":"Chorus","lines":[[{"chord":["E♭","","",""],"hasStartRepeat":true},{"chord":["E♭m","","",""]},{"chord":["B♭","","",""]},{"chord":["G7","","",""]},{"chord":["C9","","",""]},{"chord":["F7","","",""]},{"chord":["B♭","","",""]},{"chord":["","","",""]}],[{"chord":["E♭","","",""]},{"chord":["E♭m","","",""]},{"chord":["B♭","","",""]},{"chord":["G7","","",""]},{"chord":["Cm","","G7",""]},{"chord":["Cm","","Cm7♭5",""]},{"chord":["B♭","","D7",""]},{"chord":["Gm","","Edim",""]}],[{"chord":["B♭","","",""]},{"chord":["F7","","",""]},{"chord":["B♭","E♭7","",""]},{"chord":["B♭","","",""],"hasEndRepeat":true}]]}]
+	const expectedAfter = [{"type":"part","name":"Verse","lines":[[{"chord":["B♭","","",""]},{"chord":["C7","","F7",""]},{"chord":["B♭7","","",""]},{"chord":["E♭","","G7","Cm"]},{"chord":["Edim","","",""]},{"chord":["B♭","","G7",""]},{"chord":["C9","","F7",""]},{"chord":["B♭","","B♭+",""]}]]},{"type":"part","name":"Chorus","lines":[[{"chord":["E♭","","",""],"hasStartRepeat":true},{"chord":["E♭m","","",""]},{"chord":["B♭","","",""]},{"chord":["G7","","",""]},{"chord":["C9","","",""]},{"chord":["F7","","",""]},{"chord":["B♭","","",""]},{"chord":["%","","",""]}],[{"chord":["E♭","","",""]},{"chord":["E♭m","","",""]},{"chord":["B♭","","",""]},{"chord":["G7","","",""]},{"chord":["Cm","","G7",""]},{"chord":["Cm","","Cm7♭5",""]},{"chord":["B♭","","D7",""]},{"chord":["Gm","","Edim",""]}],[{"chord":["B♭","","",""]},{"chord":["F7","","",""]},{"chord":["B♭","E♭7","",""]},{"chord":["B♭","","",""],"hasEndRepeat":true}]]}]
 
 	const abcAint = `X:1
 M:4/4
@@ -47,7 +47,7 @@ GA>c edcc |: "C"A3G- G4 | zGA>c "C7"edcG|"F"A3A- A4 |zGG>G AGAG|
 "G7"g3d- d4 | zee>g ecAG|1"C"(_e/d/c-"F"c6) | "G7" zGA>c edcc :|2"C"(_e/d/cc2-) "F"c4- |"C"c4 zcdc ||
 `
 
-	const expectedAint = [{"type":"part","name":"Verse","lines":[[{"chord":["C","","",""],"hasStartRepeat":true},{"chord":["C","","C7",""]},{"chord":["F","","",""]},{"chord":["","","",""]},{"chord":["G7","","",""]},{"chord":["","","",""]},{"chord":["C","F","",""],"ending":"1"},{"chord":["G7","","",""],"hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["C","","F",""],"ending":"2"},{"chord":["C","","",""]}]]}]
+	const expectedAint = [{"type":"part","name":"Verse","lines":[[{"chord":["C","","",""],"hasStartRepeat":true},{"chord":["C","","C7",""]},{"chord":["F","","",""]},{"chord":["%","","",""]},{"chord":["G7","","",""]},{"chord":["%","","",""]},{"chord":["C","F","",""],"ending":"1"},{"chord":["G7","","",""],"hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["C","","F",""],"ending":"2"},{"chord":["C","","",""]}]]}]
 
 	const abcAll = `X:1
 M: 4/4
@@ -65,7 +65,7 @@ P:B
 "Eb7"zg2f- f_dB2|zg2f- fBBB|"Bb7"_d2y4 "^N.C."B2B2Bc-|c2z2zF GB-!mark!||
 `
 
-	const expectedAll = [{"type":"part","name":"A","lines":[[{"chord":["B♭7","","",""],"hasStartRepeat":true},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]}],[{"chord":["E♭7","","",""]},{"chord":["","","",""]},{"chord":["B♭7","","",""]},{"chord":["B♭7","","G7",""]}],[{"chord":["Cm7","","",""]},{"chord":["F7","","",""]},{"chord":["B♭7","","E♭7",""]},{"chord":["B♭7","","F7",""],"hasEndRepeat":true}]]},{"type":"part","name":"B","lines":[[{"chord":["B♭7","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["E♭7","","",""]},{"chord":["","","",""]},{"chord":["B♭7","N.C.","",""]},{"chord":["","","",""]}]]}]
+	const expectedAll = [{"type":"part","name":"A","lines":[[{"chord":["B♭7","","",""],"hasStartRepeat":true},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]}],[{"chord":["E♭7","","",""]},{"chord":["%","","",""]},{"chord":["B♭7","","",""]},{"chord":["B♭7","","G7",""]}],[{"chord":["Cm7","","",""]},{"chord":["F7","","",""]},{"chord":["B♭7","","E♭7",""]},{"chord":["B♭7","","F7",""],"hasEndRepeat":true}]]},{"type":"part","name":"B","lines":[[{"chord":["B♭7","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["E♭7","","",""]},{"chord":["%","","",""]},{"chord":["B♭7","N.C.","",""]},{"chord":["N.C.","","",""]}]]}]
 
 	const abcAnd = `X:1
 L:1/4
@@ -77,7 +77,7 @@ P:A
 "F#m"zFG/Ad/-|"C#m"d/ce/-e2|"A"zec/A(G/-|"B7"F2)z/C/B,/C/-|"Eb"C/G/-G3|z4:|
 `
 
-	const expectedAnd = [{"type":"part","name":"A","lines":[[{"chord":["F♯m","","",""]},{"chord":["C♯m","","",""]},{"chord":["F♯m","","",""]},{"chord":["C♯m","","",""]},{"chord":["F♯m","","",""]},{"chord":["C♯m","","",""]},{"chord":["A","","",""]},{"chord":["B7","","",""]}],[{"chord":["E♭","","",""]},{"chord":["","","",""],"hasEndRepeat":true}]]}]
+	const expectedAnd = [{"type":"part","name":"A","lines":[[{"chord":["F♯m","","",""]},{"chord":["C♯m","","",""]},{"chord":["F♯m","","",""]},{"chord":["C♯m","","",""]},{"chord":["F♯m","","",""]},{"chord":["C♯m","","",""]},{"chord":["A","","",""]},{"chord":["B7","","",""]}],[{"chord":["E♭","","",""]},{"chord":["%","","",""],"hasEndRepeat":true}]]}]
 
 	const abcAuld = `X:1
 M: 4/4
@@ -111,7 +111,7 @@ V:2 cue=on
 xx|:x8|DDE2=EF3|x8|"Bb"BF_AG "F7"FG3|
 `
 
-	const expectedBasin = [{"type":"part","name":"Intro and Outro","lines":[[{"chord":["B♭","","",""],"hasStartRepeat":true},{"chord":["","","",""]},{"chord":["B♭","","F7",""]},{"chord":["B♭","","F7",""]},{"chord":["B♭","","B♭7",""]},{"chord":["E♭","","E♭m",""]},{"chord":["B♭","break","",""]},{"chord":["F7","","B♭","F+7"],"ending":"1","hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["F7","","B♭",""],"ending":"2"}]]}]
+	const expectedBasin = [{"type":"part","name":"Intro and Outro","lines":[[{"chord":["B♭","","",""],"hasStartRepeat":true},{"chord":["%","","",""]},{"chord":["B♭","","F7",""]},{"chord":["B♭","","F7",""]},{"chord":["B♭","","B♭7",""]},{"chord":["E♭","","E♭m",""]},{"chord":["B♭","break","",""]},{"chord":["F7","","B♭","F+7"],"ending":"1","hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["F7","","B♭",""],"ending":"2"}]]}]
 
 	const abcBill = `X:1
 T:Bill Bailey
@@ -133,7 +133,7 @@ GGce|g2_b2|"F"a4-|a3c|
 "D7"ed^cd|"G7"f2e2|"C"c4-|czz2|]
 `
 
-	const expectedBill = [{"type":"part","name":"","lines":[[{"chord":["C","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["G7","","",""]},{"chord":["","","",""]}],[{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["G7","","G+",""]},{"chord":["C","","",""]},{"chord":["","","",""]}]]},{"type":"subtitle","subtitle":"Second Half"},{"type":"part","name":"","lines":[[{"chord":["C","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["","","",""]},{"chord":["F","","",""]},{"chord":["","","",""]}]]},{"type":"text","text":"extra text is shown and causes a part break"},{"type":"part","name":"","lines":[[{"chord":["F","","",""]},{"chord":["F♯°7","","",""]},{"chord":["C","","",""]},{"chord":["A7","","",""]},{"chord":["D7","","",""]},{"chord":["G7","","",""]},{"chord":["C","","",""]},{"chord":["","","",""]}]]}]
+	const expectedBill = [{"type":"part","name":"","lines":[[{"chord":["C","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["G7","","",""]},{"chord":["%","","",""]}],[{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["G7","","G+",""]},{"chord":["C","","",""]},{"chord":["%","","",""]}]]},{"type":"subtitle","subtitle":"Second Half"},{"type":"part","name":"","lines":[[{"chord":["C","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["F","","",""]},{"chord":["%","","",""]}]]},{"type":"text","text":"extra text is shown and causes a part break"},{"type":"part","name":"","lines":[[{"chord":["F","","",""]},{"chord":["F♯°7","","",""]},{"chord":["C","","",""]},{"chord":["A7","","",""]},{"chord":["D7","","",""]},{"chord":["G7","","",""]},{"chord":["C","","",""]},{"chord":["%","","",""]}]]}]
 
 	const abcWaltz = `X: 35
 T:Mollie's Garden
@@ -172,6 +172,7 @@ Q:Rubato
 N:cut time
 N:tempo change
 N:y - spacer
+N:measure 4 has no changes but measure 3 has more than one
 K:G
 P:Intro
 "G"zdBG|"C7"E/G/E2G|"G"DG"Dm6"Ay"E7"B-|B4|
@@ -180,11 +181,9 @@ P:Chorus
 [K:C]|:[Q:1/4=220]"C"e4|G4|"Ab7"_A4-|_A4|"C"e4|G4|"A7"A4-|A4|
 "D7"e4|A4|"G7"e4|B4|"C"d2c2|"C°7"B2A2|"G7"c2B2|A2"G+7"G2|`
 
-	const expectedBye = []
+	const expectedBye = [{"type":"part","name":"Intro","lines":[[{"chord":["G","","",""]},{"chord":["C7","","",""]},{"chord":["G","","Dm6","E7"]},{"chord":["E7","","",""]},{"chord":["A7","","",""]},{"chord":["D7","","",""]},{"chord":["G","","",""]},{"chord":["Am7","","D+7","D7"]}]]},{"type":"part","name":"Chorus","lines":[[{"chord":["C","","",""],"hasStartRepeat":true},{"chord":["%","","",""]},{"chord":["A♭7","","",""]},{"chord":["%","","",""]},{"chord":["C","","",""]},{"chord":["%","","",""]},{"chord":["A7","","",""]},{"chord":["%","","",""]}],[{"chord":["D7","","",""]},{"chord":["%","","",""]},{"chord":["G7","","",""]},{"chord":["%","","",""]},{"chord":["C","","",""]},{"chord":["C°7","","",""]},{"chord":["G7","","",""]},{"chord":["G7","","G+7",""]}]]}]
 
 	const abcDeed = `X:1
-T:Deed I Do
-C: Fred Rose/Walter Hirsch
 M: 4/4
 L: 1/4
 Q:1/4=150
@@ -207,7 +206,7 @@ P:Bridge
 "C"A2c2|"C7"A3/2G/2-G2|"F"E2D2|"Fm"E3/2D/2-D2|
 "C"EG2"A7"yD|"D7"C2"G7"D2|C4- & "C" x2 "F7"x2|"C"C4||`
 
-	const expectedDeed = []
+	const expectedDeed = [{"type":"part","name":"Intro","lines":[[{"chord":["C","","",""]},{"chord":["C7","","",""]},{"chord":["F","","",""]},{"chord":["Fm","","",""]},{"chord":["C","","","A7"]},{"chord":["D7","","G7",""]},{"chord":["C","","",""]},{"chord":["%","","",""]}]]},{"type":"part","name":"Verse (rubato)","lines":[[{"chord":["Dm","","",""]},{"chord":["G7","","",""]},{"chord":["C","","",""]},{"chord":["Am7","","",""]},{"chord":["Dm","","",""]},{"chord":["G7","","",""]},{"chord":["C","","",""]},{"chord":["A7","","",""]}],[{"chord":["Dm","","",""]},{"chord":["Dm7","","",""]},{"chord":["Em7","","",""]},{"chord":["%","","",""]},{"chord":["Am","","",""]},{"chord":["%","","",""]},{"chord":["Em","","",""]},{"chord":["Dm7","","G7",""]}]]},{"type":"part","name":"Chorus (a tempo)","lines":[[{"chord":["C","","",""],"hasStartRepeat":true},{"chord":["C7","","",""]},{"chord":["F","","",""]},{"chord":["Fm","","",""]},{"chord":["C","","","A7"]},{"chord":["D7","","G7",""]},{"chord":["C","","C♯°",""],"ending":"1"},{"chord":["Dm7","","G7",""],"hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["C","","",""],"ending":"2"},{"chord":["C7","","",""]}]]},{"type":"part","name":"Bridge","lines":[[{"chord":["F","","",""]},{"chord":["%","","",""]},{"chord":["E7","","",""]},{"chord":["%","","",""]},{"chord":["A7","","",""]},{"chord":["%","","",""]},{"chord":["D7","","",""]},{"chord":["G7","","G+7",""]}],[{"chord":["C","","",""]},{"chord":["C7","","",""]},{"chord":["F","","",""]},{"chord":["Fm","","",""]},{"chord":["C","","","A7"]},{"chord":["D7","","G7",""]},{"chord":["C","","F7",""]},{"chord":["C","","",""]}]]}]
 
 	const abcDo = `X:1
 L:1/8
@@ -218,7 +217,7 @@ K: G
 P: Intro
 "C"A^GAg-"C#°7"g3fy|"G"a_agf "E7"=fe3|"Am7"bgeb- "D7"beb2|"G"g8||"^No Chord"[G_B^c][GBc] [FA=c][FAc] [EG_B]2[EG^c][DF=c]-|[DF=c]6 GA||`
 
-	const expectedDo = [{"type":"part","name":"Intro","lines":[[{"chord":["C","","C♯°7",""]},{"chord":["G","","E7",""]},{"chord":["Am7","","D7",""]},{"chord":["G","","",""]},{"chord":["No Chord","","",""]},{"chord":["","","",""]}]]}]
+	const expectedDo = [{"type":"part","name":"Intro","lines":[[{"chord":["C","","C♯°7",""]},{"chord":["G","","E7",""]},{"chord":["Am7","","D7",""]},{"chord":["G","","",""]},{"chord":["No Chord","","",""]},{"chord":["%","","",""]}]]}]
 
 	const abcDouce = `X: 1
 M: 4/4
@@ -246,7 +245,7 @@ K:F
 "Gm7"(3B,DFAG|"Bbm6"B2"C7"AA|"Am7"c4|"Abm7"_c4|
 "Gm7"(3BBBDD|"C7"A2AA|"F6"F4-|1,2,3"Gm7"F2"C7"z2:|4 "Gm7"z "Ab°7"z"F"z2 |]`
 
-	const expectedEast = [{"type":"part","name":"","lines":[[{"chord":["FΔ7","","",""]},{"chord":["","","",""]},{"chord":["Am7","","",""]},{"chord":["D7","","",""]},{"chord":["Gm7","","",""]},{"chord":["","","",""]},{"chord":["B♭m6","","",""]},{"chord":["","","",""]}],[{"chord":["Gm7","","C7",""]},{"chord":["Em7♭5","","A7",""]},{"chord":["Dm7","","",""]},{"chord":["G7","","",""]},{"chord":["Gm7","","",""]},{"chord":["B♭m6","","C7",""]},{"chord":["Am7","","",""]},{"chord":["A♭m7","","",""]}],[{"chord":["Gm7","","",""]},{"chord":["C7","","",""]},{"chord":["F6","","",""]},{"chord":["Gm7","","C7",""],"ending":"1,2,3","hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["Gm7","A♭°7","F",""],"ending":"4"}]]}]
+	const expectedEast = [{"type":"part","name":"","lines":[[{"chord":["FΔ7","","",""]},{"chord":["%","","",""]},{"chord":["Am7","","",""]},{"chord":["D7","","",""]},{"chord":["Gm7","","",""]},{"chord":["%","","",""]},{"chord":["B♭m6","","",""]},{"chord":["%","","",""]}],[{"chord":["Gm7","","C7",""]},{"chord":["Em7♭5","","A7",""]},{"chord":["Dm7","","",""]},{"chord":["G7","","",""]},{"chord":["Gm7","","",""]},{"chord":["B♭m6","","C7",""]},{"chord":["Am7","","",""]},{"chord":["A♭m7","","",""]}],[{"chord":["Gm7","","",""]},{"chord":["C7","","",""]},{"chord":["F6","","",""]},{"chord":["Gm7","","C7",""],"ending":"1,2,3","hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["Gm7","A♭°7","F",""],"ending":"4"}]]}]
 
 	const abcFidgety = `X:1
 M:4/4
@@ -263,7 +262,7 @@ K:Eb
 "Eb"e2G2"^break"z4|"G7"d2=B2"^break"z4|"Ab"c2A2"^break"z4|"Eb"G2B2"^break"z4|
 `
 
-	const expectedFidgety = []
+	const expectedFidgety = [{"type":"part","name":"","lines":[[{"chord":["F7","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]},{"chord":["%","","",""]}]]},{"type":"part","name":"A","lines":[[{"chord":["B♭","","",""]},{"chord":["B♭","","B♭7",""]},{"chord":["E♭","","E°",""]},{"chord":["B♭","","",""]},{"chord":["B°","break","",""]},{"chord":["break","","",""]},{"chord":["C7","","F7",""]},{"chord":["B♭","","",""],"ending":"1","hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["B♭","","B♭7",""],"ending":"2"}]]},{"type":"part","name":"B","lines":[[{"chord":["E♭","","break",""]},{"chord":["G7","","break",""]},{"chord":["A♭","","break",""]},{"chord":["E♭","","break",""]}]]}]
 
 	const abcIWish = `X:1
 M:4/4
@@ -280,7 +279,7 @@ P:C - Trio
 "G7"!diminuendo(!DFDF"C7"A2A!diminuendo)!F-|1"F"F6z2:|2"F"F6"^Bass Drum:""^Thump"!style=x!a2|"^Thump"!style=x!a !mp!!>!_A3F2z2|]
 `
 
-	const expectedIWish = [{"type":"part","name":"C - Trio","lines":[[{"chord":["C7","","",""]},{"chord":["","","",""]},{"chord":["F","","",""]},{"chord":["","","",""]},{"chord":["C7","","",""]},{"chord":["","","",""]},{"chord":["C7","break","",""],"annotations":["Trombone"]},{"chord":["","","",""],"annotations":["All"]}],[{"chord":["C7","","",""]},{"chord":["","","",""]},{"chord":["F","","",""]},{"chord":["F","","","F7"]},{"chord":["B♭","","Bº",""]},{"chord":["F/C","","D7",""]},{"chord":["G7","","C7",""]},{"chord":["F","","D7",""]}],[{"chord":["G7","","C7",""]},{"chord":["F","","",""],"ending":"1","hasEndRepeat":true}],[{"chord":["F","","",""],"annotations":["Bass Drum:\nThump"],"ending":"2"},{"chord":["","","",""],"annotations":["Thump"]}]]}]
+	const expectedIWish = [{"type":"part","name":"C - Trio","lines":[[{"chord":["C7","","",""]},{"chord":["%","","",""]},{"chord":["F","","",""]},{"chord":["%","","",""]},{"chord":["C7","","",""]},{"chord":["%","","",""]},{"chord":["C7","break","",""],"annotations":["Trombone"]},{"chord":["break","","",""],"annotations":["All"]}],[{"chord":["C7","","",""]},{"chord":["%","","",""]},{"chord":["F","","",""]},{"chord":["F","","","F7"]},{"chord":["B♭","","Bº",""]},{"chord":["F/C","","D7",""]},{"chord":["G7","","C7",""]},{"chord":["F","","D7",""]}],[{"chord":["G7","","C7",""]},{"chord":["F","","",""],"ending":"1","hasEndRepeat":true}],[{"chord":["F","","",""],"annotations":["Bass Drum:\nThump"],"ending":"2"},{"chord":["%","","",""],"annotations":["Thump"]}]]}]
 
 	const abcIve =  `X:12
 L:1/8
@@ -293,7 +292,7 @@ P:Recitatif
 |:"G"z2g2fe3|"G°7"z2g2fe3|"Am"z2gf- fge2|"D7"B4A4|
 |1"Am"z2ge- ege2|"D7"B3A- ABc2|"G"d8-|"C"d4-"D7"d4:|2"Em"z2GG- GAB2|e8|"Am"z2AA- ABc2|"D7"d8||
 `
-	const expectedIve = [{"type":"part","name":"Recitatif","lines":[[{"chord":["G","","",""],"hasStartRepeat":true},{"chord":["G°7","","",""]},{"chord":["Am","","",""]},{"chord":["D7","","",""]},{"chord":["Am","","",""],"ending":"1"},{"chord":["D7","","",""]},{"chord":["G","","",""]},{"chord":["C","","D7",""],"hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["Em","","",""],"ending":"2"},{"chord":["","","",""]},{"chord":["Am","","",""]},{"chord":["D7","","",""]}]]}]
+	const expectedIve = [{"type":"part","name":"Recitatif","lines":[[{"chord":["G","","",""],"hasStartRepeat":true},{"chord":["G°7","","",""]},{"chord":["Am","","",""]},{"chord":["D7","","",""]},{"chord":["Am","","",""],"ending":"1"},{"chord":["D7","","",""]},{"chord":["G","","",""]},{"chord":["C","","D7",""],"hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["Em","","",""],"ending":"2"},{"chord":["%","","",""]},{"chord":["Am","","",""]},{"chord":["D7","","",""]}]]}]
 
 	const abcMinnie = `X: 1
 M:C
@@ -397,5 +396,6 @@ function parserTest(abc, expected) {
 	} else
 		warningEl.innerText = ''
 	var grid = visualObj[0].chordGrid
+	console.log(JSON.stringify(grid))
 	chai.assert.deepEqual(grid, expected)
 }

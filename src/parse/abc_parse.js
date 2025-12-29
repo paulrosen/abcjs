@@ -602,7 +602,7 @@ var Parse = function() {
 			} catch(err) {
 				switch (err.message) {
 					case "notCommonTime":
-						warn("Chord grid only works for 4/4 time.", 0,0)
+						warn("Chord grid only works for 2/2 and 4/4 time.", 0,0)
 						break;
 					case "noChords":
 						warn("No chords are found in the tune.", 0,0)
