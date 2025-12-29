@@ -21,24 +21,32 @@
 
 function chordGrid(visualObj) {
 	const meter = visualObj.getMeterFraction()
-	if (meter.num !== 4 || meter.den !== 4)
+	const isCommonTime = meter.num === 4 && meter.den === 4
+	const isCutTime = meter.num === 2 && meter.den === 2
+	if (!isCutTime && !isCommonTime)
 		throw new Error("notCommonTime")
 	const deline = visualObj.deline()
 
 	let chartLines = []
 
+	let nonSubtitle = false
 	deline.forEach(section => {
 		if (section.subtitle) {
-			chartLines.push({
-				type: "subtitle",
-				subtitle: section.subtitle.text
-			});
+			if (nonSubtitle) {
+				// Don't do the subtitle if the first thing is the subtitle, but that is already printed on the top
+				chartLines.push({
+					type: "subtitle",
+					subtitle: section.subtitle.text
+				});
+			}
 		} else if (section.text) {
+			nonSubtitle = true
 			chartLines.push({
 				type: "text",
 				text: section.text.text
 			})
 		} else if (section.staff) {
+			nonSubtitle = true
 			// The first staff and the first voice in it drive everything.
 			// Only part designations there will count. However, look for
 			// chords in any other part. If there is not a chord defined in
@@ -55,6 +63,8 @@ function chordGrid(visualObj) {
 	return chartLines
 
 }
+
+const breakSynonyms = ['break', '(break)', 'no chord', 'n.c.', 'tacet'];
 
 function flattenVoices(staves) {
 	const parts = []
@@ -86,11 +96,20 @@ function flattenVoices(staves) {
 						}
 						partName = element.title
 					} else if (element.el_type === 'note') {
-						const intBeat = Math.floor(beatNum)
 						if (element.decoration) {
+							// Some decorations are interesting to rhythm players
 							for (let i = 0; i < element.decoration.length; i++) {
 								switch (element.decoration[i]) {
 									case 'fermata':
+									case 'segno':
+									case 'coda':
+									case "D.C.":
+									case "D.S.":
+									case "D.C.alcoda":
+									case "D.C.alfine":
+									case "D.S.alcoda":
+									case "D.S.alfine":
+									case "fine":
 										if (!currentBar.annotations)
 											currentBar.annotations = []
 										currentBar.annotations.push(element.decoration[i])
@@ -98,9 +117,10 @@ function flattenVoices(staves) {
 								}
 							}
 						}
+						const intBeat = Math.floor(beatNum)
 						if (element.chord && element.chord.length > 0) {
 							const chord = element.chord[0]
-							const chordName = chord.position === 'default' || chord.name === "N.C." || chord.name === 'break' ? chord.name : ''
+							const chordName = chord.position === 'default' || breakSynonyms.indexOf(chord.name.toLowerCase()) >= 0 ? chord.name : ''
 							if (chordName) {
 								lastChord = chordName
 								if (currentBar.chord[intBeat]) {
@@ -116,12 +136,14 @@ function flattenVoices(staves) {
 								currentBar.annotations.push(chord.name)
 							}
 						}
-						const thisDuration = Math.floor(element.duration * 4)
-						if (thisDuration > 4) {
-							measureNum += Math.floor(thisDuration / 4)
-							beatNum = 0
-						} else
-							beatNum += element.duration * 4
+						if (!element.rest || element.rest.type !== 'spacer') {
+							const thisDuration = Math.floor(element.duration * 4)
+							if (thisDuration > 4) {
+								measureNum += Math.floor(thisDuration / 4)
+								beatNum = 0
+							} else
+								beatNum += element.duration * 4
+						}
 					} else if (element.el_type === 'bar') {
 						if (nextBarEnding) {
 							currentBar.ending = nextBarEnding
@@ -166,6 +188,9 @@ function flattenVoices(staves) {
 						} else
 							currentBar.chord = ['', '', '', '']
 						beatNum = 0
+					} else {
+						// TODO-PER: see if there are other things to handle
+						console.log(element)
 					}
 				})
 				if (staffNum === 0 && voiceNum === 0) {
@@ -197,10 +222,10 @@ function collapseIdenticalEndings(chartLines) {
 		if (line.type === "part") {
 			const partLine = line.lines[0]
 			const ending1 = partLine.findIndex(bar => {
-				return bar.ending === '1'
+				return !!bar.ending
 			})
-			const ending2 = partLine.findIndex(bar => {
-				return bar.ending === '2'
+			const ending2 = partLine.findIndex((bar, index) => {
+				return index > ending1 && !!bar.ending
 			})
 			if (ending1 >= 0 && ending2 >= 0) {
 				// If the endings are not the same length, don't collapse
@@ -248,16 +273,29 @@ function addLineBreaks(chartLines) {
 			const newLines = []
 			const oldLines = line.lines[0]
 			let is12bar = false
-			if (oldLines.length === 12 || (oldLines.length >= 12 && oldLines[11].hasEndRepeat))
+			const firstEndRepeat = oldLines.findIndex(l => {
+				return !!l.hasEndRepeat
+			})
+			const length = firstEndRepeat >= 0 ? Math.min(firstEndRepeat+1,oldLines.length) : oldLines.length
+			if (length === 12)
 				is12bar = true
 			const barsPerLine = is12bar ? 4 : 8 // Only do 4 bars per line for 12-bar blues
 			for (let i = 0; i < oldLines.length; i += barsPerLine) {
-				newLines.push(oldLines.slice(i, i + barsPerLine))
+				const newLine = oldLines.slice(i, i + barsPerLine)
+				const endRepeat = newLine.findIndex(l => {
+					return !!l.hasEndRepeat
+				})
+				if (endRepeat >= 0 && endRepeat < newLine.length-1) {
+					newLines.push(newLine.slice(0, endRepeat+1))
+					newLines.push(newLine.slice(endRepeat+1))
+				} else
+					newLines.push(newLine)
 			}
 			// TODO-PER: The following probably doesn't handle all cases. Rethink it.
 			for (let i = 0; i < newLines.length; i++) {
 				if (newLines[i][0].ending) {
-					const toAdd = newLines[0].length - newLines[i].length
+					const prevLine = Math.max(0, i-1)
+					const toAdd = newLines[prevLine].length - newLines[i].length
 					const thisLine = []
 					for (let j = 0; j < toAdd; j++)
 						thisLine.push({noBorder: true, chord: ['', '', '', '']})

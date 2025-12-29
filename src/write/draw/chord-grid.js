@@ -77,7 +77,7 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 								}
 								drawMeasure(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum, measure.chord, chordFont)
 								if (measure.annotations && measure.annotations.length > 0) {
-									drawAnnotations(renderer, renderer.y, leftMargin + barNum * colWidth, measure.annotations)
+									drawAnnotations(renderer, renderer.y + lineNum * ROW_HEIGHT, leftMargin + barNum * colWidth, measure.annotations)
 								}
 							}
 						})
@@ -114,12 +114,20 @@ function drawRepeat(renderer, x, y1, y2, isStart) {
 	renderer.paper.rect({x:circleX,y:y1 + height*2,width:2,height:2})
 }
 
+const symbols = {
+	'segno': "scripts.segno",
+	'coda': "scripts.coda",
+	"fermata": "scripts.ufermata",
+}
+
 function drawAnnotations(renderer, offset, left, annotations) {
 	let el
 	for (let a = 0; a < annotations.length; a++) {
 		switch (annotations[a]) {
+			case 'segno':
+			case 'coda':
 			case "fermata":
-				el = printSymbol(renderer, left, 0, "scripts.ufermata", {
+				el = printSymbol(renderer, left, 0, symbols[annotations[a]], {
 					scalex: 1,
 					scaley: 1,
 					//klass: renderer.controller.classes.generate(klass),
@@ -129,7 +137,7 @@ function drawAnnotations(renderer, offset, left, annotations) {
 			default:
 				renderText(renderer, {
 					x: left,
-					y: renderer.y,
+					y: offset,
 					text: annotations[a],
 					"text-anchor":"start",
 					type: {face: "Times New Roman", size: 16, style: "normal", weight: "normal", decoration: "none"},
