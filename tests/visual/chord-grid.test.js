@@ -304,7 +304,7 @@ K:Em
 P:Intro
 "Em"E2G2|B4"B7"A2G2|"Em"AB- BzE2G2|B4"B7"A2GE-|"Em"E2z2E2G2|
 `
-	const expectedMinnie = []
+	const expectedMinnie = [{"type":"part","name":"Intro","lines":[[{"chord":["Em","","B7",""]},{"chord":["Em","","",""]},{"chord":["Em","","B7",""]},{"chord":["Em","","",""]}]]}]
 
 	////////////////////////////////////
 

@@ -122,6 +122,8 @@ function flattenVoices(staves) {
 							const chord = element.chord[0]
 							const chordName = chord.position === 'default' || breakSynonyms.indexOf(chord.name.toLowerCase()) >= 0 ? chord.name : ''
 							if (chordName) {
+								if (intBeat > 0 && !currentBar.chord[0]) // Be sure there is a chord for the first beat in a measure
+									currentBar.chord[0] = lastChord
 								lastChord = chordName
 								if (currentBar.chord[intBeat]) {
 									// If there is already a chord on this beat put the next chord on the next beat, but don't overwrite anything.
