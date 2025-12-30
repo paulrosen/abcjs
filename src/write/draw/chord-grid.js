@@ -60,10 +60,16 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 							if (!measure.noBorder) {
 								renderer.paper.rect({x: leftMargin + barNum * colWidth, y: renderer.y + lineNum * ROW_HEIGHT, width: colWidth, height: ROW_HEIGHT})
 								renderer.paper.rect({x: leftMargin + barNum * colWidth + RECT_WIDTH, y: renderer.y + lineNum * ROW_HEIGHT + RECT_WIDTH, width: colWidth - RECT_WIDTH * 2, height: ROW_HEIGHT - RECT_WIDTH * 2})
-								if (measure.hasStartRepeat)
+								let repeatLeft = 0
+								let repeatRight = 0
+								if (measure.hasStartRepeat) {
 									drawStartRepeat(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum)
-								if (measure.hasEndRepeat)
+									repeatLeft = 12
+								}
+								if (measure.hasEndRepeat) {
 									drawEndRepeat(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum)
+									repeatRight = 12
+								}
 
 								if (measure.ending) {
 									renderText(renderer, {
@@ -74,7 +80,7 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 										type: {face: "Arial, sans-serif", size: 12, style: "normal", weight: "normal", decoration: "none"},
 									})
 								}
-								drawMeasure(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum, measure.chord, chordFont)
+								drawMeasure(renderer, renderer.y, leftMargin+repeatLeft, colWidth, lineNum, barNum, measure.chord, chordFont, repeatLeft+repeatRight)
 								if (measure.annotations && measure.annotations.length > 0) {
 									drawAnnotations(renderer, renderer.y + lineNum * ROW_HEIGHT, leftMargin + barNum * colWidth, measure.annotations)
 								}
@@ -159,19 +165,19 @@ function drawAnnotations(renderer, offset, left, annotations) {
 
 }
 
-function drawMeasure(renderer, offset, leftMargin, colWidth, lineNum, barNum, chords, chordFont) {
+function drawMeasure(renderer, offset, leftMargin, colWidth, lineNum, barNum, chords, chordFont, margin) {
 	const left = leftMargin + colWidth * barNum
 	const top = offset + lineNum * ROW_HEIGHT
 	const family = chordFont ? chordFont.face : textStyle['font-family']
 	if (!chords[1] && !chords[2] && !chords[3])
-		drawSingleChord(renderer, left, top, colWidth, ROW_HEIGHT, chords[0], family)
+		drawSingleChord(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords[0], family)
 	else if (!chords[1] && !chords[3])
-		drawTwoChords(renderer, left, top, colWidth, ROW_HEIGHT, chords[0], chords[2], family)
+		drawTwoChords(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords[0], chords[2], family)
 	else
-		drawFourChords(renderer, left, top, colWidth, ROW_HEIGHT, chords, family)
+		drawFourChords(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords, family)
 }
 
-function renderChord(renderer, x, y, size, chord, family) {
+function renderChord(renderer, x, y, size, chord, family, maxWidth) {
 	const attr = Object.assign({}, textStyle, {
 		x: x,
 		y: y,
@@ -180,17 +186,29 @@ function renderChord(renderer, x, y, size, chord, family) {
 		"text-anchor": "middle",
 		"class": "abcjs-chord"
 	})
-	renderer.paper.text(chord, attr, null, {"alignment-baseline": "middle"})
+	const el = renderer.paper.text(chord, attr, null, {"alignment-baseline": "middle"})
+	let bb = el.getBBox()
+	let fontSize = size
+	while (bb.width > maxWidth && fontSize >= 16) {
+		fontSize -= 2
+		el.setAttribute('font-size', fontSize)
+		bb = el.getBBox()
+	}
+
 }
 
+const MAX_ONE_CHORD = 34
+const MAX_TWO_CHORDS = 26
+const MAX_FOUR_CHORDS = 20
+
 function drawSingleChord(renderer, left, top, width, height, chord, family) {
-	renderChord(renderer, left+width/2, top+height/2, 24, chord, family)
+	renderChord(renderer, left+width/2, top+height/2, MAX_ONE_CHORD, chord, family, width)
 }
 
 function drawTwoChords(renderer, left, top, width, height, chord1, chord2, family) {
 	renderer.paper.lineToBack({x1: left, x2: left+width, y1: top+height, y2: top })
-	renderChord(renderer, left+width/4, top+height/4, 18, chord1, family)
-	renderChord(renderer, left+3*width/4, top+3*height/4, 18, chord2, family)
+	renderChord(renderer, left+width/4, top+height/4+5, MAX_TWO_CHORDS, chord1, family, width/2)
+	renderChord(renderer, left+3*width/4, top+3*height/4, MAX_TWO_CHORDS, chord2, family, width/2)
 }
 
 function drawFourChords(renderer, left, top, width, height, chords, family) {
@@ -199,13 +217,13 @@ function drawFourChords(renderer, left, top, width, height, chords, family) {
 	renderer.paper.lineToBack({x1: left+width/2, x2: left+width/2, y1: top+MARGIN, y2: top+height-MARGIN })
 
 	if (chords[0])
-		renderChord(renderer, left+width/4, top+height/4, 15, chords[0], family)
+		renderChord(renderer, left+width/4, top+height/4+2, MAX_FOUR_CHORDS, chords[0], family, width / 2)
 	if (chords[1])
-		renderChord(renderer, left+3*width/4, top+height/4, 15, chords[1], family)
+		renderChord(renderer, left+3*width/4, top+height/4+2, MAX_FOUR_CHORDS, chords[1], family, width / 2)
 	if (chords[2])
-		renderChord(renderer, left+width/4, top+3*height/4, 15, chords[2], family)
+		renderChord(renderer, left+width/4, top+3*height/4, MAX_FOUR_CHORDS, chords[2], family, width / 2)
 	if (chords[3])
-		renderChord(renderer, left+3*width/4, top+3*height/4, 15, chords[3], family)
+		renderChord(renderer, left+3*width/4, top+3*height/4, MAX_FOUR_CHORDS, chords[3], family, width / 2)
 }
 
 module.exports = drawChordGrid
