@@ -179,6 +179,10 @@ Renderer.prototype.calcY = function (ofs) {
 	return this.y - ofs * spacing.STEP;
 };
 
+Renderer.prototype.yToPitch = function (ofs) {
+	return ofs / spacing.STEP;
+};
+
 Renderer.prototype.moveY = function (em, numLines) {
 	if (numLines === undefined) numLines = 1;
 	this.y += em * numLines;

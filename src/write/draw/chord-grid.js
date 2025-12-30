@@ -1,5 +1,6 @@
 const renderText = require("./text")
 const printSymbol = require("./print-symbol");
+const printStem = require("./print-stem");
 
 const svgNS = "http://www.w3.org/2000/svg";
 
@@ -17,8 +18,6 @@ const textStyle = {
 	'font-weight':"normal",
 	'text-decoration':"none",
 }
-
-// TODO: Handle `noBorder` and `ending` attributes
 
 function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 	parts.forEach(part => {
@@ -72,7 +71,7 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 										y: renderer.y + lineNum * ROW_HEIGHT,
 										text: measure.ending,
 										"text-anchor": "start",
-										type: {face: "Arial, sans-serif", size: 16, style: "normal", weight: "normal", decoration: "none"},
+										type: {face: "Arial, sans-serif", size: 12, style: "normal", weight: "normal", decoration: "none"},
 									})
 								}
 								drawMeasure(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum, measure.chord, chordFont)
@@ -92,26 +91,35 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 function drawStartRepeat(renderer, offset, leftMargin, colWidth, lineNum, barNum) {
 	const left = leftMargin + colWidth * barNum
 	const top = offset + lineNum * ROW_HEIGHT
-	return drawRepeat(renderer, left, top, top+ROW_HEIGHT, true)
+	return drawRepeat(renderer, left, top, top+ROW_HEIGHT, true, renderer.yToPitch(lineNum * ROW_HEIGHT))
 }
 function drawEndRepeat(renderer, offset, leftMargin, colWidth, lineNum, barNum) {
 	const left = leftMargin + colWidth * barNum
 	const top = offset + lineNum * ROW_HEIGHT
-	return drawRepeat(renderer, left+colWidth, top, top+ROW_HEIGHT, false)
+	return drawRepeat(renderer, left+colWidth, top, top+ROW_HEIGHT, false, lineNum * ROW_HEIGHT)
 }
 
-function drawRepeat(renderer, x, y1, y2, isStart) {
-	// TODO-:PER: Make this prettier
-	const height = (y2 - y1) / 3
-	const lineX = isStart ? x+2 : x-2.5
-	const lineX2 = isStart ? x+4 : x-3.5
-	const circleX = isStart ? x+11 : x-10
+function drawRepeat(renderer, x, y1, y2, isStart, offset) {
+	const lineX = isStart ? x+2 : x-4
+	const circleX = isStart ? x+9 : x-11
 
-	renderer.paper.rect({x:lineX,y:y1+1,width:2,height:ROW_HEIGHT})
-	renderer.paper.rect({x:lineX2,y:y1+1,width:2,height:ROW_HEIGHT-2})
+	renderer.paper.openGroup({klass:'abcjs-repeat'})
+	printStem(renderer, lineX, 3 + renderer.lineThickness, y1, y2, null, "bar")
 
-	renderer.paper.rect({x:circleX,y:y1 + height,width:2,height:2})
-	renderer.paper.rect({x:circleX,y:y1 + height*2,width:2,height:2})
+	printSymbol(renderer, circleX, - renderer.yToPitch(offset) - 4, "dots.dot", {
+		scalex: 1,
+		scaley: 1,
+		klass: "",
+		name: "dot"
+	});
+
+	printSymbol(renderer, circleX, - renderer.yToPitch(offset) - 8, "dots.dot", {
+		scalex: 1,
+		scaley: 1,
+		klass: "",
+		name: "dot"
+	});
+	renderer.paper.closeGroup()
 }
 
 const symbols = {
@@ -126,21 +134,25 @@ function drawAnnotations(renderer, offset, left, annotations) {
 		switch (annotations[a]) {
 			case 'segno':
 			case 'coda':
-			case "fermata":
-				el = printSymbol(renderer, left, 0, symbols[annotations[a]], {
+			case "fermata": {
+				left += 12
+				el = printSymbol(renderer, left, 2, symbols[annotations[a]], {
 					scalex: 1,
 					scaley: 1,
 					//klass: renderer.controller.classes.generate(klass),
-					name: "scripts.ufermata"
+					name: symbols[annotations[a]]
 				});
+				const box = el.getBBox()
+				left += box.width
+			}
 				break;
 			default:
 				renderText(renderer, {
 					x: left,
-					y: offset,
+					y: offset - 22,
 					text: annotations[a],
 					"text-anchor":"start",
-					type: {face: "Times New Roman", size: 16, style: "normal", weight: "normal", decoration: "none"},
+					type: {face: "Times New Roman", size: 12, style: "normal", weight: "normal", decoration: "none"},
 				})
 		}
 	}
