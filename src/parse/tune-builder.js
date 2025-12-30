@@ -549,7 +549,7 @@ function resolveOverlays(tune) {
 						} else if (event.el_type === "note") {
 							if (inOverlay) {
 								overlayVoice[k].voice.push(event);
-							} else {
+							} else if (!event.rest || event.rest.type !== 'spacer') {
 								durationThisBar += event.duration;
 								durationsPerLines[i] += event.duration;
 							}

@@ -97,30 +97,10 @@ function flattenVoices(staves) {
 						}
 						partName = element.title
 					} else if (element.el_type === 'note') {
-						if (element.decoration) {
-							// Some decorations are interesting to rhythm players
-							for (let i = 0; i < element.decoration.length; i++) {
-								switch (element.decoration[i]) {
-									case 'fermata':
-									case 'segno':
-									case 'coda':
-									case "D.C.":
-									case "D.S.":
-									case "D.C.alcoda":
-									case "D.C.alfine":
-									case "D.S.alcoda":
-									case "D.S.alfine":
-									case "fine":
-										if (!currentBar.annotations)
-											currentBar.annotations = []
-										currentBar.annotations.push(element.decoration[i])
-										break;
-								}
-							}
-						}
+						addDecoration(element, currentBar)
 						const intBeat = Math.floor(beatNum)
 						if (element.chord && element.chord.length > 0) {
-							const chord = element.chord[0]
+							const chord = element.chord[0] // Use just the first chord specified - if there are multiple ones, then ignore them
 							const chordName = chord.position === 'default' || breakSynonyms.indexOf(chord.name.toLowerCase()) >= 0 ? chord.name : ''
 							if (chordName) {
 								if (intBeat > 0 && !currentBar.chord[0]) // Be sure there is a chord for the first beat in a measure
@@ -133,25 +113,33 @@ function flattenVoices(staves) {
 										currentBar.chord[intBeat + 1] = chordName
 								} else
 									currentBar.chord[intBeat] = chordName
-							} else {
-								if (!currentBar.annotations)
-									currentBar.annotations = []
-								currentBar.annotations.push(chord.name)
 							}
+							element.chord.forEach(ch => {
+								if (ch.position !== 'default' && breakSynonyms.indexOf(chord.name.toLowerCase()) < 0){
+									if (!currentBar.annotations)
+										currentBar.annotations = []
+									currentBar.annotations.push(ch.name)
+								}
+							})
 						}
 						if (!element.rest || element.rest.type !== 'spacer') {
 							const thisDuration = Math.floor(element.duration * 4)
 							if (thisDuration > 4) {
 								measureNum += Math.floor(thisDuration / 4)
 								beatNum = 0
-							} else
-								beatNum += element.duration * 4
+							} else {
+								let thisBeat = element.duration * 4
+								if (element.tripletMultiplier)
+									thisBeat *= element.tripletMultiplier
+								beatNum += thisBeat
+							}
 						}
 					} else if (element.el_type === 'bar') {
 						if (nextBarEnding) {
 							currentBar.ending = nextBarEnding
 							nextBarEnding = ""
 						}
+						addDecoration(element, currentBar)
 						if (element.type === 'bar_dbl_repeat' || element.type === 'bar_left_repeat')
 							currentBar.hasStartRepeat = true
 						if (element.type === 'bar_dbl_repeat' || element.type === 'bar_right_repeat')
@@ -199,9 +187,8 @@ function flattenVoices(staves) {
 						} else
 							currentBar.chord = ['', '', '', '']
 						beatNum = 0
-					} else {
-						// TODO-PER: see if there are other things to handle
-						console.log(element)
+					} else if (element.el_type === 'tempo') {
+						// TODO-PER: should probably report tempo, too
 					}
 				})
 				if (staffNum === 0 && voiceNum === 0) {
@@ -329,10 +316,12 @@ function addPercents(chartLines) {
 						const chords = measure.chord
 						if (!chords[0] && !chords[1] && !chords[2] && !chords[3]) {
 							// if there are no chords specified for this measure
-							if (lastMeasureSingle)
-								chords[0] = '%'
-							else
+							if (lastMeasureSingle) {
+								if (lastChord)
+									chords[0] = '%'
+							} else
 								chords[0] = lastChord
+							lastMeasureSingle = true
 						} else if (!chords[1] && !chords[2] && !chords[3]) {
 							// if there is a single chord for this measure
 							lastMeasureSingle = true
@@ -349,4 +338,27 @@ function addPercents(chartLines) {
 	})
 }
 
+function addDecoration(element, currentBar) {
+	if (element.decoration) {
+		// Some decorations are interesting to rhythm players
+		for (let i = 0; i < element.decoration.length; i++) {
+			switch (element.decoration[i]) {
+				case 'fermata':
+				case 'segno':
+				case 'coda':
+				case "D.C.":
+				case "D.S.":
+				case "D.C.alcoda":
+				case "D.C.alfine":
+				case "D.S.alcoda":
+				case "D.S.alfine":
+				case "fine":
+					if (!currentBar.annotations)
+						currentBar.annotations = []
+					currentBar.annotations.push(element.decoration[i])
+					break;
+			}
+		}
+	}
+}
 module.exports = chordGrid

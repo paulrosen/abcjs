@@ -305,6 +305,39 @@ P:Intro
 `
 	const expectedMinnie = [{"type":"part","name":"Intro","lines":[[{"chord":["Em","","B7",""]},{"chord":["Em","","",""]},{"chord":["Em","","B7",""]},{"chord":["Em","","",""]}]]}]
 
+	const abcRoyal = `X: 1
+M: 4/4
+L: 1/8
+N: annotation on same note as a chord
+Q:1/4=170
+K: F
+P:C
+"F7""^Roll"F2F2GA3|"Bb""^Roll"F2F2GA3|"Bbm""^Roll"F2F2GA3|"F"!marcato!F2z2"F7"!marcato!F2z2||
+`
+
+	const expectedRoyal = [{"type":"part","name":"C","lines":[[{"chord":["F7","","",""],"annotations":["Roll"]},{"chord":["B♭","","",""],"annotations":["Roll"]},{"chord":["B♭m","","",""],"annotations":["Roll"]},{"chord":["F","","F7",""]}]]}]
+
+	const abcSugar = `X:1
+M:4/4
+L:1/8
+Q:1/4=133
+N:the decoration is on a bar line
+K:Bb
+P:Tag
+!coda!|"Bb"B8-|"G7"B8|"Cm7"G4"G7"G4|"Cm7"c^cdf- "F7"f=cd2|"Bb"B8-|Bzz2|]
+`
+	const expectedSugar = [{"type":"part","name":"Tag","lines":[[{"chord":["B♭","","",""],"annotations":["coda"]},{"chord":["G7","","",""]},{"chord":["Cm7","","G7",""]},{"chord":["Cm7","","F7",""]},{"chord":["B♭","","",""]}]]}]
+
+	const abcUnder = `X:1
+M:4/4
+L:1/8
+N:triplets mess up beat counting
+Q:1/4=86
+K:G
+"Am7"gege-e3E|"D7"BdB6| "G"(3A2G2F2 "Cm6"(3A2G2F2 | "G"G8|]
+`
+	const expectedUnder = [{"type":"part","name":"","lines":[[{"chord":["Am7","","",""]},{"chord":["D7","","",""]},{"chord":["G","","Cm6",""]},{"chord":["G","","",""]}]]}]
+
 	////////////////////////////////////
 
 	it("ace", function () {
@@ -381,6 +414,18 @@ P:Intro
 
 	it("minnie", function () {
 		parserTest(abcMinnie, expectedMinnie);
+	})
+
+	it("royal", function () {
+		parserTest(abcRoyal, expectedRoyal);
+	})
+
+	it("sugar", function () {
+		parserTest(abcSugar, expectedSugar);
+	})
+
+	it("under", function () {
+		parserTest(abcUnder, expectedUnder);
 	})
 
 })
