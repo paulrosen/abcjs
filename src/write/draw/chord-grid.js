@@ -9,48 +9,30 @@ const PART_MARGIN_TOP = 10
 const PART_MARGIN_BOTTOM = 20
 const TEXT_MARGIN = 16
 
-const textStyle = {
-	"text-anchor":"start",
-	stroke:"none",
-	'font-size':"20",
-	'font-style':"normal",
-	'font-family':"Times New Roman",
-	'font-weight':"normal",
-	'text-decoration':"none",
-}
+function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
+	const chordFont = fonts.gchordfont
+	const partFont = fonts.partsfont
+	const annotationFont = fonts.annotationfont
+	const endingFont = fonts.repeatfont
+	const textFont = fonts.textfont
+	const subtitleFont = fonts.subtitlefont
 
-function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 	parts.forEach(part => {
 		switch (part.type) {
 			case "text": {
-				renderText(renderer, {
-					x: leftMargin,
-					y: renderer.y,
-					text: part.text,
-					"text-anchor":"start",
-					type: {face: "Times New Roman", size: 16, style: "normal", weight: "normal", decoration: "none"},
-				})
+				text(renderer, part.text, leftMargin, renderer.y, 16, textFont, null, null, false )
 				renderer.moveY(TEXT_MARGIN)
 			}
 				break
 			case "subtitle": {
-				const attr = Object.assign({}, textStyle, {
-					x: leftMargin,
-					y: renderer.y+PART_MARGIN_TOP,
-					'data-name': 'abcjs-title'
-				})
-				renderer.paper.text(part.subtitle, attr, null, {"alignment-baseline": "middle"})
+				text(renderer, part.subtitle, leftMargin, renderer.y+PART_MARGIN_TOP, 20, subtitleFont, null, "abcjs-subtitle", false )
 				renderer.moveY(PART_MARGIN_BOTTOM)
 			}
 				break
 			case "part":
 				if (part.lines.length > 0) {
-					const attr = Object.assign({}, textStyle, {
-						x: leftMargin,
-						y: renderer.y+PART_MARGIN_TOP,
-						'data-name': part.name
-					})
-					renderer.paper.text(part.name, attr, null, {"alignment-baseline": "middle"})
+					text(renderer, part.name, leftMargin, renderer.y+PART_MARGIN_TOP, 20, subtitleFont, part.name, "abcjs-part", false )
+
 					renderer.moveY(PART_MARGIN_BOTTOM)
 					const numCols = part.lines[0].length
 					const colWidth = pageWidth / numCols
@@ -72,17 +54,11 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, chordFont) {
 								}
 
 								if (measure.ending) {
-									renderText(renderer, {
-										x: leftMargin + barNum * colWidth,
-										y: renderer.y + lineNum * ROW_HEIGHT,
-										text: measure.ending,
-										"text-anchor": "start",
-										type: {face: "Arial, sans-serif", size: 12, style: "normal", weight: "normal", decoration: "none"},
-									})
+									text(renderer, measure.ending, leftMargin + barNum * colWidth + 4, renderer.y + lineNum * ROW_HEIGHT + 10, 12, endingFont, null, null, false )
 								}
 								drawMeasure(renderer, renderer.y, leftMargin+repeatLeft, colWidth, lineNum, barNum, measure.chord, chordFont, repeatLeft+repeatRight)
 								if (measure.annotations && measure.annotations.length > 0) {
-									drawAnnotations(renderer, renderer.y + lineNum * ROW_HEIGHT, leftMargin + barNum * colWidth, measure.annotations)
+									drawAnnotations(renderer, renderer.y + lineNum * ROW_HEIGHT, leftMargin + barNum * colWidth, measure.annotations, annotationFont)
 								}
 							}
 						})
@@ -134,7 +110,7 @@ const symbols = {
 	"fermata": "scripts.ufermata",
 }
 
-function drawAnnotations(renderer, offset, left, annotations) {
+function drawAnnotations(renderer, offset, left, annotations, annotationFont) {
 	let el
 	for (let a = 0; a < annotations.length; a++) {
 		switch (annotations[a]) {
@@ -153,13 +129,7 @@ function drawAnnotations(renderer, offset, left, annotations) {
 			}
 				break;
 			default:
-				renderText(renderer, {
-					x: left,
-					y: offset - 22,
-					text: annotations[a],
-					"text-anchor":"start",
-					type: {face: "Times New Roman", size: 12, style: "normal", weight: "normal", decoration: "none"},
-				})
+				text(renderer, annotations[a], left, offset - 22, 12, annotationFont, null, null, false )
 		}
 	}
 
@@ -168,25 +138,16 @@ function drawAnnotations(renderer, offset, left, annotations) {
 function drawMeasure(renderer, offset, leftMargin, colWidth, lineNum, barNum, chords, chordFont, margin) {
 	const left = leftMargin + colWidth * barNum
 	const top = offset + lineNum * ROW_HEIGHT
-	const family = chordFont ? chordFont.face : textStyle['font-family']
 	if (!chords[1] && !chords[2] && !chords[3])
-		drawSingleChord(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords[0], family)
+		drawSingleChord(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords[0], chordFont)
 	else if (!chords[1] && !chords[3])
-		drawTwoChords(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords[0], chords[2], family)
+		drawTwoChords(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords[0], chords[2], chordFont)
 	else
-		drawFourChords(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords, family)
+		drawFourChords(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords, chordFont)
 }
 
-function renderChord(renderer, x, y, size, chord, family, maxWidth) {
-	const attr = Object.assign({}, textStyle, {
-		x: x,
-		y: y,
-		"font-family" : family,
-		"font-size": size,
-		"text-anchor": "middle",
-		"class": "abcjs-chord"
-	})
-	const el = renderer.paper.text(chord, attr, null, {"alignment-baseline": "middle"})
+function renderChord(renderer, x, y, size, chord, font, maxWidth) {
+	const el = text(renderer, chord, x, y, size, font, null, "abcjs-chord", true)
 	let bb = el.getBBox()
 	let fontSize = size
 	while (bb.width > maxWidth && fontSize >= 16) {
@@ -194,36 +155,55 @@ function renderChord(renderer, x, y, size, chord, family, maxWidth) {
 		el.setAttribute('font-size', fontSize)
 		bb = el.getBBox()
 	}
-
 }
 
 const MAX_ONE_CHORD = 34
 const MAX_TWO_CHORDS = 26
 const MAX_FOUR_CHORDS = 20
 
-function drawSingleChord(renderer, left, top, width, height, chord, family) {
-	renderChord(renderer, left+width/2, top+height/2, MAX_ONE_CHORD, chord, family, width)
+function drawSingleChord(renderer, left, top, width, height, chord, font) {
+	renderChord(renderer, left+width/2, top+height/2, MAX_ONE_CHORD, chord, font, width)
 }
 
-function drawTwoChords(renderer, left, top, width, height, chord1, chord2, family) {
+function drawTwoChords(renderer, left, top, width, height, chord1, chord2, font) {
 	renderer.paper.lineToBack({x1: left, x2: left+width, y1: top+height, y2: top })
-	renderChord(renderer, left+width/4, top+height/4+5, MAX_TWO_CHORDS, chord1, family, width/2)
-	renderChord(renderer, left+3*width/4, top+3*height/4, MAX_TWO_CHORDS, chord2, family, width/2)
+	renderChord(renderer, left+width/4, top+height/4+5, MAX_TWO_CHORDS, chord1, font, width/2)
+	renderChord(renderer, left+3*width/4, top+3*height/4, MAX_TWO_CHORDS, chord2, font, width/2)
 }
 
-function drawFourChords(renderer, left, top, width, height, chords, family) {
+function drawFourChords(renderer, left, top, width, height, chords, font) {
 	const MARGIN = 5
 	renderer.paper.lineToBack({x1: left+MARGIN, x2: left+width-MARGIN, y1: top+height/2, y2: top+height/2 })
 	renderer.paper.lineToBack({x1: left+width/2, x2: left+width/2, y1: top+MARGIN, y2: top+height-MARGIN })
 
 	if (chords[0])
-		renderChord(renderer, left+width/4, top+height/4+2, MAX_FOUR_CHORDS, chords[0], family, width / 2)
+		renderChord(renderer, left+width/4, top+height/4+2, MAX_FOUR_CHORDS, chords[0], font, width / 2)
 	if (chords[1])
-		renderChord(renderer, left+3*width/4, top+height/4+2, MAX_FOUR_CHORDS, chords[1], family, width / 2)
+		renderChord(renderer, left+3*width/4, top+height/4+2, MAX_FOUR_CHORDS, chords[1], font, width / 2)
 	if (chords[2])
-		renderChord(renderer, left+width/4, top+3*height/4, MAX_FOUR_CHORDS, chords[2], family, width / 2)
+		renderChord(renderer, left+width/4, top+3*height/4, MAX_FOUR_CHORDS, chords[2], font, width / 2)
 	if (chords[3])
-		renderChord(renderer, left+3*width/4, top+3*height/4, MAX_FOUR_CHORDS, chords[3], family, width / 2)
+		renderChord(renderer, left+3*width/4, top+3*height/4, MAX_FOUR_CHORDS, chords[3], font, width / 2)
+}
+
+function text(renderer, str, x, y, size, font, dataName, klass, alignCenter) {
+	const attr = {
+		x: x,
+		y: y,
+		stroke:"none",
+		'font-size':size,
+		'font-style':font.style,
+		'font-family':font.face,
+		'font-weight':font.weight,
+		'text-decoration':font.decoration,
+	}
+	if (dataName)
+		attr['data-name'] = dataName
+	if (klass)
+		attr['class'] = klass
+	attr["text-anchor"] = alignCenter ? "middle" : "start"
+
+	return renderer.paper.text(str, attr, null, {"alignment-baseline": "middle"})
 }
 
 module.exports = drawChordGrid

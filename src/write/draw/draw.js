@@ -18,7 +18,7 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 
 	let suppressMusic = false
 	if (chordGrid && abcTune.chordGrid) {
-		drawChordGrid(renderer, abcTune.chordGrid, renderer.padding.left, width, abcTune.formatting.gchordfont)
+		drawChordGrid(renderer, abcTune.chordGrid, renderer.padding.left, width, abcTune.formatting)
 		if (chordGrid === 'noMusic')
 			suppressMusic = true
 	}
