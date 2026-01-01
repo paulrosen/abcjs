@@ -63,12 +63,14 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
 									repeatRight = 12
 								}
 
+								let endingWidth = 0
 								if (measure.ending) {
-									text(renderer, measure.ending, leftMargin + barNum * colWidth + 4, top + 10, 12, endingFont, null, null, false )
+									const endingEl = text(renderer, measure.ending, leftMargin + barNum * colWidth + 4, top + 10, 12, endingFont, null, null, false )
+									endingWidth = endingEl.getBBox().width + 4
 								}
 								drawMeasure(renderer, top, leftMargin+repeatLeft, colWidth, lineNum, barNum, measure.chord, chordFont, repeatLeft+repeatRight, ROW_HEIGHT, extraTop)
 								if (measure.annotations && measure.annotations.length > 0) {
-									drawAnnotations(renderer, top, leftMargin + barNum * colWidth, measure.annotations, annotationFont)
+									drawAnnotations(renderer, top, leftMargin + barNum * colWidth +endingWidth, measure.annotations, annotationFont)
 								}
 							}
 						})
