@@ -1,13 +1,5 @@
-const renderText = require("./text")
 const printSymbol = require("./print-symbol");
 const printStem = require("./print-stem");
-
-const svgNS = "http://www.w3.org/2000/svg";
-
-const ROW_HEIGHT = 50
-const PART_MARGIN_TOP = 10
-const PART_MARGIN_BOTTOM = 20
-const TEXT_MARGIN = 16
 
 function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
 	const chordFont = fonts.gchordfont
@@ -16,6 +8,13 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
 	const endingFont = fonts.repeatfont
 	const textFont = fonts.textfont
 	const subtitleFont = fonts.subtitlefont
+
+	const ROW_HEIGHT = 50
+	const ENDING_HEIGHT = 10
+	const ANNOTATION_HEIGHT = 14
+	const PART_MARGIN_TOP = 10
+	const PART_MARGIN_BOTTOM = 20
+	const TEXT_MARGIN = 16
 
 	parts.forEach(part => {
 		switch (part.type) {
@@ -37,48 +36,49 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
 					const numCols = part.lines[0].length
 					const colWidth = pageWidth / numCols
 					part.lines.forEach((line, lineNum) => {
+						let hasEnding = false
+						let hasAnnotation = false
+						line.forEach(measure => {
+							if (measure.ending)
+								hasEnding = true
+							if (measure.annotations && measure.annotations.length > 0)
+								hasAnnotation = true
+						})
+						const extraTop = hasAnnotation ? ANNOTATION_HEIGHT : hasEnding ? ENDING_HEIGHT : 0
 						line.forEach((measure, barNum) => {
 							const RECT_WIDTH = 1
 							if (!measure.noBorder) {
-								renderer.paper.rect({x: leftMargin + barNum * colWidth, y: renderer.y + lineNum * ROW_HEIGHT, width: colWidth, height: ROW_HEIGHT})
-								renderer.paper.rect({x: leftMargin + barNum * colWidth + RECT_WIDTH, y: renderer.y + lineNum * ROW_HEIGHT + RECT_WIDTH, width: colWidth - RECT_WIDTH * 2, height: ROW_HEIGHT - RECT_WIDTH * 2})
+								renderer.paper.rect({x: leftMargin + barNum * colWidth, y: renderer.y, width: colWidth, height: extraTop + ROW_HEIGHT})
+								renderer.paper.rect({x: leftMargin + barNum * colWidth + RECT_WIDTH, y: renderer.y + RECT_WIDTH, width: colWidth - RECT_WIDTH * 2, height: extraTop + ROW_HEIGHT - RECT_WIDTH * 2})
 								let repeatLeft = 0
 								let repeatRight = 0
+								const top = renderer.y
+								const left = leftMargin + colWidth * barNum
 								if (measure.hasStartRepeat) {
-									drawStartRepeat(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum)
+									drawRepeat(renderer, left, top, top+ROW_HEIGHT+extraTop, true, extraTop)
 									repeatLeft = 12
 								}
 								if (measure.hasEndRepeat) {
-									drawEndRepeat(renderer, renderer.y, leftMargin, colWidth, lineNum, barNum)
+									drawRepeat(renderer, left+colWidth, top, top+ROW_HEIGHT+extraTop, false, extraTop)
 									repeatRight = 12
 								}
 
 								if (measure.ending) {
-									text(renderer, measure.ending, leftMargin + barNum * colWidth + 4, renderer.y + lineNum * ROW_HEIGHT + 10, 12, endingFont, null, null, false )
+									text(renderer, measure.ending, leftMargin + barNum * colWidth + 4, top + 10, 12, endingFont, null, null, false )
 								}
-								drawMeasure(renderer, renderer.y, leftMargin+repeatLeft, colWidth, lineNum, barNum, measure.chord, chordFont, repeatLeft+repeatRight)
+								drawMeasure(renderer, top, leftMargin+repeatLeft, colWidth, lineNum, barNum, measure.chord, chordFont, repeatLeft+repeatRight, ROW_HEIGHT, extraTop)
 								if (measure.annotations && measure.annotations.length > 0) {
-									drawAnnotations(renderer, renderer.y + lineNum * ROW_HEIGHT, leftMargin + barNum * colWidth, measure.annotations, annotationFont)
+									drawAnnotations(renderer, top, leftMargin + barNum * colWidth, measure.annotations, annotationFont)
 								}
 							}
 						})
+						renderer.moveY(extraTop + ROW_HEIGHT)
 					})
-					renderer.moveY(ROW_HEIGHT * part.lines.length + PART_MARGIN_BOTTOM)
+					renderer.moveY(PART_MARGIN_BOTTOM)
 				}
 				break;
 		}
 	})
-}
-
-function drawStartRepeat(renderer, offset, leftMargin, colWidth, lineNum, barNum) {
-	const left = leftMargin + colWidth * barNum
-	const top = offset + lineNum * ROW_HEIGHT
-	return drawRepeat(renderer, left, top, top+ROW_HEIGHT, true, renderer.yToPitch(lineNum * ROW_HEIGHT))
-}
-function drawEndRepeat(renderer, offset, leftMargin, colWidth, lineNum, barNum) {
-	const left = leftMargin + colWidth * barNum
-	const top = offset + lineNum * ROW_HEIGHT
-	return drawRepeat(renderer, left+colWidth, top, top+ROW_HEIGHT, false, lineNum * ROW_HEIGHT)
 }
 
 function drawRepeat(renderer, x, y1, y2, isStart, offset) {
@@ -88,14 +88,14 @@ function drawRepeat(renderer, x, y1, y2, isStart, offset) {
 	renderer.paper.openGroup({klass:'abcjs-repeat'})
 	printStem(renderer, lineX, 3 + renderer.lineThickness, y1, y2, null, "bar")
 
-	printSymbol(renderer, circleX, - renderer.yToPitch(offset) - 4, "dots.dot", {
+	printSymbol(renderer, circleX, -renderer.yToPitch(offset)-4, "dots.dot", {
 		scalex: 1,
 		scaley: 1,
 		klass: "",
 		name: "dot"
 	});
 
-	printSymbol(renderer, circleX, - renderer.yToPitch(offset) - 8, "dots.dot", {
+	printSymbol(renderer, circleX, -renderer.yToPitch(offset)-8, "dots.dot", {
 		scalex: 1,
 		scaley: 1,
 		klass: "",
@@ -111,6 +111,7 @@ const symbols = {
 }
 
 function drawAnnotations(renderer, offset, left, annotations, annotationFont) {
+	left += 3
 	let el
 	for (let a = 0; a < annotations.length; a++) {
 		switch (annotations[a]) {
@@ -118,7 +119,7 @@ function drawAnnotations(renderer, offset, left, annotations, annotationFont) {
 			case 'coda':
 			case "fermata": {
 				left += 12
-				el = printSymbol(renderer, left, 2, symbols[annotations[a]], {
+				el = printSymbol(renderer, left, -3, symbols[annotations[a]], {
 					scalex: 1,
 					scaley: 1,
 					//klass: renderer.controller.classes.generate(klass),
@@ -129,21 +130,20 @@ function drawAnnotations(renderer, offset, left, annotations, annotationFont) {
 			}
 				break;
 			default:
-				text(renderer, annotations[a], left, offset - 22, 12, annotationFont, null, null, false )
+				text(renderer, annotations[a], left, offset + 12, 12, annotationFont, null, null, false )
 		}
 	}
 
 }
 
-function drawMeasure(renderer, offset, leftMargin, colWidth, lineNum, barNum, chords, chordFont, margin) {
+function drawMeasure(renderer, offset, leftMargin, colWidth, lineNum, barNum, chords, chordFont, margin, height, extraTop) {
 	const left = leftMargin + colWidth * barNum
-	const top = offset + lineNum * ROW_HEIGHT
 	if (!chords[1] && !chords[2] && !chords[3])
-		drawSingleChord(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords[0], chordFont)
+		drawSingleChord(renderer, left, offset+extraTop, colWidth-margin, height, chords[0], chordFont)
 	else if (!chords[1] && !chords[3])
-		drawTwoChords(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords[0], chords[2], chordFont)
+		drawTwoChords(renderer, left, offset, colWidth-margin, height, chords[0], chords[2], chordFont, extraTop)
 	else
-		drawFourChords(renderer, left, top, colWidth-margin, ROW_HEIGHT, chords, chordFont)
+		drawFourChords(renderer, left, offset, colWidth-margin, height, chords, chordFont, extraTop)
 }
 
 function renderChord(renderer, x, y, size, chord, font, maxWidth) {
@@ -165,25 +165,25 @@ function drawSingleChord(renderer, left, top, width, height, chord, font) {
 	renderChord(renderer, left+width/2, top+height/2, MAX_ONE_CHORD, chord, font, width)
 }
 
-function drawTwoChords(renderer, left, top, width, height, chord1, chord2, font) {
-	renderer.paper.lineToBack({x1: left, x2: left+width, y1: top+height, y2: top })
-	renderChord(renderer, left+width/4, top+height/4+5, MAX_TWO_CHORDS, chord1, font, width/2)
-	renderChord(renderer, left+3*width/4, top+3*height/4, MAX_TWO_CHORDS, chord2, font, width/2)
+function drawTwoChords(renderer, left, top, width, height, chord1, chord2, font, extraTop) {
+	renderer.paper.lineToBack({x1: left, x2: left+width, y1: top+height+extraTop, y2: top })
+	renderChord(renderer, left+width/4, top+height/4+5+extraTop, MAX_TWO_CHORDS, chord1, font, width/2)
+	renderChord(renderer, left+3*width/4, top+3*height/4+extraTop, MAX_TWO_CHORDS, chord2, font, width/2)
 }
 
-function drawFourChords(renderer, left, top, width, height, chords, font) {
+function drawFourChords(renderer, left, top, width, height, chords, font, extraTop) {
 	const MARGIN = 5
-	renderer.paper.lineToBack({x1: left+MARGIN, x2: left+width-MARGIN, y1: top+height/2, y2: top+height/2 })
-	renderer.paper.lineToBack({x1: left+width/2, x2: left+width/2, y1: top+MARGIN, y2: top+height-MARGIN })
+	renderer.paper.lineToBack({x1: left+MARGIN, x2: left+width-MARGIN, y1: top+height/2+extraTop, y2: top+height/2+extraTop })
+	renderer.paper.lineToBack({x1: left+width/2, x2: left+width/2, y1: top+MARGIN+extraTop, y2: top+height-MARGIN+extraTop })
 
 	if (chords[0])
-		renderChord(renderer, left+width/4, top+height/4+2, MAX_FOUR_CHORDS, chords[0], font, width / 2)
+		renderChord(renderer, left+width/4, top+height/4+2+extraTop, MAX_FOUR_CHORDS, chords[0], font, width / 2)
 	if (chords[1])
-		renderChord(renderer, left+3*width/4, top+height/4+2, MAX_FOUR_CHORDS, chords[1], font, width / 2)
+		renderChord(renderer, left+3*width/4, top+height/4+2+extraTop, MAX_FOUR_CHORDS, chords[1], font, width / 2)
 	if (chords[2])
-		renderChord(renderer, left+width/4, top+3*height/4, MAX_FOUR_CHORDS, chords[2], font, width / 2)
+		renderChord(renderer, left+width/4, top+3*height/4+extraTop, MAX_FOUR_CHORDS, chords[2], font, width / 2)
 	if (chords[3])
-		renderChord(renderer, left+3*width/4, top+3*height/4, MAX_FOUR_CHORDS, chords[3], font, width / 2)
+		renderChord(renderer, left+3*width/4, top+3*height/4+extraTop, MAX_FOUR_CHORDS, chords[3], font, width / 2)
 }
 
 function text(renderer, str, x, y, size, font, dataName, klass, alignCenter) {

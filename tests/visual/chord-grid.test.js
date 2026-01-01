@@ -208,7 +208,7 @@ P:Bridge
 
 	const expectedDeed = [{"type":"part","name":"Intro","lines":[[{"chord":["C","","",""]},{"chord":["C7","","",""]},{"chord":["F","","",""]},{"chord":["Fm","","",""]},{"chord":["C","","","A7"]},{"chord":["D7","","G7",""]},{"chord":["C","","",""]},{"chord":["%","","",""]}]]},{"type":"part","name":"Verse (rubato)","lines":[[{"chord":["Dm","","",""]},{"chord":["G7","","",""]},{"chord":["C","","",""]},{"chord":["Am7","","",""]},{"chord":["Dm","","",""]},{"chord":["G7","","",""]},{"chord":["C","","",""]},{"chord":["A7","","",""]}],[{"chord":["Dm","","",""]},{"chord":["Dm7","","",""]},{"chord":["Em7","","",""]},{"chord":["%","","",""]},{"chord":["Am","","",""]},{"chord":["%","","",""]},{"chord":["Em","","",""]},{"chord":["Dm7","","G7",""]}]]},{"type":"part","name":"Chorus (a tempo)","lines":[[{"chord":["C","","",""],"hasStartRepeat":true},{"chord":["C7","","",""]},{"chord":["F","","",""]},{"chord":["Fm","","",""]},{"chord":["C","","","A7"]},{"chord":["D7","","G7",""]},{"chord":["C","","C♯°",""],"ending":"1"},{"chord":["Dm7","","G7",""],"hasEndRepeat":true}],[{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"noBorder":true,"chord":["","","",""]},{"chord":["C","","",""],"ending":"2"},{"chord":["C7","","",""]}]]},{"type":"part","name":"Bridge","lines":[[{"chord":["F","","",""]},{"chord":["%","","",""]},{"chord":["E7","","",""]},{"chord":["%","","",""]},{"chord":["A7","","",""]},{"chord":["%","","",""]},{"chord":["D7","","",""]},{"chord":["G7","","G+7",""]}],[{"chord":["C","","",""]},{"chord":["C7","","",""]},{"chord":["F","","",""]},{"chord":["Fm","","",""]},{"chord":["C","","","A7"]},{"chord":["D7","","G7",""]},{"chord":["C","","F7",""]},{"chord":["C","","",""]}]]}]
 
-	const abcDo = `X:1
+	const abcDoY = `X:1
 L:1/8
 M:4/4
 N:"No Chord" not recognized
@@ -217,7 +217,7 @@ K: G
 P: Intro
 "C"A^GAg-"C#°7"g3fy|"G"a_agf "E7"=fe3|"Am7"bgeb- "D7"beb2|"G"g8||"^No Chord"[G_B^c][GBc] [FA=c][FAc] [EG_B]2[EG^c][DF=c]-|[DF=c]6 GA||`
 
-	const expectedDo = [{"type":"part","name":"Intro","lines":[[{"chord":["C","","C♯°7",""]},{"chord":["G","","E7",""]},{"chord":["Am7","","D7",""]},{"chord":["G","","",""]},{"chord":["No Chord","","",""]},{"chord":["%","","",""]}]]}]
+	const expectedDoY = [{"type":"part","name":"Intro","lines":[[{"chord":["C","","C♯°7",""]},{"chord":["G","","E7",""]},{"chord":["Am7","","D7",""]},{"chord":["G","","",""]},{"chord":["No Chord","","",""]},{"chord":["%","","",""]}]]}]
 
 	const abcDouce = `X: 1
 M: 4/4
@@ -388,8 +388,8 @@ K:G
 		parserTest(abcDeed, expectedDeed);
 	})
 
-	it("do", function () {
-		parserTest(abcDo, expectedDo);
+	it("doy", function () {
+		parserTest(abcDoY, expectedDoY);
 	})
 
 	it("douce", function () {
