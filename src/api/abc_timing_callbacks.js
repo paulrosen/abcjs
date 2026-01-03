@@ -116,11 +116,11 @@ var TimingCallbacks = function(target, params) {
 		if (self.lastTimestamp === timestamp)
 			return; // If there are multiple seeks or other calls, then we can easily get multiple callbacks for the same instant.
 		self.lastTimestamp = timestamp;
-		if (!self.startTime) {
-			self.startTime = timestamp;
-		}
 
 		if (!self.isPaused && self.isRunning) {
+			if (!self.startTime) {
+				self.startTime = timestamp;
+			}
 			self.currentTime = timestamp - self.startTime;
 			self.currentTime += 16; // Add a little slop because this function isn't called exactly.
 			while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < self.currentTime) {
