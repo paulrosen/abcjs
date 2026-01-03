@@ -1,21 +1,21 @@
 // All these keys have the same number of accidentals
 var keys = {
-	'C': { modes: ['CMaj', 'Amin', 'Am', 'GMix', 'DDor', 'EPhr', 'FLyd', 'BLoc'], stepsFromC: 0 },
-	'Db': { modes: ['DbMaj', 'Bbmin', 'Bbm', 'AbMix', 'EbDor', 'FPhr', 'GbLyd', 'CLoc'], stepsFromC: 1 },
-	'D': { modes: ['DMaj', 'Bmin', 'Bm', 'AMix', 'EDor', 'F#Phr', 'GLyd', 'C#Loc'], stepsFromC: 2 },
-	'Eb': { modes: ['EbMaj', 'Cmin', 'Cm', 'BbMix', 'FDor', 'GPhr', 'AbLyd', 'DLoc'], stepsFromC: 3 },
-	'E': { modes: ['EMaj', 'C#min', 'C#m', 'BMix', 'F#Dor', 'G#Phr', 'ALyd', 'D#Loc'], stepsFromC: 4 },
-	'F': { modes: ['FMaj', 'Dmin', 'Dm', 'CMix', 'GDor', 'APhr', 'BbLyd', 'ELoc'], stepsFromC: 5 },
-	'Gb': { modes: ['GbMaj', 'Ebmin', 'Ebm', 'DbMix', 'AbDor', 'BbPhr', 'CbLyd', 'FLoc'], stepsFromC: 6 },
-	'G': { modes: ['GMaj', 'Emin', 'Em', 'DMix', 'ADor', 'BPhr', 'CLyd', 'F#Loc'], stepsFromC: 7 },
-	'Ab': { modes: ['AbMaj', 'Fmin', 'Fm', 'EbMix', 'BbDor', 'CPhr', 'DbLyd', 'GLoc'], stepsFromC: 8 },
-	'A': { modes: ['AMaj', 'F#min', 'F#m', 'EMix', 'BDor', 'C#Phr', 'DLyd', 'G#Loc'], stepsFromC: 9 },
-	'Bb': { modes: ['BbMaj', 'Gmin', 'Gm', 'FMix', 'CDor', 'DPhr', 'EbLyd', 'ALoc'], stepsFromC: 10 },
-	'B': { modes: ['BMaj', 'G#min', 'G#m', 'F#Mix', 'C#Dor', 'D#Phr', 'ELyd', 'A#Loc'], stepsFromC: 11 },
+	'C': { modes: ['CMaj', 'CIon', 'Amin', 'AAeo', 'Am', 'GMix', 'DDor', 'EPhr', 'FLyd', 'BLoc'], stepsFromC: 0 },
+	'Db': { modes: ['DbMaj', 'DbIon', 'Bbmin', 'BbAeo', 'Bbm', 'AbMix', 'EbDor', 'FPhr', 'GbLyd', 'CLoc'], stepsFromC: 1 },
+	'D': { modes: ['DMaj', 'DIon', 'Bmin', 'BAeo', 'Bm', 'AMix', 'EDor', 'F#Phr', 'GLyd', 'C#Loc'], stepsFromC: 2 },
+	'Eb': { modes: ['EbMaj', 'EbIon', 'Cmin', 'CAeo', 'Cm', 'BbMix', 'FDor', 'GPhr', 'AbLyd', 'DLoc'], stepsFromC: 3 },
+	'E': { modes: ['EMaj', 'EIon', 'C#min', 'C#Aeo', 'C#m', 'BMix', 'F#Dor', 'G#Phr', 'ALyd', 'D#Loc'], stepsFromC: 4 },
+	'F': { modes: ['FMaj', 'FIon', 'Dmin', 'DAeo', 'Dm', 'CMix', 'GDor', 'APhr', 'BbLyd', 'ELoc'], stepsFromC: 5 },
+	'Gb': { modes: ['GbMaj', 'GbIon', 'Ebmin', 'EbAeo', 'Ebm', 'DbMix', 'AbDor', 'BbPhr', 'CbLyd', 'FLoc'], stepsFromC: 6 },
+	'G': { modes: ['GMaj', 'GIon', 'Emin', 'EAeo', 'Em', 'DMix', 'ADor', 'BPhr', 'CLyd', 'F#Loc'], stepsFromC: 7 },
+	'Ab': { modes: ['AbMaj', 'AbIon', 'Fmin', 'FAeo', 'Fm', 'EbMix', 'BbDor', 'CPhr', 'DbLyd', 'GLoc'], stepsFromC: 8 },
+	'A': { modes: ['AMaj', 'AIon', 'F#min', 'F#Aeo', 'F#m', 'EMix', 'BDor', 'C#Phr', 'DLyd', 'G#Loc'], stepsFromC: 9 },
+	'Bb': { modes: ['BbMaj', 'BbIon', 'Gmin', 'GAeo', 'Gm', 'FMix', 'CDor', 'DPhr', 'EbLyd', 'ALoc'], stepsFromC: 10 },
+	'B': { modes: ['BMaj', 'BIon', 'G#min', 'G#Aeo', 'G#m', 'F#Mix', 'C#Dor', 'D#Phr', 'ELyd', 'A#Loc'], stepsFromC: 11 },
 	// Enharmonic keys
-	'C#': { modes: ['C#Maj', 'A#min', 'A#m', 'G#Mix', 'D#Dor', 'E#Phr', 'F#Lyd', 'B#Loc'], stepsFromC: 1 },
-	'F#': { modes: ['F#Maj', 'D#min', 'D#m', 'C#Mix', 'G#Dor', 'A#Phr', 'BLyd', 'E#Loc'], stepsFromC: 6 },
-	'Cb': { modes: ['CbMaj', 'Abmin', 'Abm', 'GbMix', 'DbDor', 'EbPhr', 'FbLyd', 'BbLoc'], stepsFromC: 11 },
+	'C#': { modes: ['C#Maj', 'C#Ion', 'A#min', 'A#Aeo', 'A#m', 'G#Mix', 'D#Dor', 'E#Phr', 'F#Lyd', 'B#Loc'], stepsFromC: 1 },
+	'F#': { modes: ['F#Maj', 'F#Ion', 'D#min', 'D#Aeo', 'D#m', 'C#Mix', 'G#Dor', 'A#Phr', 'BLyd', 'E#Loc'], stepsFromC: 6 },
+	'Cb': { modes: ['CbMaj', 'CbIon', 'Abmin', 'AbAeo', 'Abm', 'GbMix', 'DbDor', 'EbPhr', 'FbLyd', 'BbLoc'], stepsFromC: 11 },
 }
 
 var keyReverse = null
@@ -42,7 +42,7 @@ function relativeMajor(key) {
 		createKeyReverse()
 	}
 	// get the key portion itself - there might be other stuff, like extra sharps and flats, or the mode written out.
-	var mode = key.toLowerCase().match(/([a-g][b#]?)(maj|min|mix|dor|phr|lyd|loc|m)?/)
+	var mode = key.toLowerCase().match(/([a-g][b#]?)(maj|ion|min|aeo|mix|dor|phr|lyd|loc|m)?/);
 	if (!mode || !mode[2])
 		return key;
 	mode = mode[1] + mode[2]
@@ -60,10 +60,10 @@ function relativeMode(majorKey, mode) {
 		return majorKey;
 	if (mode === '')
 		return majorKey;
-	var match = mode.toLowerCase().match(/^(maj|min|mix|dor|phr|lyd|loc|m)/)	
+	var match = mode.toLowerCase().match(/^(maj|ion|min|aeo|mix|dor|phr|lyd|loc|m)/);
 	if (!match)
 		return majorKey
-	var regMode = match[1]	
+	var regMode = match[1]
 	for (var i = 0; i < group.modes.length; i++) {
 		var thisMode = group.modes[i]
 		var ind = thisMode.toLowerCase().indexOf(regMode)
