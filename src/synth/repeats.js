@@ -55,7 +55,7 @@ function Repeats(voice) {
 							currentRepeat.common.end = section.index
 						if (currentRepeat.endings) {
 							for (e = 0; e < currentRepeat.endings.length; e++) {
-								if (currentRepeat.endings[e] && !currentRepeat.endings[e].end)
+								if (currentRepeat.endings[e] && !currentRepeat.endings[e].end && currentRepeat.endings[e].start !== section.index)
 									currentRepeat.endings[e].end = section.index
 							}
 						}
@@ -123,9 +123,9 @@ function Repeats(voice) {
 			}
 			repeatInstructions.push(currentRepeat)
 		}
-		for (var x = 0; x < repeatInstructions.length; x++) {
-			console.log(JSON.stringify(repeatInstructions[x]))
-		}
+		// for (var x = 0; x < repeatInstructions.length; x++) {
+		// 	console.log(JSON.stringify(repeatInstructions[x]))
+		// }
 
 		var output = []
 		var lastEnd = -1
