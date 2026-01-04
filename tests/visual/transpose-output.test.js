@@ -191,7 +191,7 @@ describe("Transpose Output", function () {
 		"V: 2\n" +
 		'D,_E,^F,^G, "N.C."A,B,C"^Coda"D| z8|\n' +
 		"V: 1\n" +
-		"d_e=f^g [eac']__bc'd'|\n" +
+		"d_e=f^g [ac'e]__bc'd'|\n" +
 		"V: 2\n" +
 		"d'_e'f'^g' a'b'c''Td''|\n"
 
@@ -262,6 +262,14 @@ describe("Transpose Output", function () {
 		"K: F#m\n" +
 		"FGAB|cdef|\n"
 
+	var abcAeolian = "T: Transpose Output\n" +
+		"K: EAeo\n" +
+		"EFGA|Bcde|\n"
+
+	var abcAeolianExpected = "T: Transpose Output\n" +
+		"K: F#Aeo\n" +
+		"FGAB|cdef|\n"
+
 	var abcNone = "T: Transpose Output\n" +
 		"K: none\n" +
 		"CDEF ^C^D^E^F CDEF|GABc _G_A_B_c GABc|^^C^^D^^E^^F CDEF|__G__A__B__c GABc|\n"
@@ -314,7 +322,7 @@ describe("Transpose Output", function () {
 
 	var abcUnusualExpected = "\n\nX:1\nT: Transpose Output\n" +
 		"K:G#min\n" +
-		'{/AB}c | [A3_e3] | =B !arpeggio!B !arpeggio![DFA^d] | E .- E | {B}c"<2"{d}+1+c ""_A-_A"E"|B>c|"<2"(ef)| [Ac]>[Bd] |\n'
+		'{/AB}c | [A3_e3] | =B !arpeggio!B !arpeggio![DFA^d] | E .- E | {B}c"<2"{d}+1+c ""_A-_A"E"|B>c|"<2"(ef)| [cA]>[dB] |\n'
 
 	var abcTemp = `T: Transpose Output
 `
@@ -353,6 +361,22 @@ describe("Transpose Output", function () {
 	var abcDimChordsExpected9 = "L:1/4\nK:A\n\"Cdim7\" A \"C#°7\" A |"
 	var abcDimChordsExpected10 = "L:1/4\nK:Bb\n\"Dbdim7\" B \"D°7\" B |"
 	var abcDimChordsExpected11 = "L:1/4\nK:B\n\"Ddim7\" B \"Eb°7\" B |"
+
+	const abcSpaceBeforeChord = `X:1
+K:Bb
+[c2A2] >[A2^F2] | !coda![c'2A,,2]"Gm"[A,2^A2] |[A,2A2] >[AA] |`
+
+	const abcSpaceBeforeChordExpected = `X:1
+K:A
+[B2G2] >[G2^E2] | !coda![b2G,,2]"F#m"[G,2^^G2] |[G,2G2] >[GG] |`
+
+	const abcClefSpecified = `X: 1
+K: Bb clef=treble
+F`
+
+	const abcClefSpecifiedExpected = `X: 1
+K: A clef=treble
+E`
 
 	it("output-cooley", function () {
 		outputTest(abcCooley, abcCooleyExpected0, 0, "★★ up 0 ★★")
@@ -415,6 +439,10 @@ describe("Transpose Output", function () {
 
 	it("output-minor", function () {
 		outputTest(abcMinor, abcMinorExpected, 2)
+	})
+
+	it("output-aeolian", function () {
+		outputTest(abcAeolian, abcAeolianExpected, 2)
 	})
 
 	it("output-none", function () {
@@ -503,6 +531,15 @@ describe("Transpose Output", function () {
 		chai.assert.equal(relativeMode("C", "Dorian"), "D", 'relativeMode')
 
 	})
+
+	it("space-before-chord", function () {
+		outputTest(abcSpaceBeforeChord, abcSpaceBeforeChordExpected, -1)
+	})
+
+	it("clef-specified", function () {
+		outputTest(abcClefSpecified, abcClefSpecifiedExpected, -1)
+	})
+
 })
 
 function outputTest(abc, expected, steps, comment) {

@@ -18,6 +18,11 @@ var keys = {
 	'Cb': { modes: ['CbMaj', 'CbIon', 'Abmin', 'AbAeo', 'Abm', 'GbMix', 'DbDor', 'EbPhr', 'FbLyd', 'BbLoc'], stepsFromC: 11 },
 }
 
+var modeNames = ['maj', 'ion', 'min', 'aeo', 'm', 'mix', 'dor', 'phr', 'lyd', 'loc']
+function isLegalMode(mode) {
+	return modeNames.indexOf(mode.toLowerCase()) >= 0
+}
+
 var keyReverse = null
 
 function createKeyReverse() {
@@ -89,4 +94,4 @@ function transposeKey(key, steps) {
 	return key;
 }
 
-module.exports = {relativeMajor: relativeMajor, relativeMode: relativeMode, transposeKey: transposeKey};
+module.exports = {relativeMajor: relativeMajor, relativeMode: relativeMode, transposeKey: transposeKey, isLegalMode:isLegalMode};
