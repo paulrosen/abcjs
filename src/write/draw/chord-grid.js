@@ -50,9 +50,6 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
 							if (!measure.noBorder) {
 								renderer.paper.rect({x: leftMargin + barNum * colWidth, y: renderer.y, width: colWidth, height: extraTop + ROW_HEIGHT})
 								renderer.paper.rect({x: leftMargin + barNum * colWidth + RECT_WIDTH, y: renderer.y + RECT_WIDTH, width: colWidth - RECT_WIDTH * 2, height: extraTop + ROW_HEIGHT - RECT_WIDTH * 2})
-								if (extraTop) {
-									renderer.paper.rectBeneath({x: leftMargin + barNum * colWidth, y: renderer.y, width: colWidth, height: extraTop, fill: '#e8e8e8', stroke: 'none'})
-								}
 								let repeatLeft = 0
 								let repeatRight = 0
 								const top = renderer.y
@@ -74,6 +71,9 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
 								drawMeasure(renderer, top, leftMargin+repeatLeft, colWidth, lineNum, barNum, measure.chord, chordFont, repeatLeft+repeatRight, ROW_HEIGHT, extraTop)
 								if (measure.annotations && measure.annotations.length > 0) {
 									drawAnnotations(renderer, top, leftMargin + barNum * colWidth +endingWidth, measure.annotations, annotationFont)
+								}
+								if (extraTop) {
+									renderer.paper.rectBeneath({x: leftMargin + barNum * colWidth, y: renderer.y, width: colWidth, height: extraTop, fill: '#e8e8e8', stroke: 'none'})
 								}
 							}
 						})
@@ -203,7 +203,7 @@ function drawSingleChord(renderer, left, top, width, height, chord, font, extraT
 }
 
 function drawTwoChords(renderer, left, top, width, height, chord1, chord2, font, extraTop) {
-	renderer.paper.lineToBack({x1: left, x2: left+width, y1: top+height+extraTop, y2: top })
+	renderer.paper.lineToBack({x1: left, x2: left+width, y1: top+height+extraTop, y2: top+2 })
 	renderChord(renderer, left+width/4, top+height/4+5+extraTop+TOP_MARGIN, MAX_TWO_CHORDS, chord1, font, width/2)
 	renderChord(renderer, left+3*width/4, top+3*height/4+extraTop+TOP_MARGIN, MAX_TWO_CHORDS, chord2, font, width/2)
 }
