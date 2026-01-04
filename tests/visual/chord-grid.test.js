@@ -338,6 +338,17 @@ K:G
 `
 	const expectedUnder = [{"type":"part","name":"","lines":[[{"chord":["Am7","","",""]},{"chord":["D7","","",""]},{"chord":["G","","Cm6",""]},{"chord":["G","","",""]}]]}]
 
+	const abcYou = `X:1
+N: stemless rhythms
+N: annotation on opening bar line
+K:G
+U: R = !style=rhythm!
+M:4/4
+P:Ending
+!coda!"^3x"|:"G"RB0 RB0 "G7"RB0 RB0  | "C"RB0 RB0 "Cm6"RB0 RB0 :| "G"RB0 z2 "D7"RB0 z2 | "G" z [G^A^c] (3[GBd][Bde][deg] "G"[egb]4|]
+`
+	const expectedYou = []
+
 	////////////////////////////////////
 
 	it("ace", function () {
@@ -426,6 +437,10 @@ K:G
 
 	it("under", function () {
 		parserTest(abcUnder, expectedUnder);
+	})
+
+	it("you", function () {
+		parserTest(abcYou, expectedYou);
 	})
 
 })
