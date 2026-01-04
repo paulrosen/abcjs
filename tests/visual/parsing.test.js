@@ -208,6 +208,16 @@ describe("Parsing", function () {
 		]
 	]
 
+	const abcDynamicsHairpin = `X:1
+T:Crescendo Bug
+L:1/4
+M:4/4
+K:C
+CDEF|GFED|!pp!!<(!CDEF|
+GFED|!<)!!ff!C4|]`
+
+	const expectedDynamicsHairpin = []
+
 	it("crashes", function () {
 		testParser(abc1, expected1, "abc1");
 	})
@@ -252,6 +262,12 @@ describe("Parsing", function () {
 		const ret = flattenResults(abcKeyWarn)
 		//console.log(JSON.stringify(ret))
 		chai.assert.deepStrictEqual(ret, expectedKeyWarn, "KeyWarn");
+	})
+
+	it("dynamics-over-line", function () {
+		const ret = flattenResults(abcDynamicsHairpin)
+		//console.log(JSON.stringify(ret))
+		chai.assert.deepStrictEqual(ret, expectedDynamicsHairpin, "DynamicsHairpin");
 	})
 
 	function testParser(abc, expectedLines, comment) {
