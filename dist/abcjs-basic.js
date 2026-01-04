@@ -213,6 +213,7 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
   self.lineEndCallback = params.lineEndCallback; // This is called when the end of a line is approaching.
   self.lineEndAnticipation = params.lineEndAnticipation ? parseInt(params.lineEndAnticipation, 10) : 0; // How many milliseconds before the end should the call happen.
   self.beatSubdivisions = params.beatSubdivisions ? parseInt(params.beatSubdivisions, 10) : 1; // how many callbacks per beat is desired.
+  if (!self.beatSubdivisions) self.beatSubdivisions = 1;
   self.joggerTimer = null;
   self.replaceTarget = function (newTarget) {
     self.noteTimings = newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
@@ -235,18 +236,96 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     // noteTimings contains an array of events sorted by time. Events that happen at the same time are in the same element of the array.
     self.millisecondsPerBeat = 1000 / (self.qpm / 60) / self.beatSubdivisions;
     self.lastMoment = self.noteTimings[self.noteTimings.length - 1].milliseconds;
-    self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
+
+    // For irregular time sigs that specify the beat divisions (that is, something like `M: 2+3/8`)
+    // Then the beat is not a regular pulse. To keep most of this logic easy, the beat will be specified
+    // as half as long, but the callback will happen according to the pattern. That is,
+    // for bpm=60 at the above time signature, internally the beat callback will happen at 120 bpm, but
+    // the callback function will be called at 2 sub beats, then 3 sub beats, etc.
+    // The beat number will be an integer for all of them and count up by one each time.
+    var meter = newTarget.getMeter();
+    var irregularMeter = '';
+    if (meter && meter.type === "specified" && meter.value && meter.value.length > 0 && meter.value[0].num.indexOf('+') > 0) irregularMeter = meter.value[0].num;
+    // for subdivisions = 1, then this should contain only whole numbers and the callbacks are irregular
+    // for subdivisions = 2, then this should be 1/8 notes. The beats should be something like: 0, 0.5, 1, 1.33, 1.66 2 (For M:2+3/8)
+    // etc for more subdivisions - they are just multiplied
+    self.beatStarts = [];
+    if (irregularMeter) {
+      var measureLength = self.noteTimings[self.noteTimings.length - 1].millisecondsPerMeasure;
+      var numMeasures = self.lastMoment / measureLength;
+      var parts = irregularMeter.split("+");
+      for (var i = 0; i < parts.length; i++) {
+        parts[i] = parseInt(parts[i], 10) / 2;
+      } // since we count a beat as a quarter note, but these numbers refer to 1/8 notes, we convert the beat length
+      var currentTs = 0;
+      var beatNumber = 0;
+      // For the input: parts = [ 1, 1.5 ] and beatSubdivisions = 2
+      // beatNumbers = 0 0.5 1 1.33 1.67 2 2.5 3 3.33 3.67 ...
+      // when part=1 then there is 1 extra sub beat and it is 0.5
+      // when part=1.5 then there are 2 extra sub beats at 0.33 and 0.67
+      //
+      // beatSubdivision | numFor1 | numFor1.5
+      //        2        |    2    |     3
+      //        3        |    3    |     4.5
+      //        4        |    4    |     6
+      for (var measureNumber = 0; measureNumber < numMeasures; measureNumber++) {
+        var measureStartTs = measureNumber * measureLength;
+        var subBeatCounter = 0;
+        for (var kk = 0; kk < parts.length; kk++) {
+          var beatLength = parts[kk]; // This is either 1 or 1.5 (how many quarter notes in this beat)
+          if (self.beatSubdivisions === 1) {
+            if (self.beatSubdivisions === 1) if (currentTs < self.lastMoment) {
+              self.beatStarts.push({
+                b: beatNumber,
+                ts: currentTs
+              });
+            }
+            currentTs += beatLength * self.millisecondsPerBeat;
+          } else {
+            var numDivisions = beatLength * self.beatSubdivisions;
+            for (var k = 0; k < Math.floor(numDivisions); k++) {
+              var subBeat = k / numDivisions;
+              var ts = Math.round(measureStartTs + subBeatCounter * self.millisecondsPerBeat);
+              if (ts < self.lastMoment) {
+                self.beatStarts.push({
+                  b: beatNumber + subBeat,
+                  ts: ts
+                });
+              }
+              subBeatCounter++;
+            }
+          }
+          beatNumber++;
+        }
+      }
+      self.beatStarts.push({
+        b: numMeasures * parts.length,
+        ts: self.lastMoment
+      });
+      self.totalBeats = self.beatStarts.length;
+    } else {
+      self.totalBeats = Math.round(self.lastMoment / self.millisecondsPerBeat);
+      // Add one so the last beat is the last moment
+      for (var j = 0; j < self.totalBeats + 1; j++) {
+        self.beatStarts.push({
+          b: j / self.beatSubdivisions,
+          ts: Math.round(j * self.millisecondsPerBeat)
+        });
+      }
+    }
+    //console.log({lastMoment: self.lastMoment, beatStarts: self.beatStarts})
   };
+
   self.replaceTarget(target);
   self.doTiming = function (timestamp) {
     // This is called 60 times a second, that is, every 16 msecs.
     //console.log("doTiming", timestamp, timestamp-self.lastTimestamp);
     if (self.lastTimestamp === timestamp) return; // If there are multiple seeks or other calls, then we can easily get multiple callbacks for the same instant.
     self.lastTimestamp = timestamp;
-    if (!self.startTime) {
-      self.startTime = timestamp;
-    }
     if (!self.isPaused && self.isRunning) {
+      if (!self.startTime) {
+        self.startTime = timestamp;
+      }
       self.currentTime = timestamp - self.startTime;
       self.currentTime += 16; // Add a little slop because this function isn't called exactly.
       while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < self.currentTime) {
@@ -270,14 +349,16 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
       }
       if (self.currentTime < self.lastMoment) {
         requestAnimationFrame(self.doTiming);
-        if (self.currentBeat * self.millisecondsPerBeat < self.currentTime) {
+        if (self.currentBeat < self.beatStarts.length && self.beatStarts[self.currentBeat].ts <= self.currentTime) {
           var ret = self.doBeatCallback(timestamp);
+          self.currentBeat++;
           if (ret !== null) self.currentTime = ret;
         }
       } else if (self.currentBeat <= self.totalBeats) {
         // Because of timing issues (for instance, if the browser tab isn't active), the beat callbacks might not have happened when they are supposed to. To keep the client programs from having to deal with that, this will keep calling the loop until all of them have been sent.
         if (self.beatCallback) {
           var ret2 = self.doBeatCallback(timestamp);
+          self.currentBeat++;
           if (ret2 !== null) self.currentTime = ret2;
           requestAnimationFrame(self.doTiming);
         }
@@ -362,11 +443,13 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
         };
       }
       var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
-      self.beatCallback(self.currentBeat / self.beatSubdivisions, self.totalBeats / self.beatSubdivisions, self.lastMoment, position, debugInfo);
+      self.beatCallback(self.beatStarts[self.currentBeat].b, self.totalBeats / self.beatSubdivisions, self.lastMoment, position, debugInfo);
       if (thisStartTime !== self.startTime) {
         return timestamp - self.startTime;
-      } else self.currentBeat++;
+      } // else
+      // 	self.currentBeat++;
     }
+
     return null;
   };
 
@@ -457,7 +540,6 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
     if (!self.isRunning) self.pausedPercent = percent;
     var now = performance.now();
     self.startTime = now - self.currentTime;
-    var oldEvent = self.currentEvent;
     self.currentEvent = 0;
     while (self.noteTimings.length > self.currentEvent && self.noteTimings[self.currentEvent].milliseconds < self.currentTime) {
       self.currentEvent++;
@@ -468,11 +550,18 @@ var TimingCallbacks = function TimingCallbacks(target, params) {
         self.currentLine++;
       }
     }
+
+    //console.log({jump:self.currentTime})
     var oldBeat = self.currentBeat;
-    self.currentBeat = Math.floor(self.currentTime / self.millisecondsPerBeat);
-    if (self.beatCallback && oldBeat !== self.currentBeat)
+    for (self.currentBeat = 0; self.currentBeat < self.beatStarts.length; self.currentBeat++) {
+      if (self.beatStarts[self.currentBeat].ts > self.currentTime) break;
+    }
+    self.currentBeat--;
+    if (self.beatCallback && oldBeat !== self.currentBeat) {
       // If the movement caused the beat to change, then immediately report it to the client.
       self.doBeatCallback(self.startTime + self.currentTime);
+      self.currentBeat++;
+    }
     if (self.eventCallback && self.currentEvent >= 0 && self.noteTimings[self.currentEvent].type === 'event') self.eventCallback(self.noteTimings[self.currentEvent]);
     if (self.lineEndCallback) self.lineEndCallback(self.lineEndTimings[self.currentLine], self.noteTimings[self.currentEvent], {
       line: self.currentLine,
@@ -1024,67 +1113,71 @@ module.exports = keyAccidentals;
 // All these keys have the same number of accidentals
 var keys = {
   'C': {
-    modes: ['CMaj', 'Amin', 'Am', 'GMix', 'DDor', 'EPhr', 'FLyd', 'BLoc'],
+    modes: ['CMaj', 'CIon', 'Amin', 'AAeo', 'Am', 'GMix', 'DDor', 'EPhr', 'FLyd', 'BLoc'],
     stepsFromC: 0
   },
   'Db': {
-    modes: ['DbMaj', 'Bbmin', 'Bbm', 'AbMix', 'EbDor', 'FPhr', 'GbLyd', 'CLoc'],
+    modes: ['DbMaj', 'DbIon', 'Bbmin', 'BbAeo', 'Bbm', 'AbMix', 'EbDor', 'FPhr', 'GbLyd', 'CLoc'],
     stepsFromC: 1
   },
   'D': {
-    modes: ['DMaj', 'Bmin', 'Bm', 'AMix', 'EDor', 'F#Phr', 'GLyd', 'C#Loc'],
+    modes: ['DMaj', 'DIon', 'Bmin', 'BAeo', 'Bm', 'AMix', 'EDor', 'F#Phr', 'GLyd', 'C#Loc'],
     stepsFromC: 2
   },
   'Eb': {
-    modes: ['EbMaj', 'Cmin', 'Cm', 'BbMix', 'FDor', 'GPhr', 'AbLyd', 'DLoc'],
+    modes: ['EbMaj', 'EbIon', 'Cmin', 'CAeo', 'Cm', 'BbMix', 'FDor', 'GPhr', 'AbLyd', 'DLoc'],
     stepsFromC: 3
   },
   'E': {
-    modes: ['EMaj', 'C#min', 'C#m', 'BMix', 'F#Dor', 'G#Phr', 'ALyd', 'D#Loc'],
+    modes: ['EMaj', 'EIon', 'C#min', 'C#Aeo', 'C#m', 'BMix', 'F#Dor', 'G#Phr', 'ALyd', 'D#Loc'],
     stepsFromC: 4
   },
   'F': {
-    modes: ['FMaj', 'Dmin', 'Dm', 'CMix', 'GDor', 'APhr', 'BbLyd', 'ELoc'],
+    modes: ['FMaj', 'FIon', 'Dmin', 'DAeo', 'Dm', 'CMix', 'GDor', 'APhr', 'BbLyd', 'ELoc'],
     stepsFromC: 5
   },
   'Gb': {
-    modes: ['GbMaj', 'Ebmin', 'Ebm', 'DbMix', 'AbDor', 'BbPhr', 'CbLyd', 'FLoc'],
+    modes: ['GbMaj', 'GbIon', 'Ebmin', 'EbAeo', 'Ebm', 'DbMix', 'AbDor', 'BbPhr', 'CbLyd', 'FLoc'],
     stepsFromC: 6
   },
   'G': {
-    modes: ['GMaj', 'Emin', 'Em', 'DMix', 'ADor', 'BPhr', 'CLyd', 'F#Loc'],
+    modes: ['GMaj', 'GIon', 'Emin', 'EAeo', 'Em', 'DMix', 'ADor', 'BPhr', 'CLyd', 'F#Loc'],
     stepsFromC: 7
   },
   'Ab': {
-    modes: ['AbMaj', 'Fmin', 'Fm', 'EbMix', 'BbDor', 'CPhr', 'DbLyd', 'GLoc'],
+    modes: ['AbMaj', 'AbIon', 'Fmin', 'FAeo', 'Fm', 'EbMix', 'BbDor', 'CPhr', 'DbLyd', 'GLoc'],
     stepsFromC: 8
   },
   'A': {
-    modes: ['AMaj', 'F#min', 'F#m', 'EMix', 'BDor', 'C#Phr', 'DLyd', 'G#Loc'],
+    modes: ['AMaj', 'AIon', 'F#min', 'F#Aeo', 'F#m', 'EMix', 'BDor', 'C#Phr', 'DLyd', 'G#Loc'],
     stepsFromC: 9
   },
   'Bb': {
-    modes: ['BbMaj', 'Gmin', 'Gm', 'FMix', 'CDor', 'DPhr', 'EbLyd', 'ALoc'],
+    modes: ['BbMaj', 'BbIon', 'Gmin', 'GAeo', 'Gm', 'FMix', 'CDor', 'DPhr', 'EbLyd', 'ALoc'],
     stepsFromC: 10
   },
   'B': {
-    modes: ['BMaj', 'G#min', 'G#m', 'F#Mix', 'C#Dor', 'D#Phr', 'ELyd', 'A#Loc'],
+    modes: ['BMaj', 'BIon', 'G#min', 'G#Aeo', 'G#m', 'F#Mix', 'C#Dor', 'D#Phr', 'ELyd', 'A#Loc'],
     stepsFromC: 11
   },
   // Enharmonic keys
   'C#': {
-    modes: ['C#Maj', 'A#min', 'A#m', 'G#Mix', 'D#Dor', 'E#Phr', 'F#Lyd', 'B#Loc'],
+    modes: ['C#Maj', 'C#Ion', 'A#min', 'A#Aeo', 'A#m', 'G#Mix', 'D#Dor', 'E#Phr', 'F#Lyd', 'B#Loc'],
     stepsFromC: 1
   },
   'F#': {
-    modes: ['F#Maj', 'D#min', 'D#m', 'C#Mix', 'G#Dor', 'A#Phr', 'BLyd', 'E#Loc'],
+    modes: ['F#Maj', 'F#Ion', 'D#min', 'D#Aeo', 'D#m', 'C#Mix', 'G#Dor', 'A#Phr', 'BLyd', 'E#Loc'],
     stepsFromC: 6
   },
   'Cb': {
-    modes: ['CbMaj', 'Abmin', 'Abm', 'GbMix', 'DbDor', 'EbPhr', 'FbLyd', 'BbLoc'],
+    modes: ['CbMaj', 'CbIon', 'Abmin', 'AbAeo', 'Abm', 'GbMix', 'DbDor', 'EbPhr', 'FbLyd', 'BbLoc'],
     stepsFromC: 11
   }
 };
+var modeNames = ['maj', 'ion', 'min', 'aeo', 'm', 'mix', 'dor', 'phr', 'lyd', 'loc'];
+function isLegalMode(mode) {
+  return modeNames.indexOf(mode.toLowerCase()) >= 0;
+}
 var keyReverse = null;
 function createKeyReverse() {
   keyReverse = {};
@@ -1107,7 +1200,7 @@ function relativeMajor(key) {
     createKeyReverse();
   }
   // get the key portion itself - there might be other stuff, like extra sharps and flats, or the mode written out.
-  var mode = key.toLowerCase().match(/([a-g][b#]?)(maj|min|mix|dor|phr|lyd|loc|m)?/);
+  var mode = key.toLowerCase().match(/([a-g][b#]?)(maj|ion|min|aeo|mix|dor|phr|lyd|loc|m)?/);
   if (!mode || !mode[2]) return key;
   mode = mode[1] + mode[2];
   var maj = keyReverse[mode];
@@ -1120,7 +1213,7 @@ function relativeMode(majorKey, mode) {
   var group = keys[majorKey];
   if (!group) return majorKey;
   if (mode === '') return majorKey;
-  var match = mode.toLowerCase().match(/^(maj|min|mix|dor|phr|lyd|loc|m)/);
+  var match = mode.toLowerCase().match(/^(maj|ion|min|aeo|mix|dor|phr|lyd|loc|m)/);
   if (!match) return majorKey;
   var regMode = match[1];
   for (var i = 0; i < group.modes.length; i++) {
@@ -1148,7 +1241,8 @@ function transposeKey(key, steps) {
 module.exports = {
   relativeMajor: relativeMajor,
   relativeMode: relativeMode,
-  transposeKey: transposeKey
+  transposeKey: transposeKey,
+  isLegalMode: isLegalMode
 };
 
 /***/ }),
@@ -1239,9 +1333,12 @@ var Tune = function Tune() {
   this.getBeatLength = function () {
     // This returns a fraction: for instance 1/4 for a quarter
     // There are two types of meters: compound and regular. Compound meter has 3 beats counted as one.
+
+    // Irregular meters have the beat as an 1/8 note but the tempo as a 1/4.
+    // That keeps it a similar tempo to 4/4 but that may or may not be generally intuitive, so that might need to change.
     var meter = this.getMeterFraction();
     var multiplier = 1;
-    if (meter.num === 6 || meter.num === 9 || meter.num === 12) multiplier = 3;else if (meter.num === 3 && meter.den === 8) multiplier = 3;
+    if (meter.num === 6 || meter.num === 9 || meter.num === 12) multiplier = 3;else if (meter.num === 3 && meter.den === 8) multiplier = 3;else if (meter.den === 8 && (meter.num === 5 || meter.num === 7)) multiplier = 2;
     return multiplier / meter.den;
   };
   function computePickupLength(lines, barLength) {
@@ -1325,7 +1422,13 @@ var Tune = function Tune() {
     var den = 4;
     if (meter) {
       if (meter.type === 'specified') {
-        num = parseInt(meter.value[0].num, 10);
+        if (meter.value && meter.value.length > 0 && meter.value[0].num.indexOf('+') > 0) {
+          var parts = meter.value[0].num.split('+');
+          num = 0;
+          for (var i = 0; i < parts.length; i++) {
+            num += parseInt(parts[i], 10);
+          }
+        } else num = parseInt(meter.value[0].num, 10);
         den = parseInt(meter.value[0].den, 10);
       } else if (meter.type === 'cut_time') {
         num = 2;
@@ -1757,7 +1860,7 @@ function delineTune(inputLines, options) {
   var currentTripletFont = [];
   var currentAnnotationFont = [];
   for (var i = 0; i < inputLines.length; i++) {
-    var inputLine = inputLines[i];
+    var inputLine = cloneLine(inputLines[i]);
     if (inputLine.staff) {
       if (inMusicLine && !inputLine.vskip) {
         var outputLine = outputLines[outputLines.length - 1];
@@ -2451,8 +2554,8 @@ var create;
     var tempo = commands.tempo;
     var beatsPerSecond = tempo / 60;
 
-    // Fix tempo for */8 meters
-    if (time.den == 8) {
+    // Fix tempo for compound meters
+    if (time.den === 8 && time.num !== 5 && time.num !== 7) {
       // Compute the tempo based on the actual milliseconds per measure, scaled by the number of eight notes and halved to get tempo in bpm.
       var msPerMeasure = abcTune.millisecondsPerMeasure();
       tempo = 60000 / (msPerMeasure / time.num) / 2;
@@ -2602,6 +2705,7 @@ var ParseHeader = __webpack_require__(/*! ./abc_parse_header */ "./src/parse/abc
 var ParseMusic = __webpack_require__(/*! ./abc_parse_music */ "./src/parse/abc_parse_music.js");
 var Tokenizer = __webpack_require__(/*! ./abc_tokenizer */ "./src/parse/abc_tokenizer.js");
 var wrap = __webpack_require__(/*! ./wrap_lines */ "./src/parse/wrap_lines.js");
+var chordGrid = __webpack_require__(/*! ./chord-grid */ "./src/parse/chord-grid.js");
 var Tune = __webpack_require__(/*! ../data/abc_tune */ "./src/data/abc_tune.js");
 var TuneBuilder = __webpack_require__(/*! ../parse/tune-builder */ "./src/parse/tune-builder.js");
 var Parse = function Parse() {
@@ -2644,6 +2748,7 @@ var Parse = function Parse() {
     };
     if (tune.lineBreaks) t.lineBreaks = tune.lineBreaks;
     if (tune.visualTranspose) t.visualTranspose = tune.visualTranspose;
+    if (tune.chordGrid) t.chordGrid = tune.chordGrid;
     return t;
   };
   function addPositioning(el, type, value) {
@@ -3193,6 +3298,22 @@ var Parse = function Parse() {
       addHintMeasures();
     }
     wrap.wrapLines(tune, multilineVars.lineBreaks, multilineVars.barNumbers);
+    if (switches.chordGrid) {
+      try {
+        tune.chordGrid = chordGrid(tune);
+      } catch (err) {
+        switch (err.message) {
+          case "notCommonTime":
+            warn("Chord grid only works for 2/2 and 4/4 time.", 0, 0);
+            break;
+          case "noChords":
+            warn("No chords are found in the tune.", 0, 0);
+            break;
+          default:
+            warn(err.message, 0, 0);
+        }
+      }
+    }
   };
 };
 module.exports = Parse;
@@ -9219,6 +9340,344 @@ module.exports = allNotes;
 
 /***/ }),
 
+/***/ "./src/parse/chord-grid.js":
+/*!*********************************!*\
+  !*** ./src/parse/chord-grid.js ***!
+  \*********************************/
+/***/ (function(module) {
+
+// This takes a visual object and returns an object that can
+// be rotely turned into a chord grid.
+//
+// 1) It will always be 8 measures on a line, unless it is a 12 bar blues, then it will be 4 measures.
+// 2) If it is not in 4/4 it will return an error
+// 3) If there are no chords it will return an error
+// 4) It will be divided into parts with the part title and an array of measures
+// 5) |: and :| will be included in a measure
+// 6) If there are first and second endings and the chords are the same, then collapse them
+// 7) If there are first and second endings and the chords are different, use a separate line for the second ending and right justify it.
+// 8) If there is one chord per measure and it is repeated in the next measure use a % for the second measure.
+// 9) All lines are the same height, so they are tall enough to fit two lines if there lots of chords
+// 10) Chords will be printed as large as they can without overlapping, so different chords will be smaller if they are long.
+// 11) If there are two chords per measure then there is a slash between them.
+// 12) If there are three or four chords then there is a 2x2 grid with the chords reading right to left. For three chords, leave the repeated cell blank.
+// 13) Breaks are indicated by the word "break" or "N.C.". A break that extends to the next measure is indicated by three dots in the next measure.
+// 14) Ignore pickup notes
+// 15) if a part is not a multiple of 8 bars (and not 12 bars), the last line has
+// 4 squares on left and not any grid on the right.
+// 16) Annotations and some decorations get printed above the cells.
+
+function chordGrid(visualObj) {
+  var meter = visualObj.getMeterFraction();
+  var isCommonTime = meter.num === 4 && meter.den === 4;
+  var isCutTime = meter.num === 2 && meter.den === 2;
+  if (!isCutTime && !isCommonTime) throw new Error("notCommonTime");
+  var deline = visualObj.deline();
+  var chartLines = [];
+  var nonSubtitle = false;
+  deline.forEach(function (section) {
+    if (section.subtitle) {
+      if (nonSubtitle) {
+        // Don't do the subtitle if the first thing is the subtitle, but that is already printed on the top
+        chartLines.push({
+          type: "subtitle",
+          subtitle: section.subtitle.text
+        });
+      }
+    } else if (section.text) {
+      nonSubtitle = true;
+      chartLines.push({
+        type: "text",
+        text: section.text.text
+      });
+    } else if (section.staff) {
+      nonSubtitle = true;
+      // The first staff and the first voice in it drive everything.
+      // Only part designations there will count. However, look for
+      // chords in any other part. If there is not a chord defined in
+      // the first part, use a chord defined in another part.
+      var staves = section.staff;
+      var parts = flattenVoices(staves);
+      chartLines = chartLines.concat(parts);
+    }
+  });
+  collapseIdenticalEndings(chartLines);
+  addLineBreaks(chartLines);
+  addPercents(chartLines);
+  return chartLines;
+}
+var breakSynonyms = ['break', '(break)', 'no chord', 'n.c.', 'tacet'];
+function flattenVoices(staves) {
+  var parts = [];
+  var partName = "";
+  var measures = [];
+  var currentBar = {
+    chord: ['', '', '', '']
+  };
+  var lastChord = "";
+  var nextBarEnding = "";
+  staves.forEach(function (staff, staffNum) {
+    if (staff.voices) {
+      staff.voices.forEach(function (voice, voiceNum) {
+        var currentPartNum = 0;
+        var beatNum = 0;
+        var measureNum = 0;
+        voice.forEach(function (element) {
+          if (element.el_type === 'part') {
+            if (measures.length > 0) {
+              if (staffNum === 0 && voiceNum === 0) {
+                parts.push({
+                  type: "part",
+                  name: partName,
+                  lines: [measures]
+                });
+                measures = [];
+                // } else {
+                // 	currentPartNum++
+                // 	measureNum = 0
+                // 	measures = parts[currentPartNum].lines[0]
+              }
+            }
+
+            partName = element.title;
+          } else if (element.el_type === 'note') {
+            addDecoration(element, currentBar);
+            var intBeat = Math.floor(beatNum);
+            if (element.chord && element.chord.length > 0) {
+              var chord = element.chord[0]; // Use just the first chord specified - if there are multiple ones, then ignore them
+              var chordName = chord.position === 'default' || breakSynonyms.indexOf(chord.name.toLowerCase()) >= 0 ? chord.name : '';
+              if (chordName) {
+                if (intBeat > 0 && !currentBar.chord[0])
+                  // Be sure there is a chord for the first beat in a measure
+                  currentBar.chord[0] = lastChord;
+                lastChord = chordName;
+                if (currentBar.chord[intBeat]) {
+                  // If there is already a chord on this beat put the next chord on the next beat, but don't overwrite anything.
+                  // This handles the case were a chord is misplaced slightly, for instance it is on the 1/8 before the beat.
+                  if (intBeat < 4 && !currentBar.chord[intBeat + 1]) currentBar.chord[intBeat + 1] = chordName;
+                } else currentBar.chord[intBeat] = chordName;
+              }
+              element.chord.forEach(function (ch) {
+                if (ch.position !== 'default' && breakSynonyms.indexOf(chord.name.toLowerCase()) < 0) {
+                  if (!currentBar.annotations) currentBar.annotations = [];
+                  currentBar.annotations.push(ch.name);
+                }
+              });
+            }
+            if (!element.rest || element.rest.type !== 'spacer') {
+              var thisDuration = Math.floor(element.duration * 4);
+              if (thisDuration > 4) {
+                measureNum += Math.floor(thisDuration / 4);
+                beatNum = 0;
+              } else {
+                var thisBeat = element.duration * 4;
+                if (element.tripletMultiplier) thisBeat *= element.tripletMultiplier;
+                beatNum += thisBeat;
+              }
+            }
+          } else if (element.el_type === 'bar') {
+            if (nextBarEnding) {
+              currentBar.ending = nextBarEnding;
+              nextBarEnding = "";
+            }
+            addDecoration(element, currentBar);
+            if (element.type === 'bar_dbl_repeat' || element.type === 'bar_left_repeat') currentBar.hasStartRepeat = true;
+            if (element.type === 'bar_dbl_repeat' || element.type === 'bar_right_repeat') currentBar.hasEndRepeat = true;
+            if (element.startEnding) nextBarEnding = element.startEnding;
+            if (beatNum >= 4) {
+              if (currentBar.chord[0] === '') {
+                // If there isn't a chord change at the beginning, repeat the last chord found
+                if (currentBar.chord[1] || currentBar.chord[2] || currentBar.chord[3]) {
+                  currentBar.chord[0] = findLastChord(measures);
+                }
+              }
+              if (staffNum === 0 && voiceNum === 0) measures.push(currentBar);else {
+                // Add the found items of interest to the original array
+                // We have the extra [0] in there because lines is an array of lines (but we just use the [0] for constructing, we split it apart at the end)
+                var index = measureNum;
+                var partIndex = 0;
+                while (index >= parts[partIndex].lines[0].length && partIndex < parts.length) {
+                  index -= parts[partIndex].lines[0].length;
+                  partIndex++;
+                }
+                if (partIndex < parts.length && index < parts[partIndex].lines[0].length) {
+                  var bar = parts[partIndex].lines[0][index];
+                  if (!bar.chord[0] && currentBar.chord[0]) bar.chord[0] = currentBar.chord[0];
+                  if (!bar.chord[1] && currentBar.chord[1]) bar.chord[1] = currentBar.chord[1];
+                  if (!bar.chord[2] && currentBar.chord[2]) bar.chord[2] = currentBar.chord[2];
+                  if (!bar.chord[3] && currentBar.chord[3]) bar.chord[3] = currentBar.chord[3];
+                  if (currentBar.annotations) {
+                    if (!bar.annotations) bar.annotations = currentBar.annotations;else bar.annotations = bar.annotations.concat(currentBar.annotations);
+                  }
+                }
+                measureNum++;
+              }
+              currentBar = {
+                chord: ['', '', '', '']
+              };
+            } else currentBar.chord = ['', '', '', ''];
+            beatNum = 0;
+          } else if (element.el_type === 'tempo') {
+            // TODO-PER: should probably report tempo, too
+          }
+        });
+        if (staffNum === 0 && voiceNum === 0) {
+          parts.push({
+            type: "part",
+            name: partName,
+            lines: [measures]
+          });
+        }
+      });
+    }
+  });
+  if (!lastChord) throw new Error("noChords");
+  return parts;
+}
+function findLastChord(measures) {
+  for (var m = measures.length - 1; m >= 0; m--) {
+    for (var c = measures[m].chord.length - 1; c >= 0; c--) {
+      if (measures[m].chord[c]) return measures[m].chord[c];
+    }
+  }
+}
+function collapseIdenticalEndings(chartLines) {
+  chartLines.forEach(function (line) {
+    if (line.type === "part") {
+      var partLine = line.lines[0];
+      var ending1 = partLine.findIndex(function (bar) {
+        return !!bar.ending;
+      });
+      var ending2 = partLine.findIndex(function (bar, index) {
+        return index > ending1 && !!bar.ending;
+      });
+      if (ending1 >= 0 && ending2 >= 0) {
+        // If the endings are not the same length, don't collapse
+        if (ending2 - ending1 === partLine.length - ending2) {
+          var matches = true;
+          for (var i = 0; i < ending2 - ending1 && matches; i++) {
+            var measureLhs = partLine[ending1 + i];
+            var measureRhs = partLine[ending2 + i];
+            if (measureLhs.chord[0] !== measureRhs.chord[0]) matches = false;
+            if (measureLhs.chord[1] !== measureRhs.chord[1]) matches = false;
+            if (measureLhs.chord[2] !== measureRhs.chord[2]) matches = false;
+            if (measureLhs.chord[3] !== measureRhs.chord[3]) matches = false;
+            if (measureLhs.annotations && !measureRhs.annotations) matches = false;
+            if (!measureLhs.annotations && measureRhs.annotations) matches = false;
+            if (measureLhs.annotations && measureRhs.annotations) {
+              if (measureLhs.annotations.length !== measureRhs.annotations.length) matches = false;else {
+                for (var j = 0; j < measureLhs.annotations.length; j++) {
+                  if (measureLhs.annotations[j] !== measureRhs.annotations[j]) matches = false;
+                }
+              }
+            }
+          }
+          if (matches) {
+            delete partLine[ending1].ending;
+            partLine.splice(ending2, partLine.length - ending2);
+          }
+        }
+      }
+    }
+  });
+}
+function addLineBreaks(chartLines) {
+  chartLines.forEach(function (line) {
+    if (line.type === "part") {
+      var newLines = [];
+      var oldLines = line.lines[0];
+      var is12bar = false;
+      var firstEndRepeat = oldLines.findIndex(function (l) {
+        return !!l.hasEndRepeat;
+      });
+      var length = firstEndRepeat >= 0 ? Math.min(firstEndRepeat + 1, oldLines.length) : oldLines.length;
+      if (length === 12) is12bar = true;
+      var barsPerLine = is12bar ? 4 : 8; // Only do 4 bars per line for 12-bar blues
+      for (var i = 0; i < oldLines.length; i += barsPerLine) {
+        var newLine = oldLines.slice(i, i + barsPerLine);
+        var endRepeat = newLine.findIndex(function (l) {
+          return !!l.hasEndRepeat;
+        });
+        if (endRepeat >= 0 && endRepeat < newLine.length - 1) {
+          newLines.push(newLine.slice(0, endRepeat + 1));
+          newLines.push(newLine.slice(endRepeat + 1));
+        } else newLines.push(newLine);
+      }
+      // TODO-PER: The following probably doesn't handle all cases. Rethink it.
+      for (var _i = 0; _i < newLines.length; _i++) {
+        if (newLines[_i][0].ending) {
+          var prevLine = Math.max(0, _i - 1);
+          var toAdd = newLines[prevLine].length - newLines[_i].length;
+          var thisLine = [];
+          for (var j = 0; j < toAdd; j++) {
+            thisLine.push({
+              noBorder: true,
+              chord: ['', '', '', '']
+            });
+          }
+          newLines[_i] = thisLine.concat(newLines[_i]);
+        }
+      }
+      line.lines = newLines;
+    }
+  });
+}
+function addPercents(chartLines) {
+  chartLines.forEach(function (part) {
+    if (part.lines) {
+      var lastMeasureSingle = false;
+      var lastChord = "";
+      part.lines.forEach(function (line) {
+        line.forEach(function (measure) {
+          if (!measure.noBorder) {
+            var chords = measure.chord;
+            if (!chords[0] && !chords[1] && !chords[2] && !chords[3]) {
+              // if there are no chords specified for this measure
+              if (lastMeasureSingle) {
+                if (lastChord) chords[0] = '%';
+              } else chords[0] = lastChord;
+              lastMeasureSingle = true;
+            } else if (!chords[1] && !chords[2] && !chords[3]) {
+              // if there is a single chord for this measure
+              lastMeasureSingle = true;
+              lastChord = chords[0];
+            } else {
+              // if the measure is complicated - in that case the next measure won't get %
+              lastMeasureSingle = false;
+              lastChord = chords[3] || chords[2] || chords[1];
+            }
+          }
+        });
+      });
+    }
+  });
+}
+function addDecoration(element, currentBar) {
+  if (element.decoration) {
+    // Some decorations are interesting to rhythm players
+    for (var i = 0; i < element.decoration.length; i++) {
+      switch (element.decoration[i]) {
+        case 'fermata':
+        case 'segno':
+        case 'coda':
+        case "D.C.":
+        case "D.S.":
+        case "D.C.alcoda":
+        case "D.C.alfine":
+        case "D.S.alcoda":
+        case "D.S.alfine":
+        case "fine":
+          if (!currentBar.annotations) currentBar.annotations = [];
+          currentBar.annotations.push(element.decoration[i]);
+          break;
+      }
+    }
+  }
+}
+module.exports = chordGrid;
+
+/***/ }),
+
 /***/ "./src/parse/transpose-chord.js":
 /*!**************************************!*\
   !*** ./src/parse/transpose-chord.js ***!
@@ -9857,7 +10316,7 @@ function resolveOverlays(tune) {
             } else if (event.el_type === "note") {
               if (inOverlay) {
                 overlayVoice[k].voice.push(event);
-              } else {
+              } else if (!event.rest || event.rest.type !== 'spacer') {
                 durationThisBar += event.duration;
                 durationsPerLines[i] += event.duration;
               }
@@ -10794,14 +11253,12 @@ module.exports = {
   \***************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var keyAccidentals = __webpack_require__(/*! ../const/key-accidentals */ "./src/const/key-accidentals.js");
 var _require = __webpack_require__(/*! ../const/relative-major */ "./src/const/relative-major.js"),
   relativeMajor = _require.relativeMajor,
   transposeKey = _require.transposeKey,
-  relativeMode = _require.relativeMode;
+  relativeMode = _require.relativeMode,
+  isLegalMode = _require.isLegalMode;
 var transposeChordName = __webpack_require__(/*! ../parse/transpose-chord */ "./src/parse/transpose-chord.js");
 var strTranspose;
 (function () {
@@ -10864,11 +11321,12 @@ var strTranspose;
       var match = segment.match(/^( *)([A-G])([#b]?)( ?)(\w*)/);
       if (match) {
         var start = count + 2 + match[1].length; // move past the 'K:' and optional white space
-        var key = match[2] + match[3] + match[4] + match[5]; // key name, accidental, optional space, and mode
+        var mode = isLegalMode(match[5]) ? match[5] : '';
+        var key = match[2] + match[3] + match[4] + mode; // key name, accidental, optional space, and mode
         var destinationKey = newKey({
           root: match[2],
           acc: match[3],
-          mode: match[5]
+          mode: mode
         }, steps);
         var dest = destinationKey.root + destinationKey.acc + match[4] + destinationKey.mode;
         changes.push({
@@ -10932,12 +11390,18 @@ var strTranspose;
         }
       }
       if (el.el_type === 'note' && el.pitches) {
-        for (var j = 0; j < el.pitches.length; j++) {
-          var note = parseNote(el.pitches[j].name, keyRoot, keyAccidentals, measureAccidentals);
+        var pitchArray = findNotes(abc, el.startChar, el.endChar);
+        //console.log(pitchArray)
+        for (var j = 0; j < pitchArray.length; j++) {
+          var note = parseNote(pitchArray[j].note, keyRoot, keyAccidentals, measureAccidentals);
           if (note.acc) measureAccidentals[note.name.toUpperCase()] = note.acc;
           var newPitch = transposePitch(note, destinationKey, letterDistance, transposedMeasureAccidentals);
           if (newPitch.acc) transposedMeasureAccidentals[newPitch.upper] = newPitch.acc;
-          changes.push(replaceNote(abc, el.startChar, el.endChar, newPitch.acc + newPitch.name, j));
+          changes.push({
+            note: newPitch.acc + newPitch.name,
+            start: pitchArray[j].index,
+            end: pitchArray[j].index + pitchArray[j].note.length
+          });
         }
         if (el.gracenotes) {
           for (var g = 0; g < el.gracenotes.length; g++) {
@@ -11013,6 +11477,7 @@ var strTranspose;
         break;
       }
     }
+    var newNote;
     switch (adj) {
       case -2:
         acc = "__";
@@ -11031,7 +11496,7 @@ var strTranspose;
         break;
       case -3:
         // This requires a triple flat, so bump down the pitch and try again
-        var newNote = {};
+        newNote = {};
         newNote.pitch = note.pitch - 1;
         newNote.oct = note.oct;
         newNote.name = letters[letters.indexOf(note.name) - 1];
@@ -11043,7 +11508,7 @@ var strTranspose;
         return transposePitch(newNote, key, letterDistance + 1, measureAccidentals);
       case 3:
         // This requires a triple sharp, so bump up the pitch and try again
-        var newNote = {};
+        newNote = {};
         newNote.pitch = note.pitch + 1;
         newNote.oct = note.oct;
         newNote.name = letters[letters.indexOf(note.name) + 1];
@@ -11092,8 +11557,8 @@ var strTranspose;
   var regPitch = /([_^=]*)([A-Ga-g])([,']*)/;
   var regNote = /([_^=]*[A-Ga-g][,']*)(\d*\/*\d*)([\>\<\-\)\.\s\\]*)/;
   var regOptionalNote = /([_^=]*[A-Ga-g][,']*)?(\d*\/*\d*)?([\>\<\-\)]*)?/;
-  var regSpace = /(\s*)$/;
-  var regOptionalSpace = /(\s*)/;
+  //var regSpace = /(\s*)$/
+  //var regOptionalSpace = /(\s*)/
 
   // This the relationship of the note to the tonic and an octave. So what is returned is a distance in steps from the tonic and the amount of adjustment from
   // a normal scale. That is - in the key of D an F# is two steps from the tonic and no adjustment. A G# is three steps from the tonic and one half-step higher.
@@ -11121,68 +11586,100 @@ var strTranspose;
       courtesy: reg[1] === currentAcc
     };
   }
-  function replaceNote(abc, start, end, newPitch, index) {
+  function findNotes(abc, start, end) {
+    // TODO-PER: I thought this regex should have found all the notes and ignored the chords and decorations but it didn't: /(?:"[^"]+")*(?:![^!]+!)*([_^=]*)([A-Ga-g])([,']*)/g
     var note = abc.substring(start, end);
-    // Try single note first
-    var match = note.match(new RegExp(regNote.source + regSpace.source));
-    if (match) {
-      var noteLen = match[1].length;
-      var trailingLen = match[2].length + match[3].length + match[4].length;
-      var leadingLen = end - start - noteLen - trailingLen;
-      start += leadingLen;
-      end -= trailingLen;
-    } else {
-      // Match chord
-      var regPreBracket = /([^\[]*)/;
-      var regOpenBracket = /\[/;
-      var regCloseBracket = /\-?](\d*\/*\d*)?([\>\<\-\)]*)/;
-      var regChord = new RegExp(regPreBracket.source + regOpenBracket.source + "(?:" + regOptionalNote.source + "\\s*){1,8}" + regCloseBracket.source + regSpace.source);
-      match = note.match(regChord);
-      if (match) {
-        var beforeChordLen = match[1].length + 1; // text before + '['
-        var chordBody = note.slice(match[1].length + 1, note.lastIndexOf("]"));
-        // Collect notes inside chord
-        var chordNotes = [];
-        var regNoteWithSpace = new RegExp(regOptionalNote.source + "\\s*", "g");
-        var _iterator = _createForOfIteratorHelper(chordBody.matchAll(regNoteWithSpace)),
-          _step;
-        try {
-          for (_iterator.s(); !(_step = _iterator.n()).done;) {
-            var m = _step.value;
-            var noteText = m[0].trim();
-            if (noteText !== "") {
-              chordNotes.push({
-                text: noteText,
-                index: m.index
-              });
-            }
-          }
-        } catch (err) {
-          _iterator.e(err);
-        } finally {
-          _iterator.f();
-        }
-        if (index >= chordNotes.length) {
-          throw new Error("Chord index out of range for chord: " + note);
-        }
-        var chosen = chordNotes[index];
-        // Preserve duration and tie
-        var mDurTie = chosen.text.match(/^(.+?)(\d+\/?\d*)?(-)?$/);
-        var pitchPart = mDurTie ? mDurTie[1] : chosen.text;
-        var durationPart = mDurTie && mDurTie[2] ? mDurTie[2] : "";
-        var tiePart = mDurTie && mDurTie[3] ? mDurTie[3] : "";
-        // Replace note keeping duration and tie
-        newPitch = newPitch + durationPart + tiePart;
-        start += beforeChordLen + chosen.index;
-        end = start + chosen.text.length;
-      }
+
+    // Since the regex will also find "c", "d", and "a" in `!coda!`, we need to filter them
+    var array;
+    var ignoreBlocks = [];
+    var regChord = /("[^"]+")+/g;
+    while ((array = regChord.exec(note)) !== null) {
+      ignoreBlocks.push({
+        start: regChord.lastIndex - array[0].length,
+        end: regChord.lastIndex
+      });
     }
-    return {
-      start: start,
-      end: end,
-      note: newPitch
-    };
+    var regDec = /(![^!]+!)+/g;
+    while ((array = regDec.exec(note)) !== null) {
+      ignoreBlocks.push({
+        start: regDec.lastIndex - array[0].length,
+        end: regDec.lastIndex
+      });
+    }
+    var ret = [];
+    // Define the regex each time because it is stateful
+    var regPitch = /([_^=]*)([A-Ga-g])([,']*)/g;
+    while ((array = regPitch.exec(note)) !== null) {
+      var found = false;
+      for (var i = 0; i < ignoreBlocks.length; i++) {
+        if (regPitch.lastIndex >= ignoreBlocks[i].start && regPitch.lastIndex <= ignoreBlocks[i].end) found = true;
+      }
+      if (!found) ret.push({
+        note: array[0],
+        index: start + regPitch.lastIndex - array[0].length
+      });
+    }
+    return ret;
   }
+
+  // function replaceNote(abc, start, end, newPitch, oldPitch, index) {
+  // 	var note = abc.substring(start, end);
+  // 	// Try single note first
+  // 	var match = note.match(new RegExp(regNote.source + regSpace.source));
+  // 	if (match) {
+  // 		var noteLen = match[1].length;
+  // 		var trailingLen = match[2].length + match[3].length + match[4].length;
+  // 		var leadingLen = end - start - noteLen - trailingLen;
+  // 		start += leadingLen;
+  // 		end -= trailingLen;
+  // 	} else {
+  // 		// Match chord
+  // 		var regPreBracket = /([^\[]*)/;
+  // 		var regOpenBracket = /\[/;
+  // 		var regCloseBracket = /\-?](\d*\/*\d*)?([\>\<\-\)]*)/;
+  // 		var regChord = new RegExp(
+  // 			regPreBracket.source +
+  // 			regOpenBracket.source +
+  // 			"(?:" + regOptionalNote.source + "\\s*){1,8}" +
+  // 			regCloseBracket.source +
+  // 			regSpace.source
+  // 		);
+  // 		match = note.match(regChord);
+  // 		if (match) {
+  // 			var beforeChordLen = match[1].length + 1; // text before + '['
+  // 			var chordBody = note.slice(match[1].length + 1, note.lastIndexOf("]"));
+  // 			// Collect notes inside chord
+  // 			var chordNotes = [];
+  // 			var regNoteWithSpace = new RegExp(regOptionalNote.source + "\\s*", "g");
+  // 			for (const m of chordBody.matchAll(regNoteWithSpace)) {
+  // 				let noteText = m[0].trim();
+  // 				if (noteText !== "") {
+  // 					chordNotes.push({ text: noteText, index: m.index });
+  // 				}
+  // 			}
+  // 			if (index >= chordNotes.length) {
+  // 				throw new Error("Chord index out of range for chord: " + note);
+  // 			}
+  // 			var chosen = chordNotes[index];
+  // 			// Preserve duration and tie
+  // 			let mDurTie = chosen.text.match(/^(.+?)(\d+\/?\d*)?(-)?$/);
+  // 			let pitchPart = mDurTie ? mDurTie[1] : chosen.text;
+  // 			let durationPart = mDurTie && mDurTie[2] ? mDurTie[2] : "";
+  // 			let tiePart = mDurTie && mDurTie[3] ? mDurTie[3] : "";
+  // 			// Replace note keeping duration and tie
+  // 			newPitch = newPitch + durationPart + tiePart;
+  // 			start += beforeChordLen + chosen.index;
+  // 			end = start + chosen.text.length;
+  // 		}
+  // 	}
+  // 	return {
+  // 		start: start,
+  // 		end: end,
+  // 		note: newPitch
+  // 	};
+  // }
+
   function replaceGrace(abc, start, end, newGrace, index) {
     var note = abc.substring(start, end);
     // I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
@@ -12591,11 +13088,12 @@ module.exports = rendererFactory;
 
 var sequence;
 var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
+var Repeats = __webpack_require__(/*! ./repeats */ "./src/synth/repeats.js");
 (function () {
   "use strict";
 
   var measureLength = 1; // This should be set by the meter, but just in case that is missing, we'll take a guess.
-  // The abc is provided to us line by line. It might have repeats in it. We want to re arrange the elements to
+  // The abc is provided to us line by line. It might have repeats in it. We want to rearrange the elements to
   // be an array of voices with all the repeats embedded, and no lines. Then it is trivial to go through the events
   // one at a time and turn it into midi.
 
@@ -12732,8 +13230,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
       timing: 0
     };
     var currentVolume;
-    var startRepeatPlaceholder = []; // There is a place holder for each voice.
-    var skipEndingPlaceholder = []; // This is the place where the first ending starts.
+    var repeats = [];
     var startingDrumSet = false;
     var lines = abctune.lines; //abctune.deline(); TODO-PER: can switch to this, then simplify the loops below.
     for (var i = 0; i < lines.length; i++) {
@@ -12812,6 +13309,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                 el_type: "name",
                 trackName: voiceName
               });
+              repeats[voiceNumber] = new Repeats(voices[voiceNumber]);
             }
             // Negate any transposition for the percussion staff.
             if (transpose && staff.clef.type === "perc") voices[voiceNumber].push({
@@ -13010,28 +13508,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
                     }); // We need the bar marking to reset the accidentals.
                   setDynamics(elem);
                   noteEventsInBar = 0;
-                  // figure out repeats and endings --
-                  // The important part is where there is a start repeat, and end repeat, or a first ending.
-                  var endRepeat = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat";
-                  var startEnding = elem.startEnding === '1';
-                  var startRepeat = elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" || elem.type === "bar_right_repeat";
-                  if (endRepeat) {
-                    var s = startRepeatPlaceholder[voiceNumber];
-                    if (!s) s = 0; // If there wasn't a left repeat, then we repeat from the beginning.
-                    var e = skipEndingPlaceholder[voiceNumber];
-                    if (!e) e = voices[voiceNumber].length; // If there wasn't a first ending marker, then we copy everything.
-                    // duplicate each of the elements - this has to be a deep copy.
-                    for (var z = s; z < e; z++) {
-                      var item = Object.assign({}, voices[voiceNumber][z]);
-                      if (item.pitches) item.pitches = parseCommon.cloneArray(item.pitches);
-                      voices[voiceNumber].push(item);
-                    }
-                    // reset these in case there is a second repeat later on.
-                    skipEndingPlaceholder[voiceNumber] = undefined;
-                    startRepeatPlaceholder[voiceNumber] = undefined;
-                  }
-                  if (startEnding) skipEndingPlaceholder[voiceNumber] = voices[voiceNumber].length;
-                  if (startRepeat) startRepeatPlaceholder[voiceNumber] = voices[voiceNumber].length;
+                  repeats[voiceNumber].addBar(elem, voiceNumber);
                   rhythmHeadThisBar = false;
                   break;
                 case 'style':
@@ -13181,6 +13658,10 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
         }
       }
     }
+    for (var r = 0; r < repeats.length; r++) {
+      voices[r] = repeats[r].resolveRepeats();
+    }
+
     // If there are tempo changes, make sure they are in all the voices. This must be done post process because all the elements in all the voices need to be created first.
     insertTempoChanges(voices, tempoChanges);
     if (drumIntro) {
@@ -13320,6 +13801,7 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           num: 4,
           den: 4
         };
+        measureLength = 4 / 4;
         break;
       case "cut_time":
         meter = {
@@ -13327,22 +13809,31 @@ var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/ab
           num: 2,
           den: 2
         };
+        measureLength = 2 / 2;
         break;
       case "specified":
         // TODO-PER: only taking the first meter, so the complex meters are not handled.
+        var num = 0;
+        if (element.value && element.value.length > 0 && element.value[0].num.indexOf('+') > 0) {
+          var parts = element.value[0].num.split('+');
+          for (var i = 0; i < parts.length; i++) {
+            num += parseInt(parts[i], 10);
+          }
+        } else num = parseInt(element.value[0].num, 10);
         meter = {
           el_type: 'meter',
-          num: element.value[0].num,
+          num: num,
           den: element.value[0].den
         };
+        measureLength = num / parseInt(element.value[0].den, 10);
         break;
       default:
         // This should never happen.
         meter = {
           el_type: 'meter'
         };
+        measureLength = 1;
     }
-    measureLength = meter.num / meter.den;
     return meter;
   }
   function removeNaturals(accidentals) {
@@ -14438,7 +14929,7 @@ function CreateSynth() {
     if (options.visualObj) {
       self.flattened = options.visualObj.setUpAudio(params);
       var meter = options.visualObj.getMeterFraction();
-      if (meter.den) self.meterSize = options.visualObj.getMeterFraction().num / options.visualObj.getMeterFraction().den;
+      if (meter.den) self.meterSize = meter.num / meter.den;
       self.pickupLength = options.visualObj.getPickupLength();
     } else if (options.sequence) self.flattened = options.sequence;else return Promise.reject(new Error("Must pass in either a visualObj or a sequence"));
     self.millisecondsPerMeasure = options.millisecondsPerMeasure ? options.millisecondsPerMeasure : options.visualObj ? options.visualObj.millisecondsPerMeasure(self.flattened.tempo) : 1000;
@@ -15584,6 +16075,221 @@ function registerAudioContext(ac) {
   return window.abcjsAudioContext.state !== "suspended";
 }
 module.exports = registerAudioContext;
+
+/***/ }),
+
+/***/ "./src/synth/repeats.js":
+/*!******************************!*\
+  !*** ./src/synth/repeats.js ***!
+  \******************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var parseCommon = __webpack_require__(/*! ../parse/abc_common */ "./src/parse/abc_common.js");
+function Repeats(voice) {
+  this.sections = [{
+    type: 'startRepeat',
+    index: -1
+  }];
+  this.addBar = function (elem) {
+    // Record the "interesting" parts for analysis at the end.
+    var thisIndex = voice.length - 1;
+    var isStartRepeat = elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat";
+    var isEndRepeat = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat";
+    var startEnding = elem.startEnding ? startEndingNumbers(elem.startEnding) : undefined;
+    if (isEndRepeat) this.sections.push({
+      type: "endRepeat",
+      index: thisIndex
+    });
+    if (isStartRepeat) this.sections.push({
+      type: "startRepeat",
+      index: thisIndex
+    });
+    if (startEnding) this.sections.push({
+      type: "startEnding",
+      index: thisIndex,
+      endings: startEnding
+    });
+  };
+  this.resolveRepeats = function () {
+    // this.sections contain all the interesting bars - start and end repeats.
+    var e;
+
+    // There may be one last set of events after the last interesting bar, so capture that now.
+    var lastSection = this.sections[this.sections.length - 1];
+    var lastElement = voice.length - 1;
+    if (lastSection.type === 'startRepeat') lastSection.end = lastElement;else if (lastSection.index + 1 < lastElement) this.sections.push({
+      type: "startRepeat",
+      index: lastSection.index + 1
+    });
+
+    // console.log(voice.map((el,index) => {
+    // 	return JSON.stringify({i: index, t: el.el_type, p: el.pitches ? el.pitches[0].name: undefined})
+    // }).join("\n"))
+
+    // console.log(this.sections.map(s => JSON.stringify(s)).join("\n"))
+    if (this.sections.length < 2) return voice; // If there are no repeats then don't bother copying anything
+
+    // Go through all the markers and turn that into an array of sets of sections in order.
+    // The output is repeatInstructions. If "endings" is not present, then the common section should just
+    // be copied once. If "endings" is present but is empty, that means it is a plain repeat without
+    // endings so the common section is copied twice. If "endings" contains items, then copy the
+    // common section followed by each ending in turn. If the last item in "endings" is -1, then
+    // the common section should be copied one more time but there isn't a corresponding ending for it.
+    var repeatInstructions = []; // { common: { start: number, end: number }, endings: Array<{start:number, end:number> }
+    var currentRepeat = null;
+    for (var i = 0; i < this.sections.length; i++) {
+      var section = this.sections[i];
+      //var end = i < this.sections.length-1 ? this.sections[i+1].index : lastElement
+      switch (section.type) {
+        case "startRepeat":
+          if (currentRepeat) {
+            if (!currentRepeat.common.end) currentRepeat.common.end = section.index;
+            if (currentRepeat.endings) {
+              for (e = 0; e < currentRepeat.endings.length; e++) {
+                if (currentRepeat.endings[e] && !currentRepeat.endings[e].end && currentRepeat.endings[e].start !== section.index) currentRepeat.endings[e].end = section.index;
+              }
+            }
+            // If the last event was an end repeat, then there is one more repeat of just the common area. (Only when there are ending markers - otherwise it is already taken care of.)
+            if (this.sections[i - 1].type === 'endRepeat' && currentRepeat.endings && currentRepeat.endings.length) currentRepeat.endings[currentRepeat.endings.length] = {
+              start: -1,
+              end: -1
+            };
+            repeatInstructions.push(currentRepeat);
+          }
+
+          // if there is a gap between the last event and this start, then
+          // insert those items.
+          if (currentRepeat) {
+            var lastUsed = currentRepeat.common.end;
+            if (currentRepeat.endings) {
+              for (e = 0; e < currentRepeat.endings.length; e++) {
+                if (currentRepeat.endings[e]) lastUsed = Math.max(lastUsed, currentRepeat.endings[e].end);
+              }
+            }
+            if (lastUsed < section.index - 1) {
+              console.log("gap", voice.slice(lastUsed + 1, section.index));
+              repeatInstructions.push({
+                common: {
+                  start: lastUsed + 1,
+                  end: section.index
+                }
+              });
+            }
+          }
+          currentRepeat = {
+            common: {
+              start: section.index
+            }
+          };
+          break;
+        case "startEnding":
+          {
+            if (currentRepeat) {
+              if (!currentRepeat.common.end) currentRepeat.common.end = section.index;
+              if (!currentRepeat.endings) currentRepeat.endings = [];
+              for (e = 0; e < section.endings.length; e++) {
+                currentRepeat.endings[section.endings[e]] = {
+                  start: section.index + 1
+                };
+              }
+            }
+            break;
+          }
+        case "endRepeat":
+          if (currentRepeat) {
+            if (!currentRepeat.endings) currentRepeat.endings = [];
+            if (currentRepeat.endings.length > 0) {
+              for (e = 0; e < currentRepeat.endings.length; e++) {
+                if (currentRepeat.endings[e] && !currentRepeat.endings[e].end) currentRepeat.endings[e].end = section.index;
+              }
+            }
+            if (!currentRepeat.common.end)
+              // This is a repeat that doesn't have first and second endings
+              currentRepeat.common.end = section.index;
+          }
+          break;
+      }
+    }
+    if (currentRepeat) {
+      if (!currentRepeat.common.end) currentRepeat.common.end = lastElement;
+      if (currentRepeat.endings) {
+        for (e = 0; e < currentRepeat.endings.length; e++) {
+          if (currentRepeat.endings[e] && !currentRepeat.endings[e].end) currentRepeat.endings[e].end = lastElement;
+        }
+      }
+      repeatInstructions.push(currentRepeat);
+    }
+    // for (var x = 0; x < repeatInstructions.length; x++) {
+    // 	console.log(JSON.stringify(repeatInstructions[x]))
+    // }
+
+    var output = [];
+    var lastEnd = -1;
+    for (var r = 0; r < repeatInstructions.length; r++) {
+      var instructions = repeatInstructions[r];
+      if (!instructions.endings) {
+        duplicateSpan(voice, output, instructions.common.start, instructions.common.end);
+      } else if (instructions.endings.length === 0) {
+        // this is when there is no endings specified - it is just a repeat
+        duplicateSpan(voice, output, instructions.common.start, instructions.common.end);
+        duplicateSpan(voice, output, instructions.common.start, instructions.common.end);
+      } else {
+        for (e = 0; e < instructions.endings.length; e++) {
+          var ending = instructions.endings[e];
+          if (ending) {
+            // this is a sparse array so skip the empty ones
+            duplicateSpan(voice, output, instructions.common.start, instructions.common.end);
+            if (ending.start > 0) {
+              duplicateSpan(voice, output, ending.start, ending.end);
+            }
+            lastEnd = Math.max(lastEnd, ending.end);
+          }
+        }
+      }
+    }
+    return output;
+  };
+}
+function duplicateSpan(input, output, start, end) {
+  //console.log("dup", {start, end})
+  for (var i = start; i <= end; i++) {
+    output.push(duplicateItem(input[i]));
+  }
+}
+function duplicateItem(src) {
+  var item = Object.assign({}, src);
+  if (item.pitches) item.pitches = parseCommon.cloneArray(item.pitches);
+  return item;
+}
+function startEndingNumbers(startEnding) {
+  // The ending can be in four different types: "random-string", "number", "number-number", "number,number"
+  // If we don't get a number out of it then we will just skip the ending - we don't know what to do with it.
+  var nums = [];
+  var ending, endings, i;
+  if (startEnding.indexOf(',') > 0) {
+    endings = startEnding.split(',');
+    for (i = 0; i < endings.length; i++) {
+      ending = parseInt(endings[i], 10);
+      if (ending > 0) {
+        nums.push(ending);
+      }
+    }
+  } else if (startEnding.indexOf('-') > 0) {
+    endings = startEnding.split('-');
+    var se = parseInt(endings[0], 10);
+    var ee = parseInt(endings[1], 10);
+    for (i = se; i <= ee; i++) {
+      nums.push(i);
+    }
+  } else {
+    ending = parseInt(startEnding, 10);
+    if (ending > 0) {
+      nums.push(ending);
+    }
+  }
+  return nums;
+}
+module.exports = Repeats;
 
 /***/ }),
 
@@ -17823,8 +18529,11 @@ AbstractEngraver.prototype.createABCElement = function (isFirstStaff, isSingleLi
       elemset[0] = abselem;
       break;
     case "tempo":
+      // MAE 20 Nov 2025 For %%printtempo after initial header
       var abselem3 = new AbsoluteElement(elem, 0, 0, 'tempo', this.tuneNumber);
-      abselem3.addFixedX(new TempoElement(elem, this.tuneNumber, createNoteHead));
+      if (!elem.suppress) {
+        abselem3.addFixedX(new TempoElement(elem, this.tuneNumber, createNoteHead));
+      }
       elemset[0] = abselem3;
       break;
     case "style":
@@ -22055,6 +22764,268 @@ module.exports = drawBrace;
 
 /***/ }),
 
+/***/ "./src/write/draw/chord-grid.js":
+/*!**************************************!*\
+  !*** ./src/write/draw/chord-grid.js ***!
+  \**************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var printSymbol = __webpack_require__(/*! ./print-symbol */ "./src/write/draw/print-symbol.js");
+var printStem = __webpack_require__(/*! ./print-stem */ "./src/write/draw/print-stem.js");
+function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
+  var chordFont = fonts.gchordfont;
+  var partFont = fonts.partsfont;
+  var annotationFont = fonts.annotationfont;
+  var endingFont = fonts.repeatfont;
+  var textFont = fonts.textfont;
+  var subtitleFont = fonts.subtitlefont;
+  var ROW_HEIGHT = 50;
+  var ENDING_HEIGHT = 10;
+  var ANNOTATION_HEIGHT = 14;
+  var PART_MARGIN_TOP = 10;
+  var PART_MARGIN_BOTTOM = 20;
+  var TEXT_MARGIN = 16;
+  parts.forEach(function (part) {
+    switch (part.type) {
+      case "text":
+        {
+          text(renderer, part.text, leftMargin, renderer.y, 16, textFont, null, null, false);
+          renderer.moveY(TEXT_MARGIN);
+        }
+        break;
+      case "subtitle":
+        {
+          text(renderer, part.subtitle, leftMargin, renderer.y + PART_MARGIN_TOP, 20, subtitleFont, null, "abcjs-subtitle", false);
+          renderer.moveY(PART_MARGIN_BOTTOM);
+        }
+        break;
+      case "part":
+        if (part.lines.length > 0) {
+          text(renderer, part.name, leftMargin, renderer.y + PART_MARGIN_TOP, 20, subtitleFont, part.name, "abcjs-part", false);
+          renderer.moveY(PART_MARGIN_BOTTOM);
+          var numCols = part.lines[0].length;
+          var colWidth = pageWidth / numCols;
+          part.lines.forEach(function (line, lineNum) {
+            var hasEnding = false;
+            var hasAnnotation = false;
+            line.forEach(function (measure) {
+              if (measure.ending) hasEnding = true;
+              if (measure.annotations && measure.annotations.length > 0) hasAnnotation = true;
+            });
+            var extraTop = hasAnnotation ? ANNOTATION_HEIGHT : hasEnding ? ENDING_HEIGHT : 0;
+            line.forEach(function (measure, barNum) {
+              var RECT_WIDTH = 1;
+              if (!measure.noBorder) {
+                renderer.paper.rect({
+                  x: leftMargin + barNum * colWidth,
+                  y: renderer.y,
+                  width: colWidth,
+                  height: extraTop + ROW_HEIGHT
+                });
+                renderer.paper.rect({
+                  x: leftMargin + barNum * colWidth + RECT_WIDTH,
+                  y: renderer.y + RECT_WIDTH,
+                  width: colWidth - RECT_WIDTH * 2,
+                  height: extraTop + ROW_HEIGHT - RECT_WIDTH * 2
+                });
+                var repeatLeft = 0;
+                var repeatRight = 0;
+                var top = renderer.y;
+                var left = leftMargin + colWidth * barNum;
+                if (measure.hasStartRepeat) {
+                  drawRepeat(renderer, left, top, top + ROW_HEIGHT + extraTop, true, extraTop);
+                  repeatLeft = 12;
+                }
+                if (measure.hasEndRepeat) {
+                  drawRepeat(renderer, left + colWidth, top, top + ROW_HEIGHT + extraTop, false, extraTop);
+                  repeatRight = 12;
+                }
+                var endingWidth = 0;
+                if (measure.ending) {
+                  var endingEl = text(renderer, measure.ending, leftMargin + barNum * colWidth + 4, top + 10, 12, endingFont, null, null, false);
+                  endingWidth = endingEl.getBBox().width + 4;
+                }
+                drawMeasure(renderer, top, leftMargin + repeatLeft, colWidth, lineNum, barNum, measure.chord, chordFont, repeatLeft + repeatRight, ROW_HEIGHT, extraTop);
+                if (measure.annotations && measure.annotations.length > 0) {
+                  drawAnnotations(renderer, top, leftMargin + barNum * colWidth + endingWidth, measure.annotations, annotationFont);
+                }
+                if (extraTop) {
+                  renderer.paper.rectBeneath({
+                    x: leftMargin + barNum * colWidth,
+                    y: renderer.y,
+                    width: colWidth,
+                    height: extraTop,
+                    fill: '#e8e8e8',
+                    stroke: 'none'
+                  });
+                }
+              }
+            });
+            renderer.moveY(extraTop + ROW_HEIGHT);
+          });
+          renderer.moveY(PART_MARGIN_BOTTOM);
+        }
+        break;
+    }
+  });
+}
+function drawPercent(renderer, x, y, offset) {
+  var lineX1 = x - 10;
+  var lineX2 = x + 10;
+  var lineY1 = y + 10;
+  var lineY2 = y - 10;
+  var leftDotX = x - 10;
+  var leftDotY = -renderer.yToPitch(offset) + 2;
+  var rightDotX = x + 6.5;
+  var rightDotY = -renderer.yToPitch(offset) - 2.3;
+  renderer.paper.lineToBack({
+    x1: lineX1,
+    x2: lineX2,
+    y1: lineY1,
+    y2: lineY2,
+    'stroke-width': '3px',
+    'stroke-linecap': "round"
+  });
+  printSymbol(renderer, leftDotX, leftDotY, "dots.dot", {
+    scalex: 1,
+    scaley: 1,
+    klass: "",
+    name: "dot"
+  });
+  printSymbol(renderer, rightDotX, rightDotY, "dots.dot", {
+    scalex: 1,
+    scaley: 1,
+    klass: "",
+    name: "dot"
+  });
+}
+function drawRepeat(renderer, x, y1, y2, isStart, offset) {
+  var lineX = isStart ? x + 2 : x - 4;
+  var circleX = isStart ? x + 9 : x - 11;
+  renderer.paper.openGroup({
+    klass: 'abcjs-repeat'
+  });
+  printStem(renderer, lineX, 3 + renderer.lineThickness, y1, y2, null, "bar");
+  printSymbol(renderer, circleX, -renderer.yToPitch(offset) - 4, "dots.dot", {
+    scalex: 1,
+    scaley: 1,
+    klass: "",
+    name: "dot"
+  });
+  printSymbol(renderer, circleX, -renderer.yToPitch(offset) - 8, "dots.dot", {
+    scalex: 1,
+    scaley: 1,
+    klass: "",
+    name: "dot"
+  });
+  renderer.paper.closeGroup();
+}
+var symbols = {
+  'segno': "scripts.segno",
+  'coda': "scripts.coda",
+  "fermata": "scripts.ufermata"
+};
+function drawAnnotations(renderer, offset, left, annotations, annotationFont) {
+  left += 3;
+  var el;
+  for (var a = 0; a < annotations.length; a++) {
+    switch (annotations[a]) {
+      case 'segno':
+      case 'coda':
+      case "fermata":
+        {
+          left += 12;
+          el = printSymbol(renderer, left, -3, symbols[annotations[a]], {
+            scalex: 1,
+            scaley: 1,
+            //klass: renderer.controller.classes.generate(klass),
+            name: symbols[annotations[a]]
+          });
+          var box = el.getBBox();
+          left += box.width;
+        }
+        break;
+      default:
+        text(renderer, annotations[a], left, offset + 12, 12, annotationFont, null, null, false);
+    }
+  }
+}
+function drawMeasure(renderer, offset, leftMargin, colWidth, lineNum, barNum, chords, chordFont, margin, height, extraTop) {
+  var left = leftMargin + colWidth * barNum;
+  if (!chords[1] && !chords[2] && !chords[3]) drawSingleChord(renderer, left, offset + extraTop, colWidth - margin, height, chords[0], chordFont, extraTop);else if (!chords[1] && !chords[3]) drawTwoChords(renderer, left, offset, colWidth - margin, height, chords[0], chords[2], chordFont, extraTop);else drawFourChords(renderer, left, offset, colWidth - margin, height, chords, chordFont, extraTop);
+}
+function renderChord(renderer, x, y, size, chord, font, maxWidth) {
+  var el = text(renderer, chord, x, y, size, font, null, "abcjs-chord", true);
+  var bb = el.getBBox();
+  var fontSize = size;
+  while (bb.width > maxWidth && fontSize >= 14) {
+    fontSize -= 2;
+    el.setAttribute('font-size', fontSize);
+    bb = el.getBBox();
+  }
+}
+var MAX_ONE_CHORD = 34;
+var MAX_TWO_CHORDS = 26;
+var MAX_FOUR_CHORDS = 20;
+var TOP_MARGIN = -3;
+function drawSingleChord(renderer, left, top, width, height, chord, font, extraTop) {
+  if (chord === '%') drawPercent(renderer, left + width / 2, top + height / 2, extraTop + height / 2);else renderChord(renderer, left + width / 2, top + height / 2 + TOP_MARGIN, MAX_ONE_CHORD, chord, font, width);
+}
+function drawTwoChords(renderer, left, top, width, height, chord1, chord2, font, extraTop) {
+  renderer.paper.lineToBack({
+    x1: left,
+    x2: left + width,
+    y1: top + height + extraTop,
+    y2: top + 2
+  });
+  renderChord(renderer, left + width / 4, top + height / 4 + 5 + extraTop + TOP_MARGIN, MAX_TWO_CHORDS, chord1, font, width / 2);
+  renderChord(renderer, left + 3 * width / 4, top + 3 * height / 4 + extraTop + TOP_MARGIN, MAX_TWO_CHORDS, chord2, font, width / 2);
+}
+function drawFourChords(renderer, left, top, width, height, chords, font, extraTop) {
+  var MARGIN = 3;
+  renderer.paper.lineToBack({
+    x1: left + MARGIN,
+    x2: left + width - MARGIN,
+    y1: top + height / 2 + extraTop,
+    y2: top + height / 2 + extraTop
+  });
+  renderer.paper.lineToBack({
+    x1: left + width / 2,
+    x2: left + width / 2,
+    y1: top + MARGIN + extraTop,
+    y2: top + height - MARGIN + extraTop
+  });
+  if (chords[0]) renderChord(renderer, left + width / 4, top + height / 4 + 2 + extraTop + TOP_MARGIN, MAX_FOUR_CHORDS, shortenChord(chords[0]), font, width / 2);
+  if (chords[1]) renderChord(renderer, left + 3 * width / 4, top + height / 4 + 2 + extraTop + TOP_MARGIN, MAX_FOUR_CHORDS, shortenChord(chords[1]), font, width / 2);
+  if (chords[2]) renderChord(renderer, left + width / 4, top + 3 * height / 4 + extraTop + TOP_MARGIN, MAX_FOUR_CHORDS, shortenChord(chords[2]), font, width / 2);
+  if (chords[3]) renderChord(renderer, left + 3 * width / 4, top + 3 * height / 4 + extraTop + TOP_MARGIN, MAX_FOUR_CHORDS, shortenChord(chords[3]), font, width / 2);
+}
+function shortenChord(chord) {
+  if (chord === "No Chord") return "N.C.";
+  return chord;
+}
+function text(renderer, str, x, y, size, font, dataName, klass, alignCenter) {
+  var attr = {
+    x: x,
+    y: y,
+    stroke: "none",
+    'font-size': size,
+    'font-style': font.style,
+    'font-family': font.face,
+    'font-weight': font.weight,
+    'text-decoration': font.decoration
+  };
+  if (dataName) attr['data-name'] = dataName;
+  if (klass) attr['class'] = klass;
+  attr["text-anchor"] = alignCenter ? "middle" : "start";
+  return renderer.paper.text(str, attr, null, {
+    "alignment-baseline": "middle"
+  });
+}
+module.exports = drawChordGrid;
+
+/***/ }),
+
 /***/ "./src/write/draw/crescendo.js":
 /*!*************************************!*\
   !*** ./src/write/draw/crescendo.js ***!
@@ -22138,7 +23109,8 @@ var setPaperSize = __webpack_require__(/*! ./set-paper-size */ "./src/write/draw
 var nonMusic = __webpack_require__(/*! ./non-music */ "./src/write/draw/non-music.js");
 var spacing = __webpack_require__(/*! ../helpers/spacing */ "./src/write/helpers/spacing.js");
 var Selectables = __webpack_require__(/*! ./selectables */ "./src/write/draw/selectables.js");
-function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset) {
+var drawChordGrid = __webpack_require__(/*! ./chord-grid */ "./src/write/draw/chord-grid.js");
+function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, selectTypes, tuneNumber, lineOffset, chordGrid) {
   var selectables = new Selectables(renderer.paper, selectTypes, tuneNumber);
   var groupClasses = {};
   if (classes.shouldAddClasses) groupClasses.klass = "abcjs-meta-top";
@@ -22147,43 +23119,52 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
   nonMusic(renderer, abcTune.topText, selectables);
   renderer.paper.closeGroup();
   renderer.moveY(renderer.spacing.music);
+  var suppressMusic = false;
+  if (chordGrid && abcTune.chordGrid) {
+    drawChordGrid(renderer, abcTune.chordGrid, renderer.padding.left, width, abcTune.formatting);
+    if (chordGrid === 'noMusic') suppressMusic = true;
+  }
   var staffgroups = [];
   var nStaves = 0;
-  for (var line = 0; line < abcTune.lines.length; line++) {
-    classes.incrLine();
-    var abcLine = abcTune.lines[line];
-    if (abcLine.staff) {
-      // MAE 26 May 2025 - for incipits staff count limiting
-      nStaves++;
-      if (abcTune.formatting.maxStaves) {
-        if (nStaves > abcTune.formatting.maxStaves) {
-          break;
+  if (!suppressMusic) {
+    for (var line = 0; line < abcTune.lines.length; line++) {
+      classes.incrLine();
+      var abcLine = abcTune.lines[line];
+      if (abcLine.staff) {
+        // MAE 26 May 2025 - for incipits staff count limiting
+        nStaves++;
+        if (abcTune.formatting.maxStaves) {
+          if (nStaves > abcTune.formatting.maxStaves) {
+            break;
+          }
         }
+        if (classes.shouldAddClasses) groupClasses.klass = "abcjs-staff-wrapper abcjs-l" + classes.lineNumber;
+        renderer.paper.openGroup(groupClasses);
+        if (abcLine.vskip) {
+          renderer.moveY(abcLine.vskip);
+        }
+        if (staffgroups.length >= 1) addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
+        var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
+        staffgroup.line = lineOffset + line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
+        staffgroups.push(staffgroup);
+        renderer.paper.closeGroup();
+      } else if (abcLine.nonMusic) {
+        if (classes.shouldAddClasses) groupClasses.klass = "abcjs-non-music";
+        renderer.paper.openGroup(groupClasses);
+        nonMusic(renderer, abcLine.nonMusic, selectables);
+        renderer.paper.closeGroup();
       }
-      if (classes.shouldAddClasses) groupClasses.klass = "abcjs-staff-wrapper abcjs-l" + classes.lineNumber;
-      renderer.paper.openGroup(groupClasses);
-      if (abcLine.vskip) {
-        renderer.moveY(abcLine.vskip);
-      }
-      if (staffgroups.length >= 1) addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
-      var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
-      staffgroup.line = lineOffset + line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
-      staffgroups.push(staffgroup);
-      renderer.paper.closeGroup();
-    } else if (abcLine.nonMusic) {
-      if (classes.shouldAddClasses) groupClasses.klass = "abcjs-non-music";
-      renderer.paper.openGroup(groupClasses);
-      nonMusic(renderer, abcLine.nonMusic, selectables);
-      renderer.paper.closeGroup();
     }
   }
   classes.reset();
-  if (abcTune.bottomText && abcTune.bottomText.rows && abcTune.bottomText.rows.length > 0) {
-    if (classes.shouldAddClasses) groupClasses.klass = "abcjs-meta-bottom";
-    renderer.paper.openGroup(groupClasses);
-    renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
-    nonMusic(renderer, abcTune.bottomText, selectables);
-    renderer.paper.closeGroup();
+  if (!suppressMusic) {
+    if (abcTune.bottomText && abcTune.bottomText.rows && abcTune.bottomText.rows.length > 0) {
+      if (classes.shouldAddClasses) groupClasses.klass = "abcjs-meta-bottom";
+      renderer.paper.openGroup(groupClasses);
+      renderer.moveY(24); // TODO-PER: Empirically discovered. What variable should this be?
+      nonMusic(renderer, abcTune.bottomText, selectables);
+      renderer.paper.closeGroup();
+    }
   }
   setPaperSize(renderer, maxWidth, scale, responsive);
   return {
@@ -23552,7 +24533,7 @@ function renderText(renderer, params, alreadyInGroup) {
 
   // MAE 9 May 2025 for free text blocks
   var text;
-  if (params.name == "free-text") {
+  if (params.name === "free-text") {
     text = params.text.replace(/^[ \t]*\n/gm, ' \n');
   } else {
     text = params.text.replace(/\n\n/g, "\n \n");
@@ -23970,6 +24951,7 @@ var EngraverController = function EngraverController(paper, params) {
   if (params.accentAbove) this.accentAbove = params.accentAbove;
   if (params.germanAlphabet) this.germanAlphabet = params.germanAlphabet;
   if (params.lineThickness) this.lineThickness = params.lineThickness;
+  if (params.chordGrid) this.chordGrid = params.chordGrid;
   this.renderer.controller = this; // TODO-GD needed for highlighting
   this.renderer.foregroundColor = params.foregroundColor ? params.foregroundColor : "currentColor";
   if (params.ariaLabel !== undefined) this.renderer.ariaLabel = params.ariaLabel;
@@ -24177,7 +25159,7 @@ EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOf
   }
 
   // Do all the writing to the SVG
-  var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset);
+  var ret = draw(this.renderer, this.classes, abcTune, this.width, maxWidth, this.responsive, scale, this.selectTypes, tuneNumber, lineOffset, this.chordGrid);
   this.staffgroups = ret.staffgroups;
   this.selectables = ret.selectables;
   if (this.oneSvgPerLine) {
@@ -25229,7 +26211,22 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
         var auxBeamEndX = x;
         var auxBeamEndY = bary + sy * (j + 1);
         if (auxBeams[j].single) {
-          auxBeamEndX = i === 0 ? x + 5 : x - 5;
+          if (i === 0) {
+            // This is the first note in the group, always draw the beam to the right
+            auxBeamEndX = x + 5;
+          } else if (i === elems.length - 1) {
+            // This is the last note in the group, always draw the beam to the left
+            auxBeamEndX = x - 5;
+          } else {
+            // This is a middle note, check the note durations of the notes to the left and right
+            if (elems[i - 1].duration === elems[i + 1].duration) {
+              // The notes on either side are the same duration, alternate which side the beam goes to
+              auxBeamEndX = i % 2 === 0 ? x + 5 : x - 5;
+            } else {
+              // The notes on either side are different durations, draw the beam to the shorter note
+              auxBeamEndX = elems[i - 1].duration > elems[i + 1].duration ? x + 5 : x - 5;
+            }
+          }
           auxBeamEndY = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, auxBeamEndX) + sy * (j + 1);
         }
         var b = {
@@ -26421,6 +27418,9 @@ Renderer.prototype.setVerticalSpace = function (formatting) {
 Renderer.prototype.calcY = function (ofs) {
   return this.y - ofs * spacing.STEP;
 };
+Renderer.prototype.yToPitch = function (ofs) {
+  return ofs / spacing.STEP;
+};
 Renderer.prototype.moveY = function (em, numLines) {
   if (numLines === undefined) numLines = 1;
   this.y += em * numLines;
@@ -26581,7 +27581,7 @@ Svg.prototype.rectBeneath = function (attr) {
   if (attr['fill-opacity']) el.setAttribute("fill-opacity", attr['fill-opacity']);
   this.svg.insertBefore(el, this.svg.firstChild);
 };
-Svg.prototype.text = function (text, attr, target) {
+Svg.prototype.text = function (text, attr, target, spanAttr) {
   var el = document.createElementNS(svgNS, 'text');
   el.setAttribute("stroke", "none");
   for (var key in attr) {
@@ -26597,6 +27597,13 @@ Svg.prototype.text = function (text, attr, target) {
       continue;
     }
     var line = document.createElementNS(svgNS, 'tspan');
+    if (spanAttr) {
+      for (var skey in spanAttr) {
+        if (spanAttr.hasOwnProperty(skey)) {
+          line.setAttribute(skey, spanAttr[skey]);
+        }
+      }
+    }
     line.setAttribute("x", attr.x ? attr.x : 0);
     if (i !== 0) line.setAttribute("dy", "1.2em");
     if (lines[i].indexOf("\x03") !== -1) {
@@ -26808,7 +27815,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.5.2';
+var version = '6.6.0';
 module.exports = version;
 
 /***/ })

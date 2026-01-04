@@ -10,6 +10,12 @@ Full documentation is here: [abcjs documentation](https://paulrosen.github.io/ab
 
 There is an organization that has a collection of useful projects related to abcjs called [abcjs-music](https://github.com/abcjs-music). See some examples there. If you have a project that you think would be of general interest and would like to add it to that organization, contact me.
 
+## Announcement: version 6.6.0
+
+This has the new feature `chordGrid`, which is a view of the chords similar to some of the trad jazz lead sheets. If you have `chordGrid: "noMusic"` then only the chords will show, if you have `chordGrid: "withMusic"` then the chords will print above the standard music.
+
+There is also completely new handling for the repeated sections that can handle more complicated repeating patterns. This should make more charts play correctly but it might cause an issue if you are counting on the old behavior.
+
 ## Announcement: version 6.4.0
 
 The method for creating chord accompaniment has changed. Hopefully there aren't any regressions but if you have an example that doesn't match what it used to be, please open an issue.

@@ -1,3 +1,29 @@
+# Version 6.6.0
+
+## Features
+
+* Created a chord grid view with the parameter `chordGrid`.
+
+* Improved the handling of repeated sections to handle third endings, and constructions like `1-3` and `1,2`.
+
+## Bugs
+
+* Fixed transposing bugs: Aeolian mode; `clef=` on `K:` line; bugs when there are spaces in unexpected places.
+
+* Fix suppressing the tempo when %%printtempo 0 is specified.
+
+* Fix an issue with wrong TimingCallbacks startTime
+
+* Updated algorithm to determine direction of single beams
+
+* Fixed bug where TimingCallbacks gets one last call after it has been stopped.
+
+* Handle 5/8 and 7/8 better in TimingCallbacks.
+
+## Documentation
+
+* Moved documentation to https://codeberg.org/abcjs/abcjs-docs
+
 # Version 6.5.2
 
 ## Bugs
