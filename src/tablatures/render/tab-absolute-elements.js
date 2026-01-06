@@ -129,21 +129,36 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
 
 function addTabStem(plugin, abs) {
 	if (!plugin || !plugin.params || !plugin.params.stems) return;
-	var minPitch = Infinity;
-	var maxPitch = -Infinity;
+	var linePitch = plugin.linePitch || 3;
+	// How far below the tab number the stem should start, relative to string spacing.
+	// Use ~1.5 line pitches to clear the digit by about a full "digit height".
+	var stemTopOffset = linePitch * 1.5;
+	// How far further down the stem should extend (roughly double the previous value).
+	var padding = linePitch * 2.4;
+	// Determine whether this note should display a quaver-style tail on the tab stem.
+	var duration = abs.abcelem && abs.abcelem.duration;
+	var hasTail = duration !== undefined && duration < 0.25; // quavers and shorter
 	for (var i = 0; i < abs.children.length; i++) {
 		var child = abs.children[i];
 		if (child.type === 'tabNumber' && child.pitch !== undefined) {
-			if (child.pitch < minPitch) minPitch = child.pitch;
-			if (child.pitch > maxPitch) maxPitch = child.pitch;
+			// For each tab number, create an individual downward stem whose top is clearly below the number.
+			// Smaller pitch values are lower on the tablature staff, so subtract to go down.
+			var top = child.pitch - stemTopOffset; // just below the digit, near the space to the next string
+			var bottom = top - padding; // further down from the digit
+			// Use a slightly smaller linewidth magnitude than standard stems so the tab stems appear skinny.
+			var stem = new RelativeElement(null, 0, 0, bottom, { type: 'stem', pitch2: top, linewidth: -0.5, klass: 'abcjs-tab-stem' });
+			stem.x = child.x !== undefined ? child.x : abs.x;
+			abs.addExtra(stem);
+			if (hasTail) {
+				// Add a small horizontal tail at the bottom of the tab stem for quavers and shorter.
+				var tailWidth = linePitch * 0.9;
+				var tailPitch = bottom + linePitch * 0.2; // near the end of the stem
+				var tail = new RelativeElement(null, 0, tailWidth, tailPitch, { type: 'tabTail' });
+				tail.x = stem.x;
+				abs.addExtra(tail);
+			}
 		}
 	}
-	if (!isFinite(minPitch) || !isFinite(maxPitch)) return;
-	var padding = plugin.linePitch || 3;
-	var p1 = minPitch - padding;
-	var p2 = maxPitch + padding;
-	var stem = new RelativeElement(null, 0, 0, p1, { type: 'stem', pitch2: p2, linewidth: -1 });
-	abs.addExtra(stem);
 }
 
 function getXGrace(abs, index) {

@@ -61,7 +61,13 @@ function drawRelativeElement(renderer, params, bartop) {
 			params.graphelem = printStem(renderer, params.x, params.linewidth + renderer.lineThickness, y, (bartop) ? bartop : renderer.calcY(params.pitch2), null, "bar"); break; // bartop can't be 0
 		case "stem":
 			var stemWidth = params.linewidth > 0 ? params.linewidth + renderer.lineThickness : params.linewidth - renderer.lineThickness
-			params.graphelem = printStem(renderer, params.x, stemWidth, y, renderer.calcY(params.pitch2), 'abcjs-stem', 'stem'); break;
+			var stemClass = 'abcjs-stem';
+			if (params.klass)
+				stemClass += ' ' + params.klass;
+			params.graphelem = printStem(renderer, params.x, stemWidth, y, renderer.calcY(params.pitch2), stemClass, 'stem'); break;
+		case "tabTail":
+			var tailThickness = 0.35 + renderer.lineThickness / 2;
+			params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, 'abcjs-tab-stem', 'tab-tail', tailThickness); break;
 		case "ledger":
 			params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger", 0.35 + renderer.lineThickness); break;
 	}
