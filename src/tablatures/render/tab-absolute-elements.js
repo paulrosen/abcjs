@@ -127,6 +127,25 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
 	return tabNoteRelative;
 }
 
+function addTabStem(plugin, abs) {
+	if (!plugin || !plugin.params || !plugin.params.stems) return;
+	var minPitch = Infinity;
+	var maxPitch = -Infinity;
+	for (var i = 0; i < abs.children.length; i++) {
+		var child = abs.children[i];
+		if (child.type === 'tabNumber' && child.pitch !== undefined) {
+			if (child.pitch < minPitch) minPitch = child.pitch;
+			if (child.pitch > maxPitch) maxPitch = child.pitch;
+		}
+	}
+	if (!isFinite(minPitch) || !isFinite(maxPitch)) return;
+	var padding = plugin.linePitch || 3;
+	var p1 = minPitch - padding;
+	var p2 = maxPitch + padding;
+	var stem = new RelativeElement(null, 0, 0, p1, { type: 'stem', pitch2: p2, linewidth: -1 });
+	abs.addExtra(stem);
+}
+
 function getXGrace(abs, index) {
 	var found = 0;
 	if (abs.extra) {
@@ -294,6 +313,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
 					defNote.abselem = abs;
 					tabVoice.push(defNote);
 					dest.children.push(abs);
+					addTabStem(plugin, abs);
 				}
 				break;
 		}
