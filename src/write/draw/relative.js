@@ -66,8 +66,23 @@ function drawRelativeElement(renderer, params, bartop) {
 				stemClass += ' ' + params.klass;
 			params.graphelem = printStem(renderer, params.x, stemWidth, y, renderer.calcY(params.pitch2), stemClass, 'stem'); break;
 		case "tabTail":
-			var tailThickness = 0.35 + renderer.lineThickness / 2;
-			params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, 'abcjs-tab-stem', 'tab-tail', tailThickness); break;
+			// Draw a short diagonal line "flag" that angles back up from the stem.
+			var x1 = params.x;
+			var y1 = renderer.calcY(params.pitch); // attach at the stem
+			var x2 = x1 + params.w;
+			// Increase pitch to move visually upward (since calcY subtracts pitch*STEP).
+			var y2 = renderer.calcY(params.pitch + 2); // a little higher to create the diagonal.
+			var attr = {
+				x1: x1,
+				y1: y1,
+				x2: x2,
+				y2: y2,
+				stroke: renderer.foregroundColor,
+				"stroke-width": 1
+			};
+			attr['class'] = 'abcjs-tab-stem';
+			attr['data-name'] = 'tab-tail';
+			params.graphelem = renderer.paper.lineToBack(attr); break;
 		case "ledger":
 			params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger", 0.35 + renderer.lineThickness); break;
 	}

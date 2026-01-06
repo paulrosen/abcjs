@@ -135,9 +135,15 @@ function addTabStem(plugin, abs) {
 	var stemTopOffset = linePitch * 1.5;
 	// How far further down the stem should extend (roughly double the previous value).
 	var padding = linePitch * 2.4;
-	// Determine whether this note should display a quaver-style tail on the tab stem.
+	// Determine whether this note should display quaver/semicolon-style tails on the tab stem.
 	var duration = abs.abcelem && abs.abcelem.duration;
-	var hasTail = duration !== undefined && duration < 0.25; // quavers and shorter
+	var tailCount = 0;
+	if (duration !== undefined && duration < 0.25) { // quavers and shorter
+		// One tail for quavers, two for semiquavers and shorter.
+		tailCount = 1;
+		if (duration < 0.125)
+			tailCount = 2;
+	}
 	for (var i = 0; i < abs.children.length; i++) {
 		var child = abs.children[i];
 		if (child.type === 'tabNumber' && child.pitch !== undefined) {
@@ -149,13 +155,16 @@ function addTabStem(plugin, abs) {
 			var stem = new RelativeElement(null, 0, 0, bottom, { type: 'stem', pitch2: top, linewidth: -0.5, klass: 'abcjs-tab-stem' });
 			stem.x = child.x !== undefined ? child.x : abs.x;
 			abs.addExtra(stem);
-			if (hasTail) {
-				// Add a small horizontal tail at the bottom of the tab stem for quavers and shorter.
+			if (tailCount > 0) {
+				// Add one or more small horizontal tails near the bottom of the tab stem.
 				var tailWidth = linePitch * 0.9;
-				var tailPitch = bottom + linePitch * 0.2; // near the end of the stem
-				var tail = new RelativeElement(null, 0, tailWidth, tailPitch, { type: 'tabTail' });
-				tail.x = stem.x;
-				abs.addExtra(tail);
+				for (var t = 0; t < tailCount; t++) {
+					// Stack tails upward along the stem for multiple flags.
+					var tailPitch = bottom + linePitch * (0.2 + t * 0.5);
+					var tail = new RelativeElement(null, 0, tailWidth, tailPitch, { type: 'tabTail' });
+					tail.x = stem.x;
+					abs.addExtra(tail);
+				}
 			}
 		}
 	}
