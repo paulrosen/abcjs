@@ -1,0 +1,39 @@
+X: 1
+T: Concerto pour Alto - Mouvement I
+C: Abenson Georges
+M: 4/4
+L: 1/8
+K: Cmaj
+
+% Orchestral Introduction (Orchestre)
+V:1
+"Orchestre" z4 C2 E2 | "F" F2 A2 c2 e2 | "C" G2 c2 e2 g2 | "G" D2 G2 B2 d2 |
+"C" E2 G2 c2 e2 | "F" A2 c2 f2 a2 | "C" C2 E2 G2 c2 | "G" D2 G2 B2 d2 |
+
+% Solo Alto
+V:2 clef=alto
+"Alto Solo" z4 C2 E2 | "Am" A2 C2 E2 A2 | "Dm" D2 F2 A2 c2 | "G" G2 B2 d2 g2 |
+"C" E2 G2 c2 e2 | "F" A2 c2 f2 a2 | "C" C2 E2 G2 c2 | "G" D2 G2 B2 d2 |
+
+% Accompagnement de l'Orchestre avec la mélodie
+V:1
+"Orchestre" C2 E2 G2 c2 | "Am" A2 C2 E2 A2 | "F" F2 A2 c2 e2 | "C" G2 C2 E2 G2 |
+"Am" A2 C2 E2 A2 | "G" G2 B2 D2 G2 | "C" C2 E2 G2 c2 | "G" D2 G2 B2 d2 |
+
+% Solo Alto : Mélodie principale avec nuances
+V:2 clef=alto
+"Alto Solo" G2 c2 e2 g2 | "F" f2 a2 c'2 e'2 | "G" g2 b2 d'2 g'2 | "C" e2 g2 c'2 e'2 |
+"Am" A2 C2 E2 A2 | "G" G2 B2 d2 g2 | "C" C2 E2 G2 c2 | "G" D2 G2 B2 d2 |
+
+% Transition
+V:1
+"Orchestre" F2 A2 c2 e2 | "G" D2 G2 B2 d2 | "C" E2 G2 c2 e2 | "Am" A2 C2 E2 A2 |
+
+% Solo Alto : Cadence
+V:2 clef=alto
+"Alto Solo" A2 B2 C'2 E'2 | "F" F2 A2 c'2 f'2 | "G" G2 B2 D'2 G'2 | "C" C2 E2 G2 c2 |
+
+% Coda : Finale du mouvement
+V:1
+"Orchestre" C2 E2 G2 c2 | "F" A2 c2 e2 a2 | "C" G2 E2 C2 G2 | "G" D2 G2 B2 d2 |
+"C" E2 G2 C2 E2 | "F" A2 C2 F2 A2 | "C" G2 C2 E2 G2 | "C" C2 G2 C2 E2 :|
