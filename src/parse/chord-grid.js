@@ -123,12 +123,14 @@ function flattenVoices(staves) {
 							})
 						}
 						if (!element.rest || element.rest.type !== 'spacer') {
-							const thisDuration = Math.floor(element.duration * 4)
+							// if the duration is zero and it is a note, then it is stemless and should count as a quarter note
+							const dur = element.duration === 0 && !element.rest ? 0.25 : element.duration
+							const thisDuration = Math.floor(dur * 4)
 							if (thisDuration > 4) {
 								measureNum += Math.floor(thisDuration / 4)
 								beatNum = 0
 							} else {
-								let thisBeat = element.duration * 4
+								let thisBeat = dur * 4
 								if (element.tripletMultiplier)
 									thisBeat *= element.tripletMultiplier
 								beatNum += thisBeat
@@ -140,6 +142,15 @@ function flattenVoices(staves) {
 							nextBarEnding = ""
 						}
 						addDecoration(element, currentBar)
+						if (element.chord) {
+							element.chord.forEach(ch => {
+								if (ch.position !== 'default') {
+									if (!currentBar.annotations)
+										currentBar.annotations = []
+									currentBar.annotations.push(ch.name)
+								}
+							})
+						}
 						if (element.type === 'bar_dbl_repeat' || element.type === 'bar_left_repeat')
 							currentBar.hasStartRepeat = true
 						if (element.type === 'bar_dbl_repeat' || element.type === 'bar_right_repeat')

@@ -347,7 +347,7 @@ M:4/4
 P:Ending
 !coda!"^3x"|:"G"RB0 RB0 "G7"RB0 RB0  | "C"RB0 RB0 "Cm6"RB0 RB0 :| "G"RB0 z2 "D7"RB0 z2 | "G" z [G^A^c] (3[GBd][Bde][deg] "G"[egb]4|]
 `
-	const expectedYou = []
+	const expectedYou = [{"type":"part","name":"Ending","lines":[[{"chord":["G","","G7",""],"annotations":["coda","3x"],"hasStartRepeat":true},{"chord":["C","","Cm6",""],"hasEndRepeat":true}],[{"chord":["G","","D7",""]},{"chord":["G","","G",""]}]]}]
 
 	////////////////////////////////////
 
