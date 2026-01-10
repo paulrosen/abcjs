@@ -271,6 +271,7 @@ AbstractEngraver.prototype.createABCVoice = function (abcline, tempo, s, v, isSi
 		}
 		pos += ret.count;
 	}
+	this.decoration.endLine(voice)
 	this.pushCrossLineElems(s, v);
 };
 

@@ -216,7 +216,13 @@ K:C
 CDEF|GFED|!pp!!<(!CDEF|
 GFED|!<)!!ff!C4|]`
 
-	const expectedDynamicsHairpin = []
+	const abcGlissandoTwoLine = `X:1
+T:Crescendo Bug
+L:1/4
+M:4/4
+K:C
+CDEF|GFED|CDE!~(!F|
+!~)!GFED|C4|]`
 
 	it("crashes", function () {
 		testParser(abc1, expected1, "abc1");
@@ -265,9 +271,17 @@ GFED|!<)!!ff!C4|]`
 	})
 
 	it("dynamics-over-line", function () {
-		const ret = flattenResults(abcDynamicsHairpin)
-		//console.log(JSON.stringify(ret))
-		chai.assert.deepStrictEqual(ret, expectedDynamicsHairpin, "DynamicsHairpin");
+		var visualObj = abcjs.renderAbc("paper", abcDynamicsHairpin);
+
+		var dynamics = document.querySelectorAll('#paper [data-name="dynamics"]')
+		chai.assert.equal(dynamics.length, 4);
+	})
+
+	it("glissando-two-line", function () {
+		var visualObj = abcjs.renderAbc("paper", abcGlissandoTwoLine);
+
+		var glissando = document.querySelectorAll('#paper [data-name="glissando"]')
+		chai.assert.equal(glissando.length, 2);
 	})
 
 	function testParser(abc, expectedLines, comment) {
