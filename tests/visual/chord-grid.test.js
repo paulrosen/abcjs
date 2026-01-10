@@ -443,6 +443,10 @@ P:Ending
 		parserTest(abcYou, expectedYou);
 	})
 
+	it("1-svg-grid", function () {
+		oneSvgTest(abcAfter, expectedAfter);
+	})
+
 })
 
 function parserTest(abc, expected) {
@@ -458,4 +462,13 @@ function parserTest(abc, expected) {
 	var grid = visualObj[0].chordGrid
 	console.log(JSON.stringify(grid))
 	chai.assert.deepEqual(grid, expected)
+}
+
+function oneSvgTest(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc, { oneSvgPerLine: true, chordGrid: "withMusic", format: {
+		gchordfont: "itim-music, itim, Verdana, sans-serif 18"
+		}
+	});
+	const divs = document.querySelectorAll("#paper > div")
+	chai.assert.equal(divs.length, 9)
 }
