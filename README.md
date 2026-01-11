@@ -4,9 +4,9 @@
 
 This library makes it easy to incorporate **sheet music** into your **websites**. You can also turn visible **ABC** text into sheet music on websites that you don't own using a greasemonkey script, or change your own website that contains ABC text with no other changes than the addition of one javascript file. You can also generate **MIDI files** or play them directly in your browser.
 
-[List of Examples](https://cdn.rawgit.com/paulrosen/abcjs/main/examples/toc.html)
+[List of Examples](https://examples.abcjs.net/)
 
-Full documentation is here: [abcjs documentation](https://paulrosen.github.io/abcjs/)
+Full documentation is here: [abcjs documentation](https://docs.abcjs.net/)
 
 There is an organization that has a collection of useful projects related to abcjs called [abcjs-music](https://github.com/abcjs-music). See some examples there. If you have a project that you think would be of general interest and would like to add it to that organization, contact me.
 
