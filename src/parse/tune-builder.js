@@ -496,7 +496,6 @@ function simplifyMetaText(tune) {
 
 function resolveOverlays(tune) {
 	var madeChanges = false;
-	var durationsPerLines = [];
 	for (var i = 0; i < tune.lines.length; i++) {
 		var line = tune.lines[i];
 		if (line.staff) {
@@ -506,10 +505,8 @@ function resolveOverlays(tune) {
 				for (var k = 0; k < staff.voices.length; k++) {
 					var voice = staff.voices[k];
 					overlayVoice.push({ hasOverlay: false, voice: [], snip: [] });
-					durationsPerLines[i] = 0;
 					var durationThisBar = 0;
 					var inOverlay = false;
-					var overlayDuration = 0;
 					var snipStart = -1;
 					for (var kk = 0; kk < voice.length; kk++) {
 						var event = voice[kk];
@@ -518,19 +515,32 @@ function resolveOverlays(tune) {
 							inOverlay = true;
 							snipStart = kk;
 							overlayVoice[k].hasOverlay = true;
-							if (overlayDuration === 0)
-								overlayDuration = durationsPerLines[i];
-							// If this isn't the first line, we also need invisible rests on the previous lines.
-							// So, if the next voice doesn't appear in a previous line, create it
+
+							// TODO-PER: This looks like it can create a completely blank voice but I'm not sure how. That doesn't seem to hurt anything, though.
 							for (var ii = 0; ii < i; ii++) {
-								if (durationsPerLines[ii] && tune.lines[ii].staff && staff.voices.length >= tune.lines[ii].staff[0].voices.length) {
-									tune.lines[ii].staff[0].voices.push([{
-										el_type: "note",
-										duration: durationsPerLines[ii],
-										rest: { type: "invisible" },
-										startChar: event.startChar,
-										endChar: event.endChar
-									}]);
+								if (tune.lines[ii].staff) {
+									tune.lines[ii].staff.forEach(s => {
+										if (staff.voices.length >= s.voices.length) {
+											s.voices.forEach(v => {
+												let nv = [];
+												v.forEach(ev => {
+													if (ev.el_type === "bar") {
+														nv.push(ev);
+													} else if (ev.el_type === "note") {
+														nv.push({
+															el_type: "note",
+															duration: ev.duration,
+															decoration: ev.decoration,
+															rest: {type: "invisible"},
+															startChar: ev.startChar,
+															endChar: ev.endChar
+														});
+													}
+												});
+												s.voices.push(nv);
+											});
+										}
+									});
 								}
 							}
 						} else if (event.el_type === "bar") {
@@ -551,7 +561,6 @@ function resolveOverlays(tune) {
 								overlayVoice[k].voice.push(event);
 							} else if (!event.rest || event.rest.type !== 'spacer') {
 								durationThisBar += event.duration;
-								durationsPerLines[i] += event.duration;
 							}
 						} else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose" || event.el_type === "color") {
 							// These types of events are duplicated on the overlay layer.
@@ -567,6 +576,7 @@ function resolveOverlays(tune) {
 					var ov = overlayVoice[k];
 					if (ov.hasOverlay) {
 						ov.voice.splice(0, 0, { el_type: "stem", direction: "down" })
+						console.log(ov.voice)
 						staff.voices.push(ov.voice);
 						for (var kkk = ov.snip.length - 1; kkk >= 0; kkk--) {
 							var snip = ov.snip[kkk];
@@ -591,7 +601,8 @@ function resolveOverlays(tune) {
 		}
 	}
 	return madeChanges;
-};
+}
+
 
 function findLastBar(voice, start) {
 	for (var i = start - 1; i > 0 && voice[i].el_type !== "bar"; i--) {

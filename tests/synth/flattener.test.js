@@ -1880,7 +1880,7 @@ describe("Audio flattener", function() {
 			],
 			[
 				{"cmd":"program","channel":1,"instrument":0},
-				{"cmd":"note","pitch":64,"volume":95,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":65,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":74,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":76,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0},
@@ -1890,8 +1890,11 @@ describe("Audio flattener", function() {
 			],
 			[
 				{"cmd":"program","channel":2,"instrument":0},
-				{"cmd":"note","pitch":77,"volume":95,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":79,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0}
+			],
+			[
+				{"cmd":"program","channel":3,"instrument":0}
 			]
 		]
 	};
@@ -7736,6 +7739,25 @@ describe("Audio flattener", function() {
 			{"cmd":"note","pitch":64,"volume":105,"start":33,"duration":1,"instrument":0,"gap":0},
 		]],"totalDuration":34}
 
+	var abcOverlayRepeat = `Q:1/4=90
+[V:2]|:e2|
+|b2:|
+|B,,2 & xF,|
+`
+
+	var expectedOverlayRepeat = {"tempo":90,"instrument":0,"tracks":[
+		[
+			{"cmd":"program","channel":0,"instrument":0},
+			{"cmd":"note","pitch":76,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":105,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":76,"volume":105,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":105,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":47,"volume":105,"start":1,"duration":0.25,"instrument":0,"gap":0}
+		],[
+			{"cmd":"program","channel":1,"instrument":0},
+			{"cmd":"note","pitch":53,"volume":85,"start":1.125,"duration":0.125,"instrument":0,"gap":0}
+		]],"totalDuration":1.25}
+
 	//////////////////////////////////////////////////////////
 
 
@@ -7933,6 +7955,10 @@ describe("Audio flattener", function() {
 
 	it("repeat-3", function() {
 		doFlattenTest(abcRepeat3, expectedRepeat3);
+	})
+
+	it("overlay-repeat", function() {
+		doFlattenTest(abcOverlayRepeat, expectedOverlayRepeat);
 	})
 
 })
