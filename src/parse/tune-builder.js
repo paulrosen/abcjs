@@ -103,8 +103,22 @@ var TuneBuilder = function (tune) {
 		}
 
 		// If there are overlays, create new voices for them.
+		var hadOverlays = false
 		while (resolveOverlays(tune)) {
+			hadOverlays = true
 			// keep resolving overlays as long as any are found.
+		}
+		if (hadOverlays) {
+			// remove any blank lines that got inserted - not sure how that happened.
+			var voiceNum = 0
+			var isUseful = voiceUseful(tune.lines, voiceNum)
+			while(isUseful !== 'not-found') {
+				isUseful = voiceUseful(tune.lines, voiceNum)
+				if (!isUseful)
+					deleteVoice(tune.lines, voiceNum)
+				else
+					voiceNum++
+			}
 		}
 
 		for (var i = 0; i < tune.lines.length; i++) {
@@ -495,6 +509,12 @@ function simplifyMetaText(tune) {
 // }
 
 function resolveOverlays(tune) {
+	// TODO-PER: maybe a better algorithm than the following:
+	// do a pass to find all the overlays - return a count
+	// (this first pass also removes the overlays and returns them)
+	// do a pass of creating voices with all the measures with invisible rests for all lines
+	// do a pass of inserting the overlays
+
 	var madeChanges = false;
 	for (var i = 0; i < tune.lines.length; i++) {
 		var line = tune.lines[i];
@@ -576,7 +596,6 @@ function resolveOverlays(tune) {
 					var ov = overlayVoice[k];
 					if (ov.hasOverlay) {
 						ov.voice.splice(0, 0, { el_type: "stem", direction: "down" })
-						console.log(ov.voice)
 						staff.voices.push(ov.voice);
 						for (var kkk = ov.snip.length - 1; kkk >= 0; kkk--) {
 							var snip = ov.snip[kkk];
@@ -1010,6 +1029,46 @@ function createStaff(self, tune, params) {
 function createLine(self, tune, params) {
 	tune.lines[tune.lineNum] = { staff: [] };
 	createStaff(self, tune, params);
+}
+
+function voiceUseful(lines, voiceNum) {
+	var isUseful = false
+	var voiceExists = false
+	for (var line = 0; line < lines.length; line++) {
+		var staves = lines[line].staff;
+		if (staves) {
+			for (var s = 0; s < staves.length; s++) {
+				var staff = staves[s]
+				if (voiceNum < staff.voices.length) {
+					voiceExists = true
+					var voice = staff.voices[voiceNum];
+					var output = []
+					for (var e = 0; e < voice.length; e++) {
+						var el = voice[e]
+						if (el.el_type === 'note' && !el.rest)
+							isUseful = true
+					}
+				}
+			}
+		}
+	}
+	if (!voiceExists)
+		return 'not-found'
+	return isUseful
+}
+
+function deleteVoice(lines, voiceNum) {
+	for (var line = 0; line < lines.length; line++) {
+		var staves = lines[line].staff;
+		if (staves) {
+			for (var s = 0; s < staves.length; s++) {
+				var staff = staves[s]
+				if (voiceNum < staff.voices.length) {
+					staff.voices.splice(voiceNum, 1)
+				}
+			}
+		}
+	}
 }
 
 module.exports = TuneBuilder;
