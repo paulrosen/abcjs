@@ -78,7 +78,7 @@ function Repeats(voice) {
 						}
 
 						if (lastUsed < section.index - 1) {
-							console.log("gap", voice.slice(lastUsed+1, section.index))
+							//console.log("gap", voice.slice(lastUsed+1, section.index))
 							repeatInstructions.push({common: {start: lastUsed+1, end: section.index}})
 						}
 					}
