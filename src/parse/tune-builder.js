@@ -1045,7 +1045,7 @@ function voiceUseful(lines, voiceNum) {
 					var output = []
 					for (var e = 0; e < voice.length; e++) {
 						var el = voice[e]
-						if (el.el_type === 'note' && !el.rest)
+						if (el.el_type === 'note' && (!el.rest || el.chord))
 							isUseful = true
 					}
 				}
