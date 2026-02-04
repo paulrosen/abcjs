@@ -156,8 +156,33 @@ function Repeats(voice) {
 
 function duplicateSpan(input, output, start, end) {
 	//console.log("dup", {start, end})
+	if (start < 0) start = 0
+	// If there is a bar at the end of a line and a bar to start the next line, it would be duplicated.
+	if (output.length > 0 && input[start].el_type === 'bar' && output[output.length-1].el_type === 'bar')
+		start++
+
 	for (var i = start; i <= end; i++) {
-		output.push(duplicateItem(input[i]))
+		// If there is a beginning element, it might be duplicated.
+		var index;
+		var skip = false
+		if (input[i].el_type === 'key' || input[i].el_type === 'meter' || input[i].el_type === 'tempo' || input[i].el_type === 'instrument') {
+			index = output.length-1
+			while (index >= 0 && output[index].el_type !== input[i].el_type)
+				index--
+			if (index >= 0) {
+				if (input[i].el_type === 'key' && areKeysEqual(input[i], output[index])) {
+					skip = true
+				} else if (input[i].el_type === 'meter' && input[i].num === output[index].num && input[i].den === output[index].den) {
+					skip = true
+				} else if (input[i].el_type === 'instrument' && input[i].program === output[index].program) {
+					skip = true
+				} else if (input[i].el_type === 'tempo' && input[i].qpm === output[index].qpm) {
+					skip = true
+				}
+			}
+		}
+		if (!skip)
+			output.push(duplicateItem(input[i]))
 	}
 }
 
@@ -166,6 +191,13 @@ function duplicateItem(src) {
 	if (item.pitches)
 		item.pitches = parseCommon.cloneArray(item.pitches);
 	return item
+}
+
+function areKeysEqual(el1, el2) {
+	if (!el1.accidentals || !el2.accidentals)
+		return false // this shouldn't happen, but if so, we don't want to skip the element
+
+	return JSON.stringify(el1.accidentals) === JSON.stringify(el2.accidentals)
 }
 
 function startEndingNumbers(startEnding) {
