@@ -1,3 +1,23 @@
+# Version 6.6.1
+
+## Bugs
+
+* fix repeat logic when user forgets to add a start repeat.
+
+* remove duplicate elements when copying repeats
+
+* fix handling of overlays
+
+* fix bug with creating synth with overlays and repeats
+
+* fix links to documentation and examples.
+
+* fix drawing crescendo across lines.
+
+* fix chord grid with slash rhythm notes
+
+* fix chord grid with one svg per line
+
 # Version 6.6.0
 
 ## Features

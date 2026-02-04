@@ -9465,12 +9465,14 @@ function flattenVoices(staves) {
               });
             }
             if (!element.rest || element.rest.type !== 'spacer') {
-              var thisDuration = Math.floor(element.duration * 4);
+              // if the duration is zero and it is a note, then it is stemless and should count as a quarter note
+              var dur = element.duration === 0 && !element.rest ? 0.25 : element.duration;
+              var thisDuration = Math.floor(dur * 4);
               if (thisDuration > 4) {
                 measureNum += Math.floor(thisDuration / 4);
                 beatNum = 0;
               } else {
-                var thisBeat = element.duration * 4;
+                var thisBeat = dur * 4;
                 if (element.tripletMultiplier) thisBeat *= element.tripletMultiplier;
                 beatNum += thisBeat;
               }
@@ -9481,6 +9483,14 @@ function flattenVoices(staves) {
               nextBarEnding = "";
             }
             addDecoration(element, currentBar);
+            if (element.chord) {
+              element.chord.forEach(function (ch) {
+                if (ch.position !== 'default') {
+                  if (!currentBar.annotations) currentBar.annotations = [];
+                  currentBar.annotations.push(ch.name);
+                }
+              });
+            }
             if (element.type === 'bar_dbl_repeat' || element.type === 'bar_left_repeat') currentBar.hasStartRepeat = true;
             if (element.type === 'bar_dbl_repeat' || element.type === 'bar_right_repeat') currentBar.hasEndRepeat = true;
             if (element.startEnding) nextBarEnding = element.startEnding;
@@ -9864,8 +9874,20 @@ var TuneBuilder = function TuneBuilder(tune) {
     }
 
     // If there are overlays, create new voices for them.
+    var hadOverlays = false;
     while (resolveOverlays(tune)) {
+      hadOverlays = true;
       // keep resolving overlays as long as any are found.
+    }
+
+    if (hadOverlays) {
+      // remove any blank lines that got inserted - not sure how that happened.
+      var voiceNum = 0;
+      var isUseful = voiceUseful(tune.lines, voiceNum);
+      while (isUseful !== 'not-found') {
+        isUseful = voiceUseful(tune.lines, voiceNum);
+        if (!isUseful) deleteVoice(tune.lines, voiceNum);else voiceNum++;
+      }
     }
     for (var i = 0; i < tune.lines.length; i++) {
       var staff = tune.lines[i].staff;
@@ -10247,8 +10269,13 @@ function simplifyMetaText(tune) {
 // }
 
 function resolveOverlays(tune) {
+  // TODO-PER: maybe a better algorithm than the following:
+  // do a pass to find all the overlays - return a count
+  // (this first pass also removes the overlays and returns them)
+  // do a pass of creating voices with all the measures with invisible rests for all lines
+  // do a pass of inserting the overlays
+
   var madeChanges = false;
-  var durationsPerLines = [];
   for (var i = 0; i < tune.lines.length; i++) {
     var line = tune.lines[i];
     if (line.staff) {
@@ -10262,10 +10289,8 @@ function resolveOverlays(tune) {
             voice: [],
             snip: []
           });
-          durationsPerLines[i] = 0;
           var durationThisBar = 0;
           var inOverlay = false;
-          var overlayDuration = 0;
           var snipStart = -1;
           for (var kk = 0; kk < voice.length; kk++) {
             var event = voice[kk];
@@ -10274,20 +10299,33 @@ function resolveOverlays(tune) {
               inOverlay = true;
               snipStart = kk;
               overlayVoice[k].hasOverlay = true;
-              if (overlayDuration === 0) overlayDuration = durationsPerLines[i];
-              // If this isn't the first line, we also need invisible rests on the previous lines.
-              // So, if the next voice doesn't appear in a previous line, create it
+
+              // TODO-PER: This looks like it can create a completely blank voice but I'm not sure how. That doesn't seem to hurt anything, though, because I filter that out immediately afterward.
               for (var ii = 0; ii < i; ii++) {
-                if (durationsPerLines[ii] && tune.lines[ii].staff && staff.voices.length >= tune.lines[ii].staff[0].voices.length) {
-                  tune.lines[ii].staff[0].voices.push([{
-                    el_type: "note",
-                    duration: durationsPerLines[ii],
-                    rest: {
-                      type: "invisible"
-                    },
-                    startChar: event.startChar,
-                    endChar: event.endChar
-                  }]);
+                if (tune.lines[ii].staff) {
+                  tune.lines[ii].staff.forEach(function (s) {
+                    if (staff.voices.length >= s.voices.length) {
+                      s.voices.forEach(function (v) {
+                        var nv = [];
+                        v.forEach(function (ev) {
+                          if (ev.el_type === "bar") {
+                            nv.push(ev);
+                          } else if (ev.el_type === "note") {
+                            nv.push({
+                              el_type: "note",
+                              duration: ev.duration,
+                              rest: {
+                                type: "invisible"
+                              },
+                              startChar: ev.startChar,
+                              endChar: ev.endChar
+                            });
+                          }
+                        });
+                        s.voices.push(nv);
+                      });
+                    }
+                  });
                 }
               }
             } else if (event.el_type === "bar") {
@@ -10318,7 +10356,6 @@ function resolveOverlays(tune) {
                 overlayVoice[k].voice.push(event);
               } else if (!event.rest || event.rest.type !== 'spacer') {
                 durationThisBar += event.duration;
-                durationsPerLines[i] += event.duration;
               }
             } else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose" || event.el_type === "color") {
               // These types of events are duplicated on the overlay layer.
@@ -10370,7 +10407,6 @@ function resolveOverlays(tune) {
   }
   return madeChanges;
 }
-;
 function findLastBar(voice, start) {
   for (var i = start - 1; i > 0 && voice[i].el_type !== "bar"; i--) {}
   return i;
@@ -10772,6 +10808,42 @@ function createLine(self, tune, params) {
     staff: []
   };
   createStaff(self, tune, params);
+}
+function voiceUseful(lines, voiceNum) {
+  var isUseful = false;
+  var voiceExists = false;
+  for (var line = 0; line < lines.length; line++) {
+    var staves = lines[line].staff;
+    if (staves) {
+      for (var s = 0; s < staves.length; s++) {
+        var staff = staves[s];
+        if (voiceNum < staff.voices.length) {
+          voiceExists = true;
+          var voice = staff.voices[voiceNum];
+          var output = [];
+          for (var e = 0; e < voice.length; e++) {
+            var el = voice[e];
+            if (el.el_type === 'note' && (!el.rest || el.chord)) isUseful = true;
+          }
+        }
+      }
+    }
+  }
+  if (!voiceExists) return 'not-found';
+  return isUseful;
+}
+function deleteVoice(lines, voiceNum) {
+  for (var line = 0; line < lines.length; line++) {
+    var staves = lines[line].staff;
+    if (staves) {
+      for (var s = 0; s < staves.length; s++) {
+        var staff = staves[s];
+        if (voiceNum < staff.voices.length) {
+          staff.voices.splice(voiceNum, 1);
+        }
+      }
+    }
+  }
 }
 module.exports = TuneBuilder;
 
@@ -12011,7 +12083,7 @@ var pitchesToPerc = __webpack_require__(/*! ./pitches-to-perc */ "./src/synth/pi
             break;
           default:
             // This should never happen
-            console.log("MIDI creation. Unknown el_type: " + element.el_type + "\n"); // jshint ignore:line
+            console.log("MIDI creation. Unknown el_type: " + element.el_type + "\n");
             break;
         }
       }
@@ -16096,10 +16168,17 @@ function Repeats(voice) {
     var isStartRepeat = elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat";
     var isEndRepeat = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat";
     var startEnding = elem.startEnding ? startEndingNumbers(elem.startEnding) : undefined;
-    if (isEndRepeat) this.sections.push({
-      type: "endRepeat",
-      index: thisIndex
-    });
+    if (isEndRepeat) {
+      // If there are two endRepeats in a row, that is a notation error, but we'll recover by pretending there was a startRepeat right before it.
+      if (this.sections.length > 0 && this.sections[this.sections.length - 1].type === 'endRepeat') this.sections.push({
+        type: "startRepeat",
+        index: this.sections[this.sections.length - 1].index
+      });
+      this.sections.push({
+        type: "endRepeat",
+        index: thisIndex
+      });
+    }
     if (isStartRepeat) this.sections.push({
       type: "startRepeat",
       index: thisIndex
@@ -16167,7 +16246,7 @@ function Repeats(voice) {
               }
             }
             if (lastUsed < section.index - 1) {
-              console.log("gap", voice.slice(lastUsed + 1, section.index));
+              //console.log("gap", voice.slice(lastUsed+1, section.index))
               repeatInstructions.push({
                 common: {
                   start: lastUsed + 1,
@@ -16252,14 +16331,42 @@ function Repeats(voice) {
 }
 function duplicateSpan(input, output, start, end) {
   //console.log("dup", {start, end})
+  if (start < 0) start = 0;
+  // If there is a bar at the end of a line and a bar to start the next line, it would be duplicated.
+  if (output.length > 0 && input[start].el_type === 'bar' && output[output.length - 1].el_type === 'bar') start++;
   for (var i = start; i <= end; i++) {
-    output.push(duplicateItem(input[i]));
+    // If there is a beginning element, it might be duplicated.
+    var index;
+    var skip = false;
+    if (input[i].el_type === 'key' || input[i].el_type === 'meter' || input[i].el_type === 'tempo' || input[i].el_type === 'instrument') {
+      index = output.length - 1;
+      while (index >= 0 && output[index].el_type !== input[i].el_type) {
+        index--;
+      }
+      if (index >= 0) {
+        if (input[i].el_type === 'key' && areKeysEqual(input[i], output[index])) {
+          skip = true;
+        } else if (input[i].el_type === 'meter' && input[i].num === output[index].num && input[i].den === output[index].den) {
+          skip = true;
+        } else if (input[i].el_type === 'instrument' && input[i].program === output[index].program) {
+          skip = true;
+        } else if (input[i].el_type === 'tempo' && input[i].qpm === output[index].qpm) {
+          skip = true;
+        }
+      }
+    }
+    if (!skip) output.push(duplicateItem(input[i]));
   }
 }
 function duplicateItem(src) {
   var item = Object.assign({}, src);
   if (item.pitches) item.pitches = parseCommon.cloneArray(item.pitches);
   return item;
+}
+function areKeysEqual(el1, el2) {
+  if (!el1.accidentals || !el2.accidentals) return false; // this shouldn't happen, but if so, we don't want to skip the element
+
+  return JSON.stringify(el1.accidentals) === JSON.stringify(el2.accidentals);
 }
 function startEndingNumbers(startEnding) {
   // The ending can be in four different types: "random-string", "number", "number-number", "number,number"
@@ -18450,6 +18557,7 @@ AbstractEngraver.prototype.createABCVoice = function (abcline, tempo, s, v, isSi
     }
     pos += ret.count;
   }
+  this.decoration.endLine(voice);
   this.pushCrossLineElems(s, v);
 };
 AbstractEngraver.prototype.saveState = function () {
@@ -20168,6 +20276,16 @@ function leftDecoration(decoration, abselem, roomtaken) {
     }
   }
 }
+Decoration.prototype.endLine = function (voice) {
+  if (this.startDiminuendoX) {
+    voice.addOther(new CrescendoElem(this.startDiminuendoX, lastNote(voice.children), ">", this.dynamicPositioning));
+    this.startDiminuendoX = undefined;
+  }
+  if (this.startCrescendoX) {
+    voice.addOther(new CrescendoElem(this.startCrescendoX, lastNote(voice.children), "<", this.dynamicPositioning));
+    this.startCrescendoX = undefined;
+  }
+};
 Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, positioning) {
   var diminuendo;
   var crescendo;
@@ -20176,9 +20294,11 @@ Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, p
     switch (decoration[i]) {
       case "diminuendo(":
         this.startDiminuendoX = abselem;
+        this.dynamicPositioning = positioning;
         diminuendo = undefined;
         break;
       case "diminuendo)":
+        if (!this.startDiminuendoX) this.startDiminuendoX = firstNote(voice.children);
         diminuendo = {
           start: this.startDiminuendoX,
           stop: abselem
@@ -20187,9 +20307,11 @@ Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, p
         break;
       case "crescendo(":
         this.startCrescendoX = abselem;
+        this.dynamicPositioning = positioning;
         crescendo = undefined;
         break;
       case "crescendo)":
+        if (!this.startCrescendoX) this.startCrescendoX = firstNote(voice.children);
         crescendo = {
           start: this.startCrescendoX,
           stop: abselem
@@ -20221,6 +20343,16 @@ Decoration.prototype.dynamicDecoration = function (voice, decoration, abselem, p
     voice.addOther(new GlissandoElem(glissando.start, glissando.stop));
   }
 };
+function firstNote(els) {
+  for (var i = 0; i < els.length; i++) {
+    if (els[i].abcelem.pitches) return els[i];
+  }
+  return null;
+}
+function lastNote(els) {
+  // The end point doesn't need to be a note - we end at the end of the line
+  return els[els.length - 1];
+}
 Decoration.prototype.createDecoration = function (voice, decoration, pitch, width, abselem, roomtaken, dir, minPitch, positioning, hasVocals, accentAbove) {
   if (!positioning) positioning = {
     ornamentPosition: 'above',
@@ -22785,6 +22917,9 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
   var PART_MARGIN_TOP = 10;
   var PART_MARGIN_BOTTOM = 20;
   var TEXT_MARGIN = 16;
+  renderer.paper.openGroup({
+    klass: 'abcjs-chord-grid'
+  });
   parts.forEach(function (part) {
     switch (part.type) {
       case "text":
@@ -22868,6 +23003,7 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
         break;
     }
   });
+  renderer.paper.closeGroup();
 }
 function drawPercent(renderer, x, y, offset) {
   var lineX1 = x - 10;
@@ -27815,7 +27951,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.6.0';
+var version = '6.6.1';
 module.exports = version;
 
 /***/ })
