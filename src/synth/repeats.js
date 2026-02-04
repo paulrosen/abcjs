@@ -9,8 +9,12 @@ function Repeats(voice) {
 		var isStartRepeat = elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat"
 		var isEndRepeat = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat"
 		var startEnding = elem.startEnding ? startEndingNumbers(elem.startEnding) : undefined
-		if (isEndRepeat)
-			this.sections.push({type:"endRepeat", index: thisIndex})
+		if (isEndRepeat) {
+			// If there are two endRepeats in a row, that is a notation error, but we'll recover by pretending there was a startRepeat right before it.
+			if (this.sections.length > 0 && this.sections[this.sections.length-1].type === 'endRepeat')
+				this.sections.push({type: "startRepeat", index: this.sections[this.sections.length-1].index})
+			this.sections.push({type: "endRepeat", index: thisIndex})
+		}
 		if (isStartRepeat)
 			this.sections.push({type:"startRepeat", index: thisIndex})
 		if (startEnding)

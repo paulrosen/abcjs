@@ -7833,6 +7833,82 @@ G4|]
 
 	//////////////////////////////////////////////////////////
 
+	var abcNoStartRepeatPart = `X:1
+L:1/4
+M:4/4
+K:C
+P:A
+C4 |
+P:B
+D4 :|
+`
+
+	var expectedNoStartRepeatPart = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":4
+	}
+
+	var abcNoStartRepeatRepeat = `X:1
+L:1/4
+M:4/4
+K:C
+C4 :|
+D4 :|
+`
+
+	var expectedNoStartRepeatRepeat = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+			]
+		],
+		"totalDuration":4
+	}
+
+	var abcNoStartRepeatTitle = `X:1
+T:medley
+L:1/4
+M:4/4
+K:C
+C4 |
+T: another tune
+D4 :|
+`
+
+	//TODO-PER: maybe the repeat should never go before a subtitle, but I'm not sure if that will break anyone's expectations.
+	var expectedNoStartRepeatTitle = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":4
+	}
+
+	//////////////////////////////////////////////////////////
+
 
 	it("flatten-pickup-triplet-chords-rhythmhead", function() {
 		doFlattenTest(abcMultiple, expectedMultiple);
@@ -8040,6 +8116,18 @@ G4|]
 
 	it("overlay-repeat", function() {
 		doFlattenTest(abcOverlayRepeat, expectedOverlayRepeat);
+	})
+
+	it("no-start-repeat-part", function() {
+		doFlattenTest(abcNoStartRepeatPart, expectedNoStartRepeatPart);
+	})
+
+	it("no-start-repeat-title", function() {
+		doFlattenTest(abcNoStartRepeatTitle, expectedNoStartRepeatTitle);
+	})
+
+	it("no-start-repeat-repeat", function() {
+		doFlattenTest(abcNoStartRepeatRepeat, expectedNoStartRepeatRepeat);
 	})
 
 })
