@@ -536,7 +536,7 @@ function resolveOverlays(tune) {
 							snipStart = kk;
 							overlayVoice[k].hasOverlay = true;
 
-							// TODO-PER: This looks like it can create a completely blank voice but I'm not sure how. That doesn't seem to hurt anything, though.
+							// TODO-PER: This looks like it can create a completely blank voice but I'm not sure how. That doesn't seem to hurt anything, though, because I filter that out immediately afterward.
 							for (var ii = 0; ii < i; ii++) {
 								if (tune.lines[ii].staff) {
 									tune.lines[ii].staff.forEach(s => {
@@ -550,7 +550,6 @@ function resolveOverlays(tune) {
 														nv.push({
 															el_type: "note",
 															duration: ev.duration,
-															decoration: ev.decoration,
 															rest: {type: "invisible"},
 															startChar: ev.startChar,
 															endChar: ev.endChar

@@ -1898,6 +1898,35 @@ describe("Audio flattener", function() {
 
 	//////////////////////////////////////////////////////////
 
+	var abcPickupOverlay = 'X:1\n' +
+'M: 4/4\n' +
+'L: 1/4\n' +
+'K:C\n' +
+'B, | C4 | D4 |\n' +
+'G4 & E4 | A4 & F4 |\n';
+
+	var expectedPickupOverlay = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":85,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0.25,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":1.25,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":2.25,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":3.25,"duration":1,"instrument":0,"gap":0}
+			],[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":2.25,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":3.25,"duration":1,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":4.25
+	}
+
+	//////////////////////////////////////////////////////////
+
 	var abcRepeatsAndOverlay = `X:1
 L: 1/4
 K: C
@@ -7893,6 +7922,10 @@ G4|]
 
 	it("flatten-overlay", function() {
 		doFlattenTest(abcOverlay, expectedOverlay);
+	})
+
+	it("flatten-pickup-overlay", function() {
+		doFlattenTest(abcPickupOverlay, expectedPickupOverlay);
 	})
 
 	it("flatten-rep-and-over", function() {
