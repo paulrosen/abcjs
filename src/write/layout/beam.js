@@ -212,13 +212,12 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 				var auxBeamEndX = x;
 				var auxBeamEndY = bary + sy * (j + 1);
 
-
 				if (auxBeams[j].single) {
 					var prevNonRestIndex = findPrevNonRest(elems, i);
 					var isFirstNote = (prevNonRestIndex === -1);
 					var isLastNote = (nextNonRestIndex === -1);
 					
-					if(isFirstNote) {
+					if (isFirstNote) {
 						// This is the first note in the group, always draw the beam to the right
 						auxBeamEndX = x + 5;
 					} else if (isLastNote) {
@@ -228,7 +227,7 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 						// This is a middle note, check the note durations of the notes to the left and right (skipping rests)
 						var prevDuration = elems[prevNonRestIndex].abcelem.duration;
 						var nextDuration = elems[nextNonRestIndex].abcelem.duration;
-						if(prevDuration === nextDuration) {
+						if (prevDuration === nextDuration) {
 							// The notes on either side are the same duration, alternate which side the beam goes to
 							auxBeamEndX = i%2 === 0 ? x + 5 : x - 5;
 						} else {
