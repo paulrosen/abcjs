@@ -143,6 +143,27 @@ function createStems(elems, asc, beam, dy, mainNote) {
 
 }
 
+
+// Helper function to find the next non-rest element in the array
+function findNextNonRest(elems, startIndex) {
+	for (var k = startIndex + 1; k < elems.length; k++) {
+		if (!elems[k].abcelem.rest) {
+			return k;
+		}
+	}
+	return -1; // No non-rest element found
+}
+
+// Helper function to find the previous non-rest element in the array
+function findPrevNonRest(elems, startIndex) {
+	for (var k = startIndex - 1; k >= 0; k--) {
+		if (!elems[k].abcelem.rest) {
+			return k;
+		}
+	}
+	return -1; // No non-rest element found
+}
+
 function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 	var beams = [];
 	var auxBeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
@@ -182,27 +203,37 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 		}
 
 		for (var j = auxBeams.length - 1; j >= 0; j--) {
-			if (i === elems.length - 1 || getDurlog(elems[i + 1].abcelem.duration) > (-j - 4)) {
-
+			// Find the next non-rest element to check if we should end the beam
+			var nextNonRestIndex = findNextNonRest(elems, i);
+			var shouldEndBeam = (nextNonRestIndex === -1) || 
+				(nextNonRestIndex < elems.length && getDurlog(elems[nextNonRestIndex].abcelem.duration) > (-j - 4));
+			
+			if (shouldEndBeam) {
 				var auxBeamEndX = x;
 				var auxBeamEndY = bary + sy * (j + 1);
 
 
 				if (auxBeams[j].single) {
-					if(i === 0) {
+					var prevNonRestIndex = findPrevNonRest(elems, i);
+					var isFirstNote = (prevNonRestIndex === -1);
+					var isLastNote = (nextNonRestIndex === -1);
+					
+					if(isFirstNote) {
 						// This is the first note in the group, always draw the beam to the right
 						auxBeamEndX = x + 5;
-					} else if (i === elems.length - 1) {
+					} else if (isLastNote) {
 						// This is the last note in the group, always draw the beam to the left
 						auxBeamEndX = x - 5;
 					} else {
-						// This is a middle note, check the note durations of the notes to the left and right
-						if(elems[i-1].duration === elems[i+1].duration) {
-						// The notes on either side are the same duration, alternate which side the beam goes to
-						auxBeamEndX = i%2 === 0 ? x + 5 : x - 5;
+						// This is a middle note, check the note durations of the notes to the left and right (skipping rests)
+						var prevDuration = elems[prevNonRestIndex].abcelem.duration;
+						var nextDuration = elems[nextNonRestIndex].abcelem.duration;
+						if(prevDuration === nextDuration) {
+							// The notes on either side are the same duration, alternate which side the beam goes to
+							auxBeamEndX = i%2 === 0 ? x + 5 : x - 5;
 						} else {
-						// The notes on either side are different durations, draw the beam to the shorter note
-						auxBeamEndX = elems[i-1].duration > elems[i+1].duration ? x + 5 : x - 5;
+							// The notes on either side are different durations, draw the beam to the shorter note
+							auxBeamEndX = prevDuration > nextDuration ? x + 5 : x - 5;
 						}
 					}
 					auxBeamEndY = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, auxBeamEndX) + sy * (j + 1);
