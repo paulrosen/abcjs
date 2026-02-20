@@ -231,10 +231,8 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 							// The notes on either side are the same duration, alternate which side the beam goes to
 							auxBeamEndX = i%2 === 0 ? x + 5 : x - 5;
 						} else {
-							// The notes on either side are different durations, draw the beam to the shorter note
-							auxBeamEndX = prevDuration > nextDuration ? x + 5 : x - 5;
-						// The notes on either side are different durations, draw the beam to the longer note
-						auxBeamEndX = elems[i-1].duration < elems[i+1].duration ? x + 5 : x - 5;
+							// The notes on either side are different durations, draw the beam to the longer note
+							auxBeamEndX = prevDuration < nextDuration ? x + 5 : x - 5;
 						}
 					}
 					auxBeamEndY = getBarYAt(beam.startX, beam.startY, beam.endX, beam.endY, auxBeamEndX) + sy * (j + 1);
