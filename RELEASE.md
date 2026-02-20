@@ -1,3 +1,11 @@
+# Version 6.6.2
+
+## Bugs
+
+* Fix beaming when there's a rest.
+
+* Fix direction of partial beam in some cases.
+
 # Version 6.6.1
 
 ## Bugs
