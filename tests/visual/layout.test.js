@@ -178,6 +178,60 @@ describe("Layout", function() {
 		{"klass":"abcjs-ending abcjs-l1 abcjs-m0 abcjs-mm1 abcjs-v0","stroke":"blue","fill":"blue","strokeText":"none","fillText":null}
 	]
 
+	var abcPartialStemDirection = `X:1
+L:1/16
+K:C
+M:6/8
+G3GG2 d3dd2 |G2GG3 d2dd3 |GG3G2 dd3d2 |G2G3G d2d3d |
+M:4/4
+G3GG2G2 d3dd2d2 | G2G2GG3 d2d2dd3 | G2G2G3G d2d2d3d | G3GG2G2 d3dd2d2 | 
+G3GG3G d3dd3d | GG3GG3 dd3dd3 | GG3G3G dd3d3d | G3GGG3 d3ddd3 | 
+G3G G3G d3d d3d | GG3 GG3 dd3 dd3 | GG3 G3G dd3 d3d | G3G GG3 d3d dd3 | 
+`
+
+	var expectedPartialStemDirection = [
+		[{"l":79,"r":133},{"l":113,"r":109}],
+		[{"l":151,"r":206},{"l":185,"r":180}],
+		[{"l":253,"r":301},{"l":281,"r":286}],
+		[{"l":325,"r":373},{"l":353,"r":358}],
+		[{"l":427,"r":481},{"l":427,"r":432}],
+		[{"l":499,"r":553},{"l":499,"r":504}],
+		[{"l":600,"r":663},{"l":662,"r":658}],
+		[{"l":673,"r":735},{"l":734,"r":729}],
+		[{"l":80,"r":141},{"l":105,"r":101}],
+		[{"l":152,"r":213},{"l":177,"r":172}],
+		[{"l":254,"r":310},{"l":295,"r":301}],
+		[{"l":326,"r":382},{"l":367,"r":372}],
+		[{"l":427,"r":494},{"l":494,"r":489}],
+		[{"l":499,"r":566},{"l":566,"r":561}],
+		[{"l":602,"r":663},{"l":627,"r":623}],
+		[{"l":674,"r":735},{"l":699,"r":694}],
+		[{"l":58,"r":128},{"l":85,"r":81},{"l":127,"r":123}],
+		[{"l":133,"r":203},{"l":160,"r":155},{"l":202,"r":197}],
+		[{"l":238,"r":296},{"l":238,"r":244},{"l":280,"r":286}],
+		[{"l":313,"r":371},{"l":313,"r":318},{"l":355,"r":360}],
+		[{"l":417,"r":487},{"l":417,"r":423},{"l":486,"r":482}],
+		[{"l":492,"r":562},{"l":492,"r":497},{"l":561,"r":556}],
+		[{"l":597,"r":655},{"l":624,"r":640}],
+		[{"l":672,"r":730},{"l":699,"r":714}],
+		[{"l":58,"r":86},{"l":85,"r":81}],
+		[{"l":100,"r":128},{"l":127,"r":123}],
+		[{"l":133,"r":161},{"l":160,"r":155}],
+		[{"l":175,"r":203},{"l":202,"r":197}],
+		[{"l":238,"r":254},{"l":238,"r":244}],
+		[{"l":280,"r":296},{"l":280,"r":286}],
+		[{"l":313,"r":329},{"l":313,"r":318}],
+		[{"l":355,"r":371},{"l":355,"r":360}],
+		[{"l":418,"r":434},{"l":418,"r":423}],
+		[{"l":460,"r":487},{"l":486,"r":482}],
+		[{"l":493,"r":509},{"l":493,"r":498}],
+		[{"l":535,"r":562},{"l":561,"r":556}],
+		[{"l":598,"r":625},{"l":624,"r":620}],
+		[{"l":640,"r":656},{"l":640,"r":645}],
+		[{"l":673,"r":700},{"l":699,"r":694}],
+		[{"l":715,"r":731},{"l":715,"r":720}]
+	]
+
 	it("line-too-wide", function() {
 		var visualObj = doLayoutTest(lineTooWide, {staffwidth: 500, expandToWidest: true }, expectedLineTooWide, 'staffwidth=500');
 		var expected = ['', 313, '', '', 15, 611, '']
@@ -266,6 +320,36 @@ describe("Layout", function() {
 		}
 		console.log(JSON.stringify(output))
 		chai.assert.deepEqual(output, expectedVoiceEndings)
+	})
+
+	it("partial-stem-direction", function() {
+		var visualObj = abcjs.renderAbc("paper", abcPartialStemDirection, {add_classes: true});
+		var beams = []
+
+		for (var i = 0; i < visualObj[0].lines.length; i++) {
+			var line = visualObj[0].lines[i]
+			if (line.staffGroup) {
+				for (var j = 0; j < line.staffGroup.voices.length; j++) {
+					var elem = line.staffGroup.voices[j]
+					if (elem.beams) {
+						for (var k = 0; k < elem.beams.length; k++) {
+							var beam = elem.beams[k]
+							if (beam.beams) {
+								var group = []
+								for (var b = 0; b < beam.beams.length; b++) {
+									group.push({l: Math.round(beam.beams[b].startX),r: Math.round(beam.beams[b].endX)})
+								}
+								beams.push(group)
+							}
+						}
+					}
+				}
+			}
+		}
+		var out = JSON.stringify(beams)
+		console.log(out.replace(/\],\[/g, '],\n[').replace("[[", "[\n[").replace("]]", "]\n]"))
+		chai.assert.deepEqual(beams, expectedPartialStemDirection)
+
 	})
 
 })
