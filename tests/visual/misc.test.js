@@ -235,15 +235,30 @@ describe("Miscellaneous", function () {
 	var abcChordClass = "X: 1\n" +
 		"L: 1/8\n" +
 		"K: C none\n" +
-		"[ceg] [gce]"
+		"[ceg] [gce] [_d^f=b]3"
 
 	var expectedChordClass = [
-		'c abcjs-notehead abcjs-chord-pos-0',
-		'e abcjs-notehead abcjs-chord-pos-1',
-		'g abcjs-notehead abcjs-chord-pos-2',
-		'c abcjs-notehead abcjs-chord-pos-0',
-		'e abcjs-notehead abcjs-chord-pos-1',
-		'g abcjs-notehead abcjs-chord-pos-2'
+		'flags.d8th null',
+		'c abcjs-notehead abcjs-chord-pos-1',
+		'e abcjs-notehead abcjs-chord-pos-2',
+		'g abcjs-notehead abcjs-chord-pos-3',
+		'stem abcjs-stem',
+		'flags.d8th null',
+		'c abcjs-notehead abcjs-chord-pos-1',
+		'e abcjs-notehead abcjs-chord-pos-2',
+		'g abcjs-notehead abcjs-chord-pos-3',
+		'stem abcjs-stem',
+		'dots.dot abcjs-chord-pos-1',
+		'accidentals.flat abcjs-chord-pos-1',
+		'_d abcjs-notehead abcjs-chord-pos-1',
+		'dots.dot abcjs-chord-pos-2',
+		'accidentals.sharp abcjs-chord-pos-2',
+		'^f abcjs-notehead abcjs-chord-pos-2',
+		'dots.dot abcjs-chord-pos-3',
+		'accidentals.nat abcjs-chord-pos-3',
+		'=b abcjs-notehead abcjs-chord-pos-3',
+		'stem abcjs-stem',
+		'ledger abcjs-ledger'
 	]
 
 	it("line-width", function () {
@@ -390,14 +405,14 @@ describe("Miscellaneous", function () {
 
 	it("chord-class", function () {
 		var visualObj = abcjs.renderAbc("paper", abcChordClass);
-		var notes = document.querySelectorAll('.abcjs-notehead')
+		var notes = document.querySelectorAll('[data-name="note"] path')
 		const results = []
 		notes.forEach(note => {
 			const name = note.dataset.name
 			const klass = note.getAttribute('class')
 			results.push(name + ' ' + klass)
 		})
-		console.log(results)
+		console.log(results.join('\n'))
 		chai.assert.deepEqual(results, expectedChordClass)
 	})
 })
