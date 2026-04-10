@@ -232,6 +232,20 @@ describe("Miscellaneous", function () {
 		{"startX":96.21320343559643,"endX":91.21320343559643,"startY":0.5,"endY":0.5,"dy":-3.875}
 	]
 
+	var abcChordClass = "X: 1\n" +
+		"L: 1/8\n" +
+		"K: C none\n" +
+		"[ceg] [gce]"
+
+	var expectedChordClass = [
+		'c abcjs-notehead abcjs-chord-pos-0',
+		'e abcjs-notehead abcjs-chord-pos-1',
+		'g abcjs-notehead abcjs-chord-pos-2',
+		'c abcjs-notehead abcjs-chord-pos-0',
+		'e abcjs-notehead abcjs-chord-pos-1',
+		'g abcjs-notehead abcjs-chord-pos-2'
+	]
+
 	it("line-width", function () {
 		abcjs.renderAbc("paper", abcLineWidth, { add_classes: true});
 		var height = extractHeight()
@@ -372,6 +386,19 @@ describe("Miscellaneous", function () {
 
 	it("beamed-rest-last", function () {
 		testBeamedRest("a/4a/4a/2a/4z/4", "rest at end");
+	})
+
+	it("chord-class", function () {
+		var visualObj = abcjs.renderAbc("paper", abcChordClass);
+		var notes = document.querySelectorAll('.abcjs-notehead')
+		const results = []
+		notes.forEach(note => {
+			const name = note.dataset.name
+			const klass = note.getAttribute('class')
+			results.push(name + ' ' + klass)
+		})
+		console.log(results)
+		chai.assert.deepEqual(results, expectedChordClass)
 	})
 })
 

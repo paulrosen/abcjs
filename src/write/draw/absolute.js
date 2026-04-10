@@ -9,6 +9,7 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 	var isTempo = params.children.length > 0 && params.children[0].type === "TempoElement";
 	params.elemset = [];
 	elementGroup.beginGroup(renderer.paper, renderer.controller);
+	var notePos = 0
 	for (var i = 0; i < params.children.length; i++) {
 		var child = params.children[i];
 		switch (child.type) {
@@ -18,7 +19,8 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 			default:
 				var el = drawRelativeElement(renderer, child, bartop);
 				if (child.type === "symbol" && child.c && child.c.indexOf('notehead') >= 0) {
-					el.setAttribute('class', 'abcjs-notehead')
+					el.setAttribute('class', 'abcjs-notehead abcjs-chord-pos-'+notePos)
+					notePos++
 				}
 		}
 	}
