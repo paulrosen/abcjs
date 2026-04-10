@@ -718,8 +718,9 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
 		}
 
 		var hasStem = !nostem && durlog <= -1;
+		var chordPos = pp > 1 ? p+1 : null
 		var ret = createNoteHead(abselem, c, elem.pitches[p],
-			{ dir: dir, extrax: -roomTaken, flag: flag, dot: dot, dotshiftx: dotshiftx, scale: this.voiceScale, accidentalSlot: accidentalSlot, shouldExtendStem: !stemdir, printAccidentals: !voice.isPercussion });
+			{ dir: dir, extrax: -roomTaken, flag: flag, dot: dot, dotshiftx: dotshiftx, scale: this.voiceScale, accidentalSlot: accidentalSlot, shouldExtendStem: !stemdir, printAccidentals: !voice.isPercussion, chordPos: chordPos });
 		symbolWidth = Math.max(glyphs.getSymbolWidth(c), symbolWidth);
 		abselem.extraw -= ret.extraLeft;
 		noteHead = ret.notehead;

@@ -9,7 +9,6 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 	var isTempo = params.children.length > 0 && params.children[0].type === "TempoElement";
 	params.elemset = [];
 	elementGroup.beginGroup(renderer.paper, renderer.controller);
-	var notePos = 1
 	for (var i = 0; i < params.children.length; i++) {
 		var child = params.children[i];
 		switch (child.type) {
@@ -18,15 +17,14 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 				break;
 			default:
 				var el = drawRelativeElement(renderer, child, bartop);
-				if (child.name !== 'stem' && child.name.indexOf('flags.') !== 0 && child.name !== 'ledger') {
-					var klass = el.getAttribute("class")
-					if (klass) klass = klass + ' abcjs-chord-pos-'+notePos
-					else klass = 'abcjs-chord-pos-'+notePos
-					el.setAttribute('class', klass)
-				}
 				if (child.type === "symbol" && child.c && child.c.indexOf('notehead') >= 0) {
-					el.setAttribute('class', 'abcjs-notehead abcjs-chord-pos-'+notePos)
-					notePos++
+					el.setAttribute('class', 'abcjs-notehead')
+				}
+				if (el && child.chordPos && child.name.indexOf('flags.') !== 0) {
+					var klass = el.getAttribute("class")
+					if (klass) klass = klass + ' abcjs-chord-pos-'+child.chordPos
+					else klass = 'abcjs-chord-pos-'+child.chordPos
+					el.setAttribute('class', klass)
 				}
 		}
 	}

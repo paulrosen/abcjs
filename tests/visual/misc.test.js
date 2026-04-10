@@ -235,7 +235,7 @@ describe("Miscellaneous", function () {
 	var abcChordClass = "X: 1\n" +
 		"L: 1/8\n" +
 		"K: C none\n" +
-		"[ceg] [gce] [_d^f=b]3"
+		'.[ceg] T[gce] [_d^f=b]3 "Dm7".d Te\n'
 
 	var expectedChordClass = [
 		'flags.d8th null',
@@ -243,11 +243,13 @@ describe("Miscellaneous", function () {
 		'e abcjs-notehead abcjs-chord-pos-2',
 		'g abcjs-notehead abcjs-chord-pos-3',
 		'stem abcjs-stem',
+		'scripts.staccato null',
 		'flags.d8th null',
 		'c abcjs-notehead abcjs-chord-pos-1',
 		'e abcjs-notehead abcjs-chord-pos-2',
 		'g abcjs-notehead abcjs-chord-pos-3',
 		'stem abcjs-stem',
+		'scripts.trill null',
 		'dots.dot abcjs-chord-pos-1',
 		'accidentals.flat abcjs-chord-pos-1',
 		'_d abcjs-notehead abcjs-chord-pos-1',
@@ -258,7 +260,16 @@ describe("Miscellaneous", function () {
 		'accidentals.nat abcjs-chord-pos-3',
 		'=b abcjs-notehead abcjs-chord-pos-3',
 		'stem abcjs-stem',
-		'ledger abcjs-ledger'
+		'ledger abcjs-ledger',
+		'flags.d8th null',
+		'd abcjs-notehead',
+		'stem abcjs-stem',
+		'scripts.staccato null',
+		'chord ',
+		'flags.d8th null',
+		'e abcjs-notehead',
+		'stem abcjs-stem',
+		'scripts.trill null',
 	]
 
 	it("line-width", function () {
@@ -405,14 +416,14 @@ describe("Miscellaneous", function () {
 
 	it("chord-class", function () {
 		var visualObj = abcjs.renderAbc("paper", abcChordClass);
-		var notes = document.querySelectorAll('[data-name="note"] path')
+		var notes = document.querySelectorAll('[data-name="note"] > *')
 		const results = []
 		notes.forEach(note => {
 			const name = note.dataset.name
 			const klass = note.getAttribute('class')
 			results.push(name + ' ' + klass)
 		})
-		console.log(results.join('\n'))
+		console.log(results.map(r => `'${r}',`).join('\n'))
 		chai.assert.deepEqual(results, expectedChordClass)
 	})
 })
