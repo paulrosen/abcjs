@@ -75,7 +75,8 @@ var setUpperAndLowerElements = function (renderer, staffGroup) {
 
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffGroup.voices[staff.voices[j]];
-			setUpperAndLowerVoiceElements(positionY, voice, renderer.spacing);
+			var diff = setUpperAndLowerVoiceElements(positionY, voice, renderer.spacing);
+			staff.bottom -= diff
 		}
 		// We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
 		// Only try to put in extra space if this isn't the top staff.
@@ -112,9 +113,16 @@ function incTop(staff, positionY, item, count) {
 function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 	var i;
 	var abselem;
+	var diff = 0
 	for (i = 0; i < voice.children.length; i++) {
 		abselem = voice.children[i];
-		setUpperAndLowerAbsoluteElements(positionY, abselem, spacing);
+		var bottom = setUpperAndLowerAbsoluteElements(positionY, abselem, spacing);
+		if (bottom < abselem.bottom) {
+			// We're moving things down so tell the staff that it needs to be taller
+			diff = abselem.bottom - bottom
+			abselem.bottom = bottom
+			voice.bottom = bottom
+		}
 	}
 	for (i = 0; i < voice.otherchildren.length; i++) {
 		abselem = voice.otherchildren[i];
@@ -138,6 +146,7 @@ function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 				break;
 		}
 	}
+	return diff
 }
 
 // For each of the relative elements that can't be placed in advance (because their vertical placement depends on everything
@@ -145,6 +154,7 @@ function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 // hash with the vertical placement (in pitch units) for each type.
 // TODO-PER: I think this needs to be separated by "above" and "below". How do we know that for dynamics at the point where they are being defined, though? We need a pass through all the relative elements to set "above" and "below".
 function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
+	var bottom = element.bottom
 	// specialYResolved contains the actual pitch for each of the classes of elements.
 	for (var i = 0; i < element.children.length; i++) {
 		var child = element.children[i];
@@ -152,6 +162,11 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
 			if (element.specialY.hasOwnProperty(key)) {
 				if (child[key]) { // If this relative element has defined a height for this class of element
 					child.pitch = specialYResolved[key];
+					if (key === 'lyricHeightBelow' && child.type === 'lyric' && child.voiceNumber) {
+						console.log(child)
+						child.pitch -= child.voiceNumber*child[key]
+						bottom = Math.min(element.bottom, child.pitch)
+					}
 					if (child.top === undefined) { // TODO-PER: HACK! Not sure this is the right place to do this.
 						if (child.type === 'TempoElement') {
 							setUpperAndLowerTempoElement(specialYResolved, child);
@@ -165,6 +180,7 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
 			}
 		}
 	}
+	return bottom
 }
 
 function setUpperAndLowerCrescendoElements(positionY, element) {

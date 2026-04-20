@@ -25,19 +25,19 @@ describe("Multi-voice", function () {
 		"V:Top\n" +
 		"K:C clef=treble \n" +
 		"!p!c'2b2 z4 f2a2 f4|\n" +
-		"w:C B C F A F\n" +
+		"w:C B F A F\n" +
+		"!p!c'2b2 z4 f2a2 f4|\n" +
+		"w:c b f a f\n" +
 		"V:Bottom\n" +
 		"K:C clef=treble \n" +
 		"!p!E,4 E,4 A,8|\n" +
-		"w:E E A\n"
-	// var expectedDirectives = [
-	// 	{ c: 'D.C. al coda', anchor: 'end'},
-	// 	{ c: 'D.C. al fine', anchor: 'end'},
-	// 	{ c: 'D.S. al coda', anchor: 'end'},
-	// 	{ c: 'D.S. al fine', anchor: 'end'},
-	// 	{ c: 'D.C.', anchor: 'middle'},
-	// 	{ c: '5', anchor: 'middle'},
-	// ]
+		"w:E E A\n" +
+		"!p!E,4 E,4 A,8|\n" +
+		"w:EE EE AA\n"
+
+	var expectedLyricsTwoVoices = [
+		{"x":71,"y":187,"width":12,"height":19},{"x":170,"y":187,"width":11,"height":19},{"x":410,"y":187,"width":10,"height":19},{"x":508,"y":187,"width":12,"height":19},{"x":609,"y":187,"width":10,"height":19},{"x":71,"y":206,"width":11,"height":19},{"x":270,"y":206,"width":11,"height":19},{"x":409,"y":206,"width":12,"height":19},{"x":49,"y":392,"width":8,"height":19},{"x":78,"y":392,"width":9,"height":19},{"x":152,"y":392,"width":7,"height":19},{"x":181,"y":392,"width":9,"height":19},{"x":212,"y":392,"width":7,"height":19},{"x":41,"y":411,"width":23,"height":19},{"x":101,"y":411,"width":23,"height":19},{"x":143,"y":411,"width":25,"height":19}
+	]
 
 	it('triplet-brackets', function() {
 		var visualObj = abcjs.renderAbc("paper", abcTripletBrackets, {add_classes:true});
@@ -59,8 +59,14 @@ describe("Multi-voice", function () {
 
 	it('lyrics-two-voices', function() {
 		var visualObj = abcjs.renderAbc("paper", abcLyricsTwoVoices, {add_classes:true});
-		var actual = 4
-		chai.assert.equal(actual, 6)
+		var lyrics = document.querySelectorAll("#paper .abcjs-lyric")
+		var actual = []
+		for (var i = 0; i < lyrics.length; i++) {
+			var box = lyrics[i].getBBox()
+			actual.push({x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width), height: Math.round(box.height)})
+		}
+		console.log(JSON.stringify(actual))
+		chai.assert.deepEqual(actual, expectedLyricsTwoVoices)
 	})
 
 })

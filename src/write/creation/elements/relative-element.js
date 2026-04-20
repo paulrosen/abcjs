@@ -33,6 +33,8 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 		this.dim = opt.dim;
 	if (opt.position)
 		this.position = opt.position;
+	if (opt.voiceNumber !== undefined)
+		this.voiceNumber = opt.voiceNumber
 	this.height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
 	if (opt.top)
 		this.top = opt.top;

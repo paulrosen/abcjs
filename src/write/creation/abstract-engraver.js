@@ -766,7 +766,7 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
 	return { noteHead: noteHead, roomTaken: roomTaken, roomTakenRight: roomTakenRight, min: min, additionalLedgers: additionalLedgers, dir: dir, symbolWidth: symbolWidth };
 };
 
-AbstractEngraver.prototype.addLyric = function (abselem, elem) {
+AbstractEngraver.prototype.addLyric = function (abselem, elem, voiceNumber) {
 	var lyricStr = "";
 	elem.lyric.forEach(function (ly) {
 		var div = ly.divider === ' ' ? "" : ly.divider;
@@ -774,7 +774,7 @@ AbstractEngraver.prototype.addLyric = function (abselem, elem) {
 	});
 	var lyricDim = this.getTextSize.calc(lyricStr, 'vocalfont', "lyric");
 	var position = elem.positioning ? elem.positioning.vocalPosition : 'below';
-	abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, { type: "lyric", position: position, height: lyricDim.height / spacing.STEP, dim: this.getTextSize.attr('vocalfont', "lyric") }));
+	abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, undefined, { type: "lyric", position: position, height: lyricDim.height / spacing.STEP, dim: this.getTextSize.attr('vocalfont', "lyric"), voiceNumber: voiceNumber }));
 };
 
 AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaff, voice) { //stem presence: true for drawing stemless notehead
@@ -828,7 +828,7 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
 	}
 
 	if (elem.lyric !== undefined) {
-		this.addLyric(abselem, elem);
+		this.addLyric(abselem, elem, voice.voicenumber);
 	}
 
 	if (elem.gracenotes !== undefined) {
