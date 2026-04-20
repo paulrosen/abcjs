@@ -21,29 +21,54 @@ function layoutTriplet(element) {
 			if (isAbove(beam))
 				element.endingHeightAbove = 4;
 		} else {
-			// If there isn't a beam, then we need to draw the bracket and the text. The bracket is always above.
+			// If there isn't a beam, then we need to draw the bracket and the text. The bracket is either above or below depending on the stem direction of the notes.
+			// Above:
 			// The bracket is never lower than the 'a' line, but is 4 pitches above the first and last notes. If there is
 			// a tall note in the middle, the bracket is horizontal and above the highest note.
-			element.startNote = Math.max(element.anchor1.parent.top, 9) + 4;
-			element.endNote = Math.max(element.anchor2.parent.top, 9) + 4;
+			// Below: The bracket is never higher than the 'C' line, and is 4 pitches below.
+
+			// To decide if the bracket goes above or below, go in the direction of the most stems. If there are the same number it will put the bracket above.
+			var up = stemDirectionUp(element)
+			element.up = up
+			element.startNote = up ? Math.max(element.anchor1.parent.top, 9) + 4 : Math.min(element.anchor1.parent.bottom, 0) - 4
+			element.endNote = up ? Math.max(element.anchor2.parent.top, 9) + 4 : Math.min(element.anchor2.parent.bottom, 0) - 4
+
 			// If it starts or ends on a rest, make the beam horizontal
 			if (element.anchor1.parent.type === "rest" && element.anchor2.parent.type !== "rest")
 				element.startNote = element.endNote;
 			else if (element.anchor2.parent.type === "rest" && element.anchor1.parent.type !== "rest")
 				element.endNote = element.startNote;
-			// See if the middle note is really high.
-			var max = 0;
-			for (var i = 0; i < element.middleElems.length; i++) {
-				max = Math.max(max, element.middleElems[i].top);
-			}
-			max += 4;
-			if (max > element.startNote || max > element.endNote) {
-				element.startNote = max;
-				element.endNote = max;
+			if (up) {
+				// See if the middle note is really high.
+				var max = 0;
+				for (var i = 0; i < element.middleElems.length; i++) {
+					max = Math.max(max, element.middleElems[i].top);
+				}
+				max += 4;
+				if (max > element.startNote || max > element.endNote) {
+					element.startNote = max + 3;
+					element.endNote = max + 3;
+				}
+			} else {
+				// See if the middle note is really low.
+				var min = 0;
+				for (var i = 0; i < element.middleElems.length; i++) {
+					min = Math.min(min, element.middleElems[i].bottom);
+				}
+				min -= 4;
+				if (min < element.startNote || min < element.endNote) {
+					element.startNote = min - 3;
+					element.endNote = min - 3;
+				}
 			}
 			if (element.flatBeams) {
-				element.startNote = Math.max(element.startNote, element.endNote);
-				element.endNote = Math.max(element.startNote, element.endNote);
+				if (up) {
+					element.startNote = Math.max(element.startNote, element.endNote);
+					element.endNote = Math.max(element.startNote, element.endNote);
+				} else {
+					element.startNote = Math.min(element.startNote, element.endNote);
+					element.endNote = Math.min(element.startNote, element.endNote);
+				}
 			}
 
 			element.yTextPos = element.startNote + (element.endNote - element.startNote) / 2;
@@ -57,6 +82,27 @@ function layoutTriplet(element) {
 
 function isAbove(beam) {
 	return beam.stemsUp;
+}
+
+function stemDirectionUp(element) {
+	var up = 0
+	var down = 0
+	if (element.anchor1) {
+		if (element.anchor1.stemDir === 'up') up++
+		if (element.anchor1.stemDir === 'down') down++
+	}
+	if (element.anchor2) {
+		if (element.anchor2.stemDir === 'up') up++
+		if (element.anchor2.stemDir === 'down') down++
+	}
+	if (element.middleElems) {
+		for (var i = 0; i < element.middleElems.length; i++) {
+			var elem = element.middleElems[i]
+			if (elem.stemDir === 'up') up++
+			if (elem.stemDir === 'down') down++
+		}
+	}
+	return up >= down
 }
 
 // We can't just use the entire beam for the calculation. The range has to be passed in, because the beam might extend into some unrelated notes. for instance, (3_a'f'e'f'2 when L:16

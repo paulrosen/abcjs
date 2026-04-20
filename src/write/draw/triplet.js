@@ -6,7 +6,7 @@ var roundNumber = require("./round-number");
 function drawTriplet(renderer, params, selectables) {
 	renderer.paper.openGroup({ klass: renderer.controller.classes.generate('triplet ' + params.durationClass), "data-name": "triplet" });
 	if (!params.hasBeam) {
-		drawBracket(renderer, params.anchor1.x, params.startNote, params.anchor2.x + params.anchor2.w, params.endNote);
+		drawBracket(renderer, params.anchor1.x, params.startNote, params.anchor2.x + params.anchor2.w, params.endNote, params.up);
 	}
 	// HACK: adjust the position of "3". It is too high in all cases so we fudge it by subtracting 1 here.
 	renderText(renderer, { x: params.xTextPos, y: renderer.calcY(params.yTextPos - 1), text: "" + params.number, type: 'tripletfont', anchor: "middle", centerVertically: true, noClass: true, name: "" + params.number }, true);
@@ -19,10 +19,10 @@ function drawLine(l, t, r, b) {
 	return sprintf("M %f %f L %f %f", roundNumber(l), roundNumber(t), roundNumber(r), roundNumber(b));
 }
 
-function drawBracket(renderer, x1, y1, x2, y2) {
+function drawBracket(renderer, x1, y1, x2, y2, up) {
 	y1 = renderer.calcY(y1);
 	y2 = renderer.calcY(y2);
-	var bracketHeight = 5;
+	var bracketHeight = up ? 5 : -5;
 
 	// Draw vertical lines at the beginning and end
 	var pathString = "";
