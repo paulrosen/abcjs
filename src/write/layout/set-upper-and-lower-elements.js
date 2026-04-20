@@ -163,7 +163,6 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
 				if (child[key]) { // If this relative element has defined a height for this class of element
 					child.pitch = specialYResolved[key];
 					if (key === 'lyricHeightBelow' && child.type === 'lyric' && child.voiceNumber) {
-						console.log(child)
 						child.pitch -= child.voiceNumber*child[key]
 						bottom = Math.min(element.bottom, child.pitch)
 					}
