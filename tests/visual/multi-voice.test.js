@@ -48,7 +48,7 @@ describe("Multi-voice", function () {
 			actual.push({x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width), height: Math.round(box.height)})
 		}
 		console.log(JSON.stringify(actual))
-		chai.assert.equal(actual, expectedTripletBrackets)
+		chai.assert.deepEqual(actual, expectedTripletBrackets)
 	})
 
 	it('rest-placement', function() {
