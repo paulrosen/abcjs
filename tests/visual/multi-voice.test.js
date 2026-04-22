@@ -14,9 +14,16 @@ describe("Multi-voice", function () {
 	var abcRestPlacement = "K:C\n" +
 		"%%score (Top Bottom)\n" +
 		"V:Top\n" +
-		"G4 EDF2|\n" +
+		"G4 ED edF2|g2 z2 g2 z2|\n" +
 		"V:Bottom\n" +
-		"E,4 z2A,2|\n"
+		"E,4 z2z2A,2|c2 d2 e2 A2|\n"
+
+	var expectedRestPlacement = [
+		{"x":324,"y":31,"width":8,"height":21},
+		{"x":409,"y":42,"width":8,"height":21},
+		{"x":108,"y":99,"width":8,"height":21},
+		{"x":168,"y":73,"width":8,"height":21}
+	]
 
 	var abcLyricsTwoVoices = "X:1\n" +
 		"M:4/4\n" +
@@ -53,8 +60,14 @@ describe("Multi-voice", function () {
 
 	it('rest-placement', function() {
 		var visualObj = abcjs.renderAbc("paper", abcRestPlacement, {add_classes:true});
-		var actual = 4
-		chai.assert.equal(actual, 6)
+		var rests = document.querySelectorAll("#paper .abcjs-rest")
+		var actual = []
+		for (var i = 0; i < rests.length; i++) {
+			var box = rests[i].getBBox()
+			actual.push({x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width), height: Math.round(box.height)})
+		}
+		console.log(JSON.stringify(actual))
+		chai.assert.deepEqual(actual, expectedRestPlacement)
 	})
 
 	it('lyrics-two-voices', function() {
