@@ -3,6 +3,7 @@ var setUpperAndLowerElements = require('./set-upper-and-lower-elements');
 var layoutStaffGroup = require('./staff-group');
 var getLeftEdgeOfStaff = require('./get-left-edge-of-staff');
 var layoutInGrid = require('./layout-in-grid');
+var toTimeAndStaffBased = require("./to-time-and-staff-based");
 
 // This sets the "x" attribute on all the children in abctune.lines
 // It also sets the "w" and "startx" attributes on "voices"
@@ -41,10 +42,11 @@ var layout = function (renderer, abctune, width, space, expandToWidest, timeBase
 	}
 
 	// See if there are collisions between voices that need to be tweaked
+	var timeBased = toTimeAndStaffBased(abctune.lines)
 	for (i = 0; i < abctune.lines.length; i++) {
 		abcLine = abctune.lines[i];
-		if (abcLine.staffGroup && abcLine.staffGroup.voices && abcLine.staffGroup.voices.length > 1) {
-			fixVoiceCollisions(abcLine)
+		if (abcLine.staffGroup) {
+			fixVoiceCollisions(timeBased[i])
 			setUpperAndLowerElements(renderer, abcLine.staffGroup);
 		}
 	}
@@ -135,60 +137,41 @@ function centerWholeRests(voices) {
 	}
 }
 
-function fixVoiceCollisions(staffGroup) {
-	if (staffGroup && staffGroup.staffGroup && staffGroup.staffGroup.voices) {
-		var voices = staffGroup.staffGroup.voices
-		if (voices.length > 1) {
-			var timeSlot = {}
-			for (var i = 0; i < voices.length; i++) {
-				var voice = voices[i]
-				var time = 0
-				for (var k = 0; k < voice.children.length; k++) {
-					var index = 'T' + time
-					if (!timeSlot[index])
-						timeSlot[index] = []
-					if (voice.children[k].abcelem.el_type === 'note') {
-						timeSlot[index].push(voice.children[k])
-						time += voice.children[k].duration
+function fixVoiceCollisions(timeBasedLine) {
+	for (var s = 0; s < timeBasedLine.length; s++) {
+		var timeSlot = timeBasedLine[s]
+		// If there is more than one thing happening at the same time,
+		// and one of those things is a rest, then:
+		// If the rest is in the first element, check to see if the bottom bumps into the top of any of the rest of the elements
+		// If the rest is in the last element, check to see if the top bumps into the bottom of any of the rest of the elements.
+		// Note: if there are more than two voices the staff will get sloppy, so there is a limit to how much that can be improved, but this should be fine when there are two voices.
+		// If there is a collision, move the rest up or down to fix that.
+		var keys = Object.keys(timeSlot)
+		for (var z = 0; z < keys.length; z++) {
+			var slot = timeSlot[keys[z]] // slot is an array of all the things happening at a particular time
+			var lastIndex = slot.length - 1
+			if (slot.length > 1) {
+				if (slot[0].abcelem.rest && !slot[lastIndex].abcelem.rest) {
+					// the first voice has a rest and the second doesn't
+					var distance1 = slot[0].bottom - slot[lastIndex].top
+					distance1 -= 2 // give some room between the rest and the note
+					if (distance1 < 0 && slot[0].children.length > 0) {
+						slot[0].bottom -= distance1
+						slot[0].top -= distance1
+						slot[0].children[0].bottom -= distance1
+						slot[0].children[0].top -= distance1
+						slot[0].children[0].pitch -= distance1
 					}
-				}
-			}
-			// Now timeSlot is an object with all the voices that happen at
-			// the same time as an array.
-			//
-			// If there is more than one thing happening at the same time,
-			// and one of those things is a rest, then:
-			// If the rest is in the first element, check to see if the bottom bumps into the top of any of the rest of the elements
-			// If the rest is in the last element, check to see if the top bumps into the bottom of any of the rest of the elements.
-			// Note: if there are more than two voices the staff will get sloppy, so there is a limit to how much that can be improved, but this should be fine when there are two voices.
-			// If there is a collision, move the rest up or down to fix that.
-			var keys = Object.keys(timeSlot)
-			for (var z = 0; z < keys.length; z++) {
-				var slot = timeSlot[keys[z]] // slot is an array of all the things happening at a particular time
-				var lastIndex = slot.length-1
-				if (slot.length > 1) {
-					if (slot[0].abcelem.rest && !slot[lastIndex].abcelem.rest) {
-						// the first voice has a rest and the second doesn't
-						var distance1 = slot[0].bottom - slot[lastIndex].top
-						distance1 -= 2 // give some room between the rest and the note
-						if (distance1 < 0 && slot[0].children.length > 0) {
-							slot[0].bottom -= distance1
-							slot[0].top -= distance1
-							slot[0].children[0].bottom -= distance1
-							slot[0].children[0].top -= distance1
-							slot[0].children[0].pitch -= distance1
-						}
-					} else if (slot[lastIndex].abcelem.rest && !slot[0].abcelem.rest) {
-						// the last voice has a rest and the first doesn't
-						var distance2 = slot[lastIndex].top - slot[0].bottom
-						distance2 += 2 // give some room between the rest and the note
-						if (distance2 > 0 && slot[lastIndex].children.length > 0) {
-							slot[lastIndex].bottom -= distance2
-							slot[lastIndex].top -= distance2
-							slot[lastIndex].children[0].bottom -= distance2
-							slot[lastIndex].children[0].top -= distance2
-							slot[lastIndex].children[0].pitch -= distance2
-						}
+				} else if (slot[lastIndex].abcelem.rest && !slot[0].abcelem.rest) {
+					// the last voice has a rest and the first doesn't
+					var distance2 = slot[lastIndex].top - slot[0].bottom
+					distance2 += 2 // give some room between the rest and the note
+					if (distance2 > 0 && slot[lastIndex].children.length > 0) {
+						slot[lastIndex].bottom -= distance2
+						slot[lastIndex].top -= distance2
+						slot[lastIndex].children[0].bottom -= distance2
+						slot[lastIndex].children[0].top -= distance2
+						slot[lastIndex].children[0].pitch -= distance2
 					}
 				}
 			}
