@@ -76,7 +76,7 @@ var setUpperAndLowerElements = function (renderer, staffGroup) {
 		for (var j = 0; j < staff.voices.length; j++) {
 			var voice = staffGroup.voices[staff.voices[j]];
 			var diff = setUpperAndLowerVoiceElements(positionY, voice, renderer.spacing);
-			staff.bottom -= diff
+			staff.bottom -= diff//
 		}
 		// We might need a little space in between staves if the staves haven't been pushed far enough apart by notes or extra vertical stuff.
 		// Only try to put in extra space if this isn't the top staff.
@@ -120,8 +120,8 @@ function setUpperAndLowerVoiceElements(positionY, voice, spacing) {
 		if (bottom < abselem.bottom) {
 			// We're moving things down so tell the staff that it needs to be taller
 			diff = abselem.bottom - bottom
-			abselem.bottom = bottom
-			voice.bottom = bottom
+			abselem.bottom = bottom//
+			voice.bottom = bottom//
 		}
 	}
 	for (i = 0; i < voice.otherchildren.length; i++) {
@@ -163,8 +163,8 @@ function setUpperAndLowerAbsoluteElements(specialYResolved, element, spacing) {
 				if (child[key]) { // If this relative element has defined a height for this class of element
 					child.pitch = specialYResolved[key];
 					if (key === 'lyricHeightBelow' && child.type === 'lyric' && child.voiceNumber) {
-						child.pitch -= child.voiceNumber*child[key]
-						bottom = Math.min(element.bottom, child.pitch)
+						child.pitch -= child.voiceNumber*child[key]//
+						bottom = Math.min(element.bottom, child.pitch)//
 					}
 					if (child.top === undefined) { // TODO-PER: HACK! Not sure this is the right place to do this.
 						if (child.type === 'TempoElement') {

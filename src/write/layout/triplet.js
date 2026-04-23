@@ -30,8 +30,8 @@ function layoutTriplet(element) {
 			// To decide if the bracket goes above or below, go in the direction of the most stems. If there are the same number it will put the bracket above.
 			var up = stemDirectionUp(element)
 			element.up = up
-			element.startNote = up ? Math.max(element.anchor1.parent.top, 9) + 4 : Math.min(element.anchor1.parent.bottom, 0) - 4
-			element.endNote = up ? Math.max(element.anchor2.parent.top, 9) + 4 : Math.min(element.anchor2.parent.bottom, 0) - 4
+			element.startNote = up ? Math.max(element.anchor1.parent.top, 9) + 4 : Math.min(element.anchor1.parent.bottom, 0) - 2
+			element.endNote = up ? Math.max(element.anchor2.parent.top, 9) + 4 : Math.min(element.anchor2.parent.bottom, 0) - 2
 
 			// If it starts or ends on a rest, make the beam horizontal
 			if (element.anchor1.parent.type === "rest" && element.anchor2.parent.type !== "rest")
@@ -53,12 +53,12 @@ function layoutTriplet(element) {
 				// See if the middle note is really low.
 				var min = 0;
 				for (var i = 0; i < element.middleElems.length; i++) {
-					min = Math.min(min, element.middleElems[i].bottom);
+					min = Math.min(min, element.middleElems[i].bottom-element.middleElems[i].height);
 				}
-				min -= 4;
-				if (min < element.startNote || min < element.endNote) {
-					element.startNote = min - 3;
-					element.endNote = min - 3;
+				min -= 3;
+				if (min < element.startNote && min < element.endNote) {
+					element.startNote = Math.min(min, element.startNote) - 2;
+					element.endNote = Math.min(min, element.endNote) - 2;
 				}
 			}
 			if (element.flatBeams) {
@@ -74,6 +74,7 @@ function layoutTriplet(element) {
 			element.yTextPos = element.startNote + (element.endNote - element.startNote) / 2;
 			element.xTextPos = element.anchor1.x + (element.anchor2.x + element.anchor2.w - element.anchor1.x) / 2;
 			element.top = element.yTextPos + 1;
+			element.bottom = element.yTextPos - 2;
 		}
 	}
 	delete element.middleElems;

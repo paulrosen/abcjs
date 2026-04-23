@@ -47,7 +47,7 @@ var layout = function (renderer, abctune, width, space, expandToWidest, timeBase
 		abcLine = abctune.lines[i];
 		if (abcLine.staffGroup) {
 			fixVoiceCollisions(timeBased[i])
-			setUpperAndLowerElements(renderer, abcLine.staffGroup);
+			//setUpperAndLowerElements(renderer, abcLine.staffGroup);
 		}
 	}
 
@@ -164,7 +164,7 @@ function fixVoiceCollisions(timeBasedLine) {
 					}
 				} else if (slot[lastIndex].abcelem.rest && !slot[0].abcelem.rest) {
 					// the last voice has a rest and the first doesn't
-					var distance2 = slot[lastIndex].top - slot[0].bottom
+					var distance2 = slot[lastIndex].top - closeBottom(slot[0])
 					distance2 += 2 // give some room between the rest and the note
 					if (distance2 > 0 && slot[lastIndex].children.length > 0) {
 						slot[lastIndex].bottom -= distance2
@@ -177,6 +177,20 @@ function fixVoiceCollisions(timeBasedLine) {
 			}
 		}
 	}
+}
+
+function closeBottom(absElem) {
+	if (absElem.children) {
+		var min = 90 // This is clearly way higher than the min calculated below
+		for (var i = 0; i < absElem.children.length; i++) {
+			var child = absElem.children[i]
+			if (child.type !== 'lyric')
+				min = Math.min(min, child.bottom)
+		}
+		if (min < 90)
+			return min
+	}
+	return absElem.bottom
 }
 
 module.exports = layout;
