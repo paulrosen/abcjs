@@ -791,7 +791,16 @@ declare module 'abcjs' {
 		startChar: number;
 		endChar: number;
 		duration: number;
-		pitches?: Array<any>; // TODO-PER
+		pitches?: Array<{
+			accidental?: AccidentalName;
+			pitch: number;
+			name: string;
+			startSlur?: Array<{label: number}>;
+			endSlur?: Array<number>;
+			startTie?: {};
+			endTie?: boolean;
+			verticalPos: number;
+		}>; // TODO-PER
 		rest?: { type: 'rest' | 'spacer' | 'invisible' | 'invisible-multimeasure' | 'multimeasure', text? : number};
 	}
 	export type VoiceItem = VoiceItemClef | VoiceItemBar | VoiceItemGap | VoiceItemKey | VoiceItemMeter | VoiceItemMidi | VoiceItemOverlay | VoiceItemPart | VoiceItemScale | VoiceItemStem | VoiceItemStyle | VoiceItemTempo | VoiceItemTranspose | VoiceItemNote;
@@ -948,6 +957,7 @@ declare module 'abcjs' {
 		midiPitches?: MidiPitches;
 		midiGraceNotePitches?: MidiGracePitches;
 		pitches?: Array<{
+			accidental?: AccidentalName;
 			pitch: number;
 			name: string;
 			startSlur?: Array<{label: number}>;
