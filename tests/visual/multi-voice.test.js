@@ -12,7 +12,7 @@ describe("Multi-voice", function () {
 		"E,4 E,4 E,4 E,4 |\n"
 
 	var expectedTripletBrackets = [
-		{"x":435,"y":78,"width":63,"height":20},{"x":514,"y":83,"width":63,"height":17},{"x":594,"y":72,"width":61,"height":17},{"x":674,"y":37,"width":63,"height":17},{"x":49,"y":157,"width":63,"height":19},{"x":129,"y":165,"width":63,"height":17},{"x":208,"y":161,"width":61,"height":17},{"x":288,"y":188,"width":63,"height":17},{"x":49,"y":215,"width":79,"height":20},{"x":153,"y":215,"width":79,"height":20},{"x":257,"y":215,"width":79,"height":20},{"x":361,"y":215,"width":79,"height":20}
+		{"x":435,"y":78,"width":63,"height":20},{"x":514,"y":83,"width":63,"height":17},{"x":594,"y":72,"width":61,"height":17},{"x":674,"y":37,"width":63,"height":17},{"x":49,"y":157,"width":63,"height":19},{"x":129,"y":165,"width":63,"height":17},{"x":208,"y":161,"width":61,"height":17},{"x":288,"y":188,"width":63,"height":17},{"x":49,"y":219,"width":79,"height":20},{"x":153,"y":219,"width":79,"height":20},{"x":257,"y":219,"width":79,"height":20},{"x":361,"y":219,"width":79,"height":20}
 	]
 
 	var abcTripletSecondLine = "K:C\n" +
@@ -21,7 +21,7 @@ describe("Multi-voice", function () {
 		"\"C7\"d4GABc|\n"
 
 	var expectedTripletSecondLine = [
-		{"x":49,"y":94,"width":252,"height":17}
+		{"x":49,"y":105,"width":252,"height":17}
 	]
 	var abcRestPlacementBug = "M:4/4\n" +
 		"L:1/16\n" +
