@@ -124,27 +124,27 @@ describe("Multi-voice", function () {
 	]
 
 	var expectedTwoVoiceRestsTripletsWordsWords = [
-		{"x":49,"y":203,"width":12,"height":19},
-		{"x":128,"y":203,"width":11,"height":19},
-		{"x":205,"y":203,"width":12,"height":19},
-		{"x":284,"y":203,"width":12,"height":19},
-		{"x":373,"y":203,"width":11,"height":19},
-		{"x":435,"y":203,"width":10,"height":19},
-		{"x":460,"y":203,"width":13,"height":19},
-		{"x":486,"y":203,"width":13,"height":19},
-		{"x":541,"y":203,"width":7,"height":19},
-		{"x":566,"y":203,"width":9,"height":19},
-		{"x":590,"y":203,"width":13,"height":19},
-		{"x":617,"y":203,"width":11,"height":19},
-		{"x":51,"y":222,"width":9,"height":19},
-		{"x":77,"y":222,"width":9,"height":19},
-		{"x":103,"y":222,"width":9,"height":19},
-		{"x":155,"y":222,"width":9,"height":19},
-		{"x":181,"y":222,"width":9,"height":19},
-		{"x":207,"y":222,"width":9,"height":19},
-		{"x":233,"y":222,"width":9,"height":19},
-		{"x":285,"y":222,"width":9,"height":19},
-		{"x":312,"y":222,"width":9,"height":19}
+		{"x":49,"y":207,"width":12,"height":19},
+		{"x":128,"y":207,"width":11,"height":19},
+		{"x":205,"y":207,"width":12,"height":19},
+		{"x":284,"y":207,"width":12,"height":19},
+		{"x":373,"y":207,"width":11,"height":19},
+		{"x":435,"y":207,"width":10,"height":19},
+		{"x":460,"y":207,"width":13,"height":19},
+		{"x":486,"y":207,"width":13,"height":19},
+		{"x":541,"y":207,"width":7,"height":19},
+		{"x":566,"y":207,"width":9,"height":19},
+		{"x":590,"y":207,"width":13,"height":19},
+		{"x":617,"y":207,"width":11,"height":19},
+		{"x":51,"y":226,"width":9,"height":19},
+		{"x":77,"y":226,"width":9,"height":19},
+		{"x":103,"y":226,"width":9,"height":19},
+		{"x":155,"y":226,"width":9,"height":19},
+		{"x":181,"y":226,"width":9,"height":19},
+		{"x":207,"y":226,"width":9,"height":19},
+		{"x":233,"y":226,"width":9,"height":19},
+		{"x":285,"y":226,"width":9,"height":19},
+		{"x":312,"y":226,"width":9,"height":19}
 	]
 
 	it('triplet-brackets', function() {
