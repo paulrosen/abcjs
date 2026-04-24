@@ -147,6 +147,63 @@ describe("Multi-voice", function () {
 		{"x":312,"y":226,"width":9,"height":19}
 	]
 
+	var abcOverlayRests = 'M: 4/4\n' +
+		'L: 1/4\n' +
+		'K: F\n' +
+		'c4 & "F"x2 "E7"x "Eb7"x|\n'
+
+	var expectedOverlayRests = [
+		{"x":83,"y":25,"width":10,"height":18},
+		{"x":138,"y":25,"width":20,"height":18},
+		{"x":172,"y":25,"width":36,"height":18}
+	]
+
+	var abcChordsSecondVoice = 'M: 3/4\n' +
+		'L: 1/4\n' +
+		"%%staffwidth 200\n" +
+		"%%score (Top Bottom)\n" +
+		'K: F\n' +
+		"V:Top\n" +
+		'c z c|\n' +
+		"V:Bottom\n" +
+		"\"F\"z \"E7\"G \"Eb7\"G |\n"
+
+	var expectedChordsSecondVoice = [
+		{"x":83,"y":25,"width":10,"height":18},
+		{"x":147,"y":25,"width":20,"height":18},
+		{"x":203,"y":25,"width":36,"height":18}
+	]
+
+	var expectedChordsSecondVoiceRests = [
+		{"x":151,"y":48,"width":8,"height":21},
+		{"x":83,"y":25,"width":12,"height":83}
+	]
+
+	var abcLyricsOnlyVoiceTwo = 'M: 3/4\n' +
+		"%%staffwidth 200\n" +
+		"%%score (Top Bottom)\n" +
+		"V:Top\n" +
+		"e4 e4 e4 |\n" +
+		"e4 e4 e4 |\n" +
+		"w: A B C\n" +
+		"V:Bottom\n" +
+		"G4G4G4 |\n" +
+		"w: 1 2 3\n" +
+		"G4G4G4 |\n" +
+		"w: 1 2 3\n"
+
+	var expectedLyricsOnlyVoiceTwo = [
+		{"x":67,"y":110,"width":9,"height":19},
+		{"x":136,"y":110,"width":9,"height":19},
+		{"x":206,"y":110,"width":9,"height":19},
+		{"x":49,"y":221,"width":12,"height":19},
+		{"x":124,"y":221,"width":11,"height":19},
+		{"x":199,"y":221,"width":12,"height":19},
+		{"x":51,"y":240,"width":9,"height":19},
+		{"x":126,"y":240,"width":9,"height":19},
+		{"x":201,"y":240,"width":9,"height":19}
+	]
+
 	it('triplet-brackets', function() {
 		var visualObj = abcjs.renderAbc("paper", abcTripletBrackets, {add_classes:true});
 		var actual = getElementsBox("#paper .abcjs-triplet")
@@ -182,6 +239,23 @@ describe("Multi-voice", function () {
 		chai.assert.deepEqual(actual, expectedRestPlacementTwoStaff)
 	})
 
+	it('overlay-rest-placement', function() {
+		var visualObj = abcjs.renderAbc("paper", abcOverlayRests, {add_classes:true});
+		var actual = getElementsBox("#paper .abcjs-chord")
+		console.log(JSON.stringify(actual))
+		chai.assert.deepEqual(actual, expectedOverlayRests)
+	})
+
+	it('chords-second-voice', function() {
+		var visualObj = abcjs.renderAbc("paper", abcChordsSecondVoice, {add_classes:true});
+		var actual = getElementsBox("#paper .abcjs-chord")
+		console.log(JSON.stringify(actual))
+		chai.assert.deepEqual(actual, expectedChordsSecondVoice)
+		actual = getElementsBox("#paper .abcjs-rest")
+		console.log(JSON.stringify(actual))
+		chai.assert.deepEqual(actual, expectedChordsSecondVoiceRests)
+	})
+
 	it('lyrics-two-voices', function() {
 		var visualObj = abcjs.renderAbc("paper", abcLyricsTwoVoices, {add_classes:true});
 		var actual = getElementsBox("#paper .abcjs-lyric")
@@ -194,6 +268,13 @@ describe("Multi-voice", function () {
 		var actual = getElementsBox("#paper .abcjs-lyric")
 		console.log(JSON.stringify(actual))
 		chai.assert.deepEqual(actual, expectedLyricsTwoVoicesTwoStaves)
+	})
+
+	it('lyrics-only-voice-two', function() {
+		var visualObj = abcjs.renderAbc("paper", abcLyricsOnlyVoiceTwo, {add_classes:true});
+		var actual = getElementsBox("#paper .abcjs-lyric")
+		console.log(JSON.stringify(actual))
+		chai.assert.deepEqual(actual, expectedLyricsOnlyVoiceTwo)
 	})
 
 	it('two-voice-rests-triplets-words', function() {

@@ -151,32 +151,55 @@ function fixVoiceCollisions(timeBasedLine) {
 			var slot = timeSlot[keys[z]] // slot is an array of all the things happening at a particular time
 			var lastIndex = slot.length - 1
 			if (slot.length > 1) {
-				if (slot[0].abcelem.rest && !slot[lastIndex].abcelem.rest) {
+				var isRealRest = slot[0].abcelem.rest && slot[0].abcelem.rest.type === 'rest' // weed out invisible rests
+				var isRealRest2 = slot[lastIndex].abcelem.rest && slot[lastIndex].abcelem.rest.type === 'rest' // weed out invisible rests
+				if (isRealRest && !slot[lastIndex].abcelem.rest) {
 					// the first voice has a rest and the second doesn't
-					var distance1 = slot[0].bottom - slot[lastIndex].top
-					distance1 -= 2 // give some room between the rest and the note
-					if (distance1 < 0 && slot[0].children.length > 0) {
-						slot[0].bottom -= distance1
-						slot[0].top -= distance1
-						slot[0].children[0].bottom -= distance1
-						slot[0].children[0].top -= distance1
-						slot[0].children[0].pitch -= distance1
+					var restTop = slot[0].children.find(function (ch) { return ch.name.includes('rest') })
+					var otherTop = closeTop(slot[lastIndex])
+					if (restTop) {
+						var distance1 = restTop.bottom - otherTop
+						distance1 -= 2 // give some room between the rest and the note
+						if (distance1 < 0 && slot[0].children.length > 0) {
+							slot[0].bottom -= distance1
+							slot[0].top -= distance1
+							slot[0].children[0].bottom -= distance1
+							slot[0].children[0].top -= distance1
+							slot[0].children[0].pitch -= distance1
+						}
 					}
-				} else if (slot[lastIndex].abcelem.rest && !slot[0].abcelem.rest) {
+				} else if (isRealRest2 && !slot[0].abcelem.rest) {
 					// the last voice has a rest and the first doesn't
-					var distance2 = slot[lastIndex].top - closeBottom(slot[0])
-					distance2 += 2 // give some room between the rest and the note
-					if (distance2 > 0 && slot[lastIndex].children.length > 0) {
-						slot[lastIndex].bottom -= distance2
-						slot[lastIndex].top -= distance2
-						slot[lastIndex].children[0].bottom -= distance2
-						slot[lastIndex].children[0].top -= distance2
-						slot[lastIndex].children[0].pitch -= distance2
+					var restBottom = slot[lastIndex].children.find(function (ch) { return ch.name.includes('rest') })
+					if (restBottom) {
+						var distance2 = restBottom.top - closeBottom(slot[0])
+						distance2 += 2 // give some room between the rest and the note
+						if (distance2 > 0 && slot[lastIndex].children.length > 0) {
+							slot[lastIndex].bottom -= distance2
+							slot[lastIndex].top -= distance2
+							slot[lastIndex].children[0].bottom -= distance2
+							slot[lastIndex].children[0].top -= distance2
+							slot[lastIndex].children[0].pitch -= distance2
+						}
 					}
 				}
 			}
 		}
 	}
+}
+
+function closeTop(absElem) {
+	if (absElem.children) {
+		var max = -90 // This is clearly way lower than the max calculated below
+		for (var i = 0; i < absElem.children.length; i++) {
+			var child = absElem.children[i]
+			if (child.type !== 'chord')
+				max = Math.max(max, child.top)
+		}
+		if (max > -90)
+			return max
+	}
+	return absElem.top
 }
 
 function closeBottom(absElem) {
