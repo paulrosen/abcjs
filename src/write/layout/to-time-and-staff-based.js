@@ -13,7 +13,7 @@ function toTimeAndStaffBased(abcLines) {
 					var voice = staffGroup.voices[staff.voices[i]]
 					var time = 0
 					for (var k = 0; k < voice.children.length; k++) {
-						var index = 'T' + time
+						var index = 'T' + Math.round(time*1000) // There can be inexactness when calculating triplets, so we'll round, but we'll make sure that no make sure that we don't lose necessary precision by making it a shorter time than would ever happen
 						if (!timeSlot[index])
 							timeSlot[index] = []
 						if (voice.children[k].abcelem.el_type === 'note') {

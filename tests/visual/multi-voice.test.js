@@ -23,6 +23,20 @@ describe("Multi-voice", function () {
 	var expectedTripletSecondLine = [
 		{"x":49,"y":94,"width":252,"height":17}
 	]
+	var abcRestPlacementBug = "M:4/4\n" +
+		"L:1/16\n" +
+		"%%score (mpguitar mpguitarlow)\n" +
+		"V:mpguitar\n" +
+		"K:G clef=treble \n" +
+		"D16|(3B2G2D2 E4|]\n" +
+		"V:mpguitarlow\n" +
+		"K:G clef=treble \n" +
+		"E,16|G,4 z4|]\n"
+
+	var expectedRestPlacementBug = [
+		{"x":258,"y":117,"width":8,"height":21}
+	]
+
 	var abcRestPlacementOne = "K:C\n" +
 		"%%score (Top Bottom)\n" +
 		"V:Top\n" +
@@ -110,7 +124,27 @@ describe("Multi-voice", function () {
 	]
 
 	var expectedTwoVoiceRestsTripletsWordsWords = [
-		{"x":49,"y":203,"width":12,"height":19},{"x":128,"y":203,"width":11,"height":19},{"x":205,"y":203,"width":12,"height":19},{"x":284,"y":203,"width":12,"height":19},{"x":373,"y":203,"width":11,"height":19},{"x":435,"y":203,"width":10,"height":19},{"x":460,"y":203,"width":13,"height":19},{"x":486,"y":203,"width":13,"height":19},{"x":541,"y":203,"width":7,"height":19},{"x":566,"y":203,"width":9,"height":19},{"x":590,"y":203,"width":13,"height":19},{"x":617,"y":203,"width":11,"height":19},{"x":51,"y":222,"width":9,"height":19},{"x":77,"y":222,"width":9,"height":19},{"x":103,"y":222,"width":9,"height":19},{"x":155,"y":222,"width":9,"height":19},{"x":181,"y":222,"width":9,"height":19},{"x":207,"y":222,"width":9,"height":19},{"x":233,"y":222,"width":9,"height":19},{"x":285,"y":222,"width":9,"height":19},{"x":312,"y":222,"width":9,"height":19}
+		{"x":49,"y":203,"width":12,"height":19},
+		{"x":128,"y":203,"width":11,"height":19},
+		{"x":205,"y":203,"width":12,"height":19},
+		{"x":284,"y":203,"width":12,"height":19},
+		{"x":373,"y":203,"width":11,"height":19},
+		{"x":435,"y":203,"width":10,"height":19},
+		{"x":460,"y":203,"width":13,"height":19},
+		{"x":486,"y":203,"width":13,"height":19},
+		{"x":541,"y":203,"width":7,"height":19},
+		{"x":566,"y":203,"width":9,"height":19},
+		{"x":590,"y":203,"width":13,"height":19},
+		{"x":617,"y":203,"width":11,"height":19},
+		{"x":51,"y":222,"width":9,"height":19},
+		{"x":77,"y":222,"width":9,"height":19},
+		{"x":103,"y":222,"width":9,"height":19},
+		{"x":155,"y":222,"width":9,"height":19},
+		{"x":181,"y":222,"width":9,"height":19},
+		{"x":207,"y":222,"width":9,"height":19},
+		{"x":233,"y":222,"width":9,"height":19},
+		{"x":285,"y":222,"width":9,"height":19},
+		{"x":312,"y":222,"width":9,"height":19}
 	]
 
 	it('triplet-brackets', function() {
@@ -125,6 +159,13 @@ describe("Multi-voice", function () {
 		var actual = getElementsBox("#paper .abcjs-triplet")
 		console.log(JSON.stringify(actual))
 		chai.assert.deepEqual(actual, expectedTripletSecondLine)
+	})
+
+	it('rest-placement-bug', function() {
+		var visualObj = abcjs.renderAbc("paper", abcRestPlacementBug, {add_classes:true});
+		var actual = getElementsBox("#paper .abcjs-rest")
+		console.log(JSON.stringify(actual))
+		chai.assert.deepEqual(actual, expectedRestPlacementBug)
 	})
 
 	it('rest-placement-one', function() {
@@ -158,12 +199,15 @@ describe("Multi-voice", function () {
 	it('two-voice-rests-triplets-words', function() {
 		var visualObj = abcjs.renderAbc("paper", abcTwoVoiceRestsTripletsWords, {add_classes:true});
 		var actual = getElementsBox("#paper .abcjs-lyric")
+		console.log("Lyric")
 		console.log(JSON.stringify(actual))
 		chai.assert.deepEqual(actual, expectedTwoVoiceRestsTripletsWordsWords)
 		actual = getElementsBox("#paper .abcjs-rest")
+		console.log("Rest")
 		console.log(JSON.stringify(actual))
 		chai.assert.deepEqual(actual, expectedTwoVoiceRestsTripletsWordsRests)
 		actual = getElementsBox("#paper .abcjs-triplet")
+		console.log("Triplet")
 		console.log(JSON.stringify(actual))
 		chai.assert.deepEqual(actual, expectedTwoVoiceRestsTripletsWordsTriplets)
 	})
