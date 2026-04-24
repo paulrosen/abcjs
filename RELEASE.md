@@ -1,3 +1,15 @@
+# Version 6.6.3
+
+## Bugs
+
+* Fix collisions of rests with notes in multipart music.
+
+* Fix the placement of lyrics that are in a second voice.
+
+* Fix the placement of the triplet brackets when the stems point down.
+
+* Add chord-pos class.
+
 # Version 6.6.2
 
 ## Bugs
