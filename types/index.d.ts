@@ -142,7 +142,7 @@ declare module 'abcjs' {
 
 	export interface ChordProperties {
 		name: string;
-		chord: {
+		chord?: {
 			root: ChordRoot;
 			type: ChordType;
 		},
@@ -941,42 +941,133 @@ declare module 'abcjs' {
 
 	export type TuneObjectArray = [TuneObject]
 
+	export type AbcElemType = VoiceItem["el_type"] | DragTypes | "break" | "color" | "font" | "hint" | "bracket" |
+		"glissando" | "keySignature" | "separator" | "tab" | "tabNumber" | "timeSignature" | "triplet";
+
+	export type SlurDirection = "up" | "down";
+
+	export interface SlurProperties {
+		label: number;
+		direction?: SlurDirection;
+		style?: "dotted";
+	}
+
+	export interface TieProperties {
+		direction?: SlurDirection;
+		style?: "dotted";
+	}
+
+	export interface AbcElemPitch {
+		accidental?: AccidentalName;
+		endSlur?: Array<number>;
+		endTie?: true;
+		highestVert?: number;
+		midipitch?: number;
+		name: string;
+		pitch: number;
+		startSlur?: Array<SlurProperties>;
+		startTie?: TieProperties;
+		style?: NoteHeadType;
+		verticalPos: number;
+	}
+
+	export interface AbcElemGraceNote extends AbcElemPitch {
+		acciaccatura?: true;
+		duration: number;
+		endBeam?: true;
+		startBeam?: true;
+	}
+
+	export interface AbcElemRest {
+		type: "invisible" | "spacer" | "rest" | "multimeasure" | "invisible-multimeasure" | "whole";
+		text?: number;
+		endTie?: true;
+		startTie?: TieProperties;
+	}
+
+	export interface AbcElemPositioning {
+		chordPosition?: Placement | "hidden";
+		dynamicPosition?: Placement | "hidden";
+		ornamentPosition?: Placement | "hidden";
+		vocalPosition?: Placement | "hidden";
+		volumePosition?: Placement | "hidden";
+	}
+
+	export interface AbcElemFonts {
+		annotationfont?: Font;
+		gchordfont?: Font;
+		measurefont?: Font;
+		repeatfont?: Font;
+		tripletfont?: Font;
+		vocalfont?: Font;
+	}
+
 	export interface AbcElem {
-		el_type: string; //TODO enumerate these
-		abselem: AbsoluteElement;
+		el_type: AbcElemType;
+		abselem?: AbsoluteElement;
+		accidentals?: Array<Accidental>
+		acc?: KeyAccidentalName
+		averagepitch?: number;
+		barNumber?: number;
+		beat_division?: Meter["beat_division"]
+		bpm?: number
+		clefPos?: number
+		cmd?: MidiCommands;
+		maxpitch?: number;
+		minpitch?: number;
+		mode?: Mode
+		postString?: string
+		preString?: string
+		root?: KeyRoot
+		stafflines?: number
+		staffscale?: number
+		suppress?: true
+		suppressBpm?: true
+		value?: Meter["value"]
+		verticalPos?: number
 		beambr?: number;
-		chord?: Array<{name: string; position: ChordPlacement}>
-		decoration: Array<string> //TODO enumerate these
-		duration: number
-		endBeam?: boolean
-		endSlur?: number
+		chord?: Array<ChordProperties>
+		color?: string;
+		decoration?: Array<Decorations>
+		duration?: number | Array<number>
+		endBeam?: true
+		endEnding?: true
+		endSlur?: Array<number>
 		endTriplet?: true
-		gracenotes?: Array<{duration: number; name:string; pitch: number; verticalPosition: number;}>
+		fonts?: AbcElemFonts;
+		gap?: number;
+		gracenotes?: Array<AbcElemGraceNote>
+		head?: NoteHeadType
 		lyric?: Array<{syllable: string; divider: ' ' | '-' | '_';}>
-		noStem?: boolean
-		midiPitches?: MidiPitches;
-		midiGraceNotePitches?: MidiGracePitches;
-		pitches?: Array<{
-			accidental?: AccidentalName;
-			pitch: number;
-			name: string;
-			startSlur?: Array<{label: number}>;
-			endSlur?: Array<number>;
-			startTie?: {};
-			endTie?: boolean;
-			verticalPos: number;
-			highestVert: number;
-		}>
-		positioning?: any
-		rest?: {"type": "rest"}
-		startBeam?: boolean
+		noStem?: true
+		notes?: Array<any>
+		overlay?: Array<VoiceItemNote>
+		params?: Array<string|number>;
+		pitches?: Array<AbcElemPitch>
+		positioning?: AbcElemPositioning
+		rest?: AbcElemRest
+		size?: number
+		startBeam?: true
+		startEnding?: string
+		startSlur?: Array<SlurProperties>
 		startTriplet?: number
-		tripletMultiplier?: number
-		tripletR?: number
+		steps?: number
 		stemConnectsToAbove?: true
 		style?: NoteHeadType
-		startChar: number
-		endChar: number
+		title?: string
+		transpose?: number
+		tripletMultiplier?: number
+		tripletR?: number
+		type?: string
+		direction?: StemDirection;
+		grace?: true
+		text?: string | number;
+		currentTrackMilliseconds?: number
+		currentTrackWholeNotes?: number | Array<number>
+		midiPitches?: MidiPitches;
+		midiGraceNotePitches?: MidiGracePitches;
+		startChar?: number
+		endChar?: number
 	}
 
 	export interface ClickListenerDrag {
