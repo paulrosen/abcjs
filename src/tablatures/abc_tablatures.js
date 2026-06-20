@@ -19,6 +19,85 @@ var pluginTab = {
 	'mandolin': { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: 0 },
 	'guitar': { name: 'StringTab', defaultTuning: ['E,', 'A,', 'D', 'G', 'B', 'e'], isTabBig: true, tabSymbolOffset: 0 },
 	'fiveString': { name: 'StringTab', defaultTuning: ['C,', 'G,', 'D', 'A', 'e'], isTabBig: false, tabSymbolOffset: -.95 },
+	//
+	// ═══ BANJO TUNINGS ═══
+	//
+	// 5-string banjo has a unique physical layout: the 5th string (short drone
+	// string) is the highest-pitched string but sits at the top of the neck,
+	// not the bottom. This means the physical string order doesn't match the
+	// ascending pitch order that abcjs's tablature engine expects internally.
+	//
+	// To handle this, each banjo entry uses three custom properties:
+	//
+	// defaultTuning: notes listed in ASCENDING PITCH order, not physical order.
+	//   For Open G (gDGBd physically), this is ['D','G','B','d','g'] because
+	//   D is the lowest pitch and g (the drone) is the highest.
+	//
+	// strOrder: an array that remaps ascending-pitch indices to physical string
+	//   positions on the tab staff. [4,0,1,2,3] means:
+	//     - ascending index 0 (D, lowest)  → physical string 4 (bottom tab line)
+	//     - ascending index 1 (G)          → physical string 0
+	//     - ascending index 2 (B)          → physical string 1
+	//     - ascending index 3 (d)          → physical string 2
+	//     - ascending index 4 (g, drone)   → physical string 3 (but drawn at top
+	//       because string 0 is at the top of the tab staff)
+	//   This remapping is applied in tab-absolute-elements.js after the fret
+	//   numbers are calculated.
+	//
+	// maxFrets: limits the maximum fret number per string (in ascending-pitch
+	//   order). The last element [24,24,24,24,0] sets maxFret=0 for the drone
+	//   (ascending index 4), meaning only open (fret 0) is allowed. When a note
+	//   would need a higher fret on the drone string, the toNumber() function in
+	//   string-patterns.js skips it and assigns the note to the next lower string.
+	//
+	// Each tuning has a corresponding "_fretted" variant that omits maxFrets,
+	// allowing all frets on the drone string. These are not shown directly in
+	// the UI — they're selected by appending "_fretted" to the instrument name
+	// when the user checks "Allow fretted drone string".
+	//
+	'banjoOpenG':    { name: 'StringTab', defaultTuning: ['D', 'G', 'B', 'd', 'g'],   strOrder: [4, 0, 1, 2, 3], maxFrets: [24, 24, 24, 24, 0], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoDoubleC':  { name: 'StringTab', defaultTuning: ['C', 'G', 'c', 'd', 'g'],   strOrder: [4, 0, 1, 2, 3], maxFrets: [24, 24, 24, 24, 0], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoSawmill':  { name: 'StringTab', defaultTuning: ['D', 'G', 'c', 'd', 'g'],   strOrder: [4, 0, 1, 2, 3], maxFrets: [24, 24, 24, 24, 0], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoOpenD':    { name: 'StringTab', defaultTuning: ['D', '^F', 'A', 'd', '^f'],  strOrder: [4, 0, 1, 2, 3], maxFrets: [24, 24, 24, 24, 0], isTabBig: true, tabSymbolOffset: -.95 }, // ^F = F#, ^f = f#
+	'banjoOpenC':    { name: 'StringTab', defaultTuning: ['C', 'G', 'c', 'e', 'g'],    strOrder: [4, 0, 1, 2, 3], maxFrets: [24, 24, 24, 24, 0], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoGMinor':   { name: 'StringTab', defaultTuning: ['D', 'G', '_B', 'd', 'g'],   strOrder: [4, 0, 1, 2, 3], maxFrets: [24, 24, 24, 24, 0], isTabBig: true, tabSymbolOffset: -.95 }, // _B = Bb
+	'banjoDADE':     { name: 'StringTab', defaultTuning: ['D', 'A', 'd', 'e', 'a'],    strOrder: [4, 0, 1, 2, 3], maxFrets: [24, 24, 24, 24, 0], isTabBig: true, tabSymbolOffset: -.95 },
+	// _fretted variants: identical tunings but no maxFrets restriction, so the
+	// drone string can be fretted at any position. Hidden from the UI dropdown;
+	// activated by the "Allow fretted drone string" checkbox which appends
+	// "_fretted" to the instrument name before passing it to abcjs.
+	'banjoOpenG_fretted':    { name: 'StringTab', defaultTuning: ['D', 'G', 'B', 'd', 'g'],   strOrder: [4, 0, 1, 2, 3], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoDoubleC_fretted':  { name: 'StringTab', defaultTuning: ['C', 'G', 'c', 'd', 'g'],   strOrder: [4, 0, 1, 2, 3], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoSawmill_fretted':  { name: 'StringTab', defaultTuning: ['D', 'G', 'c', 'd', 'g'],   strOrder: [4, 0, 1, 2, 3], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoOpenD_fretted':    { name: 'StringTab', defaultTuning: ['D', '^F', 'A', 'd', '^f'],  strOrder: [4, 0, 1, 2, 3], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoOpenC_fretted':    { name: 'StringTab', defaultTuning: ['C', 'G', 'c', 'e', 'g'],    strOrder: [4, 0, 1, 2, 3], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoGMinor_fretted':   { name: 'StringTab', defaultTuning: ['D', 'G', '_B', 'd', 'g'],   strOrder: [4, 0, 1, 2, 3], isTabBig: true, tabSymbolOffset: -.95 },
+	'banjoDADE_fretted':     { name: 'StringTab', defaultTuning: ['D', 'A', 'd', 'e', 'a'],    strOrder: [4, 0, 1, 2, 3], isTabBig: true, tabSymbolOffset: -.95 },
+	//
+	// ═══ CUSTOM INSTRUMENTS ═══
+	//
+	// These allow users to define their own tuning via a text input in the UI.
+	// The defaultTuning here is a fallback used when no custom tuning is provided.
+	// The actual tuning is passed via params.tuning from the front-end, and
+	// tab-string.js derives the number of tab lines from the tuning length
+	// (not from defaultTuning.length), so any number of strings is supported.
+	//
+	// 'custom': a generic fretted instrument with no string reordering.
+	//   Uses whatever tuning the user types, rendered as a standard tab staff.
+	//
+	// 'customBanjo': like custom, but with isBanjo=true. This flag tells
+	//   tab-string.js to dynamically compute strOrder and maxFrets based on
+	//   the tuning length — the last string in ascending order is always treated
+	//   as the drone (mapped to physical string 0, locked to fret 0).
+	//   This supports banjos with any number of strings (4, 5, 6, etc.).
+	//
+	// 'customBanjo_fretted': same as customBanjo but with frettedDrone=true,
+	//   which tells tab-string.js to skip generating maxFrets, so the drone
+	//   string can be fretted freely.
+	//
+	'custom':              { name: 'StringTab', defaultTuning: ['G,', 'D', 'A', 'e'], isTabBig: true, tabSymbolOffset: 0 },
+	'customBanjo':         { name: 'StringTab', defaultTuning: ['D', 'G', 'B', 'd', 'g'], isBanjo: true, isTabBig: true, tabSymbolOffset: -.95 },
+	'customBanjo_fretted': { name: 'StringTab', defaultTuning: ['D', 'G', 'B', 'd', 'g'], isBanjo: true, frettedDrone: true, isTabBig: true, tabSymbolOffset: -.95 },
 };
 
 var abcTablatures = {
