@@ -155,8 +155,18 @@ function toNumber(self, note) {
 			var num = note.pitch + note.pitchAltered - self.stringPitches[i]
 			if (note.quarter === '^') num -= 0.5
 			else if (note.quarter === "v") num += 0.5
+			var fret = Math.round(num);
+			// maxFrets check: if this string has a maximum fret limit and the
+			// calculated fret exceeds it, skip this string and try the next
+			// lower-pitched one. This is how the banjo drone string is restricted
+			// to open only — maxFrets[4] = 0 means any note that would need
+			// fret 1+ on the drone gets pushed down to the 4th string instead.
+			// The loop naturally continues to i-1 (next lower string) via 'continue'.
+			if (self.maxFrets && self.maxFrets[i] !== undefined && fret > self.maxFrets[i]) {
+				continue;
+			}
 			return {
-				num: Math.round(num),
+				num: fret,
 				str: self.stringPitches.length - 1 - i, // reverse the strings because string 0 is on the bottom
 				note: note
 			}
@@ -298,6 +308,22 @@ function StringPatterns(plugin) {
 	}
 	this.transpose = plugin.transpose ? plugin.transpose : 0
 	this.tuning = tuning;
+	// strOrder maps ascending-pitch string indices to physical string positions.
+	// For banjo in Open G: tuning is ['D','G','B','d','g'] (ascending pitch)
+	// but physical layout is [5th,1st,2nd,3rd,4th] so strOrder is [4,0,1,2,3].
+	// Default is sequential [0,1,2,...] for instruments with ascending string order.
+	if (plugin.strOrder) {
+		this.strOrder = plugin.strOrder;
+	} else {
+		this.strOrder = [];
+		for (var s = 0; s < tuning.length; s++) {
+			this.strOrder.push(s);
+		}
+	}
+	// maxFrets limits the highest fret allowed per string (in ascending-pitch order).
+	// For banjo, the 5th string (index 4) is a drone — maxFrets[4] = 0 means only
+	// open (fret 0) is allowed. Notes that would need a higher fret fall to the next string.
+	this.maxFrets = plugin.maxFrets || null;
 	this.stringPitches = []
 	for (var i = 0; i < this.tuning.length; i++) {
 		var pitch = noteToMidi(this.tuning[i]) + this.capo
