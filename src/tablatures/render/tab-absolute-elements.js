@@ -265,9 +265,47 @@ TabAbsoluteElements.prototype.build = function (plugin,
 				var pitches = absChild.abcelem.pitches;
 				var graceNotes = absChild.abcelem.gracenotes;
 				abs.type = 'tabNumber';
-				// to number conversion 
+				// Convert ABC pitches and grace notes into tablature positions.
+				// convertToNumber() returns { notes: [...], graces: [...], error }
+				// where each entry has { num: fretNumber, str: stringIndex, note }.
+				// At this point, str values are in ascending-pitch order (0 = lowest
+				// pitched string, N-1 = highest), which is how the tuning array is
+				// organized internally by StringPatterns.
 				tabPos = convertToNumber(plugin, pitches, graceNotes);
 				if (tabPos.error) return;
+
+				// strOrder remapping: the tablature engine calculates string assignments
+				// assuming strings are in ascending pitch order (index 0 = lowest pitch).
+				// But some instruments have a different physical layout — for example,
+				// the 5-string banjo's highest-pitched string (the drone, index 4 in the
+				// tuning array) is physically the FIRST string the player sees (string 0).
+				//
+				// strOrder is an array that maps ascending-pitch indices to physical
+				// string positions. For standard banjo: [4, 0, 1, 2, 3] meaning:
+				//   ascending index 0 (lowest D) → physical string 4 (bottom of tab)
+				//   ascending index 1 (G)        → physical string 0 (top of tab, but
+				//                                   strOrder puts it at position 0)
+				//   ...
+				//   ascending index 4 (high g)   → physical string 4 → remapped to 0
+				//                                   (drone, top line of tab)
+				//
+				// Without this remapping, the drone notes would appear on the wrong
+				// line of the tablature staff.
+				var strOrder = plugin.semantics.strOrder;
+				if (strOrder && tabPos.notes) {
+					for (var so = 0; so < tabPos.notes.length; so++) {
+						tabPos.notes[so].str = strOrder[tabPos.notes[so].str];
+					}
+				}
+				// Grace notes ("graces") are the small ornamental notes written before
+				// a main note in ABC notation (e.g. {ag} in ABC). They appear as tiny
+				// notes on the staff and need the same string remapping as regular notes
+				// so they land on the correct tablature line.
+				if (strOrder && tabPos.graces) {
+					for (var sg = 0; sg < tabPos.graces.length; sg++) {
+						tabPos.graces[sg].str = strOrder[tabPos.graces[sg].str];
+					}
+				}
 				if (tabPos.graces) {
 					// add graces to last note in notes
 					var posNote = tabPos.notes.length - 1;
