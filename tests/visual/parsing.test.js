@@ -224,6 +224,12 @@ K:C
 CDEF|GFED|CDE!~(!F|
 !~)!GFED|C4|]`
 
+	const abcEscapePercent = `T:100\\% Amazing
+M:4/4
+K:C
+C2 "Play 100\\% awesomely"G4 E2 C2| % comment
+`
+
 	it("crashes", function () {
 		testParser(abc1, expected1, "abc1");
 	})
@@ -282,6 +288,13 @@ CDEF|GFED|CDE!~(!F|
 
 		var glissando = document.querySelectorAll('#paper [data-name="glissando"]')
 		chai.assert.equal(glissando.length, 2);
+	})
+
+	it("escape-percent", function () {
+		var visualObj = abcjs.renderAbc("paper", abcEscapePercent);
+		chai.assert.equal(visualObj[0].metaText.title, "100​％ Amazing");
+		chai.assert.equal(visualObj[0].warnings, undefined)
+		chai.assert.equal(visualObj[0].lines[0].staff[0].voices[0][1].chord[0].name, "Play 100​％ awesomely")
 	})
 
 	function testParser(abc, expectedLines, comment) {
