@@ -237,8 +237,6 @@ declare module 'abcjs' {
 
 	export type AbstractEngraver = any;
 
-	export type NoteProperties = any; // TODO
-
 	export type AudioTrackCommand = 'program' | 'text' | 'note';
 	//
 	// Input Types
@@ -750,7 +748,7 @@ declare module 'abcjs' {
 		el_type: "overlay";
 		startChar: number;
 		endChar: number;
-		overlay: Array<NoteProperties>;
+		overlay: Array<VoiceItemNote>;
 	}
 
 	export interface VoiceItemPart {
@@ -786,7 +784,7 @@ declare module 'abcjs' {
 		steps: number;
 	}
 
-	export interface VoiceItemNote extends NoteProperties {
+	export interface VoiceItemNote {
 		el_type: "note";
 		startChar: number;
 		endChar: number;
@@ -800,7 +798,7 @@ declare module 'abcjs' {
 			startTie?: {};
 			endTie?: boolean;
 			verticalPos: number;
-		}>; // TODO-PER
+		}>;
 		rest?: { type: 'rest' | 'spacer' | 'invisible' | 'invisible-multimeasure' | 'multimeasure', text? : number};
 	}
 	export type VoiceItem = VoiceItemClef | VoiceItemBar | VoiceItemGap | VoiceItemKey | VoiceItemMeter | VoiceItemMidi | VoiceItemOverlay | VoiceItemPart | VoiceItemScale | VoiceItemStem | VoiceItemStyle | VoiceItemTempo | VoiceItemTranspose | VoiceItemNote;
@@ -1009,7 +1007,7 @@ declare module 'abcjs' {
 		acc?: KeyAccidentalName
 		averagepitch?: number;
 		barNumber?: number;
-		beat_division?: Meter["beat_division"]
+		beat_division?: Array<MeterFraction>;
 		bpm?: number
 		clefPos?: number
 		cmd?: MidiCommands;
@@ -1023,7 +1021,7 @@ declare module 'abcjs' {
 		staffscale?: number
 		suppress?: true
 		suppressBpm?: true
-		value?: Meter["value"]
+		value?: Array<MeterFraction>
 		verticalPos?: number
 		beambr?: number;
 		chord?: Array<ChordProperties>
