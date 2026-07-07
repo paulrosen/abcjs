@@ -41,4 +41,48 @@ describe("Parser Lyrics", function() {
 		chai.assert.deepEqual(notes[2].lyric, [{syllable: "", divider: "_"}], "note 3 lyric should extend");
 		chai.assert.deepEqual(notes[3].lyric, [{syllable: "", divider: "_"}], "note 4 lyric should extend");
 	});
+
+	it("renders one continuous extension line, not a row of underscores", function() {
+		abcjs.renderAbc("paper", abcMelismaMultipleUnderscores, {add_classes: true});
+		var svg = document.querySelector("#paper svg");
+
+		// A single unbroken line covers the whole melisma rather than one glyph per note.
+		var lines = svg.querySelectorAll('[data-name="lyric-extension"]');
+		chai.assert.equal(lines.length, 1, "should draw a single continuous line");
+
+		// The underscores must not be printed as text.
+		var lyrics = svg.querySelectorAll('[data-name="lyric"]');
+		lyrics.forEach(function(el) {
+			chai.assert.equal(el.textContent.indexOf("_"), -1, "underscore should not be drawn as a glyph");
+		});
+	});
+
+	// A melisma can be held across a barline and should stay a single line.
+	var abcMelismaAcrossBar =
+		"X:1\n" +
+		"K:C\n" +
+		"C D | E F\n" +
+		"w: la_ _ _ _\n"
+
+	it("draws a single line across a barline", function() {
+		abcjs.renderAbc("paper", abcMelismaAcrossBar, {add_classes: true});
+		var svg = document.querySelector("#paper svg");
+		var lines = svg.querySelectorAll('[data-name="lyric-extension"]');
+		chai.assert.equal(lines.length, 1, "melisma across a barline is still one line");
+	});
+
+	// Each verse gets its own independent extension line.
+	var abcMelismaTwoVerses =
+		"X:1\n" +
+		"K:C\n" +
+		"C D E\n" +
+		"w: a_ _ b\n" +
+		"w: c d_ _\n"
+
+	it("draws a separate line per verse", function() {
+		abcjs.renderAbc("paper", abcMelismaTwoVerses, {add_classes: true});
+		var svg = document.querySelector("#paper svg");
+		var lines = svg.querySelectorAll('[data-name="lyric-extension"]');
+		chai.assert.equal(lines.length, 2, "one line for each verse's melisma");
+	});
 });
