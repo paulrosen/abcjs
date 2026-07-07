@@ -35,7 +35,7 @@ function lyricChild(abselem) {
 }
 
 function drawVerseExtensions(renderer, children, verse, selectables) {
-	var run = null; // { startX, endX, y }
+	var run = null; // { startX, endX, y, startChar, endChar }
 	for (var i = 0; i < children.length; i++) {
 		var child = children[i];
 		if (child.type === 'bar')
@@ -63,11 +63,21 @@ function drawVerseExtensions(renderer, children, verse, selectables) {
 		if (ly.syllable && ly.syllable.length > 0) {
 			// This note carries the syllable that begins the melisma.
 			run = flush(renderer, run, selectables);
-			run = { startX: relElem.x + relElem.w / 2 + 2, endX: relElem.x, y: y };
+			run = {
+				startX: relElem.x + relElem.w / 2 + 2,
+				endX: relElem.x,
+				y: y,
+				// The span of ABC source covered by this melisma, tracked so the
+				// line can be matched back to its notes (see the data attributes below).
+				startChar: child.abcelem.startChar,
+				endChar: child.abcelem.endChar
+			};
 		} else if (run) {
 			// A bare "_": extend the current line to cover this note.
 			run.endX = relElem.x;
 			run.y = y;
+			if (child.abcelem.endChar !== undefined)
+				run.endChar = child.abcelem.endChar;
 		}
 	}
 	flush(renderer, run, selectables);
@@ -80,8 +90,20 @@ function flush(renderer, run, selectables) {
 		var endX = Math.max(run.endX, run.startX + 6);
 		var klass = renderer.controller.classes.generate('lyric-extension');
 		var el = printLine(renderer, run.startX, endX, run.y, klass, 'lyric-extension', 0.6);
-		if (el)
-			selectables.wrapSvgEl({ el_type: "extension", startChar: -1, endChar: -1 }, el);
+		if (el) {
+			// The line is drawn outside of any note's group, so it never appears in
+			// a playback event's `elements`. To let callers highlight/animate it in
+			// sync with playback, expose the ABC source range it covers. During a
+			// TimingCallbacks eventCallback, a line covers the current note when
+			// `event.startChar >= data-start-char && event.startChar < data-end-char`.
+			if (run.startChar !== undefined && run.endChar !== undefined) {
+				renderer.paper.setAttributeOnElement(el, {
+					"data-start-char": run.startChar,
+					"data-end-char": run.endChar
+				});
+			}
+			selectables.wrapSvgEl({ el_type: "extension", startChar: run.startChar, endChar: run.endChar }, el);
+		}
 	}
 	return null;
 }
