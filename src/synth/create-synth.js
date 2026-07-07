@@ -317,8 +317,14 @@ function CreateSynth() {
 
 				var noteMapTracks = createNoteMap(self.flattened);
 
-				if (self.options.swing)
-					addSwing(noteMapTracks, self.options.swing, self.meterFraction, self.pickupLength)
+				if (self.options.swing) {
+					// If we have a drum intro, then the pickup is already incorporated into the beat.
+					// That is, without a drum intro, the first note starts at 0 whether it
+					// is a pickup or not. With a drum intro, the first note will be in its
+					// proper place.
+					var pickupLength = self.options.drumIntro ? 0 : self.pickupLength
+					addSwing(noteMapTracks, self.options.swing, self.meterFraction, pickupLength)
+				}
 
 				if (self.sequenceCallback)
 					self.sequenceCallback(noteMapTracks, self.callbackContext);
@@ -564,7 +570,7 @@ function CreateSynth() {
 	function addSwing(noteMapTracks, swing, meterFraction, pickupLength) {
 
 		// we can only swing in X/4 and X/8 meters.
-		if (meterFraction.den != 4 && meterFraction.den != 8)
+		if (meterFraction.den !== 4 && meterFraction.den !== 8)
 			return;
 
 		swing = parseFloat(swing);
@@ -586,7 +592,7 @@ function CreateSynth() {
 		// could be also in the settings. Try out values such 0.1, 0.2
 		var volumeIncrease = 0.0;
 
-		// the beatLength in X/8 meters
+		// the beatLength in X/4 meters
 		var beatLength = 0.25; 
 
 		// in X/8 meters the 16s swing so the beatLength is halved
@@ -605,15 +611,15 @@ function CreateSynth() {
 				var event = track[i];
 				if (
 					// is halfbeat
-					(event.start-pickupLength) % halfbeatLength == 0 && (event.start-pickupLength) % beatLength != 0 
+					(event.start-pickupLength) % halfbeatLength === 0 && (event.start-pickupLength) % beatLength !== 0
 					&& (
 						// the previous note is on the beat or before OR there is no previous note 
-						i == 0 
+						i === 0
 						|| track[i-1].start <= track[i].start - halfbeatLength
 					)
 					&& (
 						// the next note is on the beat or after OR there is no next note
-						i == track.length - 1 
+						i === track.length - 1
 						|| track[i+1].start >= track[i].start + halfbeatLength
 					)
 				) {
@@ -626,7 +632,7 @@ function CreateSynth() {
 
 					// if there is a previous note ending at the start of this note, extend its end
 					// and decrease its volume
-					if (i > 0 && track[i-1].end == oldEventStart) {
+					if (i > 0 && track[i-1].end === oldEventStart) {
 						track[i-1].end = event.start;
 						track[i-1].volume *= 1 - volumeIncrease;
 					}
