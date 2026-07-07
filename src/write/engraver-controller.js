@@ -351,7 +351,7 @@ function splitSvgIntoLines(renderer, output, title, responsive, scale) {
 		if (responsive === 'resize')
 			svg.style.position = ''
 		// TODO-PER: Hack! Not sure why this is needed.
-		var viewBoxHeight = renderer.firefox112 ? height+1 : height
+		var viewBoxHeight = renderer.firefox ? height+1 : height
 		svg.setAttribute("viewBox", "0 " + nextTop + " " + width + " " + viewBoxHeight)
 		svg.appendChild(style.cloneNode(true))
 		var titleEl = document.createElement("title")

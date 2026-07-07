@@ -8,7 +8,7 @@ function printLine(renderer, x1, x2, y, klass, name, dy) {
 	var y1 = roundNumber(y - dy);
 	var y2 = roundNumber(y + dy);
 	// TODO-PER: This fixes a firefox bug where it isn't displayed
-	if (renderer.firefox112) {
+	if (renderer.firefox) {
 		y += dy / 2; // Because the y coordinate is the edge of where the line goes but the width widens from the middle.
 		var attr = {
 			x1: x1,
@@ -39,4 +39,3 @@ function printLine(renderer, x1, x2, y, klass, name, dy) {
 }
 
 module.exports = printLine;
-

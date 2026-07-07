@@ -13,7 +13,7 @@ function printStem(renderer, x, dx, y1, y2, klass, name) {
 	x = roundNumber(x);
 	var x2 = roundNumber(x + dx);
 	// TODO-PER: This fixes a firefox bug where it isn't displayed
-	if (renderer.firefox112) {
+	if (renderer.firefox) {
 		x += dx / 2; // Because the x coordinate is the edge of where the line goes but the width widens from the middle.
 		var attr = {
 			x1: x,
