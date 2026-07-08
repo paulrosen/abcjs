@@ -191,9 +191,17 @@ describe("Parsing", function () {
 		"L:1/8\n" +
 		"K:Edor\n" +
 		"V:1\n" +
-		"C2 D2 E2 F2| [K:C] G2 A2 B2 c2|]\n" +
+		"C2 D2 E2 F2| [K:F] G2 A2 B2 c2|]\n" +
 		"V:2\n" +
-		"C2 D2 E2 F2| [K:C] G2 A2 B2 c2|]\n"
+		"C2 D2 E2 F2| [K:F] G2 A2 B2 c2|]\n" +
+		"V:1\n" +
+		"C2 D2 E2 F2| [K:Bb^f] G2 A2 B2 c2|]\n" +
+		"V:2\n" +
+		"C2 D2 E2 F2| [K:Bb^f] G2 A2 B2 c2|]\n" +
+		"V:1\n" +
+		"C2 D2 E2 F2| G2 A2 B2 c2|]\n" +
+		"V:2\n" +
+		"C2 D2 E2 F2| G2 A2 B2 c2|]\n"
 
 	var expectedInlineKeyPerVoice = [
 		{"line":0,"staff":0,"type":"initial-clef","style":"treble"},
@@ -203,7 +211,7 @@ describe("Parsing", function () {
 		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"E"},
 		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"F"},
 		{"line":0,"staff":0,"type":"bar","style":"bar_thin"},
-		{"line":0,"staff":0,"type":"key","name":"C","accidentals":"f natural,c natural"},
+		{"line":0,"staff":0,"type":"key","name":"F","accidentals":"f natural,c natural,B flat"},
 		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"G"},
 		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"A"},
 		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"B"},
@@ -216,14 +224,63 @@ describe("Parsing", function () {
 		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"E"},
 		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"F"},
 		{"line":0,"staff":1,"type":"bar","style":"bar_thin"},
-		{"line":0,"staff":1,"type":"key","name":"C","accidentals":"f natural,c natural"},
+		{"line":0,"staff":1,"type":"key","name":"F","accidentals":"f natural,c natural,B flat"},
 		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"G"},
 		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"A"},
 		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"B"},
 		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"c"},
-		{"line":0,"staff":1,"type":"bar","style":"bar_thin_thick"}
+		{"line":0,"staff":1,"type":"bar","style":"bar_thin_thick"},
+		{"line":1,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":1,"staff":0,"type":"initial-key","name":"F","accidentals":"B flat"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":1,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":1,"staff":0,"type":"key","name":"B","accidentals":"B flat,e flat,f sharp"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":1,"staff":0,"type":"bar","style":"bar_thin_thick"},
+		{"line":1,"staff":1,"type":"initial-clef","style":"treble"},
+		{"line":1,"staff":1,"type":"initial-key","name":"F","accidentals":"B flat"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":1,"staff":1,"type":"bar","style":"bar_thin"},
+		{"line":1,"staff":1,"type":"key","name":"B","accidentals":"B flat,e flat,f sharp"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":1,"staff":1,"type":"bar","style":"bar_thin_thick"},
+		{"line":2,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":2,"staff":0,"type":"initial-key","name":"B","accidentals":"B flat,e flat,f sharp"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":2,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":2,"staff":0,"type":"bar","style":"bar_thin_thick"},
+		{"line":2,"staff":1,"type":"initial-clef","style":"treble"},
+		{"line":2,"staff":1,"type":"initial-key","name":"B","accidentals":"B flat,e flat,f sharp"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":2,"staff":1,"type":"bar","style":"bar_thin"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":2,"staff":1,"type":"bar","style":"bar_thin_thick"}
 	]
-
 
 	var abcBarNumberSubtitle = "X:1\n" +
 		"T:song\n" +

@@ -241,36 +241,30 @@ var parseKeyVoice = {};
 				multilineVars.key = { root: "HP", accidentals: [], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
-				if (isInline)
-					setVoiceKey();
-				else {
+				if (!isInline) {
 					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-					setVoiceKey();
 				}
+				setVoiceKey();
 				break;
 			case 'Hp':
 				parseDirective.addDirective("bagpipes");
 				multilineVars.key = { root: "Hp", accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
-				if (isInline)
-					setVoiceKey();
-				else {
+				if (!isInline) {
 					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-					setVoiceKey();
 				}
+				setVoiceKey();
 				break;
 			case 'none':
 				// we got the none key - that's the same as C to us
 				multilineVars.key = { root: "none", accidentals: [], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
-				if (isInline)
-					setVoiceKey();
-				else {
+				if (!isInline) {
 					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-					setVoiceKey();
 				}
+				setVoiceKey();
 				break;
 			default:
 				var retPitch = tokenizer.getKeyPitch(tokens[0].token);
@@ -338,12 +332,10 @@ var parseKeyVoice = {};
 							}
 						}
 					}
-					if (isInline)
-						setVoiceKey();
-					else {
+					if (!isInline) {
 						multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-						setVoiceKey();
 					}
+					setVoiceKey();
 				}
 				break;
 		}
@@ -393,12 +385,10 @@ var parseKeyVoice = {};
 					}
 				}
 			}
-			if (isInline)
-				setVoiceKey();
-			else {
+			if (!isInline) {
 				multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
-				setVoiceKey();
 			}
+			setVoiceKey();
 		}
 
 		// Now see if any optional parameters are present. They have the form "key=value", except that "clef=" is optional
