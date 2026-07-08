@@ -186,6 +186,44 @@ describe("Parsing", function () {
 		{"line":3,"staff":0,"type":"bar","style":"bar_thin"}
 	]
 
+	var abcInlineKeyPerVoice = "X:1\n" +
+		"M:4/4\n" +
+		"L:1/8\n" +
+		"K:Edor\n" +
+		"V:1\n" +
+		"C2 D2 E2 F2| [K:C] G2 A2 B2 c2|]\n" +
+		"V:2\n" +
+		"C2 D2 E2 F2| [K:C] G2 A2 B2 c2|]\n"
+
+	var expectedInlineKeyPerVoice = [
+		{"line":0,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":0,"staff":0,"type":"initial-key","name":"EDor","accidentals":"f sharp,c sharp"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":0,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":0,"staff":0,"type":"key","name":"C","accidentals":"f natural,c natural"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":0,"staff":0,"type":"bar","style":"bar_thin_thick"},
+		{"line":0,"staff":1,"type":"initial-clef","style":"treble"},
+		{"line":0,"staff":1,"type":"initial-key","name":"EDor","accidentals":"f sharp,c sharp"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":0,"staff":1,"type":"bar","style":"bar_thin"},
+		{"line":0,"staff":1,"type":"key","name":"C","accidentals":"f natural,c natural"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":0,"staff":1,"type":"bar","style":"bar_thin_thick"}
+	]
+
 
 	var abcBarNumberSubtitle = "X:1\n" +
 		"T:song\n" +
@@ -268,6 +306,11 @@ CDEF|GFED|CDE!~(!F|
 		const ret = flattenResults(abcKeyWarn)
 		//console.log(JSON.stringify(ret))
 		chai.assert.deepStrictEqual(ret, expectedKeyWarn, "KeyWarn");
+	})
+
+	it("inline-key-per-voice", function () {
+		const ret = flattenResults(abcInlineKeyPerVoice)
+		chai.assert.deepStrictEqual(ret, expectedInlineKeyPerVoice, "InlineKeyPerVoice");
 	})
 
 	it("dynamics-over-line", function () {
