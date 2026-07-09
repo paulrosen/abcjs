@@ -2,10 +2,6 @@ var TimingCallbacks = function(target, params) {
 	var self = this;
 	if (!params) params = {};
 	self.qpm = params.qpm ? parseInt(params.qpm, 10) : null;
-	if (!self.qpm) {
-		var tempo = target.metaText ? target.metaText.tempo : null;
-		self.qpm = target.getBpm(tempo);
-	}
 	self.extraMeasuresAtBeginning = params.extraMeasuresAtBeginning ? parseInt(params.extraMeasuresAtBeginning, 10) : 0;
 	self.beatCallback = params.beatCallback; // This is called for each beat.
 	self.eventCallback = params.eventCallback;   // This is called for each note or rest encountered.
@@ -16,6 +12,10 @@ var TimingCallbacks = function(target, params) {
 	self.joggerTimer = null;
 
 	self.replaceTarget = function(newTarget) {
+		if (!params.qpm) {
+			var tempo = newTarget.metaText ? newTarget.metaText.tempo : null;
+			self.qpm = newTarget.getBpm(tempo);
+		}
 		self.noteTimings = newTarget.setTiming(self.qpm, self.extraMeasuresAtBeginning);
 		if (newTarget.noteTimings.length === 0)
 			self.noteTimings = newTarget.setTiming(0,0);
