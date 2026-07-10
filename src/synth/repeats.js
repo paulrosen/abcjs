@@ -15,10 +15,10 @@ function Repeats(voice) {
 				this.sections.push({type: "startRepeat", index: this.sections[this.sections.length-1].index})
 			this.sections.push({type: "endRepeat", index: thisIndex})
 		}
-		if (isStartRepeat)
-			this.sections.push({type:"startRepeat", index: thisIndex})
 		if (startEnding)
 			this.sections.push({type:"startEnding", index: thisIndex, endings: startEnding})
+		if (isStartRepeat)
+			this.sections.push({type:"startRepeat", index: thisIndex})
 	}
 
 	this.resolveRepeats = function() {
