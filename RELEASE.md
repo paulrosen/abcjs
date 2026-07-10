@@ -1,3 +1,32 @@
+# Version 6.6.4
+
+## Bugs
+
+* Be able to escape the percent sign.
+
+* Make the lines a little thicker in Firefox because it has rendering problems.
+
+* fix inline meter & key signature change rendering in grand staff
+
+* Fix swung note positioning when using pickup notes.
+
+* Fix inline key changes leaking between voices
+
+* Add debugging info for mysterious timing callback crash
+
+* When doing callbacks, respect new tempo when replacing a tune and there isn't an explicit tempo set.
+
+* Fix bug in sequencing repeats when there is a start repeat at the same place as an end repeat.
+
+## Features
+
+* Add many more chords when generating synth. (thx michaeljmachado)
+
+
+## Documentation
+
+* Improve AbcElem typescript definition
+
 # Version 6.6.3
 
 ## Bugs
