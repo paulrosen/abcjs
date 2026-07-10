@@ -245,17 +245,47 @@ var TimingCallbacks = function(target, params) {
 				};
 			}
 
-			var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
-			self.beatCallback(
-				self.beatStarts[self.currentBeat].b,
-				self.totalBeats / self.beatSubdivisions,
-				self.lastMoment,
-				position,
-				debugInfo);
-			if (thisStartTime !== self.startTime) {
-				return timestamp - self.startTime;
-			} // else
-			// 	self.currentBeat++;
+			// there is a case where self.beatStarts[self.currentBeat] doesn't exist, but I don't know how. Give more info in that case for better debugging.
+			if (self.currentBeat < 0 || self.currentBeat >= self.beatStarts.length || !self.beatStarts[self.currentBeat]) {
+				var obj = {
+					currentBeat: self.currentBeat,
+					beatStartLength: self.beatStarts.length,
+					totalBeats: self.totalBeats,
+
+					startTime: self.startTime,
+					currentTime: self.currentTime,
+					lastMoment: self.lastMoment,
+					lastTimestamp: self.lastTimestamp,
+
+					qpm: self.qpm,
+					millisecondsPerBeat: self.millisecondsPerBeat,
+					beatSubdivisions: self.beatSubdivisions,
+
+					currentEvent: self.currentEvent,
+					currentLine: self.currentLine,
+
+					isPaused: self.isPaused,
+					isRunning: self.isRunning,
+					pausedPercent: self.pausedPercent,
+					justUnpaused: self.justUnpaused,
+					newSeekPercent: self.newSeekPercent,
+				}
+				setTimeout(function() {
+					// throw the error outside of the normal processing so that everything else continues working.
+					throw new Error("abcjs-timing-callback error: " + JSON.stringify(obj))
+				}, 1)
+			} else {
+				var thisStartTime = self.startTime; // the beat callback can call seek and change the position from beneath us.
+				self.beatCallback(
+					self.beatStarts[self.currentBeat].b,
+					self.totalBeats / self.beatSubdivisions,
+					self.lastMoment,
+					position,
+					debugInfo);
+				if (thisStartTime !== self.startTime) {
+					return timestamp - self.startTime;
+				}
+			}
 		}
 		return null;
 	};
