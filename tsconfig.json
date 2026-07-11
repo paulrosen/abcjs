@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "lib": ["ES2015", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "noEmit": true,
+    "isolatedModules": true,
+    "types": ["node"]
+  },
+  "include": [
+    "index.js",
+    "plugin.js",
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests"
+  ]
+}
