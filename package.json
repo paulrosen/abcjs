@@ -13,7 +13,8 @@
     "test": "concurrently \"http-server\" \"npx opener http://localhost:8080/tests/all.html\"",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
-    "build:analyze": "npm run build:basic -- --env analyze"
+    "build:analyze": "npm run build:basic -- --env analyze",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -43,13 +44,19 @@
   },
   "homepage": "https://abcjs.net",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@rollup/plugin-commonjs": "^29.0.3",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@tarp/require": "1.4.3",
     "chai": "4.3.7",
     "concurrently": "7.6.0",
+    "eslint": "^10.7.0",
+    "globals": "^17.7.0",
     "http-server": "14.1.1",
+    "jiti": "^2.7.0",
     "mocha": "10.2.0",
     "opener": "1.5.2",
+    "typescript-eslint": "^8.63.0",
     "vite": "^4.0.5",
     "vite-plugin-banner": "^0.8.1",
     "vuepress": "2.0.0-beta.60",
