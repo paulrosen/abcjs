@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2015",
-    "lib": ["ES2015", "DOM"],
+    "lib": [
+      "ES2015",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "node",
     "declaration": true,
@@ -18,7 +21,9 @@
     "removeComments": false,
     "noEmit": true,
     "isolatedModules": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "index.js",

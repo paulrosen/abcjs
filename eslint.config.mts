@@ -18,6 +18,7 @@ export default defineConfig([
 		plugins: { "@stylistic": stylistic },
 		rules: {
 			"@stylistic/indent": ["error", "tab"],
+			"@typescript-eslint/no-explicit-any": "warn",
 		},
 	},
 ]);

@@ -7,6 +7,35 @@
   function getDefaultExportFromCjs(x) {
     return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
   }
+  function getAugmentedNamespace(n) {
+    if (n.__esModule)
+      return n;
+    var f = n.default;
+    if (typeof f == "function") {
+      var a = function a2() {
+        if (this instanceof a2) {
+          var args = [null];
+          args.push.apply(args, arguments);
+          var Ctor = Function.bind.apply(f, args);
+          return new Ctor();
+        }
+        return f.apply(this, arguments);
+      };
+      a.prototype = f.prototype;
+    } else
+      a = {};
+    Object.defineProperty(a, "__esModule", { value: true });
+    Object.keys(n).forEach(function(k) {
+      var d = Object.getOwnPropertyDescriptor(n, k);
+      Object.defineProperty(a, k, d.get ? d : {
+        enumerable: true,
+        get: function() {
+          return n[k];
+        }
+      });
+    });
+    return a;
+  }
   var version_1;
   var hasRequiredVersion;
   function requireVersion() {
@@ -11830,50 +11859,46 @@
     voiceElement = VoiceElement;
     return voiceElement;
   }
-  var setClass_1;
-  var hasRequiredSetClass;
-  function requireSetClass() {
-    if (hasRequiredSetClass)
-      return setClass_1;
-    hasRequiredSetClass = 1;
-    var setClass = function(elemset, addClass, removeClass, color) {
-      if (!elemset)
-        return;
-      for (var i = 0; i < elemset.length; i++) {
-        var el = elemset[i];
-        var attr = el.getAttribute("highlight");
-        if (!attr)
-          attr = "fill";
-        el.setAttribute(attr, color);
-        var kls = el.getAttribute("class");
-        if (!kls)
-          kls = "";
-        kls = kls.replace(removeClass, "");
-        kls = kls.replace(addClass, "");
-        if (addClass.length > 0) {
-          if (kls.length > 0 && kls[kls.length - 1] !== " ")
-            kls += " ";
-          kls += addClass;
-        }
-        el.setAttribute("class", kls);
+  function setClass(elemset, addClass, removeClass, color) {
+    if (!elemset)
+      return;
+    for (let i = 0; i < elemset.length; i++) {
+      const el = elemset[i];
+      let attr = el.getAttribute("highlight");
+      if (!attr)
+        attr = "fill";
+      el.setAttribute(attr, color);
+      let kls = el.getAttribute("class");
+      if (!kls)
+        kls = "";
+      kls = kls.replace(removeClass, "");
+      kls = kls.replace(addClass, "");
+      if (addClass.length > 0) {
+        if (kls.length > 0 && kls[kls.length - 1] !== " ")
+          kls += " ";
+        kls += addClass;
       }
-    };
-    setClass_1 = setClass;
-    return setClass_1;
+      el.setAttribute("class", kls);
+    }
   }
+  const setClass$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: setClass
+  }, Symbol.toStringTag, { value: "Module" }));
+  const require$$3 = /* @__PURE__ */ getAugmentedNamespace(setClass$1);
   var highlight_1;
   var hasRequiredHighlight;
   function requireHighlight() {
     if (hasRequiredHighlight)
       return highlight_1;
     hasRequiredHighlight = 1;
-    var setClass = requireSetClass();
+    var setClass2 = require$$3;
     var highlight = function(klass, color) {
       if (klass === void 0)
         klass = "abcjs-note_selected";
       if (color === void 0)
         color = "#ff0000";
-      setClass(this.elemset, klass, "", color);
+      setClass2(this.elemset, klass, "", color);
     };
     highlight_1 = highlight;
     return highlight_1;
@@ -11884,13 +11909,13 @@
     if (hasRequiredUnhighlight)
       return unhighlight_1;
     hasRequiredUnhighlight = 1;
-    var setClass = requireSetClass();
+    var setClass2 = require$$3;
     var unhighlight = function(klass, color) {
       if (klass === void 0)
         klass = "abcjs-note_selected";
       if (color === void 0)
         color = "#000000";
-      setClass(this.elemset, "", klass, color);
+      setClass2(this.elemset, "", klass, color);
     };
     unhighlight_1 = unhighlight;
     return unhighlight_1;
@@ -19292,24 +19317,19 @@
     layout_1 = layout;
     return layout_1;
   }
-  var classes;
-  var hasRequiredClasses;
-  function requireClasses() {
-    if (hasRequiredClasses)
-      return classes;
-    hasRequiredClasses = 1;
-    var Classes = function Classes2(options) {
+  class Classes {
+    constructor(options) {
       this.shouldAddClasses = options.shouldAddClasses;
       this.reset();
-    };
-    Classes.prototype.reset = function() {
+    }
+    reset() {
       this.lineNumber = null;
       this.voiceNumber = null;
       this.measureNumber = null;
       this.measureTotalPerLine = [];
       this.noteNumber = null;
-    };
-    Classes.prototype.incrLine = function() {
+    }
+    incrLine() {
       if (this.lineNumber === null)
         this.lineNumber = 0;
       else
@@ -19317,44 +19337,44 @@
       this.voiceNumber = null;
       this.measureNumber = null;
       this.noteNumber = null;
-    };
-    Classes.prototype.incrVoice = function() {
+    }
+    incrVoice() {
       if (this.voiceNumber === null)
         this.voiceNumber = 0;
       else
         this.voiceNumber++;
       this.measureNumber = null;
       this.noteNumber = null;
-    };
-    Classes.prototype.isInMeasure = function() {
+    }
+    isInMeasure() {
       return this.measureNumber !== null;
-    };
-    Classes.prototype.newMeasure = function() {
+    }
+    newMeasure() {
       if (this.measureNumber)
         this.measureTotalPerLine[this.lineNumber] = this.measureNumber;
       this.measureNumber = null;
       this.noteNumber = null;
-    };
-    Classes.prototype.startMeasure = function() {
+    }
+    startMeasure() {
       this.measureNumber = 0;
       this.noteNumber = 0;
-    };
-    Classes.prototype.incrMeasure = function() {
+    }
+    incrMeasure() {
       this.measureNumber++;
       this.noteNumber = 0;
-    };
-    Classes.prototype.incrNote = function() {
+    }
+    incrNote() {
       this.noteNumber++;
-    };
-    Classes.prototype.measureTotal = function() {
-      var total = 0;
-      for (var i = 0; i < this.lineNumber; i++)
+    }
+    measureTotal() {
+      let total = 0;
+      for (let i = 0; i < this.lineNumber; i++)
         total += this.measureTotalPerLine[i] ? this.measureTotalPerLine[i] : 0;
       if (this.measureNumber)
         total += this.measureNumber;
       return total;
-    };
-    Classes.prototype.getCurrent = function(c) {
+    }
+    getCurrent() {
       return {
         line: this.lineNumber,
         measure: this.measureNumber,
@@ -19362,11 +19382,11 @@
         voice: this.voiceNumber,
         note: this.noteNumber
       };
-    };
-    Classes.prototype.generate = function(c) {
+    }
+    generate(c) {
       if (!this.shouldAddClasses)
         return "";
-      var ret = [];
+      let ret = [];
       if (c && c.length > 0)
         ret.push(c);
       if (c === "abcjs-tab-number")
@@ -19384,18 +19404,20 @@
       if (c && (c.indexOf("note") >= 0 || c.indexOf("rest") >= 0 || c.indexOf("lyric") >= 0) && this.noteNumber !== null)
         ret.push("n" + this.noteNumber);
       if (ret.length > 0) {
-        ret = ret.join(" ");
-        ret = ret.split(" ");
-        for (var i = 0; i < ret.length; i++) {
+        ret = ret.join(" ").split(" ");
+        for (let i = 0; i < ret.length; i++) {
           if (ret[i].indexOf("abcjs-") !== 0 && ret[i].length > 0)
             ret[i] = "abcjs-" + ret[i];
         }
       }
       return ret.join(" ");
-    };
-    classes = Classes;
-    return classes;
+    }
   }
+  const classes = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: Classes
+  }, Symbol.toStringTag, { value: "Module" }));
+  const require$$10 = /* @__PURE__ */ getAugmentedNamespace(classes);
   var getFontAndAttr;
   var hasRequiredGetFontAndAttr;
   function requireGetFontAndAttr() {
@@ -20625,7 +20647,7 @@
     var drawTempo = requireTempo();
     var drawRelativeElement = requireRelative();
     var spacing = requireSpacing();
-    var setClass = requireSetClass();
+    var setClass2 = require$$3;
     var elementGroup = requireGroupElements();
     function drawAbsolute(renderer2, params, bartop, selectables2, staffPos) {
       if (params.invisible)
@@ -20689,9 +20711,9 @@
       } else if (params.elemset.length > 0)
         selectables2.add(params, params.elemset[0], params.type === "note", staffPos);
       if (params.klass)
-        setClass(params.elemset, "mark", "", "#00ff00");
+        setClass2(params.elemset, "mark", "", "#00ff00");
       if (params.hint)
-        setClass(params.elemset, "abcjs-hint", "", null);
+        setClass2(params.elemset, "abcjs-hint", "", null);
       params.abcelem.abselem = params;
       if (params.heads && params.heads.length > 0) {
         params.notePositions = [];
@@ -21641,7 +21663,7 @@
     var BottomText = requireBottomText();
     var setupSelection = requireSelection();
     var layout = requireLayout();
-    var Classes = requireClasses();
+    var Classes2 = require$$10;
     var GetFontAndAttr = requireGetFontAndAttr();
     var GetTextSize = requireGetTextSize();
     var draw = requireDraw();
@@ -21661,7 +21683,7 @@
       this.timeBasedLayout = params.timeBasedLayout;
       this.expandToWidest = !!params.expandToWidest;
       this.scale = params.scale ? parseFloat(params.scale) : 0;
-      this.classes = new Classes({ shouldAddClasses: params.add_classes });
+      this.classes = new Classes2({ shouldAddClasses: params.add_classes });
       if (!(this.scale > 0.1))
         this.scale = void 0;
       if (params.staffwidth) {

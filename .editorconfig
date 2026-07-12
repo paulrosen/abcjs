@@ -2,3 +2,7 @@ root = true
 
 [*.{ts,mts}]
 indent_style = tab
+
+[*.json]
+indent_style = space
+indent_size = 2
