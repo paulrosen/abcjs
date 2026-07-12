@@ -1,5 +1,5 @@
-/*! abcjs_basic v6.6.4 Copyright © 2009-2024 Paul Rosen and Gregory Dyke (https://abcjs.net) */
-/*! For license information please see abcjs_basic.LICENSE */
+/*! abcjs-basic v6.6.4 Copyright © 2009-2024 Paul Rosen and Gregory Dyke (https://abcjs.net) */
+/*! For license information please see abcjs-basic.LICENSE */
 (function(global, factory) {
   typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, global.ABCJS = factory());
 })(this, function() {

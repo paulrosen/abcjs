@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "types/index.d.ts",
   "scripts": {
-    "build": "npm run build:basic && npm run build:plugin && npm run build:basic-min",
+    "build": "rm dist/* && npm run build:basic && npm run build:plugin && npm run build:basic-min",
     "build:basic": "vite build --mode development:basic",
     "build:basic-min": "vite build --mode production:basic",
     "build:plugin": "vite build --mode production:plugin",
