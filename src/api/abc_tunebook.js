@@ -39,6 +39,14 @@ var tunebook = {};
 		return null;
 	};
 
+	TuneBook.prototype.getTunesByType = function(type) {
+		if (type !== "none") {
+			this.tunes = this.tunes.filter((tune) => tune.type.toLowerCase() === type.toLowerCase())
+		}
+		
+		return this;
+	}
+
 	tunebook.parseOnly = function(abc, params) {
 		var numTunes = tunebook.numberOfTunes(abc);
 
