@@ -127,6 +127,49 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
 	return tabNoteRelative;
 }
 
+function addTabStem(plugin, abs) {
+	if (!plugin || !plugin.params || !plugin.params.stems) return;
+	var linePitch = plugin.linePitch || 3;
+	// How far below the tab number the stem should start, relative to string spacing.
+	// Use ~1.5 line pitches to clear the digit by about a full "digit height".
+	var stemTopOffset = linePitch * 1.5;
+	// How far further down the stem should extend (roughly double the previous value).
+	var padding = linePitch * 2.4;
+	// Determine whether this note should display quaver/semicolon-style tails on the tab stem.
+	var duration = abs.abcelem && abs.abcelem.duration;
+	var tailCount = 0;
+	if (duration !== undefined && duration < 0.25) { // quavers and shorter
+		// One tail for quavers, two for semiquavers and shorter.
+		tailCount = 1;
+		if (duration < 0.125)
+			tailCount = 2;
+	}
+	for (var i = 0; i < abs.children.length; i++) {
+		var child = abs.children[i];
+		if (child.type === 'tabNumber' && child.pitch !== undefined) {
+			// For each tab number, create an individual downward stem whose top is clearly below the number.
+			// Smaller pitch values are lower on the tablature staff, so subtract to go down.
+			var top = child.pitch - stemTopOffset; // just below the digit, near the space to the next string
+			var bottom = top - padding; // further down from the digit
+			// Use a slightly smaller linewidth magnitude than standard stems so the tab stems appear skinny.
+			var stem = new RelativeElement(null, 0, 0, bottom, { type: 'stem', pitch2: top, linewidth: -0.5, klass: 'abcjs-tab-stem' });
+			stem.x = child.x !== undefined ? child.x : abs.x;
+			abs.addExtra(stem);
+			if (tailCount > 0) {
+				// Add one or more small horizontal tails near the bottom of the tab stem.
+				var tailWidth = linePitch * 0.9;
+				for (var t = 0; t < tailCount; t++) {
+					// Stack tails upward along the stem for multiple flags.
+					var tailPitch = bottom + linePitch * (0.2 + t * 0.5);
+					var tail = new RelativeElement(null, 0, tailWidth, tailPitch, { type: 'tabTail' });
+					tail.x = stem.x;
+					abs.addExtra(tail);
+				}
+			}
+		}
+	}
+}
+
 function getXGrace(abs, index) {
 	var found = 0;
 	if (abs.extra) {
@@ -294,6 +337,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
 					defNote.abselem = abs;
 					tabVoice.push(defNote);
 					dest.children.push(abs);
+					addTabStem(plugin, abs);
 				}
 				break;
 		}
