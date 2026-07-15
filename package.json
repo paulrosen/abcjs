@@ -10,7 +10,7 @@
     "build:basic-min": "vite build --mode production:basic",
     "build:plugin": "vite build --mode production:plugin",
     "test-server": "npx http-server",
-    "test": "concurrently \"http-server\" \"npx opener http://localhost:8080/tests/all.html\"",
+    "test": "npm run build:basic && concurrently \"http-server\" \"npx opener http://localhost:8080/tests/all.html\"",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "build:analyze": "npm run build:basic -- --env analyze",

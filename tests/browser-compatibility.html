@@ -3,15 +3,12 @@
 <head>
 	<!--
 	Run this to check the browser compatibility of abcjs on a wide variety of browsers.
-	This uses the compiled but uncompressed library.
+	This uses the compiled, uncompressed library (dist/abcjs-basic.js).
 
-	This has the same effect as the all.html file that works with modern browsers but it
-	works in a wider range of browsers.
+	This runs a minimal subset of tests that are known to work in older browsers.
+	For a full test suite, see all.html (modern browsers only).
 
-	It can't use the node.js version because the Tarp library (used to polyfill
-	the require statement) is not very browser-compatible.
-
-	Here are the oldest browser versions that have been tested:
+	Oldest browser versions that have been tested:
 	Firefox 32
 	Safari 5.1
 	IE 10
