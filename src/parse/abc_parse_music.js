@@ -243,8 +243,27 @@ MusicParser.prototype.parseMusic = function(line) {
 						if (ret[0] > 0) {
 							el.gracenotes = ret[1];
 							i += ret[0];
-						} else
-							break;
+						} else {
+							ret = letter_to_open_slurs_and_triplets(line, i);
+							if (ret.consumed > 0) {
+								if (ret.startSlur !== undefined)
+									el.startSlur = (el.startSlur || 0) + ret.startSlur;
+								if (ret.dottedSlur)
+									el.dottedSlur = true;
+								if (ret.triplet !== undefined) {
+									if (tripletNotesLeft > 0)
+										warn("Can't nest triplets", line, i);
+									else {
+										el.startTriplet = ret.triplet;
+										el.tripletMultiplier = ret.tripletQ / ret.triplet;
+										el.tripletR = ret.num_notes;
+										tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
+									}
+								}
+								i += ret.consumed;
+							} else
+								break;
+						}
 					}
 				}
 			}
