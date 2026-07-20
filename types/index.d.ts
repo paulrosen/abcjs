@@ -1,82 +1,337 @@
-declare module 'abcjs' {
+declare module "abcjs" {
 	//
 	// Enumerations
 	//
 
-	export type Clef = 'treble' | 'tenor' | 'bass' | 'alto' | 'treble+8' | 'tenor+8' | 'bass+8' | 'alto+8' | 'treble-8' | 'tenor-8' | 'bass-8' | 'alto-8' | 'none' | 'perc';
+	export type Clef =
+		| "treble"
+		| "tenor"
+		| "bass"
+		| "alto"
+		| "treble+8"
+		| "tenor+8"
+		| "bass+8"
+		| "alto+8"
+		| "treble-8"
+		| "tenor-8"
+		| "bass-8"
+		| "alto-8"
+		| "none"
+		| "perc";
 
-	export type Bar = 'bar_dbl_repeat' | 'bar_right_repeat' | 'bar_left_repeat' | 'bar_invisible' | 'bar_thick_thin' | 'bar_thin_thin' | 'bar_thin' | 'bar_thin_thick';
+	export type Bar =
+		| "bar_dbl_repeat"
+		| "bar_right_repeat"
+		| "bar_left_repeat"
+		| "bar_invisible"
+		| "bar_thick_thin"
+		| "bar_thin_thin"
+		| "bar_thin"
+		| "bar_thin_thick";
 
-	export type MeterType = 'common_time' | 'cut_time' | 'specified' | 'tempus_perfectum' | 'tempus_imperfectum' | 'tempus_perfectum_prolatio' | 'tempus_imperfectum_prolatio';
+	export type MeterType =
+		| "common_time"
+		| "cut_time"
+		| "specified"
+		| "tempus_perfectum"
+		| "tempus_imperfectum"
+		| "tempus_perfectum_prolatio"
+		| "tempus_imperfectum_prolatio";
 
-	export type NoteLetter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g';
+	export type NoteLetter =
+		| "A"
+		| "B"
+		| "C"
+		| "D"
+		| "E"
+		| "F"
+		| "G"
+		| "a"
+		| "b"
+		| "c"
+		| "d"
+		| "e"
+		| "f"
+		| "g";
 
-	export type AccidentalName = 'flat' | 'natural' | 'sharp' | 'dblsharp' | 'dblflat' | 'quarterflat' | 'quartersharp';
+	export type AccidentalName =
+		| "flat"
+		| "natural"
+		| "sharp"
+		| "dblsharp"
+		| "dblflat"
+		| "quarterflat"
+		| "quartersharp";
 
-	export type ChordRoot = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+	export type ChordRoot = "A" | "B" | "C" | "D" | "E" | "F" | "G";
 
-	export type KeyRoot = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'HP' | 'Hp' | 'none';
+	export type KeyRoot =
+		| "A"
+		| "B"
+		| "C"
+		| "D"
+		| "E"
+		| "F"
+		| "G"
+		| "HP"
+		| "Hp"
+		| "none";
 
-	export type KeyAccidentalName = '' | '#' | 'b';
+	export type KeyAccidentalName = "" | "#" | "b";
 
-	export type Mode = '' | 'm' | 'Dor' | 'Mix' | 'Loc' | 'Phr' | 'Lyd';
+	export type Mode = "" | "m" | "Dor" | "Mix" | "Loc" | "Phr" | "Lyd";
 
-	export type ChordType = '' | 'm' | '7' | 'm7' | 'maj7' | 'M7' | '6' | 'm6' | 'aug' | '+' | 'aug7' | 'dim' | 'dim7' | '9' |
-		'm9' | 'maj9' | 'M9' | '11' | 'dim9' | 'sus' | 'sus9' | '7sus4' | '7sus9' | '5';
+	export type ChordType =
+		| ""
+		| "m"
+		| "7"
+		| "m7"
+		| "maj7"
+		| "M7"
+		| "6"
+		| "m6"
+		| "aug"
+		| "+"
+		| "aug7"
+		| "dim"
+		| "dim7"
+		| "9"
+		| "m9"
+		| "maj9"
+		| "M9"
+		| "11"
+		| "dim9"
+		| "sus"
+		| "sus9"
+		| "7sus4"
+		| "7sus9"
+		| "5";
 
-	export type Placement = 'above' | 'below';
+	export type Placement = "above" | "below";
 
-	export type ChordPlacement = 'above' | 'below' | 'left' | 'right' | 'default';
+	export type ChordPlacement = "above" | "below" | "left" | "right" | "default";
 
 	export type BracePosition = "start" | "continue" | "end";
 
-	export type Alignment = 'left' | 'center' |'right';
+	export type Alignment = "left" | "center" | "right";
 
-	export type Media = 'screen' | 'print';
+	export type Media = "screen" | "print";
 
 	export type ProgressUnit = "seconds" | "beats" | "percent";
 
 	export type NoteTimingEventType = "end" | "event";
 
-	export type MidiOutputType = 'encoded' | 'binary' | 'link';
+	export type MidiOutputType = "encoded" | "binary" | "link";
 
-	export type Responsive = 'resize';
+	export type Responsive = "resize";
 
-	export type DragTypes = 	"author" | "bar" | "brace" | "clef" | "composer" | "dynamicDecoration" | "ending" | "extraText" |
-		"freeText" | "keySignature" | "note" | "part" | "partOrder" | "rhythm" | "slur" | "subtitle" | "tempo" | "timeSignature" | "title" |
-		"unalignedWords" | "voiceName";
+	export type DragTypes =
+		| "author"
+		| "bar"
+		| "brace"
+		| "clef"
+		| "composer"
+		| "dynamicDecoration"
+		| "ending"
+		| "extraText"
+		| "freeText"
+		| "keySignature"
+		| "note"
+		| "part"
+		| "partOrder"
+		| "rhythm"
+		| "slur"
+		| "subtitle"
+		| "tempo"
+		| "timeSignature"
+		| "title"
+		| "unalignedWords"
+		| "voiceName";
 
-	export type FormatAttributes = "titlefont" | "gchordfont" | "composerfont" | "footerfont" | "headerfont" | "historyfont" | "infofont" |
-		"measurefont" | "partsfont" | "repeatfont" | "subtitlefont" | "tempofont" | "textfont" | "voicefont" | "tripletfont" | "vocalfont" |
-		"wordsfont" | "annotationfont" | "scale" | "partsbox" | "freegchord" | "fontboxpadding" | "stretchlast" | "tablabelfont" | "tabnumberfont" | "tabgracefont" | 'stafftopmargin';
+	export type FormatAttributes =
+		| "titlefont"
+		| "gchordfont"
+		| "composerfont"
+		| "footerfont"
+		| "headerfont"
+		| "historyfont"
+		| "infofont"
+		| "measurefont"
+		| "partsfont"
+		| "repeatfont"
+		| "subtitlefont"
+		| "tempofont"
+		| "textfont"
+		| "voicefont"
+		| "tripletfont"
+		| "vocalfont"
+		| "wordsfont"
+		| "annotationfont"
+		| "scale"
+		| "partsbox"
+		| "freegchord"
+		| "fontboxpadding"
+		| "stretchlast"
+		| "tablabelfont"
+		| "tabnumberfont"
+		| "tabgracefont"
+		| "stafftopmargin";
 
-	export type MidiCommands = "nobarlines" | "barlines" | "beataccents" | "nobeataccents" | "droneon" | "droneoff" | "noportamento" | "channel" | "c" |
-		"drumon" | "drumoff" | "fermatafixed" | "fermataproportional" | "gchordon" | "gchordoff" | "bassvol" | "chordvol" | "bassprog" | "chordprog" |
-		"controlcombo" | "temperamentnormal" | "gchord" | "ptstress" | "beatmod" | "deltaloudness" | "drumbars" | "pitchbend" |
-		"gracedivider" | "makechordchannels" | "randomchordattack" | "chordattack" | "stressmodel" | "transpose" |
-		"rtranspose" | "volinc" | "program" | "ratio" | "snt" | "bendvelocity" | "control" | "temperamentlinear" | "beat" | "beatstring" |
-		"drone" | "drummap" | "portamento" | "expand" | "grace" | "trim" | "drum" | "chordname";
+	export type MidiCommands =
+		| "nobarlines"
+		| "barlines"
+		| "beataccents"
+		| "nobeataccents"
+		| "droneon"
+		| "droneoff"
+		| "noportamento"
+		| "channel"
+		| "c"
+		| "drumon"
+		| "drumoff"
+		| "fermatafixed"
+		| "fermataproportional"
+		| "gchordon"
+		| "gchordoff"
+		| "bassvol"
+		| "chordvol"
+		| "bassprog"
+		| "chordprog"
+		| "controlcombo"
+		| "temperamentnormal"
+		| "gchord"
+		| "ptstress"
+		| "beatmod"
+		| "deltaloudness"
+		| "drumbars"
+		| "pitchbend"
+		| "gracedivider"
+		| "makechordchannels"
+		| "randomchordattack"
+		| "chordattack"
+		| "stressmodel"
+		| "transpose"
+		| "rtranspose"
+		| "volinc"
+		| "program"
+		| "ratio"
+		| "snt"
+		| "bendvelocity"
+		| "control"
+		| "temperamentlinear"
+		| "beat"
+		| "beatstring"
+		| "drone"
+		| "drummap"
+		| "portamento"
+		| "expand"
+		| "grace"
+		| "trim"
+		| "drum"
+		| "chordname";
 
-	export type StemDirection = 'up' | 'down' | 'auto' | 'none';
+	export type StemDirection = "up" | "down" | "auto" | "none";
 
-	export type NoteHeadType = 'normal' | 'harmonic' | 'rhythm' | 'x' | 'triangle';
+	export type NoteHeadType =
+		| "normal"
+		| "harmonic"
+		| "rhythm"
+		| "x"
+		| "triangle";
 
-	export type Decorations = "trill" | "trillh" | "lowermordent" | "uppermordent" | "mordent" | "pralltriller" | "accent" |
-		"fermata" | "invertedfermata" | "tenuto" | "0" | "1" | "2" | "3" | "4" | "5" | "+" | "wedge" |
-		"open" | "thumb" | "snap" | "turn" | "roll" | "irishroll" | "breath" | "shortphrase" | "mediumphrase" | "longphrase" |
-		"segno" | "coda" | "D.S." | "D.C." | "fine" | "crescendo(" | "crescendo)" | "diminuendo(" | "diminuendo)" |"glissando(" | "glissando)" |
-		"p" | "pp" | "f" | "ff" | "mf" | "mp" | "ppp" | "pppp" |  "fff" | "ffff" | "sfz" | "repeatbar" | "repeatbar2" | "slide" |
-		"upbow" | "downbow" | "staccato" | "trem1" | "trem2" | "trem3" | "trem4" |
-		"/" | "//" | "///" | "////" | "turnx" | "invertedturn" | "invertedturnx" | "arpeggio" | "trill(" | "trill)" | "xstem" |
-		"mark" | "marcato" | "umarcato" |
-		"D.C.alcoda" | "D.C.alfine" | "D.S.alcoda" | "D.S.alfine" | "editorial" | "courtesy"
+	export type Decorations =
+		| "trill"
+		| "trillh"
+		| "lowermordent"
+		| "uppermordent"
+		| "mordent"
+		| "pralltriller"
+		| "accent"
+		| "fermata"
+		| "invertedfermata"
+		| "tenuto"
+		| "0"
+		| "1"
+		| "2"
+		| "3"
+		| "4"
+		| "5"
+		| "+"
+		| "wedge"
+		| "open"
+		| "thumb"
+		| "snap"
+		| "turn"
+		| "roll"
+		| "irishroll"
+		| "breath"
+		| "shortphrase"
+		| "mediumphrase"
+		| "longphrase"
+		| "segno"
+		| "coda"
+		| "D.S."
+		| "D.C."
+		| "fine"
+		| "crescendo("
+		| "crescendo)"
+		| "diminuendo("
+		| "diminuendo)"
+		| "glissando("
+		| "glissando)"
+		| "p"
+		| "pp"
+		| "f"
+		| "ff"
+		| "mf"
+		| "mp"
+		| "ppp"
+		| "pppp"
+		| "fff"
+		| "ffff"
+		| "sfz"
+		| "repeatbar"
+		| "repeatbar2"
+		| "slide"
+		| "upbow"
+		| "downbow"
+		| "staccato"
+		| "trem1"
+		| "trem2"
+		| "trem3"
+		| "trem4"
+		| "/"
+		| "//"
+		| "///"
+		| "////"
+		| "turnx"
+		| "invertedturn"
+		| "invertedturnx"
+		| "arpeggio"
+		| "trill("
+		| "trill)"
+		| "xstem"
+		| "mark"
+		| "marcato"
+		| "umarcato"
+		| "D.C.alcoda"
+		| "D.C.alfine"
+		| "D.S.alcoda"
+		| "D.S.alfine"
+		| "editorial"
+		| "courtesy";
 
-	export type TablatureInstrument = 'guitar' | 'mandolin' | 'fiddle' | 'violin' | '';
+	export type TablatureInstrument =
+		| "guitar"
+		| "mandolin"
+		| "fiddle"
+		| "violin"
+		| "";
 
 	//
 	// Basic types
 	//
-	export type Selector = string | Element
+	export type Selector = string | Element;
 
 	type NumberFunction = () => number;
 
@@ -116,9 +371,9 @@ declare module 'abcjs' {
 	export interface Font {
 		face: string;
 		size: number;
-		weight: 'normal' | 'bold';
-		style: 'normal' | 'italic';
-		decoration: 'none' | 'underline';
+		weight: "normal" | "bold";
+		style: "normal" | "italic";
+		decoration: "none" | "underline";
 	}
 
 	export interface TempoProperties {
@@ -145,12 +400,12 @@ declare module 'abcjs' {
 		chord?: {
 			root: ChordRoot;
 			type: ChordType;
-		},
-		position?: ChordPlacement
+		};
+		position?: ChordPlacement;
 		rel_position?: {
 			x: number;
 			y: number;
-		}
+		};
 	}
 
 	export interface CharRange {
@@ -158,9 +413,15 @@ declare module 'abcjs' {
 		endChar: number;
 	}
 
-	export type MidiParam = Array<string|number>;
+	export type MidiParam = Array<string | number>;
 
-	export type MidiGracePitches = Array<{instrument: number; pitch: number; volume: number; cents?: number; durationInMeasures: number}>;
+	export type MidiGracePitches = Array<{
+		instrument: number;
+		pitch: number;
+		volume: number;
+		cents?: number;
+		durationInMeasures: number;
+	}>;
 
 	export interface MidiPitch {
 		instrument: number;
@@ -201,43 +462,52 @@ declare module 'abcjs' {
 	}
 
 	export interface AbsoluteElement {
-		abcelem : AbcElem;
-		bottom : number;
-		children : Array<RelativeElement>
-		duration : number;
-		durationClass : number;
-		elemset : Array<SVGElement>
-		extra : Array<RelativeElement>
-		extraw : number;
-		fixed : {w: number, t: number, b: number}
-		heads : Array<RelativeElement>
-		invisible : boolean;
-		minspacing : number;
-		notePositions : Array<{x:number; y:number;}>
-		right : Array<RelativeElement>
-		specialY : Array<{
-			chordHeightAbove : number;
-			chordHeightBelow : number;
-			dynamicHeightAbove : number;
-			dynamicHeightBelow : number;
-			endingHeightAbove : number;
-			lyricHeightAbove : number;
-			lyricHeightBelow : number;
-			partHeightAbove : number;
-			tempoHeightAbove : number;
-			volumeHeightAbove : number;
-			volumeHeightBelow : number;
-		}>
-		top : number;
-		tuneNumber : number;
-		type : "symbol" | "tempo" | "part" | "rest" | "note" | "bar" | "staff-extra clef" | "staff-extra key-signature" | "staff-extra time-signature";
-		w : number;
-		x : number;
+		abcelem: AbcElem;
+		bottom: number;
+		children: Array<RelativeElement>;
+		duration: number;
+		durationClass: number;
+		elemset: Array<SVGElement>;
+		extra: Array<RelativeElement>;
+		extraw: number;
+		fixed: { w: number; t: number; b: number };
+		heads: Array<RelativeElement>;
+		invisible: boolean;
+		minspacing: number;
+		notePositions: Array<{ x: number; y: number }>;
+		right: Array<RelativeElement>;
+		specialY: Array<{
+			chordHeightAbove: number;
+			chordHeightBelow: number;
+			dynamicHeightAbove: number;
+			dynamicHeightBelow: number;
+			endingHeightAbove: number;
+			lyricHeightAbove: number;
+			lyricHeightBelow: number;
+			partHeightAbove: number;
+			tempoHeightAbove: number;
+			volumeHeightAbove: number;
+			volumeHeightBelow: number;
+		}>;
+		top: number;
+		tuneNumber: number;
+		type:
+			| "symbol"
+			| "tempo"
+			| "part"
+			| "rest"
+			| "note"
+			| "bar"
+			| "staff-extra clef"
+			| "staff-extra key-signature"
+			| "staff-extra time-signature";
+		w: number;
+		x: number;
 	}
 
 	export type AbstractEngraver = any;
 
-	export type AudioTrackCommand = 'program' | 'text' | 'note';
+	export type AudioTrackCommand = "program" | "text" | "note";
 	//
 	// Input Types
 	//
@@ -252,11 +522,11 @@ declare module 'abcjs' {
 	}
 
 	export interface Tablature {
-		instrument?: TablatureInstrument,
-		capo?: number
-		label?: string,
-		tuning?: Array<string>,
-		highestNote?: string,
+		instrument?: TablatureInstrument;
+		capo?: number;
+		label?: string;
+		tuning?: Array<string>;
+		highestNote?: string;
 	}
 
 	export interface AbcVisualParams {
@@ -264,7 +534,7 @@ declare module 'abcjs' {
 		add_classes?: boolean;
 		afterParsing?: AfterParsing;
 		ariaLabel?: string;
-		chordGrid?:'noMusic'|'withMusic';
+		chordGrid?: "noMusic" | "withMusic";
 		clickListener?: ClickListener;
 		dragColor?: string;
 		dragging?: boolean;
@@ -296,7 +566,11 @@ declare module 'abcjs' {
 		stop_on_warning?: boolean;
 		tablature?: Array<Tablature>;
 		textboxpadding?: number;
-		timeBasedLayout?: { minPadding?:number, minWidth?:number, align?: 'left'|'center'};
+		timeBasedLayout?: {
+			minPadding?: number;
+			minWidth?: number;
+			align?: "left" | "center";
+		};
 		viewportHorizontal?: boolean;
 		viewportVertical?: boolean;
 		visualTranspose?: number;
@@ -348,14 +622,17 @@ declare module 'abcjs' {
 		style?: string;
 		cents?: number;
 	}
-	export type NoteMapTrack = Array<NoteMapTrackItem>
+	export type NoteMapTrack = Array<NoteMapTrackItem>;
 
 	export interface SynthOptions {
 		soundFontUrl?: string;
 		soundFontVolumeMultiplier?: number;
-		programOffsets?: {[instrument: string]: number}
+		programOffsets?: { [instrument: string]: number };
 		fadeLength?: number;
-		sequenceCallback?: (sequence: Array<NoteMapTrack>, context: any) => Array<NoteMapTrack>;
+		sequenceCallback?: (
+			sequence: Array<NoteMapTrack>,
+			context: any,
+		) => Array<NoteMapTrack>;
 		callbackContext?: any; // Anything is ok. It is just passed back in the callback
 		onEnded?: (context: any) => void;
 		pan?: Array<number>;
@@ -389,23 +666,26 @@ declare module 'abcjs' {
 		displayWarp?: boolean;
 	}
 
-	export type DownloadLabelFn = (visualObj: TuneObject, index: number) => string;
+	export type DownloadLabelFn = (
+		visualObj: TuneObject,
+		index: number,
+	) => string;
 
 	export interface MidiFileOptions extends SynthOptions {
-		midiOutputType?: MidiOutputType
-		downloadClass?: string
-		preTextDownload?: string
-		downloadLabel?: string | DownloadLabelFn
-		postTextDownload?: string
-		fileName?: string
+		midiOutputType?: MidiOutputType;
+		downloadClass?: string;
+		preTextDownload?: string;
+		downloadLabel?: string | DownloadLabelFn;
+		postTextDownload?: string;
+		fileName?: string;
 	}
 
 	export interface MidiBufferOptions {
-		audioContext? : AudioContext;
+		audioContext?: AudioContext;
 		visualObj?: TuneObject;
 		sequence?: AudioSequence;
 		millisecondsPerMeasure?: number;
-		debugCallback? : (message: string) => void;
+		debugCallback?: (message: string) => void;
 		options?: SynthOptions;
 		onEnded?: (context: any) => void;
 	}
@@ -445,9 +725,7 @@ declare module 'abcjs' {
 	}
 
 	// make an alias for backwards compatibility
-	export interface TimingEvent extends NoteTimingEvent {
-
-	}
+	export interface TimingEvent extends NoteTimingEvent {}
 
 	export interface PercMapElement {
 		sound: number;
@@ -540,7 +818,7 @@ declare module 'abcjs' {
 			transpose?: MidiParam;
 			trim?: MidiParam;
 			volinc: MidiParam;
-		}
+		};
 		musicspace?: number;
 		nobarcheck?: string;
 		notespacingfactor?: number;
@@ -605,7 +883,7 @@ declare module 'abcjs' {
 		classes: any;
 		dragColor: string;
 		dragIndex: number;
-		dragMouseStart: { x: number, y: number; };
+		dragMouseStart: { x: number; y: number };
 		dragTarget: null | any;
 		dragYStep: number;
 		dragging: boolean;
@@ -650,7 +928,7 @@ declare module 'abcjs' {
 			left: string;
 			center: string;
 			right: string;
-		}
+		};
 		history?: string;
 		instruction?: string;
 		measurebox?: boolean;
@@ -663,7 +941,7 @@ declare module 'abcjs' {
 		textBlock?: string;
 		title?: string;
 		transcription?: string;
-		unalignedWords?: Array<TextFieldProperties|string>;
+		unalignedWords?: Array<TextFieldProperties | string>;
 		url?: string;
 	}
 
@@ -709,7 +987,15 @@ declare module 'abcjs' {
 
 	export interface VoiceItemBar {
 		el_type: "bar";
-		type: 'bar_dbl_repeat' | 'bar_right_repeat' | 'bar_left_repeat' |'bar_invisible' | 'bar_thick_thin' | 'bar_thin_thin' | 'bar_thin' | 'bar_thin_thick';
+		type:
+			| "bar_dbl_repeat"
+			| "bar_right_repeat"
+			| "bar_left_repeat"
+			| "bar_invisible"
+			| "bar_thick_thin"
+			| "bar_thin_thin"
+			| "bar_thin"
+			| "bar_thin_thick";
 		barNumber?: number;
 		chord?: Array<ChordProperties>;
 		decoration: Array<Decorations>;
@@ -739,7 +1025,7 @@ declare module 'abcjs' {
 	export interface VoiceItemMidi {
 		el_type: "midi";
 		cmd: MidiCommands;
-		params: Array<string|number>;
+		params: Array<string | number>;
 		startChar: number;
 		endChar: number;
 	}
@@ -793,18 +1079,40 @@ declare module 'abcjs' {
 			accidental?: AccidentalName;
 			pitch: number;
 			name: string;
-			startSlur?: Array<{label: number}>;
+			startSlur?: Array<{ label: number }>;
 			endSlur?: Array<number>;
 			startTie?: {};
 			endTie?: boolean;
 			verticalPos: number;
 		}>;
-		rest?: { type: 'rest' | 'spacer' | 'invisible' | 'invisible-multimeasure' | 'multimeasure', text? : number};
+		rest?: {
+			type:
+				| "rest"
+				| "spacer"
+				| "invisible"
+				| "invisible-multimeasure"
+				| "multimeasure";
+			text?: number;
+		};
 	}
-	export type VoiceItem = VoiceItemClef | VoiceItemBar | VoiceItemGap | VoiceItemKey | VoiceItemMeter | VoiceItemMidi | VoiceItemOverlay | VoiceItemPart | VoiceItemScale | VoiceItemStem | VoiceItemStyle | VoiceItemTempo | VoiceItemTranspose | VoiceItemNote;
+	export type VoiceItem =
+		| VoiceItemClef
+		| VoiceItemBar
+		| VoiceItemGap
+		| VoiceItemKey
+		| VoiceItemMeter
+		| VoiceItemMidi
+		| VoiceItemOverlay
+		| VoiceItemPart
+		| VoiceItemScale
+		| VoiceItemStem
+		| VoiceItemStyle
+		| VoiceItemTempo
+		| VoiceItemTranspose
+		| VoiceItemNote;
 
 	export interface TuneLine {
-		columns?: { formatting: any, lines: any };
+		columns?: { formatting: any; lines: any };
 		image?: string;
 		newpage?: number;
 		staffbreak?: number;
@@ -845,12 +1153,12 @@ declare module 'abcjs' {
 			stafflines?: number;
 			staffscale?: number;
 			title?: Array<string>;
-			height?:number;
+			height?: number;
 			line?: number;
-			startx?:number;
-			w?:number;
-			gridStart?:number;
-			gridEnd?:number;
+			startx?: number;
+			w?: number;
+			gridStart?: number;
+			gridEnd?: number;
 		};
 		vskip?: number;
 	}
@@ -862,7 +1170,7 @@ declare module 'abcjs' {
 			height: number;
 			top: number;
 			zero: number;
-		}
+		};
 		svgEl: SVGElement;
 	}
 
@@ -877,7 +1185,7 @@ declare module 'abcjs' {
 			line: number;
 			measure: number;
 			selectableElement: HTMLElement;
-		}
+		};
 	}
 
 	interface ChordGridSubtitle {
@@ -889,11 +1197,11 @@ declare module 'abcjs' {
 		text: string;
 	}
 	interface ChordGridMeasure {
-		chord: [string,string,string,string];
-		hasStartRepeat?:boolean;
-		hasEndRepeat?:boolean;
-		noBorder?:boolean; // for when the line isn't complete, this is a placeholder
-		ending?:number; // This bar starts an ending
+		chord: [string, string, string, string];
+		hasStartRepeat?: boolean;
+		hasEndRepeat?: boolean;
+		noBorder?: boolean; // for when the line isn't complete, this is a placeholder
+		ending?: number; // This bar starts an ending
 		annotations?: Array<string>;
 	}
 	interface ChordGridPart {
@@ -919,28 +1227,46 @@ declare module 'abcjs' {
 		getBarLength: NumberFunction;
 		getBeatLength: NumberFunction;
 		getBeatsPerMeasure: NumberFunction;
-		getBpm: (tempo?:TempoProperties) => number;
+		getBpm: (tempo?: TempoProperties) => number;
 		getMeter: () => Meter;
 		getMeterFraction: () => MeterFraction;
 		getPickupLength: NumberFunction;
 		getKeySignature: () => KeySignature;
 		getElementFromChar: (charPos: number) => VoiceItem | null;
 		millisecondsPerMeasure: (bpm?: number) => number;
-		setTiming: (bpm?: number, measuresOfDelay? : number) => void;
-		setupEvents: (startingDelay: number, timeDivider:number, startingBpm: number, warp?: number) => Array<NoteTimingEvent>;
+		setTiming: (bpm?: number, measuresOfDelay?: number) => void;
+		setupEvents: (
+			startingDelay: number,
+			timeDivider: number,
+			startingBpm: number,
+			warp?: number,
+		) => Array<NoteTimingEvent>;
 		setUpAudio: (options: SynthOptions) => AudioTracks;
-		makeVoicesArray: () => Array<Selectable[]>
+		makeVoicesArray: () => Array<Selectable[]>;
 		deline: () => Array<TuneLine>;
 		findSelectableElement: (target: HTMLElement) => SelectableReturn | null;
-		getSelectableArray: () => Array<Selectable>
+		getSelectableArray: () => Array<Selectable>;
 		lineBreaks?: Array<number>;
 		visualTranspose?: number;
 	}
 
-	export type TuneObjectArray = [TuneObject]
+	export type TuneObjectArray = [TuneObject];
 
-	export type AbcElemType = VoiceItem["el_type"] | DragTypes | "break" | "color" | "font" | "hint" | "bracket" |
-		"glissando" | "keySignature" | "separator" | "tab" | "tabNumber" | "timeSignature" | "triplet";
+	export type AbcElemType =
+		| VoiceItem["el_type"]
+		| DragTypes
+		| "break"
+		| "color"
+		| "font"
+		| "hint"
+		| "bracket"
+		| "glissando"
+		| "keySignature"
+		| "separator"
+		| "tab"
+		| "tabNumber"
+		| "timeSignature"
+		| "triplet";
 
 	export type SlurDirection = "up" | "down";
 
@@ -977,7 +1303,13 @@ declare module 'abcjs' {
 	}
 
 	export interface AbcElemRest {
-		type: "invisible" | "spacer" | "rest" | "multimeasure" | "invisible-multimeasure" | "whole";
+		type:
+			| "invisible"
+			| "spacer"
+			| "rest"
+			| "multimeasure"
+			| "invisible-multimeasure"
+			| "whole";
 		text?: number;
 		endTie?: true;
 		startTie?: TieProperties;
@@ -1003,69 +1335,69 @@ declare module 'abcjs' {
 	export interface AbcElem {
 		el_type: AbcElemType;
 		abselem?: AbsoluteElement;
-		accidentals?: Array<Accidental>
-		acc?: KeyAccidentalName
+		accidentals?: Array<Accidental>;
+		acc?: KeyAccidentalName;
 		averagepitch?: number;
 		barNumber?: number;
 		beat_division?: Array<MeterFraction>;
-		bpm?: number
-		clefPos?: number
+		bpm?: number;
+		clefPos?: number;
 		cmd?: MidiCommands;
 		maxpitch?: number;
 		minpitch?: number;
-		mode?: Mode
-		postString?: string
-		preString?: string
-		root?: KeyRoot
-		stafflines?: number
-		staffscale?: number
-		suppress?: true
-		suppressBpm?: true
-		value?: Array<MeterFraction>
-		verticalPos?: number
+		mode?: Mode;
+		postString?: string;
+		preString?: string;
+		root?: KeyRoot;
+		stafflines?: number;
+		staffscale?: number;
+		suppress?: true;
+		suppressBpm?: true;
+		value?: Array<MeterFraction>;
+		verticalPos?: number;
 		beambr?: number;
-		chord?: Array<ChordProperties>
+		chord?: Array<ChordProperties>;
 		color?: string;
-		decoration?: Array<Decorations>
-		duration?: number | Array<number>
-		endBeam?: true
-		endEnding?: true
-		endSlur?: Array<number>
-		endTriplet?: true
+		decoration?: Array<Decorations>;
+		duration?: number | Array<number>;
+		endBeam?: true;
+		endEnding?: true;
+		endSlur?: Array<number>;
+		endTriplet?: true;
 		fonts?: AbcElemFonts;
 		gap?: number;
-		gracenotes?: Array<AbcElemGraceNote>
-		head?: NoteHeadType
-		lyric?: Array<{syllable: string; divider: ' ' | '-' | '_';}>
-		noStem?: true
-		notes?: Array<any>
-		overlay?: Array<VoiceItemNote>
-		params?: Array<string|number>;
-		pitches?: Array<AbcElemPitch>
-		positioning?: AbcElemPositioning
-		rest?: AbcElemRest
-		size?: number
-		startBeam?: true
-		startEnding?: string
-		startSlur?: Array<SlurProperties>
-		startTriplet?: number
-		steps?: number
-		stemConnectsToAbove?: true
-		style?: NoteHeadType
-		title?: string
-		transpose?: number
-		tripletMultiplier?: number
-		tripletR?: number
-		type?: string
+		gracenotes?: Array<AbcElemGraceNote>;
+		head?: NoteHeadType;
+		lyric?: Array<{ syllable: string; divider: " " | "-" | "_" }>;
+		noStem?: true;
+		notes?: Array<any>;
+		overlay?: Array<VoiceItemNote>;
+		params?: Array<string | number>;
+		pitches?: Array<AbcElemPitch>;
+		positioning?: AbcElemPositioning;
+		rest?: AbcElemRest;
+		size?: number;
+		startBeam?: true;
+		startEnding?: string;
+		startSlur?: Array<SlurProperties>;
+		startTriplet?: number;
+		steps?: number;
+		stemConnectsToAbove?: true;
+		style?: NoteHeadType;
+		title?: string;
+		transpose?: number;
+		tripletMultiplier?: number;
+		tripletR?: number;
+		type?: string;
 		direction?: StemDirection;
-		grace?: true
+		grace?: true;
 		text?: string | number;
-		currentTrackMilliseconds?: number
-		currentTrackWholeNotes?: number | Array<number>
+		currentTrackMilliseconds?: number;
+		currentTrackWholeNotes?: number | Array<number>;
 		midiPitches?: MidiPitches;
 		midiGraceNotePitches?: MidiGracePitches;
-		startChar?: number
-		endChar?: number
+		startChar?: number;
+		endChar?: number;
 	}
 
 	export interface ClickListenerDrag {
@@ -1102,7 +1434,7 @@ declare module 'abcjs' {
 	export interface TimingCallbacksPosition {
 		top: number;
 		left: number;
-		height: number
+		height: number;
 	}
 
 	export interface TimingCallbacksDebug {
@@ -1158,7 +1490,7 @@ declare module 'abcjs' {
 
 	export interface SequenceBeat {
 		el_type: "beat";
-		beats: [number,number,number];
+		beats: [number, number, number];
 	}
 
 	export interface SequenceBeatAccents {
@@ -1174,17 +1506,28 @@ declare module 'abcjs' {
 		el_type: "note";
 		duration: number;
 		elem: AbsoluteElement;
-		pitches: {pitch: number; name: NoteLetter};
+		pitches: { pitch: number; name: NoteLetter };
 		timing: number;
 	}
 
-	export type AudioSequenceElement = SequenceInstrument | SequenceChannel | SequenceTranspose | SequenceName | SequenceDrum | SequenceTempo | SequenceKey | SequenceBeat | SequenceBeatAccents | SequenceBagpipes | SequenceNote;
+	export type AudioSequenceElement =
+		| SequenceInstrument
+		| SequenceChannel
+		| SequenceTranspose
+		| SequenceName
+		| SequenceDrum
+		| SequenceTempo
+		| SequenceKey
+		| SequenceBeat
+		| SequenceBeatAccents
+		| SequenceBagpipes
+		| SequenceNote;
 
 	export type AudioSequenceVoice = Array<AudioSequenceElement>;
 
 	export type AudioSequence = Array<AudioSequenceVoice>;
 
-	export type MidiFile = any // This is a standard midi file format
+	export type MidiFile = any; // This is a standard midi file format
 
 	export interface MidiBufferPromise {
 		cached: Array<string>;
@@ -1193,16 +1536,16 @@ declare module 'abcjs' {
 	}
 
 	export interface AudioTrackProgramItem {
-		cmd: 'program';
+		cmd: "program";
 		channel: number;
 		instrument: number;
 	}
 
 	export interface AudioTrackNoteItem {
-		cmd: 'note';
+		cmd: "note";
 		duration: number;
 		endChar: number;
-		endType?: "staccato"|"tenuto";
+		endType?: "staccato" | "tenuto";
 		gap: number;
 		instrument: number;
 		pitch: number;
@@ -1211,11 +1554,13 @@ declare module 'abcjs' {
 		volume: number;
 	}
 	export interface AudioTrackTextItem {
-		cmd: 'text';
-		type: 'name';
+		cmd: "text";
+		type: "name";
 		text: string;
 	}
-	export type AudioTrack = Array<AudioTrackProgramItem|AudioTrackNoteItem|AudioTrackTextItem>
+	export type AudioTrack = Array<
+		AudioTrackProgramItem | AudioTrackNoteItem | AudioTrackTextItem
+	>;
 
 	export interface AudioTracks {
 		tempo: number;
@@ -1242,44 +1587,68 @@ declare module 'abcjs' {
 	export interface MeasureList {
 		header: string;
 		measures: Array<MeasureDef>;
-		hasPickup: boolean
+		hasPickup: boolean;
 	}
-
 
 	//
 	// Callbacks
 	//
 
 	// renderAbc
-	export type ClickListener = (abcElem: AbcElem, tuneNumber: number, classes: string, analysis: ClickListenerAnalysis, drag: ClickListenerDrag) => void;
+	export type ClickListener = (
+		abcElem: AbcElem,
+		tuneNumber: number,
+		classes: string,
+		analysis: ClickListenerAnalysis,
+		drag: ClickListenerDrag,
+	) => void;
 
-	export type AfterParsing = (tune: TuneObject, tuneNumber: number, abcString: string) => TuneObject;
+	export type AfterParsing = (
+		tune: TuneObject,
+		tuneNumber: number,
+		abcString: string,
+	) => TuneObject;
 
 	// TimingCallbacks
-	export type BeatCallback = (beatNumber: number, totalBeats: number, totalTime: number, position: TimingCallbacksPosition, debugInfo: TimingCallbacksDebug) => void;
+	export type BeatCallback = (
+		beatNumber: number,
+		totalBeats: number,
+		totalTime: number,
+		position: TimingCallbacksPosition,
+		debugInfo: TimingCallbacksDebug,
+	) => void;
 
-	type EventCallbackReturn = "continue" | Promise<"continue"> | undefined
+	type EventCallbackReturn = "continue" | Promise<"continue"> | undefined;
 
-	export type EventCallback = (event: NoteTimingEvent | null) => EventCallbackReturn;
+	export type EventCallback = (
+		event: NoteTimingEvent | null,
+	) => EventCallbackReturn;
 
-	export type LineEndCallback = (info : LineEndInfo, event: NoteTimingEvent, details: LineEndDetails) => void;
+	export type LineEndCallback = (
+		info: LineEndInfo,
+		event: NoteTimingEvent,
+		details: LineEndDetails,
+	) => void;
 
 	// Editor
 	export type OnChange = (editor: Editor) => void;
 
-	export type SelectionChangeCallback = (startChar: number, endChar: number) => void;
+	export type SelectionChangeCallback = (
+		startChar: number,
+		endChar: number,
+	) => void;
 
 	export type RedrawCallback = (isBefore: boolean) => void;
 
 	// Audio
 	export interface CursorControl {
-		beatSubDivision?: number
+		beatSubDivision?: number;
 
-		onReady?(): void
-		onStart?(): void
-		onFinished?(): void
-		onBeat?(beatNumber: number, totalBeats: number, totalTime: number): void
-		onEvent?(event: NoteTimingEvent): void
+		onReady?(): void;
+		onStart?(): void;
+		onFinished?(): void;
+		onBeat?(beatNumber: number, totalBeats: number, totalTime: number): void;
+		onEvent?(event: NoteTimingEvent): void;
 	}
 
 	//
@@ -1287,23 +1656,39 @@ declare module 'abcjs' {
 	//
 	let signature: string;
 
-	export function renderAbc(target: Selector, code: string, params?: AbcVisualParams): TuneObjectArray
+	export function renderAbc(
+		target: Selector,
+		code: string,
+		params?: AbcVisualParams,
+	): TuneObjectArray;
 
-	export function tuneMetrics(code: string, params?: AbcVisualParams): Array<{sections: Array<{left: number, measureWidths:Array<number>, total: number}>}>
+	export function tuneMetrics(
+		code: string,
+		params?: AbcVisualParams,
+	): Array<{
+		sections: Array<{
+			left: number;
+			measureWidths: Array<number>;
+			total: number;
+		}>;
+	}>;
 
-	export function parseOnly(abc: string, params?: AbcVisualParams) : TuneObjectArray
+	export function parseOnly(
+		abc: string,
+		params?: AbcVisualParams,
+	): TuneObjectArray;
 
 	//
 	// Animation
 	//
 	export class TimingCallbacks {
-		constructor(visualObj: TuneObject, options?: AnimationOptions) ;
+		constructor(visualObj: TuneObject, options?: AnimationOptions);
 		replaceTarget(visualObj: TuneObject): void;
-		start(position?: number, units?: ProgressUnit) : void;
-		pause() : void;
-		reset() : void;
-		stop() : void;
-		setProgress(position: number, units?: ProgressUnit ) : void;
+		start(position?: number, units?: ProgressUnit): void;
+		pause(): void;
+		reset(): void;
+		stop(): void;
+		setProgress(position: number, units?: ProgressUnit): void;
 		currentMillisecond(): number;
 
 		noteTimings: Array<NoteTimingEvent>;
@@ -1325,8 +1710,8 @@ declare module 'abcjs' {
 		pause(shouldPause: boolean): void;
 		millisecondsPerMeasure(): number;
 		pauseMidi(shouldPause: boolean): void;
-		fireChanged():void;
-		getTunes():TuneObjectArray;
+		fireChanged(): void;
+		getTunes(): TuneObjectArray;
 	}
 
 	//
@@ -1343,61 +1728,80 @@ declare module 'abcjs' {
 	}
 
 	export interface MidiBuffer {
-		init(params?: MidiBufferOptions): Promise<MidiBufferPromise>
-		prime(): Promise<{ status: string, duration: number}>
-		start(): void
-		pause(): number
-		resume(): void
-		seek(position: number, units?: ProgressUnit): void
-		stop(): number
-		download(): string // returns audio buffer in wav format as a reference to a blob
-		getIsRunning(): boolean
-		getAudioBuffer(): AudioBuffer | undefined
+		init(params?: MidiBufferOptions): Promise<MidiBufferPromise>;
+		prime(): Promise<{ status: string; duration: number }>;
+		start(): void;
+		pause(): number;
+		resume(): void;
+		seek(position: number, units?: ProgressUnit): void;
+		stop(): number;
+		download(): string; // returns audio buffer in wav format as a reference to a blob
+		getIsRunning(): boolean;
+		getAudioBuffer(): AudioBuffer | undefined;
 	}
 
 	export interface SynthInitResponse {
 		status: "no-audio-context" | "created";
 		loadingResponse?: {
-			cached: Array<string>
-			error: Array<string>
-			loaded: Array<string>
-		}
+			cached: Array<string>;
+			error: Array<string>;
+			loaded: Array<string>;
+		};
 	}
 
 	export interface SynthObjectController {
-		disable(isDisabled: boolean): void
-		setTune(visualObj: TuneObject, userAction: boolean, audioParams?: SynthOptions): Promise<SynthInitResponse>
-		load(selector: Selector, cursorControl?: CursorControl | null, visualOptions?: SynthVisualOptions): void
-		play(): void
-		pause(): void
-		toggleLoop(): void
-		restart(): void
-		setProgress(ev: number): void
-		setWarp(percent: number): Promise<void>
-		download(fName: string): void
-		getAudioBuffer(): AudioBuffer | undefined
+		disable(isDisabled: boolean): void;
+		setTune(
+			visualObj: TuneObject,
+			userAction: boolean,
+			audioParams?: SynthOptions,
+		): Promise<SynthInitResponse>;
+		load(
+			selector: Selector,
+			cursorControl?: CursorControl | null,
+			visualOptions?: SynthVisualOptions,
+		): void;
+		play(): void;
+		pause(): void;
+		toggleLoop(): void;
+		restart(): void;
+		setProgress(ev: number): void;
+		setWarp(percent: number): Promise<void>;
+		download(fName: string): void;
+		getAudioBuffer(): AudioBuffer | undefined;
 	}
 
 	export interface SynthSequenceClass {
-		addTrack(): AudioTrack
-		setInstrument(trackNumber: number, instrumentNumber: number): void
-		appendNote(trackNumber: number, pitch: number, durationInMeasures: number, volume: number, cents: number): void
+		addTrack(): AudioTrack;
+		setInstrument(trackNumber: number, instrumentNumber: number): void;
+		appendNote(
+			trackNumber: number,
+			pitch: number,
+			durationInMeasures: number,
+			volume: number,
+			cents: number,
+		): void;
 	}
 
 	export interface MidiRenderer {
-		setTempo(bpm: number): void
-		setGlobalInfo(bpm: number, name: string, key:KeySignature, time:MeterFraction): void
-		startTrack(): void
-		endTrack(): void
-		setText(type: string, text: string):void
-		setInstrument(instrument: number):void
-		setChannel(channel:number, pan?: number):void
-		startNote(pitch:number, loudness:number, cents?:number):void
-		endNote(pitch:number):void
-		addRest(length:number):void
+		setTempo(bpm: number): void;
+		setGlobalInfo(
+			bpm: number,
+			name: string,
+			key: KeySignature,
+			time: MeterFraction,
+		): void;
+		startTrack(): void;
+		endTrack(): void;
+		setText(type: string, text: string): void;
+		setInstrument(instrument: number): void;
+		setChannel(channel: number, pan?: number): void;
+		startNote(pitch: number, loudness: number, cents?: number): void;
+		endNote(pitch: number): void;
+		addRest(length: number): void;
 
-		getData():string
-		embed(parent:Element, noplayer:boolean):void
+		getData(): string;
+		embed(parent: Element, noplayer: boolean): void;
 	}
 
 	export interface SynthControlOptions {
@@ -1424,27 +1828,42 @@ declare module 'abcjs' {
 	}
 
 	export namespace synth {
-		let instrumentIndexToName: [string]
-		let pitchToNoteName: [string]
-		let SynthController: { new (): SynthObjectController }
-		let CreateSynth: { new (): MidiBuffer }
-		let SynthSequence: { new (): SynthSequenceClass }
+		let instrumentIndexToName: [string];
+		let pitchToNoteName: [string];
+		let SynthController: { new (): SynthObjectController };
+		let CreateSynth: { new (): MidiBuffer };
+		let SynthSequence: { new (): SynthSequenceClass };
 
-		export function supportsAudio(): boolean
-		export function registerAudioContext(ac?: AudioContext): boolean
-		export function activeAudioContext(): AudioContext
-		export function CreateSynthControl(element: Selector, options?: SynthControlOptions): AudioControl
-		export function getMidiFile(source: string | TuneObject, options?: MidiFileOptions): MidiFile;
-		export function playEvent(pitches: MidiPitches, graceNotes: MidiGracePitches | undefined, milliSecondsPerMeasure: number, soundFontUrl? : string, debugCallback?: (message: string) => void): Promise<void>;
-		export function sequence(visualObj: TuneObject, options: AbcVisualParams): AudioSequence
-		export function midiRenderer(): MidiRenderer
+		export function supportsAudio(): boolean;
+		export function registerAudioContext(ac?: AudioContext): boolean;
+		export function activeAudioContext(): AudioContext;
+		export function CreateSynthControl(
+			element: Selector,
+			options?: SynthControlOptions,
+		): AudioControl;
+		export function getMidiFile(
+			source: string | TuneObject,
+			options?: MidiFileOptions,
+		): MidiFile;
+		export function playEvent(
+			pitches: MidiPitches,
+			graceNotes: MidiGracePitches | undefined,
+			milliSecondsPerMeasure: number,
+			soundFontUrl?: string,
+			debugCallback?: (message: string) => void,
+		): Promise<void>;
+		export function sequence(
+			visualObj: TuneObject,
+			options: AbcVisualParams,
+		): AudioSequence;
+		export function midiRenderer(): MidiRenderer;
 	}
 
 	//
 	// Analysis
 	//
 	export class TuneBook {
-		constructor(tunebookString: string) ;
+		constructor(tunebookString: string);
 		getTuneById(id: string | number): AnalyzedTune;
 		getTuneByTitle(id: string): AnalyzedTune;
 
@@ -1452,15 +1871,19 @@ declare module 'abcjs' {
 		tunes: Array<AnalyzedTune>;
 	}
 
-	export function numberOfTunes(abc: string) : number;
-	export function extractMeasures(abc: string) : Array<MeasureList>;
-	
-	export function strTranspose(originalAbc: string, visualObj: TuneObjectArray, steps: number): string;
+	export function numberOfTunes(abc: string): number;
+	export function extractMeasures(abc: string): Array<MeasureList>;
+
+	export function strTranspose(
+		originalAbc: string,
+		visualObj: TuneObjectArray,
+		steps: number,
+	): string;
 
 	//
 	// Glyph
 	//
-	export function setGlyph(glyphName: string, glyph: GlyphDef) : void;
+	export function setGlyph(glyphName: string, glyph: GlyphDef): void;
 }
 
 export default abcjs;
