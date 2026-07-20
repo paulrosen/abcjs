@@ -6,16 +6,11 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
 	<link rel="stylesheet" href="../abcjs-audio.css" />
-	<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
 </head>
 <body>
 <div id="mocha"></div>
 <div id="paper"></div>
 <div id="midi"></div>
-<script>
-	// Map the UMD export to window.abcjs for backward compatibility
-	window.abcjs = window.ABCJS;
-</script>
 <script src="../node_modules/chai/chai.js"></script>
 <script src="../node_modules/mocha/mocha.js"></script>
 <script class="mocha-init">
@@ -27,8 +22,12 @@
 <script src="synth/midi.test.js"></script>
 <script src="synth/timing.test.js"></script>
 
+<script src="../node_modules/@tarp/require/require.min.js"></script>
 <script>
-	mocha.run();
+	Tarp.require({main: "../index.js"}).then(function (response) {
+		window.abcjs = response;
+		mocha.run();
+	});
 </script>
 
 </body>

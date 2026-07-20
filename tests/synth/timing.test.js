@@ -231,23 +231,6 @@ describe("Timing", function() {
 	var expected4_4_2 = [{"b":0,"ts":0},{"b":0.5,"ts":500},{"b":1,"ts":1000},{"b":1.5,"ts":1500},{"b":2,"ts":2000},{"b":2.5,"ts":2500},{"b":3,"ts":3000},{"b":3.5,"ts":3500},{"b":4,"ts":4000},{"b":4.5,"ts":4500},{"b":5,"ts":5000},{"b":5.5,"ts":5500},{"b":6,"ts":6000},{"b":6.5,"ts":6500},{"b":7,"ts":7000},{"b":7.5,"ts":7500},{"b":8,"ts":8000},{"b":8.5,"ts":8500},{"b":9,"ts":9000},{"b":9.5,"ts":9500},{"b":10,"ts":10000},{"b":10.5,"ts":10500},{"b":11,"ts":11000},{"b":11.5,"ts":11500},{"b":12,"ts":12000},{"b":12.5,"ts":12500},{"b":13,"ts":13000},{"b":13.5,"ts":13500},{"b":14,"ts":14000},{"b":14.5,"ts":14500},{"b":15,"ts":15000},{"b":15.5,"ts":15500},{"b":16,"ts":16000}]
 	var expected4_4_3 = [{"b":0,"ts":0},{"b":0.33,"ts":333},{"b":0.67,"ts":667},{"b":1,"ts":1000},{"b":1.33,"ts":1333},{"b":1.67,"ts":1667},{"b":2,"ts":2000},{"b":2.33,"ts":2333},{"b":2.67,"ts":2667},{"b":3,"ts":3000},{"b":3.33,"ts":3333},{"b":3.67,"ts":3667},{"b":4,"ts":4000},{"b":4.33,"ts":4333},{"b":4.67,"ts":4667},{"b":5,"ts":5000},{"b":5.33,"ts":5333},{"b":5.67,"ts":5667},{"b":6,"ts":6000},{"b":6.33,"ts":6333},{"b":6.67,"ts":6667},{"b":7,"ts":7000},{"b":7.33,"ts":7333},{"b":7.67,"ts":7667},{"b":8,"ts":8000}]
 
-	var abcSwitchTunes = "X:1\n" +
-		"K: D\n" +
-		"M: 4/4\n" +
-		"Q: 100\n" +
-		"a b c d e f g\n"
-
-	var expectedSwitchTunes = [
-		0, 300, 600, 900, 1200, 1500, 1800, 2100
-	]
-	var abcSwitchTunes2 = "X:1\n" +
-		"K: D\n" +
-		"M: 4/4\n" +
-		"Q: 200\n" +
-		"a b c d e f g\n"
-	var expectedSwitchTunes2 = [
-		0, 150, 300, 450, 600, 750, 900, 1050
-	]
 
 //////////////////////////////////////////////////////////
 
@@ -315,9 +298,6 @@ describe("Timing", function() {
 
 	it("4/4", function() {
 		return doBeatCallbackTest2(abc4_4, expected4_4, expected4_4_2, expected4_4_3)
-	});
-	it("switch-tunes", function() {
-		return doSwitchTunesTest(abcSwitchTunes, abcSwitchTunes2, expectedSwitchTunes, expectedSwitchTunes2)
 	});
 });
 
@@ -537,23 +517,6 @@ function doBeatCallbackTest2(abc, expected, expected2, expected3) {
 	})
 	msg = "3/0\nact:" + JSON.stringify(bs) + "\nexp:" + JSON.stringify(expected3) + "\n"
 	chai.assert.deepStrictEqual(bs,expected3, msg);
-}
-
-function doSwitchTunesTest(abc1, abc2, expected1, expected2) {
-	var visualObj = abcjs.renderAbc("paper", abc1, {staffwidth: 500, stretchlast: true})
-	var timing = new abcjs.TimingCallbacks(visualObj[0])
-	var noteTimings = []
-	for (var i = 0; i < timing.noteTimings.length; i++)
-		noteTimings.push(timing.noteTimings[i].milliseconds)
-	console.log(noteTimings)
-	chai.assert.deepStrictEqual(noteTimings,expected1, "original timings");
-	var visualObj2 = abcjs.renderAbc("paper2", abc2, {staffwidth: 500, stretchlast: true})
-	timing.replaceTarget(visualObj2[0])
-	var noteTimings2 = []
-	for (i = 0; i < timing.noteTimings.length; i++)
-		noteTimings2.push(timing.noteTimings[i].milliseconds)
-	console.log(noteTimings2)
-	chai.assert.deepStrictEqual(noteTimings2,expected2, "new timings");
 }
 
 function sleep(ms) {

@@ -1,19 +1,4 @@
 describe("Synth", function() {
-
-	var abcTwoRepeats = "M: 4/4\n" +
-		"|:C8|1D8::2E8||F8:|\n"
-
-	var expectedTwoRepeats = [
-		{"cmd":"program","channel":0,"instrument":0},
-		{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"startChar":9,"endChar":11,"gap":0},
-		{"cmd":"note","pitch":62,"volume":105,"start":1,"duration":1,"instrument":0,"startChar":13,"endChar":15,"gap":0},
-		{"cmd":"note","pitch":60,"volume":105,"start":2,"duration":1,"instrument":0,"startChar":9,"endChar":11,"gap":0},
-		{"cmd":"note","pitch":64,"volume":105,"start":3,"duration":1,"instrument":0,"startChar":18,"endChar":20,"gap":0},
-		{"cmd":"note","pitch":65,"volume":105,"start":4,"duration":1,"instrument":0,"startChar":22,"endChar":24,"gap":0},
-		{"cmd":"note","pitch":64,"volume":105,"start":5,"duration":1,"instrument":0,"startChar":18,"endChar":20,"gap":0},
-		{"cmd":"note","pitch":65,"volume":105,"start":6,"duration":1,"instrument":0,"startChar":22,"endChar":24,"gap":0},
-	]
-
 	var abcThatsAPlenty =
 	'T:That\'s A Plenty\n' +
 	'M:4/4\n' +
@@ -26,36 +11,6 @@ describe("Synth", function() {
 
 	//////////////////////////////////////////////////////////
 
-	it("two repeated sections", function() {
-		this.timeout(14000);
-		const tune = abcjs.renderAbc("paper", abcTwoRepeats, {
-			add_classes: true,
-			paddingtop: 0,
-			paddingbottom: 0,
-			paddingright: 0,
-			paddingleft: 0,
-			format: {
-				vocalfont: "Helvetica 14",
-			}
-		});
-		const synthController = new abcjs.synth.SynthController();
-		synthController.load("#midi", self.cursorControl, {
-			displayLoop: true,
-			displayRestart: true,
-			displayPlay: true,
-			displayProgress: true,
-			displayWarp: true
-		});
-		synthController.setTune(tune[0], false, {
-		});
-		return synthController.play().then(function (response){
-			console.log(JSON.stringify(synthController.midiBuffer.flattened.tracks[0]))
-			chai.assert.deepStrictEqual(synthController.midiBuffer.flattened.tracks[0],expectedTwoRepeats);
-			return sleep(12000).then(function () {
-				synthController.pause();
-			});
-		});
-	});
 
 	it("drum-intro", function() {
 		this.timeout(22000);

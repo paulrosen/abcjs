@@ -18,11 +18,12 @@
 
 <script src="visual/selection.test.js"></script>
 
-<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+<script src="../node_modules/@tarp/require/require.min.js"></script>
 <script>
-	// Map the UMD export to window.abcjs for backward compatibility
-	window.abcjs = window.ABCJS;
-	mocha.run();
+	Tarp.require({main: "../index.js"}).then(function (response) {
+		window.abcjs = response;
+		mocha.run();
+	});
 </script>
 
 </body>

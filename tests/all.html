@@ -38,6 +38,7 @@
 <script src="synth/flattener.test.js"></script>
 <script src="synth/options.test.js"></script>
 <script src="synth/midi.test.js"></script>
+<script src="synth/timing.test.js"></script>
 <script src="visual/chord-grid.test.js"></script>
 <script src="visual/slurs.test.js"></script>
 <script src="visual/decorations.test.js"></script>
@@ -62,11 +63,12 @@
 <script src="parse/tie-slur.test.js"></script>
 <script src="parse/voices-array.test.js"></script>
 
-<script src="../dist/abcjs-basic.js" type="text/javascript"></script>
+<script src="../node_modules/@tarp/require/require.min.js"></script>
 <script>
-	// Map the UMD export to window.abcjs for backward compatibility
-	window.abcjs = window.ABCJS;
-	mocha.run();
+	Tarp.require({main: "../index.js"}).then(function (response) {
+		window.abcjs = response;
+		mocha.run();
+	});
 </script>
 
 </body>
