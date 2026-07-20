@@ -442,8 +442,8 @@ declare module "abcjs" {
 		w: number;
 		pitch: number;
 		pitch2?: number;
-		scaleX: number;
-		scaleY: number;
+		scalex: number;
+		scaley: number;
 		type: string;
 		name: string;
 		linewidth?: number;
@@ -452,7 +452,7 @@ declare module "abcjs" {
 		top: number;
 		bottom: number;
 		dim?: number;
-		position?: number;
+		position?: Placement;
 		realWidth?: number;
 		partHeightAbove?: number;
 		chordHeightAbove?: number;
@@ -476,7 +476,8 @@ declare module "abcjs" {
 		minspacing: number;
 		notePositions: Array<{ x: number; y: number }>;
 		right: Array<RelativeElement>;
-		specialY: Array<{
+		specialY: {
+			tempoHeightAbove: number;
 			chordHeightAbove: number;
 			chordHeightBelow: number;
 			dynamicHeightAbove: number;
@@ -488,7 +489,7 @@ declare module "abcjs" {
 			tempoHeightAbove: number;
 			volumeHeightAbove: number;
 			volumeHeightBelow: number;
-		}>;
+		};
 		top: number;
 		tuneNumber: number;
 		type:
@@ -1231,7 +1232,7 @@ declare module "abcjs" {
 		getMeter: () => Meter;
 		getMeterFraction: () => MeterFraction;
 		getPickupLength: NumberFunction;
-		getKeySignature: () => KeySignature;
+		getKeySignature: () => KeySignature | Record<string, never>;
 		getElementFromChar: (charPos: number) => VoiceItem | null;
 		millisecondsPerMeasure: (bpm?: number) => number;
 		setTiming: (bpm?: number, measuresOfDelay?: number) => void;
