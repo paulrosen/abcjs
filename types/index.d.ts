@@ -1462,3 +1462,5 @@ declare module 'abcjs' {
 	//
 	export function setGlyph(glyphName: string, glyph: GlyphDef) : void;
 }
+
+export default abcjs;

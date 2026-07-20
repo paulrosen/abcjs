@@ -23,7 +23,12 @@
     "isolatedModules": true,
     "types": [
       "node"
-    ]
+    ],
+    "paths": {
+      "abcjs": [
+        "./types"
+      ]
+    }
   },
   "include": [
     "index.js",

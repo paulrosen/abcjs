@@ -2,6 +2,7 @@ import { defineConfig, ResolvedConfig, normalizePath } from "vite";
 import pkg from "./package.json";
 import commonjs from "@rollup/plugin-commonjs";
 import banner from "vite-plugin-banner";
+import tsConfigPaths from "vite-tsconfig-paths";
 import fs from "fs";
 import path from "path";
 
@@ -18,6 +19,7 @@ export default defineConfig(({ mode }) => {
 				`/*! abcjs-${type} v${pkg.version} Copyright © 2009-2024 Paul Rosen and Gregory Dyke (https://abcjs.net) */\n/*! For license information please see ${licenseFile} */`,
 			),
 			vitePluginCopyFile("LICENSE.md", licenseFile),
+			tsConfigPaths(),
 		],
 		build: {
 			target: "es2015",
