@@ -9,6 +9,3 @@ docs/.vuepress/.dist/*
 dist/report.html
 .eslintrc.json
 .DS_Store
-/dist/*
-!/dist/abcjs-*.LICENSE
-!/dist/abcjs-*.js

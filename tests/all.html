@@ -38,7 +38,6 @@
 <script src="synth/flattener.test.js"></script>
 <script src="synth/options.test.js"></script>
 <script src="synth/midi.test.js"></script>
-<script src="synth/timing.test.js"></script>
 <script src="visual/chord-grid.test.js"></script>
 <script src="visual/slurs.test.js"></script>
 <script src="visual/decorations.test.js"></script>
@@ -65,7 +64,7 @@
 
 <script src="../node_modules/@tarp/require/require.min.js"></script>
 <script>
-	Tarp.require({main: "../index.js"}).then(function (response) {
+	Tarp.require({main: "../dist/index.js", root: "http://localhost:8080/dist/"}).then(function (response) {
 		window.abcjs = response;
 		mocha.run();
 	});

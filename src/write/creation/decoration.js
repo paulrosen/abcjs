@@ -4,7 +4,7 @@ var DynamicDecoration = require('./elements/dynamic-decoration');
 var CrescendoElem = require('./elements/crescendo-element');
 var GlissandoElem = require('./elements/glissando-element');
 var glyphs = require('./glyphs');
-var RelativeElement = require('./elements/relative-element');
+var RelativeElement = require('./elements/relative-element').default;
 var TieElem = require('./elements/tie-element');
 
 var Decoration = function Decoration() {

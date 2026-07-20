@@ -8,7 +8,7 @@
 	This has the same effect as the all.html file that works with modern browsers but it
 	works in a wider range of browsers.
 
-	It can't use the node.js version because the Tarp library (used to polyfill
+	Tarp.require({main: "../dist/index.js", root: "http://localhost:8080/dist/"}).then(function (response) {
 	the require statement) is not very browser-compatible.
 
 	Here are the oldest browser versions that have been tested:

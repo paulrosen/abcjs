@@ -11892,43 +11892,40 @@
     if (hasRequiredHighlight)
       return highlight_1;
     hasRequiredHighlight = 1;
-    var setClass2 = require$$3;
-    var highlight = function(klass, color) {
+    var setClass2 = require$$3.default;
+    var highlight2 = function(klass, color) {
       if (klass === void 0)
         klass = "abcjs-note_selected";
       if (color === void 0)
         color = "#ff0000";
       setClass2(this.elemset, klass, "", color);
     };
-    highlight_1 = highlight;
+    highlight_1 = highlight2;
     return highlight_1;
   }
+  var highlightExports = requireHighlight();
+  const highlight = /* @__PURE__ */ getDefaultExportFromCjs(highlightExports);
   var unhighlight_1;
   var hasRequiredUnhighlight;
   function requireUnhighlight() {
     if (hasRequiredUnhighlight)
       return unhighlight_1;
     hasRequiredUnhighlight = 1;
-    var setClass2 = require$$3;
-    var unhighlight = function(klass, color) {
+    var setClass2 = require$$3.default;
+    var unhighlight2 = function(klass, color) {
       if (klass === void 0)
         klass = "abcjs-note_selected";
       if (color === void 0)
         color = "#000000";
       setClass2(this.elemset, "", klass, color);
     };
-    unhighlight_1 = unhighlight;
+    unhighlight_1 = unhighlight2;
     return unhighlight_1;
   }
-  var absoluteElement;
-  var hasRequiredAbsoluteElement;
-  function requireAbsoluteElement() {
-    if (hasRequiredAbsoluteElement)
-      return absoluteElement;
-    hasRequiredAbsoluteElement = 1;
-    var highlight = requireHighlight();
-    var unhighlight = requireUnhighlight();
-    var AbsoluteElement = function AbsoluteElement2(abcelem, duration, minspacing, type, tuneNumber, options) {
+  var unhighlightExports = requireUnhighlight();
+  const unhighlight = /* @__PURE__ */ getDefaultExportFromCjs(unhighlightExports);
+  class AbsoluteElement {
+    constructor(abcelem, duration, minspacing, type, tuneNumber, options) {
       if (!options)
         options = {};
       this.tuneNumber = tuneNumber;
@@ -11961,11 +11958,11 @@
         volumeHeightBelow: 0,
         dynamicHeightBelow: 0
       };
-    };
-    AbsoluteElement.prototype.getFixedCoords = function() {
+    }
+    getFixedCoords() {
       return { x: this.x, w: this.fixed.w, t: this.fixed.t, b: this.fixed.b };
-    };
-    AbsoluteElement.prototype.addExtra = function(extra) {
+    }
+    addExtra(extra) {
       this.fixed.w = Math.max(this.fixed.w, extra.dx + extra.w);
       if (this.fixed.t === void 0)
         this.fixed.t = extra.top;
@@ -11979,14 +11976,14 @@
         this.extraw = extra.dx;
       this.extra[this.extra.length] = extra;
       this._addChild(extra);
-    };
-    AbsoluteElement.prototype.addHead = function(head) {
+    }
+    addHead(head) {
       if (head.dx < this.extraw)
         this.extraw = head.dx;
       this.heads[this.heads.length] = head;
       this.addRight(head);
-    };
-    AbsoluteElement.prototype.addRight = function(right) {
+    }
+    addRight(right) {
       this.fixed.w = Math.max(this.fixed.w, right.dx + right.w);
       if (right.top !== void 0) {
         if (this.fixed.t === void 0)
@@ -12004,15 +12001,15 @@
         this.w = right.dx + right.w;
       this.right[this.right.length] = right;
       this._addChild(right);
-    };
-    AbsoluteElement.prototype.addFixed = function(elem) {
+    }
+    addFixed(elem) {
       this._addChild(elem);
-    };
-    AbsoluteElement.prototype.addFixedX = function(elem) {
+    }
+    addFixedX(elem) {
       this._addChild(elem);
-    };
-    AbsoluteElement.prototype.addCentered = function(elem) {
-      var half = elem.w / 2;
+    }
+    addCentered(elem) {
+      const half = elem.w / 2;
       if (-half < this.extraw)
         this.extraw = -half;
       this.extra[this.extra.length] = elem;
@@ -12020,17 +12017,17 @@
         this.w = elem.dx + half;
       this.right[this.right.length] = elem;
       this._addChild(elem);
-    };
-    AbsoluteElement.prototype.setLimit = function(member, child) {
+    }
+    setLimit(member, child) {
       if (!child[member])
         return;
       if (!this.specialY[member])
         this.specialY[member] = child[member];
       else
         this.specialY[member] = Math.max(this.specialY[member], child[member]);
-    };
-    AbsoluteElement.prototype._addChild = function(child) {
-      var okToPushTop = true;
+    }
+    _addChild(child) {
+      let okToPushTop = true;
       if (this.abcelem.el_type == "clef" && child.type == "barNumber") {
         okToPushTop = false;
       }
@@ -12051,53 +12048,52 @@
       this.setLimit("chordHeightBelow", child);
       this.setLimit("volumeHeightBelow", child);
       this.setLimit("dynamicHeightBelow", child);
-    };
-    AbsoluteElement.prototype.pushTop = function(top) {
+    }
+    pushTop(top) {
       if (top !== void 0) {
         if (this.top === void 0)
           this.top = top;
         else
           this.top = Math.max(top, this.top);
       }
-    };
-    AbsoluteElement.prototype.pushBottom = function(bottom) {
+    }
+    pushBottom(bottom) {
       if (bottom !== void 0) {
         if (this.bottom === void 0)
           this.bottom = bottom;
         else
           this.bottom = Math.min(bottom, this.bottom);
       }
-    };
-    AbsoluteElement.prototype.setX = function(x) {
+    }
+    setX(x) {
       this.x = x;
-      for (var i = 0; i < this.children.length; i++)
+      for (let i = 0; i < this.children.length; i++)
         this.children[i].setX(x);
-    };
-    AbsoluteElement.prototype.center = function(before, after) {
-      var midpoint = (after.x - before.x) / 2 + before.x;
+    }
+    // Not entirely sure if this should be "AbsoluteElement" or "RelativeElement"
+    center(before, after) {
+      const midpoint = (after.x - before.x) / 2 + before.x;
       this.x = midpoint - this.w / 2;
-      for (var k = 0; k < this.children.length; k++)
+      for (let k = 0; k < this.children.length; k++)
         this.children[k].setX(this.x);
-    };
-    AbsoluteElement.prototype.setHint = function() {
+    }
+    setHint() {
       this.hint = true;
-    };
-    AbsoluteElement.prototype.highlight = function(klass, color) {
+    }
+    highlight(klass, color) {
       highlight.bind(this)(klass, color);
-    };
-    AbsoluteElement.prototype.unhighlight = function(klass, color) {
+    }
+    unhighlight(klass, color) {
       unhighlight.bind(this)(klass, color);
-    };
-    absoluteElement = AbsoluteElement;
-    return absoluteElement;
+    }
   }
-  var relativeElement;
-  var hasRequiredRelativeElement;
-  function requireRelativeElement() {
-    if (hasRequiredRelativeElement)
-      return relativeElement;
-    hasRequiredRelativeElement = 1;
-    var RelativeElement = function RelativeElement2(c, dx, w, pitch, opt) {
+  const absoluteElement = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: AbsoluteElement
+  }, Symbol.toStringTag, { value: "Module" }));
+  const require$$0$1 = /* @__PURE__ */ getAugmentedNamespace(absoluteElement);
+  class RelativeElement {
+    constructor(c, dx, w, pitch, opt) {
       opt = opt || {};
       this.x = 0;
       this.c = c;
@@ -12179,49 +12175,52 @@
           this.partHeightAbove = this.height;
           break;
       }
-    };
-    RelativeElement.prototype.getChordDim = function() {
+    }
+    getChordDim() {
       if (this.type === "debug")
         return null;
       if (!this.chordHeightAbove && !this.chordHeightBelow)
         return null;
-      var margin = 0;
-      var offset = this.type === "chord" ? this.realWidth / 2 : 0;
-      var left = this.x - offset - margin;
-      var right = left + this.realWidth + margin;
+      const margin = 0;
+      const offset = this.type === "chord" ? this.realWidth / 2 : 0;
+      const left = this.x - offset - margin;
+      const right = left + this.realWidth + margin;
       return { left, right };
-    };
-    RelativeElement.prototype.invertLane = function(total) {
+    }
+    invertLane(total) {
       if (this.lane === void 0)
         this.lane = 0;
       this.lane = total - this.lane - 1;
-    };
-    RelativeElement.prototype.putChordInLane = function(i) {
+    }
+    putChordInLane(i) {
       this.lane = i;
       if (this.chordHeightAbove)
         this.chordHeightAbove = this.height * 1.25 * this.lane;
       else
         this.chordHeightBelow = this.height * 1.25 * this.lane;
-    };
-    RelativeElement.prototype.getLane = function() {
+    }
+    getLane() {
       if (this.lane === void 0)
         return 0;
       return this.lane;
-    };
-    RelativeElement.prototype.setX = function(x) {
+    }
+    setX(x) {
       this.x = x + this.dx;
-    };
-    relativeElement = RelativeElement;
-    return relativeElement;
+    }
   }
+  const relativeElement = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: RelativeElement
+  }, Symbol.toStringTag, { value: "Module" }));
+  const require$$0 = /* @__PURE__ */ getAugmentedNamespace(relativeElement);
   var tabAbsoluteElements;
   var hasRequiredTabAbsoluteElements;
   function requireTabAbsoluteElements() {
     if (hasRequiredTabAbsoluteElements)
       return tabAbsoluteElements;
     hasRequiredTabAbsoluteElements = 1;
-    var AbsoluteElement = requireAbsoluteElement();
-    var RelativeElement = requireRelativeElement();
+    var AbsoluteElement2 = require$$0$1.default;
+    var RelativeElement2 = require$$0.default;
     function isObject(a) {
       return a != null && a.constructor === Object;
     }
@@ -12235,7 +12234,7 @@
       }
     }
     function cloneAbsolute(absSrc) {
-      var returned = new AbsoluteElement("", 0, 0, "", 0);
+      var returned = new AbsoluteElement2("", 0, 0, "", 0);
       cloneObject(returned, absSrc);
       returned.top = 0;
       returned.bottom = -1;
@@ -12255,7 +12254,7 @@
         var first = true;
         for (var ii = 0; ii < children.length; ii++) {
           var child = children[ii];
-          var relative2 = new RelativeElement("", 0, 0, 0, "");
+          var relative2 = new RelativeElement2("", 0, 0, 0, "");
           cloneObject(relative2, child);
           first = plugin.tablature.setRelative(child, relative2, first);
           returned.children.push(relative2);
@@ -12277,9 +12276,9 @@
       };
       tabYPos += plugin.tabSymbolOffset;
       if (!plugin.hideTabSymbol) {
-        var tabAbsolute = new AbsoluteElement(element, 0, 0, "symbol", 0);
+        var tabAbsolute = new AbsoluteElement2(element, 0, 0, "symbol", 0);
         tabAbsolute.x = absX;
-        var tabRelative = new RelativeElement(tabIcon, 0, 0, 7.5, "tab");
+        var tabRelative = new RelativeElement2(tabIcon, 0, 0, 7.5, "tab");
         tabRelative.x = relX;
         tabAbsolute.children.push(tabRelative);
         if (tabAbsolute.abcelem.el_type == "tab") {
@@ -12324,7 +12323,7 @@
       var opt = {
         type: "tabNumber"
       };
-      var tabNoteRelative = new RelativeElement(
+      var tabNoteRelative = new RelativeElement2(
         strNote,
         0,
         0,
@@ -14438,14 +14437,14 @@
     if (hasRequiredCreateClef)
       return createClef_1;
     hasRequiredCreateClef = 1;
-    var AbsoluteElement = requireAbsoluteElement();
+    var AbsoluteElement2 = require$$0$1.default;
     var glyphs = requireGlyphs();
-    var RelativeElement = requireRelativeElement();
+    var RelativeElement2 = require$$0.default;
     var createClef = function(elem, tuneNumber) {
       var clef;
       var octave = 0;
       elem.el_type = "clef";
-      var abselem = new AbsoluteElement(elem, 0, 10, "staff-extra clef", tuneNumber);
+      var abselem = new AbsoluteElement2(elem, 0, 10, "staff-extra clef", tuneNumber);
       abselem.isClef = true;
       switch (elem.type) {
         case "treble":
@@ -14498,13 +14497,13 @@
           clef = "clefs.perc";
           break;
         default:
-          abselem.addFixed(new RelativeElement("clef=" + elem.type, 0, 0, void 0, { type: "debug" }));
+          abselem.addFixed(new RelativeElement2("clef=" + elem.type, 0, 0, void 0, { type: "debug" }));
       }
       var dx = 5;
       if (clef) {
         var height = glyphs.symbolHeightInPitches(clef);
         var ofs = clefOffsets(clef);
-        abselem.addRight(new RelativeElement(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos, { top: height + elem.clefPos + ofs, bottom: elem.clefPos + ofs }));
+        abselem.addRight(new RelativeElement2(clef, dx, glyphs.getSymbolWidth(clef), elem.clefPos, { top: height + elem.clefPos + ofs, bottom: elem.clefPos + ofs }));
         if (octave !== 0) {
           var scale = 2 / 3;
           var adjustspacing = (glyphs.getSymbolWidth(clef) - glyphs.getSymbolWidth("8") * scale) / 2;
@@ -14515,7 +14514,7 @@
             pitch = 3;
             adjustspacing = 0;
           }
-          abselem.addRight(new RelativeElement("8", dx + adjustspacing, glyphs.getSymbolWidth("8") * scale, pitch, {
+          abselem.addRight(new RelativeElement2("8", dx + adjustspacing, glyphs.getSymbolWidth("8") * scale, pitch, {
             scalex: scale,
             scaley: scale,
             top,
@@ -14548,14 +14547,14 @@
     if (hasRequiredCreateKeySignature)
       return createKeySignature_1;
     hasRequiredCreateKeySignature = 1;
-    var AbsoluteElement = requireAbsoluteElement();
+    var AbsoluteElement2 = require$$0$1.default;
     var glyphs = requireGlyphs();
-    var RelativeElement = requireRelativeElement();
+    var RelativeElement2 = require$$0.default;
     var createKeySignature = function(elem, tuneNumber) {
       elem.el_type = "keySignature";
       if (!elem.accidentals || elem.accidentals.length === 0)
         return null;
-      var abselem = new AbsoluteElement(elem, 0, 10, "staff-extra key-signature", tuneNumber);
+      var abselem = new AbsoluteElement2(elem, 0, 10, "staff-extra key-signature", tuneNumber);
       abselem.isKeySig = true;
       var dx = 0;
       elem.accidentals.forEach(function(acc) {
@@ -14584,7 +14583,7 @@
           default:
             symbol = "accidentals.flat";
         }
-        abselem.addRight(new RelativeElement(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, { thickness: glyphs.symbolHeightInPitches(symbol), top: acc.verticalPos + glyphs.symbolHeightInPitches(symbol) + fudge, bottom: acc.verticalPos + fudge }));
+        abselem.addRight(new RelativeElement2(symbol, dx, glyphs.getSymbolWidth(symbol), acc.verticalPos, { thickness: glyphs.symbolHeightInPitches(symbol), top: acc.verticalPos + glyphs.symbolHeightInPitches(symbol) + fudge, bottom: acc.verticalPos + fudge }));
         dx += glyphs.getSymbolWidth(symbol) + 2;
       }, this);
       return abselem;
@@ -14599,7 +14598,7 @@
       return createNoteHead_1;
     hasRequiredCreateNoteHead = 1;
     var glyphs = requireGlyphs();
-    var RelativeElement = requireRelativeElement();
+    var RelativeElement2 = require$$0.default;
     var createNoteHead = function(abselem, c, pitchelem, options) {
       if (!options)
         options = {};
@@ -14620,9 +14619,9 @@
       var newDotShiftX = 0;
       var extraLeft = 0;
       if (c === void 0)
-        abselem.addFixed(new RelativeElement("pitch is undefined", 0, 0, 0, { type: "debug" }));
+        abselem.addFixed(new RelativeElement2("pitch is undefined", 0, 0, 0, { type: "debug" }));
       else if (c === "") {
-        notehead = new RelativeElement(null, 0, 0, pitch, { chordPos });
+        notehead = new RelativeElement2(null, 0, 0, pitch, { chordPos });
       } else {
         var shiftheadx = headx;
         if (pitchelem.printer_shift) {
@@ -14630,7 +14629,7 @@
           shiftheadx = dir === "down" ? -glyphs.getSymbolWidth(c) * scale + adjust : glyphs.getSymbolWidth(c) * scale - adjust;
         }
         var opts = { scalex: scale, scaley: scale, thickness: glyphs.symbolHeightInPitches(c) * scale, name: pitchelem.name, chordPos };
-        notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c) * scale, pitch, opts);
+        notehead = new RelativeElement2(c, shiftheadx, glyphs.getSymbolWidth(c) * scale, pitch, opts);
         notehead.stemDir = dir;
         if (flag) {
           var pos = pitch + (dir === "down" ? -7 : 7) * scale;
@@ -14641,12 +14640,12 @@
               pos = 6;
           }
           var xdelta = dir === "down" ? headx : headx + notehead.w - 0.6;
-          abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag) * scale, pos, { scalex: scale, scaley: scale, chordPos }));
+          abselem.addRight(new RelativeElement2(flag, xdelta, glyphs.getSymbolWidth(flag) * scale, pos, { scalex: scale, scaley: scale, chordPos }));
         }
         newDotShiftX = notehead.w + dotshiftx - 2 + 5 * dot;
         for (; dot > 0; dot--) {
           var dotadjusty = 1 - Math.abs(pitch) % 2;
-          abselem.addRight(new RelativeElement("dots.dot", notehead.w + dotshiftx - 2 + 5 * dot, glyphs.getSymbolWidth("dots.dot"), pitch + dotadjusty, { chordPos }));
+          abselem.addRight(new RelativeElement2("dots.dot", notehead.w + dotshiftx - 2 + 5 * dot, glyphs.getSymbolWidth("dots.dot"), pitch + dotadjusty, { chordPos }));
         }
       }
       if (notehead)
@@ -14691,7 +14690,7 @@
           accidentalshiftx = glyphs.getSymbolWidth(symb) * scale + 2;
         }
         var h = glyphs.symbolHeightInPitches(symb);
-        abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, { scalex: scale, scaley: scale, top: pitch + h / 2, bottom: pitch - h / 2, chordPos }));
+        abselem.addExtra(new RelativeElement2(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, { scalex: scale, scaley: scale, top: pitch + h / 2, bottom: pitch - h / 2, chordPos }));
         extraLeft = glyphs.getSymbolWidth(symb) / 2;
       }
       return { notehead, accidentalshiftx, dotshiftx: newDotShiftX, extraLeft };
@@ -14705,17 +14704,17 @@
     if (hasRequiredCreateTimeSignature)
       return createTimeSignature_1;
     hasRequiredCreateTimeSignature = 1;
-    var AbsoluteElement = requireAbsoluteElement();
+    var AbsoluteElement2 = require$$0$1.default;
     var glyphs = requireGlyphs();
-    var RelativeElement = requireRelativeElement();
+    var RelativeElement2 = require$$0.default;
     var createTimeSignature = function(elem, tuneNumber) {
       elem.el_type = "timeSignature";
-      var abselem = new AbsoluteElement(elem, 0, 10, "staff-extra time-signature", tuneNumber);
+      var abselem = new AbsoluteElement2(elem, 0, 10, "staff-extra time-signature", tuneNumber);
       if (elem.type === "specified") {
         var x = 0;
         for (var i = 0; i < elem.value.length; i++) {
           if (i !== 0) {
-            abselem.addRight(new RelativeElement("+", x + 1, glyphs.getSymbolWidth("+"), 6, { thickness: glyphs.symbolHeightInPitches("+") }));
+            abselem.addRight(new RelativeElement2("+", x + 1, glyphs.getSymbolWidth("+"), 6, { thickness: glyphs.symbolHeightInPitches("+") }));
             x += glyphs.getSymbolWidth("+") + 2;
           }
           if (elem.value[i].den) {
@@ -14726,29 +14725,29 @@
             for (i2 = 0; i2 < elem.value[i].num.length; i2++)
               denWidth += glyphs.getSymbolWidth(elem.value[i].den[i2]);
             var maxWidth = Math.max(numWidth, denWidth);
-            abselem.addRight(new RelativeElement(elem.value[i].num, x + (maxWidth - numWidth) / 2, numWidth, 8, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num[0]) }));
-            abselem.addRight(new RelativeElement(elem.value[i].den, x + (maxWidth - denWidth) / 2, denWidth, 4, { thickness: glyphs.symbolHeightInPitches(elem.value[i].den[0]) }));
+            abselem.addRight(new RelativeElement2(elem.value[i].num, x + (maxWidth - numWidth) / 2, numWidth, 8, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num[0]) }));
+            abselem.addRight(new RelativeElement2(elem.value[i].den, x + (maxWidth - denWidth) / 2, denWidth, 4, { thickness: glyphs.symbolHeightInPitches(elem.value[i].den[0]) }));
             x += maxWidth;
           } else {
             var thisWidth = 0;
             for (var i3 = 0; i3 < elem.value[i].num.length; i3++)
               thisWidth += glyphs.getSymbolWidth(elem.value[i].num[i3]);
-            abselem.addRight(new RelativeElement(elem.value[i].num, x, thisWidth, 6, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num[0]) }));
+            abselem.addRight(new RelativeElement2(elem.value[i].num, x, thisWidth, 6, { thickness: glyphs.symbolHeightInPitches(elem.value[i].num[0]) }));
             x += thisWidth;
           }
         }
       } else if (elem.type === "common_time") {
-        abselem.addRight(new RelativeElement("timesig.common", 0, glyphs.getSymbolWidth("timesig.common"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.common") }));
+        abselem.addRight(new RelativeElement2("timesig.common", 0, glyphs.getSymbolWidth("timesig.common"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.common") }));
       } else if (elem.type === "cut_time") {
-        abselem.addRight(new RelativeElement("timesig.cut", 0, glyphs.getSymbolWidth("timesig.cut"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.cut") }));
+        abselem.addRight(new RelativeElement2("timesig.cut", 0, glyphs.getSymbolWidth("timesig.cut"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.cut") }));
       } else if (elem.type === "tempus_imperfectum") {
-        abselem.addRight(new RelativeElement("timesig.imperfectum", 0, glyphs.getSymbolWidth("timesig.imperfectum"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.imperfectum") }));
+        abselem.addRight(new RelativeElement2("timesig.imperfectum", 0, glyphs.getSymbolWidth("timesig.imperfectum"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.imperfectum") }));
       } else if (elem.type === "tempus_imperfectum_prolatio") {
-        abselem.addRight(new RelativeElement("timesig.imperfectum2", 0, glyphs.getSymbolWidth("timesig.imperfectum2"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.imperfectum2") }));
+        abselem.addRight(new RelativeElement2("timesig.imperfectum2", 0, glyphs.getSymbolWidth("timesig.imperfectum2"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.imperfectum2") }));
       } else if (elem.type === "tempus_perfectum") {
-        abselem.addRight(new RelativeElement("timesig.perfectum", 0, glyphs.getSymbolWidth("timesig.perfectum"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.perfectum") }));
+        abselem.addRight(new RelativeElement2("timesig.perfectum", 0, glyphs.getSymbolWidth("timesig.perfectum"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.perfectum") }));
       } else if (elem.type === "tempus_perfectum_prolatio") {
-        abselem.addRight(new RelativeElement("timesig.perfectum2", 0, glyphs.getSymbolWidth("timesig.perfectum2"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.perfectum2") }));
+        abselem.addRight(new RelativeElement2("timesig.perfectum2", 0, glyphs.getSymbolWidth("timesig.perfectum2"), 6, { thickness: glyphs.symbolHeightInPitches("timesig.perfectum2") }));
       } else {
         console.log("time signature:", elem);
       }
@@ -15032,7 +15031,7 @@
     var CrescendoElem = requireCrescendoElement();
     var GlissandoElem = requireGlissandoElement();
     var glyphs = requireGlyphs();
-    var RelativeElement = requireRelativeElement();
+    var RelativeElement2 = require$$0.default;
     var TieElem = requireTieElement();
     var Decoration = function Decoration2() {
       this.startDiminuendoX = void 0;
@@ -15076,13 +15075,13 @@
           if (glyphs.getSymbolAlign(symbol) !== "center") {
             deltaX -= glyphs.getSymbolWidth(symbol) / 2;
           }
-          abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos));
+          abselem.addFixedX(new RelativeElement2(symbol, deltaX, glyphs.getSymbolWidth(symbol), yPos));
         }
         if (decoration2[i] === "slide" && abselem.heads[0]) {
           var yPos2 = abselem.heads[0].pitch;
           yPos2 -= 2;
-          var blank1 = new RelativeElement("", -roomtaken - 15, 0, yPos2 - 1);
-          var blank2 = new RelativeElement("", -roomtaken - 5, 0, yPos2 + 1);
+          var blank1 = new RelativeElement2("", -roomtaken - 15, 0, yPos2 - 1);
+          var blank2 = new RelativeElement2("", -roomtaken - 5, 0, yPos2 + 1);
           abselem.addFixedX(blank1);
           abselem.addFixedX(blank2);
           voice2.addOther(new TieElem({ anchor1: blank1, anchor2: blank2, fixedY: true }));
@@ -15136,7 +15135,7 @@
         deltaX += dir === "down" ? -5 : 3;
         for (var i2 = 0; i2 < count; i2++) {
           placement -= 1;
-          abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), placement));
+          abselem.addFixedX(new RelativeElement2(symbol, deltaX, glyphs.getSymbolWidth(symbol), placement));
         }
       }
       for (var i = 0; i < decoration2.length; i++) {
@@ -15180,7 +15179,7 @@
         var y = getPlacement(placement);
         var textFudge = 2;
         var textHeight = 5;
-        abselem.addFixedX(new RelativeElement(text2, width / 2, 0, y + textFudge, { type: "decoration", klass: "ornament", thickness: 3, anchor }));
+        abselem.addFixedX(new RelativeElement2(text2, width / 2, 0, y + textFudge, { type: "decoration", klass: "ornament", thickness: 3, anchor }));
         incrementPlacement(placement, textHeight);
       }
       function symbolDecoration(symbol, placement) {
@@ -15191,7 +15190,7 @@
         var height = glyphs.symbolHeightInPitches(symbol) + 1;
         var y = getPlacement(placement);
         y = placement === "above" ? y + height / 2 : y - height / 2;
-        abselem.addFixedX(new RelativeElement(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, { klass: "ornament", thickness: glyphs.symbolHeightInPitches(symbol), position: placement }));
+        abselem.addFixedX(new RelativeElement2(symbol, deltaX, glyphs.getSymbolWidth(symbol), y, { klass: "ornament", thickness: glyphs.symbolHeightInPitches(symbol), position: placement }));
         incrementPlacement(placement, height);
       }
       var symbolList = {
@@ -15309,7 +15308,7 @@
           case "arpeggio":
             for (var j = abselem.abcelem.minpitch - 1; j <= abselem.abcelem.maxpitch; j += 2) {
               abselem.addExtra(
-                new RelativeElement(
+                new RelativeElement2(
                   "scripts.arpeggio",
                   -glyphs.getSymbolWidth("scripts.arpeggio") * 2 - roomtaken,
                   0,
@@ -15527,8 +15526,8 @@
     if (hasRequiredTempoElement)
       return tempoElement;
     hasRequiredTempoElement = 1;
-    var AbsoluteElement = requireAbsoluteElement();
-    var RelativeElement = requireRelativeElement();
+    var AbsoluteElement2 = require$$0$1.default;
+    var RelativeElement2 = require$$0.default;
     var TempoElement = function TempoElement2(tempo2, tuneNumber, createNoteHead) {
       this.type = "TempoElement";
       this.tempo = tempo2;
@@ -15547,7 +15546,7 @@
     TempoElement.prototype.createNote = function(createNoteHead, tempo2, tuneNumber) {
       var temposcale = 0.75;
       var duration = tempo2.duration[0];
-      var absElem = new AbsoluteElement(tempo2, duration, 1, "tempo", tuneNumber);
+      var absElem = new AbsoluteElement2(tempo2, duration, 1, "tempo", tuneNumber);
       var dot;
       var flag;
       var note;
@@ -15611,7 +15610,7 @@
         var p2 = 5 * temposcale;
         var dx = tempoNote.dx + tempoNote.w;
         var width = -0.6;
-        stem = new RelativeElement(null, dx, 0, p1, { "type": "stem", "pitch2": p2, linewidth: width });
+        stem = new RelativeElement2(null, dx, 0, p1, { "type": "stem", "pitch2": p2, linewidth: width });
         absElem.addRight(stem);
       }
       return absElem;
@@ -15698,7 +15697,7 @@
     if (hasRequiredAddChord)
       return addChord_1;
     hasRequiredAddChord = 1;
-    var RelativeElement = requireRelativeElement();
+    var RelativeElement2 = require$$0.default;
     var spacing = requireSpacing();
     const translateChord = requireTranslateChord();
     var addChord = function(getTextSize2, abselem, elem, roomTaken, roomTakenRight, noteheadWidth, jazzchords, germanAlphabet) {
@@ -15748,7 +15747,7 @@
             roomTaken += chordWidth + 7;
             x = -roomTaken;
             y = elem.averagepitch;
-            abselem.addExtra(new RelativeElement(chord, x, chordWidth + 4, y, {
+            abselem.addExtra(new RelativeElement2(chord, x, chordWidth + 4, y, {
               type: "text",
               height: chordHeight,
               dim: attr,
@@ -15759,7 +15758,7 @@
             roomTakenRight += 4;
             x = roomTakenRight;
             y = elem.averagepitch;
-            abselem.addRight(new RelativeElement(chord, x, chordWidth + 4, y, {
+            abselem.addRight(new RelativeElement2(chord, x, chordWidth + 4, y, {
               type: "text",
               height: chordHeight,
               dim: attr,
@@ -15767,7 +15766,7 @@
             }));
             break;
           case "below":
-            abselem.addRight(new RelativeElement(chord, 0, 0, void 0, {
+            abselem.addRight(new RelativeElement2(chord, 0, 0, void 0, {
               type: "text",
               position: "below",
               height: chordHeight,
@@ -15776,7 +15775,7 @@
             }));
             break;
           case "above":
-            abselem.addRight(new RelativeElement(chord, 0, 0, void 0, {
+            abselem.addRight(new RelativeElement2(chord, 0, 0, void 0, {
               type: "text",
               position: "above",
               height: chordHeight,
@@ -15787,7 +15786,7 @@
           default:
             if (rel_position) {
               var relPositionY = rel_position.y + 3 * spacing.STEP;
-              abselem.addRight(new RelativeElement(chord, x + rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
+              abselem.addRight(new RelativeElement2(chord, x + rel_position.x, 0, elem.minpitch + relPositionY / spacing.STEP, {
                 position: "relative",
                 type: "text",
                 height: chordHeight,
@@ -15798,7 +15797,7 @@
               if (elem.positioning && elem.positioning.chordPosition)
                 pos2 = elem.positioning.chordPosition;
               if (pos2 !== "hidden") {
-                abselem.addCentered(new RelativeElement(chord, noteheadWidth / 2, chordWidth, void 0, {
+                abselem.addCentered(new RelativeElement2(chord, noteheadWidth / 2, chordWidth, void 0, {
                   type: "chord",
                   position: pos2,
                   height: chordHeight,
@@ -15820,7 +15819,7 @@
     if (hasRequiredAbstractEngraver)
       return abstractEngraver;
     hasRequiredAbstractEngraver = 1;
-    var AbsoluteElement = requireAbsoluteElement();
+    var AbsoluteElement2 = require$$0$1.default;
     var BeamElem = requireBeamElement();
     var BraceElem = requireBraceElement();
     var createClef = requireCreateClef();
@@ -15830,7 +15829,7 @@
     var Decoration = requireDecoration();
     var EndingElem = requireEndingElement();
     var glyphs = requireGlyphs();
-    var RelativeElement = requireRelativeElement();
+    var RelativeElement2 = require$$0.default;
     var spacing = requireSpacing();
     var StaffGroupElement = requireStaffGroupElement();
     var TempoElement = requireTempoElement();
@@ -16059,7 +16058,7 @@
           for (i = 0; i < abselems.length; i++) {
             if (!this.tempoSet && tempo2 && !tempo2.suppress) {
               this.tempoSet = true;
-              var tempoElement2 = new AbsoluteElement(tempo2, 0, 0, "tempo", this.tuneNumber, {});
+              var tempoElement2 = new AbsoluteElement2(tempo2, 0, 0, "tempo", this.tuneNumber, {});
               tempoElement2.addFixedX(new TempoElement(tempo2, this.tuneNumber, createNoteHead));
               voice2.addChild(tempoElement2);
             }
@@ -16128,13 +16127,13 @@
           this.stemdir = elem.direction === "auto" ? void 0 : elem.direction;
           break;
         case "part":
-          var abselem = new AbsoluteElement(elem, 0, 0, "part", this.tuneNumber);
+          var abselem = new AbsoluteElement2(elem, 0, 0, "part", this.tuneNumber);
           var dim = this.getTextSize.calc(elem.title, "partsfont", "part");
-          abselem.addFixedX(new RelativeElement(elem.title, 0, 0, void 0, { type: "part", height: dim.height / spacing.STEP }));
+          abselem.addFixedX(new RelativeElement2(elem.title, 0, 0, void 0, { type: "part", height: dim.height / spacing.STEP }));
           elemset[0] = abselem;
           break;
         case "tempo":
-          var abselem3 = new AbsoluteElement(elem, 0, 0, "tempo", this.tuneNumber);
+          var abselem3 = new AbsoluteElement2(elem, 0, 0, "tempo", this.tuneNumber);
           if (!elem.suppress) {
             abselem3.addFixedX(new TempoElement(elem, this.tuneNumber, createNoteHead));
           }
@@ -16160,8 +16159,8 @@
           voice2.color = this.voiceColor;
           break;
         default:
-          var abselem2 = new AbsoluteElement(elem, 0, 0, "unsupported", this.tuneNumber);
-          abselem2.addFixed(new RelativeElement("element type " + elem.el_type, 0, 0, void 0, { type: "debug" }));
+          var abselem2 = new AbsoluteElement2(elem, 0, 0, "unsupported", this.tuneNumber);
+          abselem2.addFixed(new RelativeElement2("element type " + elem.el_type, 0, 0, void 0, { type: "debug" }));
           elemset[0] = abselem2;
       }
       return elemset;
@@ -16222,19 +16221,19 @@
     var ledgerLines = function(abselem, minPitch, maxPitch, isRest, symbolWidth, additionalLedgers, dir, dx, scale) {
       for (var i = maxPitch; i > 11; i--) {
         if (i % 2 === 0 && !isRest) {
-          abselem.addFixed(new RelativeElement(null, dx, (symbolWidth + 4) * scale, i, { type: "ledger" }));
+          abselem.addFixed(new RelativeElement2(null, dx, (symbolWidth + 4) * scale, i, { type: "ledger" }));
         }
       }
       for (i = minPitch; i < 1; i++) {
         if (i % 2 === 0 && !isRest) {
-          abselem.addFixed(new RelativeElement(null, dx, (symbolWidth + 4) * scale, i, { type: "ledger" }));
+          abselem.addFixed(new RelativeElement2(null, dx, (symbolWidth + 4) * scale, i, { type: "ledger" }));
         }
       }
       for (i = 0; i < additionalLedgers.length; i++) {
         var ofs = symbolWidth;
         if (dir === "down")
           ofs = -ofs;
-        abselem.addFixed(new RelativeElement(null, ofs + dx, (symbolWidth + 4) * scale, additionalLedgers[i], { type: "ledger" }));
+        abselem.addFixed(new RelativeElement2(null, ofs + dx, (symbolWidth + 4) * scale, additionalLedgers[i], { type: "ledger" }));
       }
     };
     AbstractEngraver.prototype.addGraceNotes = function(elem, voice2, abselem, notehead, stemHeight, isBagpipes, roomtaken) {
@@ -16275,7 +16274,7 @@
         if (elem.gracenotes[i].acciaccatura) {
           var pos = elem.gracenotes[i].verticalPos + 7 * gracescale;
           var dAcciaccatura = gracebeam ? 5 : 6;
-          abselem.addRight(new RelativeElement("flags.ugrace", -graceoffsets[i] + dAcciaccatura, 0, pos, { scalex: gracescale, scaley: gracescale }));
+          abselem.addRight(new RelativeElement2("flags.ugrace", -graceoffsets[i] + dAcciaccatura, 0, pos, { scalex: gracescale, scaley: gracescale }));
         }
         if (gracebeam) {
           var graceDuration = elem.gracenotes[i].duration / 2;
@@ -16291,7 +16290,7 @@
           var p2 = gracepitch + 7 * gracescale;
           var dx = grace.dx + grace.w;
           var width = -0.6;
-          abselem.addExtra(new RelativeElement(null, dx, 0, p1, { "type": "stem", "pitch2": p2, linewidth: width }));
+          abselem.addExtra(new RelativeElement2(null, dx, 0, p1, { "type": "stem", "pitch2": p2, linewidth: width }));
         }
         ledgerLines(abselem, gracepitch, gracepitch, false, glyphs.getSymbolWidth("noteheads.quarter"), [], true, grace.dx - 1, 0.6);
         var isInvisibleRest = elem.rest && (elem.rest.type === "spacer" || elem.rest.type === "invisible");
@@ -16357,8 +16356,8 @@
           elem.maxpitch = restpitch;
           dot = 0;
           var mmWidth = glyphs.getSymbolWidth(c);
-          abselem.addHead(new RelativeElement(c, mmWidth, mmWidth * 2, 7));
-          var numMeasures = new RelativeElement("" + elem.rest.text, mmWidth, mmWidth, 16, { type: "multimeasure-text" });
+          abselem.addHead(new RelativeElement2(c, mmWidth, mmWidth * 2, 7));
+          var numMeasures = new RelativeElement2("" + elem.rest.text, mmWidth, mmWidth, 16, { type: "multimeasure-text" });
           abselem.addExtra(numMeasures);
       }
       if (elem.rest.type.indexOf("multimeasure") < 0 && elem.rest.type !== "invisible") {
@@ -16515,7 +16514,7 @@
           else
             p1 -= 1.2;
         }
-        abselem.addRight(new RelativeElement(null, dx, 0, p1, { "type": "stem", "pitch2": p2, linewidth: width, bottom: p1 - 1 }));
+        abselem.addRight(new RelativeElement2(null, dx, 0, p1, { "type": "stem", "pitch2": p2, linewidth: width, bottom: p1 - 1 }));
         min = Math.min(p1, p2);
       }
       return { noteHead, roomTaken, roomTakenRight, min, additionalLedgers, dir, symbolWidth };
@@ -16528,7 +16527,7 @@
       });
       var lyricDim = this.getTextSize.calc(lyricStr, "vocalfont", "lyric");
       var position = elem.positioning ? elem.positioning.vocalPosition : "below";
-      abselem.addCentered(new RelativeElement(lyricStr, 0, lyricDim.width, void 0, { type: "lyric", position, height: lyricDim.height / spacing.STEP, dim: this.getTextSize.attr("vocalfont", "lyric"), voiceNumber }));
+      abselem.addCentered(new RelativeElement2(lyricStr, 0, lyricDim.width, void 0, { type: "lyric", position, height: lyricDim.height / spacing.STEP, dim: this.getTextSize.attr("vocalfont", "lyric"), voiceNumber }));
     };
     AbstractEngraver.prototype.createNote = function(elem, nostem, isSingleLineStaff, voice2) {
       var notehead = null;
@@ -16557,7 +16556,7 @@
       if (elem.rest && elem.rest.type === "invisible-multimeasure")
         durationForSpacing = this.measureLength * elem.rest.text;
       var absType = elem.rest ? "rest" : "note";
-      var abselem = new AbsoluteElement(elem, durationForSpacing, 1, absType, this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier });
+      var abselem = new AbsoluteElement2(elem, durationForSpacing, 1, absType, this.tuneNumber, { durationClassOveride: elem.duration * this.tripletmultiplier });
       if (hint)
         abselem.setHint();
       if (elem.rest) {
@@ -16589,7 +16588,7 @@
         this.decoration.createDecoration(voice2, elem.decoration, abselem.top, notehead ? notehead.w : 0, abselem, roomtaken, dir, bottom, elem.positioning, this.hasVocals, this.accentAbove);
       }
       if (elem.barNumber) {
-        abselem.addFixed(new RelativeElement(elem.barNumber, -10, 0, 0, { type: "barNumber" }));
+        abselem.addFixed(new RelativeElement2(elem.barNumber, -10, 0, 0, { type: "barNumber" }));
       }
       ledgerLines(abselem, elem.minpitch, elem.maxpitch, elem.rest, symbolWidth, additionalLedgers, dir, -2, 1);
       if (elem.chord !== void 0) {
@@ -16681,10 +16680,10 @@
       if (abselem.isClef)
         dx += measureNumDim.width / 2;
       var vert = measureNumDim.width > 10 && abselem.abcelem.type === "treble" ? 13.5 : 11;
-      abselem.addFixed(new RelativeElement(number, dx, measureNumDim.width, vert + measureNumDim.height / spacing.STEP, { type: "barNumber", dim: this.getTextSize.attr("measurefont", "bar-number") }));
+      abselem.addFixed(new RelativeElement2(number, dx, measureNumDim.width, vert + measureNumDim.height / spacing.STEP, { type: "barNumber", dim: this.getTextSize.attr("measurefont", "bar-number") }));
     };
     AbstractEngraver.prototype.createBarLine = function(voice2, elem, isFirstStaff) {
-      var abselem = new AbsoluteElement(elem, 0, 10, "bar", this.tuneNumber);
+      var abselem = new AbsoluteElement2(elem, 0, 10, "bar", this.tuneNumber);
       var anchor = null;
       var dx = 0;
       if (elem.barNumber) {
@@ -16704,16 +16703,16 @@
         this.startlimitelem = abselem;
       }
       if (firstdots) {
-        abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
-        abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
+        abselem.addRight(new RelativeElement2("dots.dot", dx, 1, 7));
+        abselem.addRight(new RelativeElement2("dots.dot", dx, 1, 5));
         dx += 6;
       }
       if (firstthin) {
-        anchor = new RelativeElement(null, dx, 1, 2, { "type": "bar", "pitch2": 10, linewidth: 0.6 });
+        anchor = new RelativeElement2(null, dx, 1, 2, { "type": "bar", "pitch2": 10, linewidth: 0.6 });
         abselem.addRight(anchor);
       }
       if (elem.type === "bar_invisible") {
-        anchor = new RelativeElement(null, dx, 1, 2, { "type": "none", "pitch2": 10, linewidth: 0.6 });
+        anchor = new RelativeElement2(null, dx, 1, 2, { "type": "none", "pitch2": 10, linewidth: 0.6 });
         abselem.addRight(anchor);
       }
       if (elem.decoration) {
@@ -16721,7 +16720,7 @@
       }
       if (thick) {
         dx += 4;
-        anchor = new RelativeElement(null, dx, 4, 2, { "type": "bar", "pitch2": 10, linewidth: 4 });
+        anchor = new RelativeElement2(null, dx, 4, 2, { "type": "bar", "pitch2": 10, linewidth: 4 });
         abselem.addRight(anchor);
         dx += 5;
       }
@@ -16731,13 +16730,13 @@
       }
       if (secondthin) {
         dx += 3;
-        anchor = new RelativeElement(null, dx, 1, 2, { "type": "bar", "pitch2": 10, linewidth: 0.6 });
+        anchor = new RelativeElement2(null, dx, 1, 2, { "type": "bar", "pitch2": 10, linewidth: 0.6 });
         abselem.addRight(anchor);
       }
       if (seconddots) {
         dx += 3;
-        abselem.addRight(new RelativeElement("dots.dot", dx, 1, 7));
-        abselem.addRight(new RelativeElement("dots.dot", dx, 1, 5));
+        abselem.addRight(new RelativeElement2("dots.dot", dx, 1, 7));
+        abselem.addRight(new RelativeElement2("dots.dot", dx, 1, 5));
       }
       if (elem.startEnding && isFirstStaff) {
         if (voice2.voicenumber === 0) {
@@ -18061,7 +18060,7 @@
     if (hasRequiredBeam$1)
       return beam$1;
     hasRequiredBeam$1 = 1;
-    var RelativeElement = requireRelativeElement();
+    var RelativeElement2 = require$$0.default;
     var spacing = requireSpacing();
     var getBarYAt = requireGetBarYAt();
     var layoutBeam = function(beam2) {
@@ -18172,7 +18171,7 @@
           else
             pitch -= 1;
         }
-        var stem = new RelativeElement(null, dx, 0, pitch, {
+        var stem = new RelativeElement2(null, dx, 0, pitch, {
           "type": "stem",
           "pitch2": bary,
           linewidth: lineWidth
@@ -20647,7 +20646,7 @@
     var drawTempo = requireTempo();
     var drawRelativeElement = requireRelative();
     var spacing = requireSpacing();
-    var setClass2 = require$$3;
+    var setClass2 = require$$3.default;
     var elementGroup = requireGroupElements();
     function drawAbsolute(renderer2, params, bartop, selectables2, staffPos) {
       if (params.invisible)
@@ -21233,8 +21232,8 @@
     if (hasRequiredSelectables)
       return selectables;
     hasRequiredSelectables = 1;
-    var highlight = requireHighlight();
-    var unhighlight = requireUnhighlight();
+    var highlight2 = requireHighlight();
+    var unhighlight2 = requireUnhighlight();
     function Selectables(paper, selectTypes, tuneNumber) {
       this.elements = [];
       this.paper = paper;
@@ -21278,8 +21277,8 @@
         tuneNumber: this.tuneNumber,
         abcelem,
         elemset: [el],
-        highlight,
-        unhighlight
+        highlight: highlight2,
+        unhighlight: unhighlight2
       };
       this.add(absEl, el, false);
     };
@@ -21663,7 +21662,7 @@
     var BottomText = requireBottomText();
     var setupSelection = requireSelection();
     var layout = requireLayout();
-    var Classes2 = require$$10;
+    var Classes2 = require$$10.default;
     var GetFontAndAttr = requireGetFontAndAttr();
     var GetTextSize = requireGetTextSize();
     var draw = requireDraw();

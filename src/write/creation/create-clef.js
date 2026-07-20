@@ -1,8 +1,8 @@
 //    abc_create_clef.js
 
-var AbsoluteElement = require('./elements/absolute-element');
+var AbsoluteElement = require('./elements/absolute-element').default;
 var glyphs = require('./glyphs');
-var RelativeElement = require('./elements/relative-element');
+var RelativeElement = require('./elements/relative-element').default;
 
 var createClef = function (elem, tuneNumber) {
 	var clef;

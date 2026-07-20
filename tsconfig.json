@@ -5,21 +5,17 @@
       "ES2015",
       "DOM"
     ],
-    "module": "ESNext",
+    "module": "umd",
     "moduleResolution": "node",
-    "declaration": true,
-    "declarationMap": true,
     "outDir": "./dist",
     "rootDir": "./",
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
     "allowJs": true,
     "sourceMap": true,
     "removeComments": false,
-    "noEmit": true,
     "isolatedModules": true,
     "types": [
       "node"

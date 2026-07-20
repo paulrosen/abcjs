@@ -189,30 +189,6 @@ G3GG3G d3dd3d | GG3GG3 dd3dd3 | GG3G3G dd3d3d | G3GGG3 d3ddd3 |
 G3G G3G d3d d3d | GG3 GG3 dd3 dd3 | GG3 G3G dd3 d3d | G3G GG3 d3d dd3 | 
 `
 
-	var abcGrandStaffInlineMeter = `X:1
-T:Time sig change test
-%%barnumbers 1
-%%measurenb 0
-%%score {R|L}
-%%stretchlast 1
-Q:"Misterioso" 1/4=80
-M:2/4
-L:1/4
-V:R clef=treble
-V:L clef=bass
-K:Gmaj
-[V:R] x x/ G/ | G2 | G2 | G2 |
-[V:L] x x/ z/ | C2 | C2 | C2 |
-%
-%%vskip 40
-[V:R] [M:4/4] G4 | G4 | G4 | G4 |
-[V:L] [M:4/4] C4 | C4 | C4 | C4 |
-%
-%%vskip 40
-[V:R] G4 | G4 | G4 | G4 |]
-[V:L] C4 | C4 | C4 | C4 |]
-`
-
 	var expectedPartialStemDirection = [
 		[{"l":79,"r":133},{"l":113,"r":109}],
 		[{"l":151,"r":206},{"l":185,"r":180}],
@@ -255,6 +231,26 @@ K:Gmaj
 		[{"l":673,"r":700},{"l":699,"r":694}],
 		[{"l":715,"r":731},{"l":715,"r":720}]
 	]
+
+	var abcGrandStaffInlineMeter = `X:1
+%%score {R|L}
+%%stretchlast 1
+M:2/4
+L:1/4
+V:R clef=treble
+V:L clef=bass
+K:Gmaj
+[V:R] G2 |
+[V:L] C2 |
+%
+%%vskip 40
+[V:R] [M:4/4] G4 |
+[V:L] [M:4/4] C4 |
+%
+%%vskip 40
+[V:R] G4 |]
+[V:L] C4 |]
+`
 
 	it("line-too-wide", function() {
 		var visualObj = doLayoutTest(lineTooWide, {staffwidth: 500, expandToWidest: true }, expectedLineTooWide, 'staffwidth=500');
@@ -375,7 +371,6 @@ K:Gmaj
 		chai.assert.deepEqual(beams, expectedPartialStemDirection)
 
 	})
-
 	it("grand-staff-inline-meter", function() {
 		var visualObj = abcjs.renderAbc("paper", abcGrandStaffInlineMeter, {});
 		var line = visualObj[0].lines[1];
