@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "lib": [
+      "ES2015",
+      "DOM"
+    ],
+    "module": "umd",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "isolatedModules": true,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "abcjs": [
+        "./types"
+      ]
+    }
+  },
+  "include": [
+    "index.js",
+    "plugin.js",
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests"
+  ]
+}

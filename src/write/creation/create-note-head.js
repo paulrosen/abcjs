@@ -1,5 +1,5 @@
 var glyphs = require('./glyphs');
-var RelativeElement = require('./elements/relative-element');
+var RelativeElement = require('./elements/relative-element').default;
 
 var createNoteHead = function (abselem, c, pitchelem, options) {
 	if (!options) options = {};

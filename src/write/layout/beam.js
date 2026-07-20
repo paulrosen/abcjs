@@ -1,4 +1,4 @@
-var RelativeElement = require('../creation/elements/relative-element');
+var RelativeElement = require('../creation/elements/relative-element').default;
 var spacing = require('../helpers/spacing');
 var getBarYAt = require('./get-bar-y-at');
 
