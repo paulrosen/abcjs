@@ -287,7 +287,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
 							tabVoice.push(defGrace);
 						}
 					}
-					var tabNoteRelative = buildRelativeTabNote(plugin, abs.x + absChild.heads[ll].dx, defNote, curNote, false);
+					var tabNoteRelative = buildRelativeTabNote(plugin, abs.x, defNote, curNote, false);
 					abs.children.push(tabNoteRelative);
 				}
 				if (defNote.notes.length > 0) {
