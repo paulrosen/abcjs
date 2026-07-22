@@ -20,24 +20,33 @@ function buildCapo(self) {
 }
 
 function buildPatterns(self) {
-	var strings = [];
-	var tuning = self.tuning;
-	if (self.capo > 0) {
-		tuning = self.capoTuning;
-	}
-	var pos = tuning.length - 1;
-	for (var iii = 0; iii < tuning.length; iii++) {
-		var nextNote = self.highestNote; // highest handled note
-		if (iii != tuning.length - 1) {
-			nextNote = tuning[iii + 1];
-		}
-		var stringNotes = tabNotes(tuning[iii], nextNote);
-		if (stringNotes.error) {
-			return stringNotes;
-		}
-		strings[pos--] = stringNotes;
-	}
-	return strings;
+  var strings = [];
+  var tuning = self.tuning;
+  if (self.capo > 0) {
+    tuning = self.capoTuning;
+  }
+  var pitches = self.stringPitches; // already computed, capo-aware
+  var pos = tuning.length - 1;
+  for (var iii = 0; iii < tuning.length; iii++) {
+    var myPitch = pitches[iii];
+    var nextNote = self.highestNote; // fallback: this string has no higher neighbor
+    var bestHigherIdx = -1;
+    for (var kkk = 0; kkk < tuning.length; kkk++) {
+      if (kkk === iii) continue;
+      if (pitches[kkk] > myPitch && (bestHigherIdx === -1 || pitches[kkk] < pitches[bestHigherIdx])) {
+        bestHigherIdx = kkk;
+      }
+    }
+    if (bestHigherIdx !== -1) {
+      nextNote = tuning[bestHigherIdx];
+    }
+    var stringNotes = tabNotes(tuning[iii], nextNote);
+    if (stringNotes.error) {
+      return stringNotes;
+    }
+    strings[pos--] = stringNotes;
+  }
+  return strings;
 }
 
 
