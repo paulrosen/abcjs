@@ -143,39 +143,55 @@ function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
 }
 
 function toNumber(self, note) {
-	if (note.isAltered || note.natural) {
-		var acc;
-		if (note.isFlat) {
-			if (note.isDouble)
-				acc = "__"
-			else
-				acc = "_"
-		} else if (note.isSharp) {
-			if (note.isDouble)
-				acc = "^^"
-			else
-				acc = "^"
-		} else if (note.natural)
-			acc = "="
-		self.measureAccidentals[note.name.toUpperCase()] = acc
-	}
-	for (var i = self.stringPitches.length - 1; i >= 0; i--) {
-		if (note.pitch + note.pitchAltered >= self.stringPitches[i]) {
-			var num = note.pitch + note.pitchAltered - self.stringPitches[i]
-			if (note.quarter === '^') num -= 0.5
-			else if (note.quarter === "v") num += 0.5
-			return {
-				num: Math.round(num),
-				str: self.stringPitches.length - 1 - i, // reverse the strings because string 0 is on the bottom
-				note: note
-			}
-		}
-	}
-	return {
-		num: "?",
-		str: self.stringPitches.length - 1,
-		note: note,
-	};
+  if (note.isAltered || note.natural) {
+    var acc;
+    if (note.isFlat) {
+      if (note.isDouble) acc = "__"; else acc = "_";
+    } else if (note.isSharp) {
+      if (note.isDouble) acc = "^^"; else acc = "^";
+    } else if (note.natural) acc = "=";
+    self.measureAccidentals[note.name.toUpperCase()] = acc;
+  }
+
+  var pitch = note.pitch + note.pitchAltered;
+  if (note.quarter === '^') pitch -= 0.5;
+  else if (note.quarter === "v") pitch += 0.5;
+
+  // Check every string, independent of array order -- required for
+  // reentrant tunings (ukulele high-G etc). Collect every string on
+  // which this pitch is physically playable (fret >= 0).
+  var candidates = [];
+  for (var i = 0; i < self.stringPitches.length; i++) {
+    var fret = pitch - self.stringPitches[i];
+    if (fret >= 0) {
+      candidates.push({ arrIndex: i, num: fret });
+    }
+  }
+  if (candidates.length === 0) {
+    return {
+      num: "?",
+      str: self.stringPitches.length - 1,
+      note: note
+    };
+  }
+
+  // Prefer the lowest fret; on ties, prefer the string closest to the
+  // one used for the previous note, to avoid needless jumps across the tab.
+  candidates.sort(function (a, b) {
+    if (a.num !== b.num) return a.num - b.num;
+    if (self.lastArrIndex != null) {
+      return Math.abs(a.arrIndex - self.lastArrIndex) - Math.abs(b.arrIndex - self.lastArrIndex);
+    }
+    return 0;
+  });
+  var chosen = candidates[0];
+  self.lastArrIndex = chosen.arrIndex;
+
+  return {
+    num: Math.round(chosen.num),
+    str: self.stringPitches.length - 1 - chosen.arrIndex, // unchanged display-order convention
+    note: note
+  };
 }
 
 StringPatterns.prototype.stringToPitch = function (stringNumber) {
@@ -307,6 +323,7 @@ function StringPatterns(plugin) {
 	}
 	this.transpose = plugin.transpose ? plugin.transpose : 0
 	this.tuning = tuning;
+	this.lastArrIndex = null;
 	this.stringPitches = []
 	for (var i = 0; i < this.tuning.length; i++) {
 		var pitch = noteToMidi(this.tuning[i]) + this.capo
