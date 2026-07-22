@@ -123,6 +123,63 @@ function bestChordAssignment(candidateLists) {
   return best; // null if no complete valid assignment exists
 }
 
+function bestPartialChordAssignment(candidateLists) {
+  // Same search as bestChordAssignment, but allows leaving some notes
+  // unplaced rather than requiring every note to get a distinct string.
+  // Used when no complete bijection exists (more notes competing for a
+  // string range than there are strings to hold them) -- maximizes the
+  // number of notes placed on distinct strings, then applies the same
+  // worst-fret / spread / sum tie-break among assignments of that size.
+  var n = candidateLists.length;
+  var usedStrings = {};
+  var current = new Array(n);
+  var best = null, bestPlaced = -1, bestCost = null;
+
+  function cost(assignment) {
+    var max = -Infinity, min = Infinity, sum = 0, count = 0;
+    for (var i = 0; i < assignment.length; i++) {
+      if (!assignment[i]) continue;
+      count++;
+      var f = assignment[i].num;
+      if (f > max) max = f;
+      if (f < min) min = f;
+      sum += f;
+    }
+    return { max: max, spread: max - min, sum: sum, count: count };
+  }
+  function better(a, b) {
+    if (a.count !== b.count) return a.count > b.count; // place more notes, always
+    if (a.max !== b.max) return a.max < b.max;
+    if (a.spread !== b.spread) return a.spread < b.spread;
+    return a.sum < b.sum;
+  }
+  function backtrack(noteIdx) {
+    if (noteIdx === n) {
+      var c = cost(current);
+      if (!best || better(c, bestCost)) { best = current.slice(); bestCost = c; }
+      return;
+    }
+    var cands = candidateLists[noteIdx];
+    var placedAny = false;
+    for (var ii = 0; ii < cands.length; ii++) {
+      var cand = cands[ii];
+      if (usedStrings[cand.arrIndex]) continue;
+      placedAny = true;
+      usedStrings[cand.arrIndex] = true;
+      current[noteIdx] = cand;
+      backtrack(noteIdx + 1);
+      usedStrings[cand.arrIndex] = false;
+      current[noteIdx] = null;
+    }
+    // Also explore leaving this note unplaced, so a single hard note
+    // doesn't block otherwise-good placements for the others.
+    current[noteIdx] = null;
+    backtrack(noteIdx + 1);
+  }
+  backtrack(0);
+  return best;
+}
+
 function handleChordNotes(self, notes) {
   var activeNotes = [];
   for (var iiii = 0; iiii < notes.length; iiii++) {
@@ -145,23 +202,27 @@ function handleChordNotes(self, notes) {
     return computeStringCandidates(self, n);
   });
   var assignment = bestChordAssignment(candidateLists);
+	if (!assignment) {
+	  assignment = bestPartialChordAssignment(candidateLists);
+	}
 
-  if (!assignment) {
-    // No complete valid assignment exists for this exact chord on this
-    // instrument (rare). Fall back rather than dropping notes silently.
-    return activeNotes.map(function (n) { return toNumber(self, n); });
-  }
-
-  var retNotes = [];
-  for (var jj = 0; jj < activeNotes.length; jj++) {
-    var chosen = assignment[jj];
-    retNotes.push({
-      num: chosen.num,
-      str: numStrings - 1 - chosen.arrIndex,
-      note: activeNotes[jj]
-    });
-  }
-  return retNotes;
+	var retNotes = [];
+	for (var jj = 0; jj < activeNotes.length; jj++) {
+	  var chosen = assignment[jj];
+	  if (chosen) {
+		retNotes.push({
+		  num: chosen.num,
+		  str: numStrings - 1 - chosen.arrIndex,
+		  note: activeNotes[jj]
+		});
+	  } else {
+		// No string could be found for this note without colliding with a
+		// higher-priority placement -- this note is not physically playable
+		// as a distinct string in this chord voicing on this instrument.
+		retNotes.push({ num: "?", str: -1, note: activeNotes[jj] });
+	  }
+	}
+	return retNotes;
 }
 
 
