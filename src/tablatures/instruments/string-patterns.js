@@ -60,87 +60,110 @@ function buildSecond(first) {
 	return seconds;
 }
 
-function sameString(self, chord) {
-	for (var jjjj = 0; jjjj < chord.length - 1; jjjj++) {
-		var curPos = chord[jjjj];
-		var nextPos = chord[jjjj + 1];
-		if (curPos.str == nextPos.str) {
-			// same String
-			// => change lower pos 
-			if (curPos.str == self.strings.length - 1) {
-				// Invalid tab Chord position for instrument
-				curPos.num = "?";
-				nextPos.num = "?";
-				return;
-			}
-			// change lower pitch on lowest string
-			if (nextPos.num < curPos.num) {
-				nextPos.str++;
-				nextPos = noteToNumber(self,
-					nextPos.note,
-					nextPos.str,
-					self.secondPos,
-					self.strings[nextPos.str].length
-				);
-			} else {
-				curPos.str++;
-				curPos = noteToNumber(self,
-					curPos.note,
-					curPos.str,
-					self.secondPos,
-					self.strings[curPos.str].length
-				);
-			}
-			// update table
-			chord[jjjj] = curPos;
-			chord[jjjj + 1] = nextPos;
-		}
-	}
-	return null;
+
+function computeStringCandidates(self, note) {
+  // Every string this note can physically be played on (fret >= 0),
+  // independent of tuning order -- required for reentrant tunings.
+  var pitch = note.pitch + note.pitchAltered;
+  if (note.quarter === '^') pitch -= 0.5;
+  else if (note.quarter === "v") pitch += 0.5;
+  var candidates = [];
+  for (var i = 0; i < self.stringPitches.length; i++) {
+    var fret = pitch - self.stringPitches[i];
+    if (fret >= 0) {
+      candidates.push({ arrIndex: i, num: Math.round(fret) });
+    }
+  }
+  candidates.sort(function (a, b) { return a.num - b.num; });
+  return candidates;
+}
+
+function bestChordAssignment(candidateLists) {
+  // Finds the note->string bijection (one note per distinct string)
+  // that minimizes the worst fret used, tie-broken by fret spread,
+  // then by total fret sum. Brute-force backtracking: chords rarely
+  // exceed 6 notes, so this is cheap regardless of tuning shape.
+  var n = candidateLists.length;
+  var usedStrings = {};
+  var current = new Array(n);
+  var best = null, bestCost = null;
+
+  function cost(assignment) {
+    var max = -Infinity, min = Infinity, sum = 0;
+    for (var i = 0; i < assignment.length; i++) {
+      var f = assignment[i].num;
+      if (f > max) max = f;
+      if (f < min) min = f;
+      sum += f;
+    }
+    return { max: max, spread: max - min, sum: sum };
+  }
+  function better(a, b) {
+    if (a.max !== b.max) return a.max < b.max;
+    if (a.spread !== b.spread) return a.spread < b.spread;
+    return a.sum < b.sum;
+  }
+  function backtrack(noteIdx) {
+    if (noteIdx === n) {
+      var c = cost(current);
+      if (!best || better(c, bestCost)) { best = current.slice(); bestCost = c; }
+      return;
+    }
+    var cands = candidateLists[noteIdx];
+    for (var ii = 0; ii < cands.length; ii++) {
+      var cand = cands[ii];
+      if (usedStrings[cand.arrIndex]) continue;
+      usedStrings[cand.arrIndex] = true;
+      current[noteIdx] = cand;
+      backtrack(noteIdx + 1);
+      usedStrings[cand.arrIndex] = false;
+    }
+  }
+  backtrack(0);
+  return best; // null if no complete valid assignment exists
 }
 
 function handleChordNotes(self, notes) {
-	var retNotes = [];
-	for (var iiii = 0; iiii < notes.length; iiii++) {
-		if (notes[iiii].endTie)
-			continue;
-		var note = new TabNote(notes[iiii].name, self.clefTranspose);
-		note.checkKeyAccidentals(self.accidentals, self.measureAccidentals)
-		var curPos = toNumber(self, note);
-		retNotes.push(curPos);
-	}
-	sameString(self, retNotes);
-	return retNotes;
+  var activeNotes = [];
+  for (var iiii = 0; iiii < notes.length; iiii++) {
+    if (notes[iiii].endTie) continue;
+    var note = new TabNote(notes[iiii].name, self.clefTranspose);
+    note.checkKeyAccidentals(self.accidentals, self.measureAccidentals);
+    activeNotes.push(note);
+  }
+  if (activeNotes.length === 0) return [];
+
+  var numStrings = self.stringPitches.length;
+
+  if (activeNotes.length > numStrings) {
+    // Physically impossible (more simultaneous notes than strings) --
+    // no valid bijection can exist. Fall back to independent placement.
+    return activeNotes.map(function (n) { return toNumber(self, n); });
+  }
+
+  var candidateLists = activeNotes.map(function (n) {
+    return computeStringCandidates(self, n);
+  });
+  var assignment = bestChordAssignment(candidateLists);
+
+  if (!assignment) {
+    // No complete valid assignment exists for this exact chord on this
+    // instrument (rare). Fall back rather than dropping notes silently.
+    return activeNotes.map(function (n) { return toNumber(self, n); });
+  }
+
+  var retNotes = [];
+  for (var jj = 0; jj < activeNotes.length; jj++) {
+    var chosen = assignment[jj];
+    retNotes.push({
+      num: chosen.num,
+      str: numStrings - 1 - chosen.arrIndex,
+      note: activeNotes[jj]
+    });
+  }
+  return retNotes;
 }
 
-function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
-	var strings = self.strings;
-	note.checkKeyAccidentals(self.accidentals, self.measureAccidentals);
-	if (secondPosition) {
-		strings = secondPosition;
-	}
-	var noteName = note.emitNoAccidentals();
-	var num = strings[stringNumber].indexOf(noteName);
-	var acc = note.acc;
-	if (num != -1) {
-		if (secondPosition) {
-			num += firstSize;
-		}
-		if ((note.isFlat || note.acc == -1) && (num == 0)) {
-			// flat on 0 pos => previous string 7th position
-			var noteEquiv = note.getAccidentalEquiv();
-			stringNumber++;
-			num = strings[stringNumber].indexOf(noteEquiv.emit());
-			acc = 0;
-		}
-		return {
-			num: (num + acc),
-			str: stringNumber,
-			note: note
-		};
-	}
-	return null;
-}
 
 function toNumber(self, note) {
   if (note.isAltered || note.natural) {
