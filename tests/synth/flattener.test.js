@@ -7907,6 +7907,34 @@ D4 :|
 		"totalDuration":4
 	}
 
+	// The common trad shorthand (thesession.org settings, for instance): the second
+	// section carries first/second endings but relies on the implicit start repeat
+	// right after the previous ":|". Expected: C C D E D F.
+	var abcNoStartRepeatEndings = `X:1
+L:1/4
+M:4/4
+K:C
+|:C4:|
+D4|1 E4:|2 F4|
+`
+
+	var expectedNoStartRepeatEndings = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":6
+	}
+
 	//////////////////////////////////////////////////////////
 
 
@@ -8128,6 +8156,10 @@ D4 :|
 
 	it("no-start-repeat-repeat", function() {
 		doFlattenTest(abcNoStartRepeatRepeat, expectedNoStartRepeatRepeat);
+	})
+
+	it("no-start-repeat-endings", function() {
+		doFlattenTest(abcNoStartRepeatEndings, expectedNoStartRepeatEndings);
 	})
 
 })
