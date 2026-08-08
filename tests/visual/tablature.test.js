@@ -399,11 +399,11 @@ describe("Tablature", function () {
 		}
 	];
 
-	var badTuningParams = [
+	var reentrantTuningParams = [
 		{
 			instrument: 'guitar',
 			label : 'Guitar (%T)',
-			tuning: ['D', 'A', 'D', 'G', 'A', 'd'],
+			tuning: ['D', 'A', 'D', 'G', 'A', 'd'], 
 		}
 	];
 
@@ -717,7 +717,7 @@ describe("Tablature", function () {
 	]
 
 	// TODO-PER: Eventually the tablature should support strings being tuned out of order (like a uke or banjo)
-	var badTuning = "X:1\n" +
+	var reentrantTuning = "X:1\n" +
 		"K:C\n" +
 		"D, A, D G B e"
 
@@ -1023,11 +1023,13 @@ describe("Tablature", function () {
 		chai.assert.equal(parseInt(x,10), 33, "Not enough left margin for instrument name")
 	})
 
-	it("bad-tuning", function () {
-		var visualObj = doRender(badTuning, badTuningParams)
-		chai.assert.equal(visualObj[0].warnings, "Invalid string Instrument tuning : D string lower than A string")
+	// TODO-PER resolved: Reentrant tuning (out of order strings) is now supported!
+	// Verification that out-of-order / reentrant tunings are accepted without warnings
+	it("reentrant-tuning-supported", function () {
+		var visualObj = doRender(reentrantTuning, reentrantTuningParams);
+		chai.assert.isUndefined(visualObj[0].warnings);
 	});
-
+	
 	it("subtitle", function() {
 		// Just see it not crash
 		var visualObj = doRender(subTitle, violinParams)
