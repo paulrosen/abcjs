@@ -24,6 +24,11 @@ function Repeats(voice) {
 			var lastSection = this.sections[this.sections.length-1]
 			if (startEnding.indexOf(1) >= 0 && lastSection.type === 'endRepeat' && lastSection.index !== thisIndex)
 				this.sections.push({type: "startRepeat", index: lastSection.index})
+			// A first ending arriving while the previous ending group is still open is the same
+			// shorthand continued over another section ("|1x:|2y|z|1x':|2y'|") - there is no bar in
+			// the notation that closes the previous group, so start the new section right after it.
+			else if (startEnding.indexOf(1) >= 0 && lastSection.type === 'startEnding')
+				this.sections.push({type: "startRepeat", index: lastSection.index+1})
 			this.sections.push({type:"startEnding", index: thisIndex, endings: startEnding})
 		}
 		if (isStartRepeat)

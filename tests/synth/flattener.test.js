@@ -7935,6 +7935,41 @@ D4|1 E4:|2 F4|
 		"totalDuration":6
 	}
 
+	// The same shorthand over consecutive sections - a three-part tune where neither
+	// later section declares its own start repeat. This matches the pre-6.6.0 output
+	// and the timing cursor: the second section's last ending is included when the
+	// third section repeats, because nothing in the notation says where that ending stops.
+	var abcNoStartRepeatEndingsMultiple = `X:1
+L:1/4
+M:4/4
+K:C
+|:C4:|
+D4|1 E4:|2 F4|
+G4|1 A4:|2 B4|
+`
+
+	var expectedNoStartRepeatEndingsMultiple = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":6,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":7,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":8,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":9,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":71,"volume":105,"start":10,"duration":1,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":11
+	}
+
 	//////////////////////////////////////////////////////////
 
 
@@ -8160,6 +8195,10 @@ D4|1 E4:|2 F4|
 
 	it("no-start-repeat-endings", function() {
 		doFlattenTest(abcNoStartRepeatEndings, expectedNoStartRepeatEndings);
+	})
+
+	it("no-start-repeat-endings-multiple", function() {
+		doFlattenTest(abcNoStartRepeatEndingsMultiple, expectedNoStartRepeatEndingsMultiple);
 	})
 
 })
