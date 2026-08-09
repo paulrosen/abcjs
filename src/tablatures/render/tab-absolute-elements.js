@@ -1,8 +1,8 @@
 /**
  * Tablature Absolute elements factory
  */
-var AbsoluteElement = require('../../write/creation/elements/absolute-element');
-var RelativeElement = require('../../write/creation/elements/relative-element');
+var AbsoluteElement = require('../../write/creation/elements/absolute-element').default;
+var RelativeElement = require('../../write/creation/elements/relative-element').default;
 
 function isObject(a) { return a != null && a.constructor === Object; }
 function cloneObject(dest, src) {

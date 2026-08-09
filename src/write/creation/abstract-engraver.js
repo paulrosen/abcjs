@@ -1,6 +1,6 @@
 // abc_abstract_engraver.js: Creates a data structure suitable for printing a line of abc
 
-var AbsoluteElement = require('./elements/absolute-element');
+var AbsoluteElement = require('./elements/absolute-element').default;
 var BeamElem = require('./elements/beam-element');
 var BraceElem = require('./elements/brace-element');
 var createClef = require('./create-clef');
@@ -10,7 +10,7 @@ var createTimeSignature = require('./create-time-signature');
 var Decoration = require('./decoration');
 var EndingElem = require('./elements/ending-element');
 var glyphs = require('./glyphs');
-var RelativeElement = require('./elements/relative-element');
+var RelativeElement = require('./elements/relative-element').default;
 var spacing = require('../helpers/spacing');
 var StaffGroupElement = require('./elements/staff-group-element');
 var TempoElement = require('./elements/tempo-element');

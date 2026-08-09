@@ -1,7 +1,7 @@
 //    abc_tempo_element.js: Definition of the TempoElement class.
 
-var AbsoluteElement = require('./absolute-element');
-var RelativeElement = require('./relative-element');
+var AbsoluteElement = require('./absolute-element').default;
+var RelativeElement = require('./relative-element').default;
 
 var TempoElement = function TempoElement(tempo, tuneNumber, createNoteHead) {
 	this.type = "TempoElement";

@@ -1,4 +1,4 @@
-var RelativeElement = require('./elements/relative-element');
+var RelativeElement = require('./elements/relative-element').default;
 var spacing = require('../helpers/spacing');
 const translateChord = require("./translate-chord");
 

@@ -1,4 +1,4 @@
-var setClass = require('../helpers/set-class');
+var setClass = require('../helpers/set-class').default;
 
 var highlight = function (klass, color) {
 	if (klass === undefined)

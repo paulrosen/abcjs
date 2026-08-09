@@ -1,8 +1,8 @@
 //    abc_create_key_signature.js
 
-var AbsoluteElement = require('./elements/absolute-element');
+var AbsoluteElement = require('./elements/absolute-element').default;
 var glyphs = require('./glyphs');
-var RelativeElement = require('./elements/relative-element');
+var RelativeElement = require('./elements/relative-element').default;
 
 var createKeySignature = function (elem, tuneNumber) {
 	elem.el_type = "keySignature";

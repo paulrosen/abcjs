@@ -1,7 +1,7 @@
 var drawTempo = require('./tempo');
 var drawRelativeElement = require('./relative');
 var spacing = require('../helpers/spacing');
-var setClass = require('../helpers/set-class');
+var setClass = require('../helpers/set-class').default;
 var elementGroup = require('./group-elements');
 
 function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
