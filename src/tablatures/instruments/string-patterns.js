@@ -238,7 +238,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
 StringPatterns.prototype.toString = function () {
 	var arr = []
 	for (var i = 0; i < this.tuning.length; i++) {
-		var str = this.tuning[i].replaceAll(',', '').replaceAll("'", '').toUpperCase();
+		var str = this.tuning[i].replace(/,/g, '').replace(/'/g, '').toUpperCase();
 		if (str[0] === '_') str = str[1] + 'b '
 		else if (str[0] === '^') str = str[1] + "# "
 		arr.push(str)
