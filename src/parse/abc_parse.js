@@ -119,6 +119,7 @@ var Parse = function() {
 		},
 		addFormattingOptions: function(el, defaultFonts, elType) {
 			if (elType === 'note') {
+				if (this.style && !el.style) el.style = this.style;
 				if (this.vocalPosition !== 'auto') addPositioning(el, 'vocalPosition', this.vocalPosition);
 				if (this.dynamicPosition !== 'auto') addPositioning(el, 'dynamicPosition', this.dynamicPosition);
 				if (this.chordPosition !== 'auto') addPositioning(el, 'chordPosition', this.chordPosition);
