@@ -55,6 +55,7 @@ function SynthController() {
 			self.isStarted = false;
 		}
 		self.isLooping = false;
+		self.isLoaded = false;
 
 		if (userAction)
 			return self.go();
