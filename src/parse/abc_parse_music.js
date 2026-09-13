@@ -182,6 +182,15 @@ MusicParser.prototype.parseMusic = function(line) {
 						multilineVars.start_new_line = false;
 					}
 				}
+				// An inline field can also come after a decoration or chord symbol, like "!mf![Q:1/4=88]C".
+				if (line[i] === '[' && line[i+2] === ':' && line[i+1] !== 'V') {
+					var retInline2 = header.letter_to_inline_header(line, i, delayStartNewLine);
+					if (retInline2[0] > 0) {
+						i += retInline2[0];
+						continue;
+					}
+				}
+
 				// gather all the grace notes, chord symbols and decorations
 				ret = letter_to_spacer(line, i);
 				if (ret[0] > 0) {
