@@ -21,7 +21,7 @@ function Repeats(voice) {
 			this.sections.push({type:"startRepeat", index: thisIndex})
 	}
 
-	this.resolveRepeats = function() {
+	this.getInstructions = function() {
 		// this.sections contain all the interesting bars - start and end repeats.
 		var e
 
@@ -39,7 +39,7 @@ function Repeats(voice) {
 
 		// console.log(this.sections.map(s => JSON.stringify(s)).join("\n"))
 		if (this.sections.length < 2)
-			return voice // If there are no repeats then don't bother copying anything
+			return null // If there are no repeats then don't bother copying anything
 
 		// Go through all the markers and turn that into an array of sets of sections in order.
 		// The output is repeatInstructions. If "endings" is not present, then the common section should just
@@ -130,39 +130,55 @@ function Repeats(voice) {
 		// for (var x = 0; x < repeatInstructions.length; x++) {
 		// 	console.log(JSON.stringify(repeatInstructions[x]))
 		// }
+		return repeatInstructions
+	}
 
+	this.resolveIndexes = function() {
+		// The elements in the order they are played, as indexes into the voice.
+		var repeatInstructions = this.getInstructions()
+		if (!repeatInstructions)
+			return null
 		var output = []
-		var lastEnd = -1
 		for (var r = 0; r < repeatInstructions.length; r++) {
 			var instructions = repeatInstructions[r]
 			if (!instructions.endings) {
-				duplicateSpan(voice, output, instructions.common.start, instructions.common.end)
+				duplicateIndexes(voice, output, instructions.common.start, instructions.common.end)
 			} else if (instructions.endings.length === 0) {
 				// this is when there is no endings specified - it is just a repeat
-				duplicateSpan(voice, output, instructions.common.start, instructions.common.end)
-				duplicateSpan(voice, output, instructions.common.start, instructions.common.end)
+				duplicateIndexes(voice, output, instructions.common.start, instructions.common.end)
+				duplicateIndexes(voice, output, instructions.common.start, instructions.common.end)
 			} else {
-				for (e = 0; e < instructions.endings.length; e++) {
+				for (var e = 0; e < instructions.endings.length; e++) {
 					var ending = instructions.endings[e]
 					if (ending) { // this is a sparse array so skip the empty ones
-						duplicateSpan(voice, output, instructions.common.start, instructions.common.end)
+						duplicateIndexes(voice, output, instructions.common.start, instructions.common.end)
 						if (ending.start > 0) {
-							duplicateSpan(voice, output, ending.start, ending.end)
+							duplicateIndexes(voice, output, ending.start, ending.end)
 						}
-						lastEnd = Math.max(lastEnd, ending.end)
 					}
 				}
 			}
 		}
 		return output
 	}
+
+	this.resolveRepeats = function() {
+		var indexes = this.resolveIndexes()
+		if (!indexes)
+			return voice // If there are no repeats then don't bother copying anything
+		var output = []
+		for (var i = 0; i < indexes.length; i++) {
+			output.push(duplicateItem(voice[indexes[i]]))
+		}
+		return output
+	}
 }
 
-function duplicateSpan(input, output, start, end) {
+function duplicateIndexes(input, output, start, end) {
 	//console.log("dup", {start, end})
 	if (start < 0) start = 0
 	// If there is a bar at the end of a line and a bar to start the next line, it would be duplicated.
-	if (output.length > 0 && input[start].el_type === 'bar' && output[output.length-1].el_type === 'bar')
+	if (output.length > 0 && input[start].el_type === 'bar' && input[output[output.length-1]].el_type === 'bar')
 		start++
 
 	for (var i = start; i <= end; i++) {
@@ -171,22 +187,22 @@ function duplicateSpan(input, output, start, end) {
 		var skip = false
 		if (input[i].el_type === 'key' || input[i].el_type === 'meter' || input[i].el_type === 'tempo' || input[i].el_type === 'instrument') {
 			index = output.length-1
-			while (index >= 0 && output[index].el_type !== input[i].el_type)
+			while (index >= 0 && input[output[index]].el_type !== input[i].el_type)
 				index--
 			if (index >= 0) {
-				if (input[i].el_type === 'key' && areKeysEqual(input[i], output[index])) {
+				if (input[i].el_type === 'key' && areKeysEqual(input[i], input[output[index]])) {
 					skip = true
-				} else if (input[i].el_type === 'meter' && input[i].num === output[index].num && input[i].den === output[index].den) {
+				} else if (input[i].el_type === 'meter' && input[i].num === input[output[index]].num && input[i].den === input[output[index]].den) {
 					skip = true
-				} else if (input[i].el_type === 'instrument' && input[i].program === output[index].program) {
+				} else if (input[i].el_type === 'instrument' && input[i].program === input[output[index]].program) {
 					skip = true
-				} else if (input[i].el_type === 'tempo' && input[i].qpm === output[index].qpm) {
+				} else if (input[i].el_type === 'tempo' && input[i].qpm === input[output[index]].qpm) {
 					skip = true
 				}
 			}
 		}
 		if (!skip)
-			output.push(duplicateItem(input[i]))
+			output.push(i)
 	}
 }
 
