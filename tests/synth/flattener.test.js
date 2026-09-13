@@ -7812,6 +7812,26 @@ G4|]
 			{"cmd":"note","pitch":64,"volume":105,"start":33,"duration":1,"instrument":0,"gap":0},
 		]],"totalDuration":34}
 
+	var abcMultiRepeat = 'X:1\n' +
+		'M:C\n' +
+		'L:1/8\n' +
+		'Q:1/4=120\n' +
+		'K:C\n' +
+		'|::: C8 D8 :::|\n'
+
+	var expectedMultiRepeat = {
+		"tempo":120,"instrument":0,"tracks":[[
+			{"cmd":"program","channel":0,"instrument":0},
+			{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":62,"volume":95,"start":1,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":60,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":62,"volume":95,"start":3,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":60,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":62,"volume":95,"start":5,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":60,"volume":105,"start":6,"duration":1,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":62,"volume":95,"start":7,"duration":1,"instrument":0,"gap":0},
+		]],"totalDuration":8}
+
 	var abcOverlayRepeat = `Q:1/4=90
 [V:2]|:e2|
 |b2:|
@@ -8112,6 +8132,10 @@ D4 :|
 
 	it("repeat-3", function() {
 		doFlattenTest(abcRepeat3, expectedRepeat3);
+	})
+
+	it("multi-repeat", function() {
+		doFlattenTest(abcMultiRepeat, expectedMultiRepeat);
 	})
 
 	it("overlay-repeat", function() {
