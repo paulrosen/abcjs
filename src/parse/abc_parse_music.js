@@ -898,14 +898,16 @@ var letter_to_open_slurs_and_triplets =  function(line, i) {
 	}
 	while (line[i] === '(' || tokenizer.isWhiteSpace(line[i])) {
 		if (line[i] === '(') {
-			if (i+1 < line.length && (line[i+1] >= '2' && line[i+1] <= '9')) {
+			var p = tokenizer.getNumber(line, i+1); // p, q and r can have more than one digit, like "(11:8:11"
+			if (line[i+1] !== '0' && p.num >= 2) {
+				var index = p.index;
 				if (ret.triplet !== undefined)
 					warn("Can't nest triplets", line, i);
 				else {
-					ret.triplet = line[i+1] - '0';
-					ret.tripletQ = tripletQ[ret.triplet];
+					ret.triplet = p.num;
+					ret.tripletQ = tripletQ[ret.triplet] ? tripletQ[ret.triplet] : 2;
 					ret.num_notes = ret.triplet;
-					if (i+2 < line.length && line[i+2] === ':') {
+					if (index < line.length && line[index] === ':') {
 						// We are expecting "(p:q:r" or "(p:q" or "(p::r"
 						// That is: "put p notes into the time of q for the next r notes"
 						// if r is missing, then it is equal to p.
@@ -918,28 +920,33 @@ var letter_to_open_slurs_and_triplets =  function(line, i) {
 						// (7 notes in the time of n
 						// (8 notes in the time of 3
 						// (9 notes in the time of n
-						if (i+3 < line.length && line[i+3] === ':') {
+						// (10 or more notes in the time of n
+						if (index+1 < line.length && line[index+1] === ':') {
 							// The second number, 'q', is not present.
-							if (i+4 < line.length && (line[i+4] >= '1' && line[i+4] <= '9')) {
-								ret.num_notes = line[i+4] - '0';
-								i += 3;
+							var r = tokenizer.getNumber(line, index+2);
+							if (line[index+2] !== '0' && r.num > 0) {
+								ret.num_notes = r.num;
+								index = r.index;
 							} else
 								warn("expected number after the two colons after the triplet to mark the duration", line, i);
-						} else if (i+3 < line.length && (line[i+3] >= '1' && line[i+3] <= '9')) {
-							ret.tripletQ = line[i+3] - '0';
-							if (i+4 < line.length && line[i+4] === ':') {
-								if (i+5 < line.length && (line[i+5] >= '1' && line[i+5] <= '9')) {
-									ret.num_notes = line[i+5] - '0';
-									i += 4;
+						} else {
+							var q = tokenizer.getNumber(line, index+1);
+							if (line[index+1] !== '0' && q.num > 0) {
+								ret.tripletQ = q.num;
+								index = q.index;
+								if (index < line.length && line[index] === ':') {
+									var r2 = tokenizer.getNumber(line, index+1);
+									if (line[index+1] !== '0' && r2.num > 0) {
+										ret.num_notes = r2.num;
+										index = r2.index;
+									}
 								}
-							} else {
-								i += 2;
-							}
-						} else
-							warn("expected number after the triplet to mark the duration", line, i);
+							} else
+								warn("expected number after the triplet to mark the duration", line, i);
+						}
 					}
 				}
-				i++;
+				i = index-1;
 			}
 			else {
 				if (ret.startSlur === undefined)
