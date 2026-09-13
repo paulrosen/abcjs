@@ -426,6 +426,33 @@ describe("Miscellaneous", function () {
 		console.log(results.map(r => `'${r}',`).join('\n'))
 		chai.assert.deepEqual(results, expectedChordClass)
 	})
+
+	it("tuplet-invisible-rest", function () {
+		// An invisible rest has no note head. The bracket goes from the first to the last visible note.
+		var cases = [
+			{ abc: "(3c2x z3", brackets: 1 },
+			{ abc: "(3xEG A2", brackets: 1 },
+			{ abc: "(3ExG A2", brackets: 1 },
+			{ abc: "(3EGx A2", brackets: 1 },
+			{ abc: "(3xxE A2", brackets: 1 },
+			{ abc: "(3:2:2E2x G2", brackets: 1 },
+			{ abc: "(3xxx A2", brackets: 0 },
+		];
+		for (var i = 0; i < cases.length; i++) {
+			abcjs.renderAbc("paper", "X:1\nL:1/8\nK:C\n" + cases[i].abc + "|\n");
+			var brackets = document.querySelectorAll('#paper [data-name="triplet"]');
+			chai.assert.equal(brackets.length, cases[i].brackets, cases[i].abc);
+		}
+
+		// The notes after the tuplet are spaced the same as when it ends with a normal rest.
+		var noteX = function (abc) {
+			var visualObj = abcjs.renderAbc("paper", "X:1\nL:1/8\nK:C\n" + abc + "|\n");
+			return visualObj[0].lines[0].staff[0].voices[0].map(function (el) { return el.abselem ? el.abselem.x : null });
+		}
+		chai.assert.deepEqual(noteX("(3EGx A2 B2"), noteX("(3EGz A2 B2"), "(3EGx spacing");
+		chai.assert.deepEqual(noteX("(3:2:2E2x G2 A2"), noteX("(3:2:2E2z G2 A2"), "(3:2:2E2x spacing");
+		chai.assert.deepEqual(noteX("(3xxx A2 B2"), noteX("(3zzz A2 B2"), "(3xxx spacing");
+	})
 })
 
 function checkFreeText(abc, expected) {
