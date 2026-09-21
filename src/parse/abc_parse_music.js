@@ -268,6 +268,8 @@ MusicParser.prototype.parseMusic = function(line) {
 				if (bar.type.length === 0)
 					warn("Unknown bar type", line, i);
 				else {
+					if (ret[3])
+						bar.numRepeats = ret[3];
 					if (multilineVars.inEnding && bar.type !== 'bar_thin') {
 						bar.endEnding = true;
 						multilineVars.inEnding = false;
@@ -878,13 +880,13 @@ var letter_to_bar = function(line, curr_pos) {
 	// It can also be a quoted string. It is unclear whether that construct requires '[', but it seems like it would. otherwise it would be confused with a regular chord.
 	if (line[curr_pos+ret.len] === '"' && line[curr_pos+ret.len-1] === '[') {
 		var ending = tokenizer.getBrackettedSubstring(line, curr_pos+ret.len, 5);
-		return [ret.len+ending[0], ret.token, ending[1]];
+		return [ret.len+ending[0], ret.token, ending[1], ret.numRepeats];
 	}
 	var retRep = tokenizer.getTokenOf(line.substring(curr_pos+ret.len), "1234567890-,");
 	if (retRep.len === 0 || retRep.token[0] === '-')
-		return [orig_bar_len, ret.token];
+		return [orig_bar_len, ret.token, undefined, ret.numRepeats];
 
-	return [ret.len+retRep.len, ret.token, retRep.token];
+	return [ret.len+retRep.len, ret.token, retRep.token, ret.numRepeats];
 };
 
 var letter_to_open_slurs_and_triplets =  function(line, i) {

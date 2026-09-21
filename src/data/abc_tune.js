@@ -485,25 +485,28 @@ var Tune = function() {
 
 						if (endingRepeatElem === -1)
 							endingRepeatElem = elem;
-						var lastVoiceTimeMilliseconds = 0;
-						tempoDone = -1;
-						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
-							thisMeasure = elements[el2].measureNumber;
-							if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
-								bpm = this.tempoLocations[thisMeasure];
-								timeDivider = warp * this.getBeatLength() * bpm / 60;
-								tempoDone = thisMeasure;
+						var numRepeats = element.abcelem.numRepeats || 1;
+						for (var rep = 0; rep < numRepeats; rep++) {
+							var lastVoiceTimeMilliseconds = 0;
+							tempoDone = -1;
+							for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
+								thisMeasure = elements[el2].measureNumber;
+								if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
+									bpm = this.tempoLocations[thisMeasure];
+									timeDivider = warp * this.getBeatLength() * bpm / 60;
+									tempoDone = thisMeasure;
+								}
+								var element2 = elements[el2].elem;
+								ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
+								isTiedState = ret.isTiedState;
+								nextIsBar = ret.nextIsBar;
+								voiceTime += ret.duration;
+								lastVoiceTimeMilliseconds = voiceTimeMilliseconds;
+								voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 							}
-							var element2 = elements[el2].elem;
-							ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
-							isTiedState = ret.isTiedState;
-							nextIsBar = ret.nextIsBar;
-							voiceTime += ret.duration;
-							lastVoiceTimeMilliseconds = voiceTimeMilliseconds;
-							voiceTimeMilliseconds = Math.round(voiceTime * 1000);
+							if (eventHash["event" + lastVoiceTimeMilliseconds]) // This won't exist if it is the beginning of the next line. That's ok because we will just count the end of the last line as the end.
+								eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
 						}
-						if (eventHash["event" + lastVoiceTimeMilliseconds]) // This won't exist if it is the beginning of the next line. That's ok because we will just count the end of the last line as the end.
-							eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
 						nextIsBar = true;
 						endingRepeatElem = -1;
 					}

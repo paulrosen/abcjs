@@ -13,12 +13,12 @@ function Repeats(voice) {
 			// If there are two endRepeats in a row, that is a notation error, but we'll recover by pretending there was a startRepeat right before it.
 			if (this.sections.length > 0 && this.sections[this.sections.length-1].type === 'endRepeat')
 				this.sections.push({type: "startRepeat", index: this.sections[this.sections.length-1].index})
-			this.sections.push({type: "endRepeat", index: thisIndex})
+			this.sections.push({type: "endRepeat", index: thisIndex, numRepeats: elem.numRepeats})
 		}
 		if (startEnding)
 			this.sections.push({type:"startEnding", index: thisIndex, endings: startEnding})
 		if (isStartRepeat)
-			this.sections.push({type:"startRepeat", index: thisIndex})
+			this.sections.push({type:"startRepeat", index: thisIndex, numRepeats: elem.numRepeats})
 	}
 
 	this.resolveRepeats = function() {
@@ -86,7 +86,7 @@ function Repeats(voice) {
 							repeatInstructions.push({common: {start: lastUsed+1, end: section.index}})
 						}
 					}
-					currentRepeat = { common: { start: section.index} }
+					currentRepeat = { common: { start: section.index}, numRepeats: section.numRepeats }
 					break;
 				case "startEnding": {
 					if (currentRepeat) {
@@ -103,6 +103,8 @@ function Repeats(voice) {
 					if (currentRepeat) {
 						if (!currentRepeat.endings)
 							currentRepeat.endings = []
+						if (section.numRepeats)
+							currentRepeat.numRepeats = Math.max(currentRepeat.numRepeats || 1, section.numRepeats)
 						if (currentRepeat.endings.length > 0) {
 							for (e = 0; e < currentRepeat.endings.length; e++) {
 								if (currentRepeat.endings[e] && !currentRepeat.endings[e].end)
@@ -139,8 +141,10 @@ function Repeats(voice) {
 				duplicateSpan(voice, output, instructions.common.start, instructions.common.end)
 			} else if (instructions.endings.length === 0) {
 				// this is when there is no endings specified - it is just a repeat
-				duplicateSpan(voice, output, instructions.common.start, instructions.common.end)
-				duplicateSpan(voice, output, instructions.common.start, instructions.common.end)
+				var numRepeats = instructions.numRepeats || 1
+				for (var rep = 0; rep <= numRepeats; rep++) {
+					duplicateSpan(voice, output, instructions.common.start, instructions.common.end)
+				}
 			} else {
 				for (e = 0; e < instructions.endings.length; e++) {
 					var ending = instructions.endings[e]

@@ -175,7 +175,12 @@ var Tokenizer = function(lines, multilineVars) {
 			case ':':
 				++i;
 				switch (line[i]) {
-					case ':': return {len: 2, token: "bar_dbl_repeat"};
+					case ':': // :: or an end to a multiple repeat, like :::| which means repeat three times.
+						var colons = 2;
+						while (line[i-1+colons] === ':') colons++;
+						if (line[i-1+colons] === '|')
+							return {len: colons+1, token: "bar_right_repeat", numRepeats: colons};
+						return {len: 2, token: "bar_dbl_repeat"};
 					case '|':	// :|
 						++i;
 						switch (line[i]) {
@@ -207,7 +212,12 @@ var Tokenizer = function(lines, multilineVars) {
 				if (line[i] === '|') {	// [|
 					++i;
 					switch (line[i]) {
-						case ':': return {len: 3, token: "bar_left_repeat"};
+						case ':':	// [|:
+							var colons = 1;
+							while (line[i+colons] === ':') colons++;
+							if (colons > 1)
+								return {len: 2+colons, token: "bar_left_repeat", numRepeats: colons};
+							return {len: 3, token: "bar_left_repeat"};
 						case ']': return {len: 3, token: "bar_invisible"};
 						default: return {len: 2, token: "bar_thick_thin"};
 					}
@@ -223,11 +233,19 @@ var Tokenizer = function(lines, multilineVars) {
 					case ']': return {len: 2, token: "bar_thin_thick"};
 					case '|': // ||
 						++i;
-						if (line[i] === ':') return {len: 3, token: "bar_left_repeat"};
+						if (line[i] === ':') { // ||:
+							var colons = 1;
+							while (line[i+colons] === ':') colons++;
+							if (colons > 1)
+								return {len: 2+colons, token: "bar_left_repeat", numRepeats: colons};
+							return {len: 3, token: "bar_left_repeat"};
+						}
 						return {len: 2, token: "bar_thin_thin"};
 					case ':':	// |:
 						var colons = 0;
 						while (line[i+colons] === ':') colons++;
+						if (colons > 1)
+							return { len: 1+colons, token: "bar_left_repeat", numRepeats: colons};
 						return { len: 1+colons, token: "bar_left_repeat"};
 					default: return {len: 1, token: "bar_thin"};
 				}
