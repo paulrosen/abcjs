@@ -252,26 +252,23 @@ var Repeats = require("./repeats");
 										noteElem.duration = (elem.duration === 0) ? 0.25 : elem.duration;
 										if (elem.startTriplet) {
 											tripletMultiplier = elem.tripletMultiplier;
-											tripletDurationTotal = elem.startTriplet * tripletMultiplier * elem.duration;
-											if (elem.startTriplet !== elem.tripletR) { // most commonly (3:2:2
-												if (v + elem.tripletR <= voice.length) {
-													var durationTotal = 0;
-													for (var w = v; w < v + elem.tripletR; w++) {
-														durationTotal += voice[w].duration;
-													}
-													tripletDurationTotal = tripletMultiplier * durationTotal;
-												}
-											}
-											noteElem.duration = noteElem.duration * tripletMultiplier;
-											noteElem.duration = Math.round(noteElem.duration*1000000)/1000000;
+											// The notes in a tuplet don't all have to be written the same length --
+											// "(3G>FE", "(3G2FE" and "(3:2:4 ..." are all legal -- so the total can't
+											// be extrapolated from the first note. Accumulate the written durations as
+											// we go instead. Keeping the running total is what lets the last note of
+											// the tuplet absorb the rounding error instead of it leaking into the timeline.
+											tripletDurationTotal = noteElem.duration;
+											noteElem.duration = Math.round(noteElem.duration*tripletMultiplier*1000000)/1000000;
 											tripletDurationCount = noteElem.duration;
-										} else if (tripletMultiplier) {
-											if (elem.endTriplet) {
+											if (elem.endTriplet) // a one-note tuplet, that is, "(3:2:1"
 												tripletMultiplier = 0;
-												noteElem.duration = Math.round((tripletDurationTotal - tripletDurationCount)*1000000)/1000000;
+										} else if (tripletMultiplier) {
+											tripletDurationTotal += noteElem.duration;
+											if (elem.endTriplet) {
+												noteElem.duration = Math.round((tripletDurationTotal*tripletMultiplier - tripletDurationCount)*1000000)/1000000;
+												tripletMultiplier = 0;
 											} else {
-												noteElem.duration = noteElem.duration * tripletMultiplier;
-												noteElem.duration = Math.round(noteElem.duration*1000000)/1000000;
+												noteElem.duration = Math.round(noteElem.duration*tripletMultiplier*1000000)/1000000;
 												tripletDurationCount += noteElem.duration;
 											}
 										}
