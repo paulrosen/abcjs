@@ -1,3 +1,11 @@
+# Version 6.7.1
+
+## Bugs
+
+* Fix position of grace notes when changing the zoom in Safari
+
+* Don't use replaceAll for browser compatibility
+
 # Version 6.7.0
 
 ## Bugs

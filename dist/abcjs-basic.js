@@ -17535,7 +17535,7 @@ StringPatterns.prototype.notesToNumber = function (notes, graces) {
 StringPatterns.prototype.toString = function () {
   var arr = [];
   for (var i = 0; i < this.tuning.length; i++) {
-    var str = this.tuning[i].replaceAll(',', '').replaceAll("'", '').toUpperCase();
+    var str = this.tuning[i].replace(/,/g, '').replace(/'/g, '').toUpperCase();
     if (str[0] === '_') str = str[1] + 'b ';else if (str[0] === '^') str = str[1] + "# ";
     arr.push(str);
   }
@@ -24384,7 +24384,7 @@ function drawRelativeElement(renderer, params, bartop) {
 }
 function scaleExistingElem(paper, elem, scaleX, scaleY, x, y) {
   paper.setAttributeOnElement(elem, {
-    style: "transform:scale(" + scaleX + "," + scaleY + ");transform-origin:" + x + "px " + y + "px;"
+    transform: "translate(" + x + " " + y + ") scale(" + scaleX + "," + scaleY + ") translate(-" + x + " -" + y + ")"
   });
 }
 module.exports = drawRelativeElement;
@@ -28559,7 +28559,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.7.0';
+var version = '6.7.1';
 module.exports = version;
 
 /***/ })
