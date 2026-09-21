@@ -6,6 +6,38 @@ describe("Timing", function() {
 		'K:Bb\n' +
 		'CDE|:FG[Ab]|1 Bcd:|2 efg|]\n';
 
+	var abcVoltaMultiNumber = 'X:1\n' +
+		'T:t\n' +
+		'M:4/4\n' +
+		'L:1/4\n' +
+		'Q:1/4=60\n' +
+		'K:C\n' +
+		'|: C4 | [1,2 D4 :| [3 E4 |]\n';
+
+	var abcVoltaRange = 'X:1\n' +
+		'T:t\n' +
+		'M:4/4\n' +
+		'L:1/4\n' +
+		'Q:1/4=60\n' +
+		'K:C\n' +
+		'|: C4 | [1-3 D4 :| [4 E4 |]\n';
+
+	var abcVoltaList = 'X:1\n' +
+		'T:t\n' +
+		'M:4/4\n' +
+		'L:1/4\n' +
+		'Q:1/4=60\n' +
+		'K:C\n' +
+		'|: C4 | [1,2,3 D4 :| [4 E4 |]\n';
+
+	var abcVoltaSingle = 'X:1\n' +
+		'T:t\n' +
+		'M:4/4\n' +
+		'L:1/4\n' +
+		'Q:1/4=60\n' +
+		'K:C\n' +
+		'|: C4 | [1 D4 :| [2 E4 |]\n';
+
 	var expectedRepeatedSections = [
 		{ ms: 0, pitches: [60] },
 		{ ms: 1000, pitches: [62] },
@@ -255,6 +287,17 @@ describe("Timing", function() {
 		doTimingTest(abcRepeatedSections, expectedRepeatedSections);
 	});
 
+	it("multi-number voltas in noteTimings", function() {
+		var cases = [
+			{ abc: abcVoltaMultiNumber, pitches: [60, 62, 60, 62, 60, 64], ms: [0, 4000, 8000, 12000, 16000, 20000], endMs: 24000 },
+			{ abc: abcVoltaRange, pitches: [60, 62, 60, 62, 60, 62, 60, 64], ms: [0, 4000, 8000, 12000, 16000, 20000, 24000, 28000], endMs: 32000 },
+			{ abc: abcVoltaList, pitches: [60, 62, 60, 62, 60, 62, 60, 64], ms: [0, 4000, 8000, 12000, 16000, 20000, 24000, 28000], endMs: 32000 },
+			{ abc: abcVoltaSingle, pitches: [60, 62, 60, 64], ms: [0, 4000, 8000, 12000], endMs: 16000 },
+		];
+		for (var i = 0; i < cases.length; i++)
+			doNoteTimingsVoltaTest(cases[i]);
+	});
+
 	it("repeated sections callback", function() {
 		doClickTest2(abcRepeatedSections, expectedRepeatedSections);
 	});
@@ -320,6 +363,33 @@ describe("Timing", function() {
 		return doSwitchTunesTest(abcSwitchTunes, abcSwitchTunes2, expectedSwitchTunes, expectedSwitchTunes2)
 	});
 });
+
+//////////////////////////////////////////////////////////
+
+function doNoteTimingsVoltaTest(spec) {
+	var visualObj = abcjs.renderAbc("paper", spec.abc);
+	var audio = visualObj[0].setUpAudio();
+	var audioPitches = [];
+	audio.tracks[0].forEach(function(ev) {
+		if (ev.cmd === "note")
+			audioPitches.push(ev.pitch);
+	});
+	visualObj[0].setTiming();
+	var pitches = [];
+	var ms = [];
+	for (var i = 0; i < visualObj[0].noteTimings.length; i++) {
+		var ev = visualObj[0].noteTimings[i];
+		if (ev.type === "event") {
+			pitches.push(ev.midiPitches[0].pitch);
+			ms.push(ev.milliseconds);
+		}
+	}
+	chai.assert.deepStrictEqual(audioPitches, spec.pitches, "audio pitches\n" + spec.abc);
+	chai.assert.deepStrictEqual(pitches, spec.pitches, "noteTimings pitches\n" + spec.abc);
+	chai.assert.deepStrictEqual(ms, spec.ms, "noteTimings milliseconds\n" + spec.abc);
+	chai.assert.equal(visualObj[0].noteTimings[visualObj[0].noteTimings.length - 1].milliseconds, spec.endMs, "noteTimings end\n" + spec.abc);
+	chai.assert.equal(visualObj[0].totalTime, spec.endMs / 1000, "totalTime\n" + spec.abc);
+}
 
 //////////////////////////////////////////////////////////
 

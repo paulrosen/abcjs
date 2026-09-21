@@ -3,6 +3,7 @@
 var parseCommon = require('../parse/abc_common');
 var spacing = require('../write/helpers/spacing');
 var sequence = require('../synth/abc_midi_sequencer');
+var Repeats = require('../synth/repeats');
 var flatten = require('../synth/abc_midi_flattener');
 var delineTune = require("./deline-tune");
 
@@ -450,13 +451,32 @@ var Tune = function() {
 		for (var v = 0; v < voices.length; v++) {
 			var voiceTime = time;
 			var voiceTimeMilliseconds = Math.round(voiceTime * 1000);
-			var startingRepeatElem = 0;
-			var endingRepeatElem = -1;
 			var elements = voices[v];
 			var bpm = startingBpm;
 			timeDivider = this.getBeatLength() * bpm / 60;
 			var tempoDone = -1;
-			for (var elem = 0; elem < elements.length; elem++) {
+			// Find the order that the elements are played in - the same expansion that the audio uses.
+			var parsedElements = [];
+			var repeats = new Repeats(parsedElements);
+			var e;
+			for (e = 0; e < elements.length; e++) {
+				parsedElements.push(elements[e].elem.abcelem || {});
+				if (elements[e].elem.type === 'bar')
+					repeats.addBar(parsedElements[e]);
+			}
+			var playOrder = repeats.resolveIndexes();
+			if (!playOrder) {
+				playOrder = [];
+				for (e = 0; e < elements.length; e++)
+					playOrder.push(e);
+			}
+			var lastHash = undefined;
+			for (e = 0; e < playOrder.length; e++) {
+				var elem = playOrder[e];
+				if (e > 0 && elem > playOrder[e-1] + 1 && lastHash !== undefined && eventHash[lastHash] && eventHash[lastHash].left < elements[playOrder[e-1] + 1].elem.x) {
+					// The play order skipped over earlier endings to get to this element - the cursor shouldn't span the skipped elements.
+					eventHash[lastHash].endX = elements[playOrder[e-1] + 1].elem.x;
+				}
 				var thisMeasure = elements[elem].measureNumber;
 				if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
 					bpm = this.tempoLocations[thisMeasure];
@@ -468,49 +488,18 @@ var Tune = function() {
 				isTiedState = ret.isTiedState;
 				nextIsBar = ret.nextIsBar;
 				voiceTime += ret.duration;
-				var lastHash;
 				if (element.duration > 0 && eventHash["event" + voiceTimeMilliseconds]) // This won't exist if this is the end of a tie.
 					lastHash = "event" + voiceTimeMilliseconds;
 				voiceTimeMilliseconds = Math.round(voiceTime * 1000);
 				if (element.type === 'bar') {
 					var barType = element.abcelem.type;
 					var endRepeat = (barType === "bar_right_repeat" || barType === "bar_dbl_repeat");
-					var startEnding = (element.abcelem.startEnding === '1');
-					var startRepeat = (barType === "bar_left_repeat" || barType === "bar_dbl_repeat" || barType === "bar_right_repeat");
 					if (endRepeat) {
 						// Force the end of the previous note to the position of the measure - the cursor won't go past the end repeat
-						if (elem > 0) {
+						if (lastHash !== undefined) {
 							eventHash[lastHash].endX = element.x;
 						}
-
-						if (endingRepeatElem === -1)
-							endingRepeatElem = elem;
-						var lastVoiceTimeMilliseconds = 0;
-						tempoDone = -1;
-						for (var el2 = startingRepeatElem; el2 < endingRepeatElem; el2++) {
-							thisMeasure = elements[el2].measureNumber;
-							if (tempoDone !== thisMeasure && this.tempoLocations[thisMeasure]) {
-								bpm = this.tempoLocations[thisMeasure];
-								timeDivider = warp * this.getBeatLength() * bpm / 60;
-								tempoDone = thisMeasure;
-							}
-							var element2 = elements[el2].elem;
-							ret = this.addElementToEvents(eventHash, element2, voiceTimeMilliseconds, elements[el2].top, elements[el2].height, elements[el2].line, elements[el2].measureNumber, timeDivider, isTiedState, nextIsBar);
-							isTiedState = ret.isTiedState;
-							nextIsBar = ret.nextIsBar;
-							voiceTime += ret.duration;
-							lastVoiceTimeMilliseconds = voiceTimeMilliseconds;
-							voiceTimeMilliseconds = Math.round(voiceTime * 1000);
-						}
-						if (eventHash["event" + lastVoiceTimeMilliseconds]) // This won't exist if it is the beginning of the next line. That's ok because we will just count the end of the last line as the end.
-							eventHash["event" + lastVoiceTimeMilliseconds].endX = elements[endingRepeatElem].elem.x;
-						nextIsBar = true;
-						endingRepeatElem = -1;
 					}
-					if (startEnding)
-						endingRepeatElem = elem;
-					if (startRepeat)
-						startingRepeatElem = elem;
 				}
 			}
 			maxVoiceTimeMilliseconds = Math.max(maxVoiceTimeMilliseconds, voiceTimeMilliseconds)
