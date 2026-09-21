@@ -7,6 +7,7 @@ var drawTie = require('./tie');
 var drawBeam = require('./beam');
 var renderText = require('./text');
 var drawAbsolute = require('./absolute');
+var drawLyricExtensions = require('./lyric-extension');
 
 function drawVoice(renderer, params, bartop, selectables, staffPos) {
 	var width = params.w - 1;
@@ -50,6 +51,8 @@ function drawVoice(renderer, params, bartop, selectables, staffPos) {
 	}
 
 	renderer.controller.classes.startMeasure();
+
+	drawLyricExtensions(renderer, params, selectables);
 
 	for (i = 0; i < params.beams.length; i++) {
 		var beam = params.beams[i];

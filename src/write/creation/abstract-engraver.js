@@ -769,7 +769,9 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
 AbstractEngraver.prototype.addLyric = function (abselem, elem, voiceNumber) {
 	var lyricStr = "";
 	elem.lyric.forEach(function (ly) {
-		var div = ly.divider === ' ' ? "" : ly.divider;
+		// A "_" divider marks a melisma: it isn't drawn as a glyph, but as a
+		// continuous extender line spanning the covered notes (see lyric-extension.js).
+		var div = (ly.divider === ' ' || ly.divider === '_') ? "" : ly.divider;
 		lyricStr += ly.syllable + div + "\n";
 	});
 	var lyricDim = this.getTextSize.calc(lyricStr, 'vocalfont', "lyric");
