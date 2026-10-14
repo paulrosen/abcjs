@@ -118,7 +118,8 @@ function drawStaffGroup(renderer, params, selectables, lineNumber) {
 		if (tabName) {
 			// print tab infos on staffBottom
 			var r = { rows: [] };
-			r.rows.push({ absmove: bottomLine + 2 });
+			// The tab name sits below any beams or stems that hang under the staff.
+			r.rows.push({ absmove: bottomLine + 2 + (staff.stemDepth || 0) * spacing.STEP });
 			var leftMargin = 8;
 			r.rows.push({ left: params.startx + leftMargin, text: tabName.name, font: 'tablabelfont', klass: 'text instrument-name', anchor: 'start' });
 			r.rows.push({ move: tabName.textSize.height });
