@@ -231,8 +231,8 @@ function tabRenderer(plugin, renderer, line, staffIndex) {
 		// This was pushing down the top staff by the tab label height
 		//staffGroup.staffs[staffIndex].top += nameHeight;
 		staffGroup.staffs[staffIndex].top += 1;
-		// When stems hang below the staff, the name sits under them and needs a little room for its own offset.
-		staffGroup.height += nameHeight + (staffGroupInfos.stemDepth ? 2 / spacing.STEP : 0);
+		// When stems hang below the staff, the name sits under them, so reserve a few pitch steps for its offset.
+		staffGroup.height += nameHeight + (staffGroupInfos.stemDepth ? 4 : 0);
 		tabVoice.staff = staffGroupInfos;
 		var tabVoiceIndex = voices.length
 		voices.splice(voices.length, 0, tabVoice);
