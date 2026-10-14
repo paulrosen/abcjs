@@ -214,7 +214,7 @@ function tabRenderer(plugin, renderer, line, staffIndex) {
 	staffGroupInfos.parentIndex = nextTabPos - 1;
 	staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
 	// staffGroup.staffs.push(staffGroupInfos);
-	staffGroup.height += tabSize + padd;
+	staffGroup.height += tabSize + padd + TabAbsoluteElements.getStemDepth(plugin);
 	var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos);
 	var nbVoices = 1;
 	if (isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff)) {

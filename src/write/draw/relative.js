@@ -61,28 +61,7 @@ function drawRelativeElement(renderer, params, bartop) {
 			params.graphelem = printStem(renderer, params.x, params.linewidth + renderer.lineThickness, y, (bartop) ? bartop : renderer.calcY(params.pitch2), null, "bar"); break; // bartop can't be 0
 		case "stem":
 			var stemWidth = params.linewidth > 0 ? params.linewidth + renderer.lineThickness : params.linewidth - renderer.lineThickness
-			var stemClass = 'abcjs-stem';
-			if (params.klass)
-				stemClass += ' ' + params.klass;
-			params.graphelem = printStem(renderer, params.x, stemWidth, y, renderer.calcY(params.pitch2), stemClass, 'stem'); break;
-		case "tabTail":
-			// Draw a short diagonal line "flag" that angles back up from the stem.
-			var x1 = params.x;
-			var y1 = renderer.calcY(params.pitch); // attach at the stem
-			var x2 = x1 + params.w;
-			// Increase pitch to move visually upward (since calcY subtracts pitch*STEP).
-			var y2 = renderer.calcY(params.pitch + 2); // a little higher to create the diagonal.
-			var attr = {
-				x1: x1,
-				y1: y1,
-				x2: x2,
-				y2: y2,
-				stroke: renderer.foregroundColor,
-				"stroke-width": 1
-			};
-			attr['class'] = 'abcjs-tab-stem';
-			attr['data-name'] = 'tab-tail';
-			params.graphelem = renderer.paper.lineToBack(attr); break;
+			params.graphelem = printStem(renderer, params.x, stemWidth, y, renderer.calcY(params.pitch2), 'abcjs-stem', 'stem'); break;
 		case "ledger":
 			params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger", 0.35 + renderer.lineThickness); break;
 	}
@@ -93,7 +72,9 @@ function drawRelativeElement(renderer, params, bartop) {
 }
 
 function scaleExistingElem(paper, elem, scaleX, scaleY, x, y) {
-	paper.setAttributeOnElement(elem, { style: "transform:scale(" + scaleX + "," + scaleY + ");transform-origin:" + x + "px " + y + "px;" });
+	paper.setAttributeOnElement(elem, {
+		transform:"translate(" + x +" " + y + ") scale(" + scaleX + "," + scaleY + ") translate(-" + x +" -" + y + ")"
+	});
 }
 
 module.exports = drawRelativeElement;

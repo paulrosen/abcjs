@@ -3,6 +3,7 @@
  */
 var AbsoluteElement = require('../../write/creation/elements/absolute-element');
 var RelativeElement = require('../../write/creation/elements/relative-element');
+var glyphs = require('../../write/creation/glyphs');
 
 function isObject(a) { return a != null && a.constructor === Object; }
 function cloneObject(dest, src) {
@@ -127,45 +128,58 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
 	return tabNoteRelative;
 }
 
+// Stems hang from just below the bottom string, so this is how far the staff must extend below it.
+function getStemDepth(plugin) {
+	if (!plugin || !plugin.params || !plugin.params.stems) return 0;
+	return (plugin.linePitch || 3) * 3;
+}
+
+// Duration flags for the tab stem, keyed by the number of tails (3 = quaver).
+var stemFlags = { 3: 'flags.d8th', 4: 'flags.d16th', 5: 'flags.d32nd', 6: 'flags.d64th' };
+
+// Number of augmentation dots, from the ratio of the duration to its base (power of two) value.
+function getDotCount(duration, durlog) {
+	var ratio = duration / Math.pow(2, durlog);
+	if (ratio >= 1.75) return 2;
+	if (ratio >= 1.5) return 1;
+	return 0;
+}
+
+// Adds a stem (with flags for quavers and shorter, and dots for dotted notes) to a tab note column.
+// Like standard notation the stem hangs below the staff, so it never runs through the tab numbers.
 function addTabStem(plugin, abs) {
 	if (!plugin || !plugin.params || !plugin.params.stems) return;
-	var linePitch = plugin.linePitch || 3;
-	// How far below the tab number the stem should start, relative to string spacing.
-	// Use ~1.5 line pitches to clear the digit by about a full "digit height".
-	var stemTopOffset = linePitch * 1.5;
-	// How far further down the stem should extend (roughly double the previous value).
-	var padding = linePitch * 2.4;
-	// Determine whether this note should display quaver/semicolon-style tails on the tab stem.
 	var duration = abs.abcelem && abs.abcelem.duration;
-	var tailCount = 0;
-	if (duration !== undefined && duration < 0.25) { // quavers and shorter
-		// One tail for quavers, two for semiquavers and shorter.
-		tailCount = 1;
-		if (duration < 0.125)
-			tailCount = 2;
+	if (!duration || duration >= 1) return; // whole notes have no stem
+
+	var durlog = Math.floor(Math.log(duration) / Math.LN2 + 1e-9);
+	var flagKey = Math.min(-durlog, 6);
+	var linePitch = plugin.linePitch || 3;
+	var bottomLine = plugin.semantics.stringToPitch(plugin.nbLines - 1);
+	var stemTop = bottomLine - linePitch * 0.5;
+	var stemBottom = stemTop - linePitch * 2.5;
+	var x = abs.x;
+
+	var stem = new RelativeElement(null, 0, 0, stemBottom, { type: 'stem', pitch2: stemTop, linewidth: 0.6 });
+	stem.x = x;
+	abs.addExtra(stem);
+
+	if (flagKey >= 3) {
+		var flagSymbol = stemFlags[flagKey];
+		var flag = new RelativeElement(flagSymbol, 0, glyphs.getSymbolWidth(flagSymbol), stemBottom, { type: 'symbol' });
+		flag.x = x;
+		abs.addExtra(flag);
 	}
-	for (var i = 0; i < abs.children.length; i++) {
+
+	var dots = getDotCount(duration, durlog);
+	// Dots sit to the right of each (non-grace) tab number, on the number's line.
+	for (var i = 0; i < abs.children.length && dots > 0; i++) {
 		var child = abs.children[i];
-		if (child.type === 'tabNumber' && child.pitch !== undefined) {
-			// For each tab number, create an individual downward stem whose top is clearly below the number.
-			// Smaller pitch values are lower on the tablature staff, so subtract to go down.
-			var top = child.pitch - stemTopOffset; // just below the digit, near the space to the next string
-			var bottom = top - padding; // further down from the digit
-			// Use a slightly smaller linewidth magnitude than standard stems so the tab stems appear skinny.
-			var stem = new RelativeElement(null, 0, 0, bottom, { type: 'stem', pitch2: top, linewidth: -0.5, klass: 'abcjs-tab-stem' });
-			stem.x = child.x !== undefined ? child.x : abs.x;
-			abs.addExtra(stem);
-			if (tailCount > 0) {
-				// Add one or more small horizontal tails near the bottom of the tab stem.
-				var tailWidth = linePitch * 0.9;
-				for (var t = 0; t < tailCount; t++) {
-					// Stack tails upward along the stem for multiple flags.
-					var tailPitch = bottom + linePitch * (0.2 + t * 0.5);
-					var tail = new RelativeElement(null, 0, tailWidth, tailPitch, { type: 'tabTail' });
-					tail.x = stem.x;
-					abs.addExtra(tail);
-				}
-			}
+		if (child.type !== 'tabNumber' || child.isGrace || child.pitch === undefined) continue;
+		for (var d = 0; d < dots; d++) {
+			var dot = new RelativeElement('dots.dot', 0, glyphs.getSymbolWidth('dots.dot'), child.pitch + 1.5, { type: 'symbol' });
+			dot.x = child.x + 3 + d * 3;
+			abs.addExtra(dot);
 		}
 	}
 }
@@ -343,5 +357,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
 		}
 	}
 };
+
+TabAbsoluteElements.getStemDepth = getStemDepth;
 
 module.exports = TabAbsoluteElements;

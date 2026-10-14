@@ -1073,7 +1073,71 @@ describe("Tablature", function () {
 	it("tab-lyrics", function() {
 		doVerticalTest(lyrics, lyricsOutput, violinParams)
 	})
+
+	it("stems: one stem per note, with flags for quavers", function() {
+		var visualObj = doRender("L:1/4\nM:4/4\nK:C\nC C/2 C/4 C/8 |]\n", stemParams)
+		var extras = tabStemExtras(visualObj)
+		chai.assert.equal(countExtras(extras, 'stem'), 4, "a stem for each note")
+		chai.assert.equal(countExtras(extras, 'flags.d8th'), 1, "one flag for the quaver")
+		chai.assert.equal(countExtras(extras, 'flags.d16th'), 1, "one flag for the semiquaver")
+		chai.assert.equal(countExtras(extras, 'flags.d32nd'), 1, "one flag for the demisemiquaver")
+	})
+
+	it("stems: whole notes and grace notes get no stem of their own", function() {
+		var visualObj = doRender("L:1/4\nM:4/4\nK:C\nC {/c}C C4 |]\n", stemParams)
+		var extras = tabStemExtras(visualObj)
+		chai.assert.equal(countExtras(extras, 'stem'), 2, "only the crotchets get stems")
+	})
+
+	it("stems: a chord shares a single stem", function() {
+		var visualObj = doRender("L:1/4\nM:4/4\nK:C\n[CEG]2 |]\n", stemParams)
+		var extras = tabStemExtras(visualObj)
+		chai.assert.equal(countExtras(extras, 'stem'), 1, "one stem for the whole chord")
+	})
+
+	it("stems: dotted notes get a dot", function() {
+		var visualObj = doRender("L:1/4\nM:4/4\nK:C\nC3/2 z/2 |]\n", stemParams)
+		var extras = tabStemExtras(visualObj)
+		chai.assert.equal(countExtras(extras, 'dots.dot'), 1, "one dot for the dotted crotchet")
+		chai.assert.equal(countExtras(extras, 'stem'), 1, "one stem for the dotted crotchet")
+	})
+
+	it("stems: off unless requested", function() {
+		var visualObj = doRender("L:1/4\nM:4/4\nK:C\nC C/2 |]\n", [{ instrument: 'guitar' }])
+		chai.assert.equal(countExtras(tabStemExtras(visualObj), 'stem'), 0, "no stems without the option")
+	})
+
+	it("stems: four and five string tabs", function() {
+		var violin = doRender("L:1/4\nM:4/4\nK:G\nG/2 A/2 |]\n", [{ instrument: 'violin', stems: true }])
+		chai.assert.equal(countExtras(tabStemExtras(violin), 'stem'), 2, "violin stems")
+		var fiveString = doRender("L:1/4\nM:4/4\nK:C\nC/2 G/2 |]\n", [{ instrument: 'fiveString', stems: true }])
+		chai.assert.equal(countExtras(tabStemExtras(fiveString), 'stem'), 2, "five string stems")
+	})
 });
+
+var stemParams = [{ instrument: 'guitar', stems: true }];
+
+function tabStemExtras(visualObj) {
+	var returned = [];
+	var tab = getTabStaff(visualObj[0].lines[0].staff, 0);
+	for (var v = 0; v < tab.length; v++) {
+		for (var c = 0; c < tab[v].length; c++) {
+			var abs = tab[v][c].abselem;
+			if (abs && abs.extra) {
+				for (var e = 0; e < abs.extra.length; e++) returned.push(abs.extra[e]);
+			}
+		}
+	}
+	return returned;
+}
+
+function countExtras(extras, name) {
+	var count = 0;
+	for (var i = 0; i < extras.length; i++) {
+		if (extras[i].type === name || extras[i].c === name) count++;
+	}
+	return count;
+}
 
 function doRender(abc, tabParams, params) {
 	var warningLine = document.getElementById('warnings')
