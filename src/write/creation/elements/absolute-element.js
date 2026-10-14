@@ -50,6 +50,8 @@ var AbsoluteElement = function AbsoluteElement(abcelem, duration, minspacing, ty
 	this.bottom = undefined;
 	this.top = undefined;
 	this.type = type;
+	if (abcelem.extraClass)
+		this.extraClass = abcelem.extraClass
 
 	// The following are the dimensions of the fixed part of the element.
 	// That is, the chord text will be a different height depending on lot of factors, but the 8th flag will always be in the same place.

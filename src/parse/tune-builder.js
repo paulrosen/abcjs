@@ -24,6 +24,8 @@ var TuneBuilder = function (tune) {
 		if (tune.metaText.tempo && tune.metaText.tempo.bpm && !tune.metaText.tempo.duration)
 			tune.metaText.tempo.duration = [tune.getBeatLength()];
 
+		noWarnBeforeTitle(tune)
+
 		// Remove any blank lines
 		var anyDeleted = false;
 		var i, s, v;
@@ -103,8 +105,22 @@ var TuneBuilder = function (tune) {
 		}
 
 		// If there are overlays, create new voices for them.
+		var hadOverlays = false
 		while (resolveOverlays(tune)) {
+			hadOverlays = true
 			// keep resolving overlays as long as any are found.
+		}
+		if (hadOverlays) {
+			// remove any blank lines that got inserted - not sure how that happened.
+			var voiceNum = 0
+			var isUseful = voiceUseful(tune.lines, voiceNum)
+			while(isUseful !== 'not-found') {
+				isUseful = voiceUseful(tune.lines, voiceNum)
+				if (!isUseful)
+					deleteVoice(tune.lines, voiceNum)
+				else
+					voiceNum++
+			}
 		}
 
 		for (var i = 0; i < tune.lines.length; i++) {
@@ -495,8 +511,13 @@ function simplifyMetaText(tune) {
 // }
 
 function resolveOverlays(tune) {
+	// TODO-PER: maybe a better algorithm than the following:
+	// do a pass to find all the overlays - return a count
+	// (this first pass also removes the overlays and returns them)
+	// do a pass of creating voices with all the measures with invisible rests for all lines
+	// do a pass of inserting the overlays
+
 	var madeChanges = false;
-	var durationsPerLines = [];
 	for (var i = 0; i < tune.lines.length; i++) {
 		var line = tune.lines[i];
 		if (line.staff) {
@@ -506,10 +527,8 @@ function resolveOverlays(tune) {
 				for (var k = 0; k < staff.voices.length; k++) {
 					var voice = staff.voices[k];
 					overlayVoice.push({ hasOverlay: false, voice: [], snip: [] });
-					durationsPerLines[i] = 0;
 					var durationThisBar = 0;
 					var inOverlay = false;
-					var overlayDuration = 0;
 					var snipStart = -1;
 					for (var kk = 0; kk < voice.length; kk++) {
 						var event = voice[kk];
@@ -518,19 +537,31 @@ function resolveOverlays(tune) {
 							inOverlay = true;
 							snipStart = kk;
 							overlayVoice[k].hasOverlay = true;
-							if (overlayDuration === 0)
-								overlayDuration = durationsPerLines[i];
-							// If this isn't the first line, we also need invisible rests on the previous lines.
-							// So, if the next voice doesn't appear in a previous line, create it
+
+							// TODO-PER: This looks like it can create a completely blank voice but I'm not sure how. That doesn't seem to hurt anything, though, because I filter that out immediately afterward.
 							for (var ii = 0; ii < i; ii++) {
-								if (durationsPerLines[ii] && tune.lines[ii].staff && staff.voices.length >= tune.lines[ii].staff[0].voices.length) {
-									tune.lines[ii].staff[0].voices.push([{
-										el_type: "note",
-										duration: durationsPerLines[ii],
-										rest: { type: "invisible" },
-										startChar: event.startChar,
-										endChar: event.endChar
-									}]);
+								if (tune.lines[ii].staff) {
+									tune.lines[ii].staff.forEach(s => {
+										if (staff.voices.length >= s.voices.length) {
+											s.voices.forEach(v => {
+												let nv = [];
+												v.forEach(ev => {
+													if (ev.el_type === "bar") {
+														nv.push(ev);
+													} else if (ev.el_type === "note") {
+														nv.push({
+															el_type: "note",
+															duration: ev.duration,
+															rest: {type: "invisible"},
+															startChar: ev.startChar,
+															endChar: ev.endChar
+														});
+													}
+												});
+												s.voices.push(nv);
+											});
+										}
+									});
 								}
 							}
 						} else if (event.el_type === "bar") {
@@ -551,7 +582,6 @@ function resolveOverlays(tune) {
 								overlayVoice[k].voice.push(event);
 							} else if (!event.rest || event.rest.type !== 'spacer') {
 								durationThisBar += event.duration;
-								durationsPerLines[i] += event.duration;
 							}
 						} else if (event.el_type === "scale" || event.el_type === "stem" || event.el_type === "overlay" || event.el_type === "style" || event.el_type === "transpose" || event.el_type === "color") {
 							// These types of events are duplicated on the overlay layer.
@@ -591,7 +621,8 @@ function resolveOverlays(tune) {
 		}
 	}
 	return madeChanges;
-};
+}
+
 
 function findLastBar(voice, start) {
 	for (var i = start - 1; i > 0 && voice[i].el_type !== "bar"; i--) {
@@ -999,6 +1030,84 @@ function createStaff(self, tune, params) {
 function createLine(self, tune, params) {
 	tune.lines[tune.lineNum] = { staff: [] };
 	createStaff(self, tune, params);
+}
+
+function voiceUseful(lines, voiceNum) {
+	var isUseful = false
+	var voiceExists = false
+	for (var line = 0; line < lines.length; line++) {
+		var staves = lines[line].staff;
+		if (staves) {
+			for (var s = 0; s < staves.length; s++) {
+				var staff = staves[s]
+				if (voiceNum < staff.voices.length) {
+					voiceExists = true
+					var voice = staff.voices[voiceNum];
+					var output = []
+					for (var e = 0; e < voice.length; e++) {
+						var el = voice[e]
+						if (el.el_type === 'note' && (!el.rest || el.chord))
+							isUseful = true
+					}
+				}
+			}
+		}
+	}
+	if (!voiceExists)
+		return 'not-found'
+	return isUseful
+}
+
+function deleteVoice(lines, voiceNum) {
+	for (var line = 0; line < lines.length; line++) {
+		var staves = lines[line].staff;
+		if (staves) {
+			for (var s = 0; s < staves.length; s++) {
+				var staff = staves[s]
+				if (voiceNum < staff.voices.length) {
+					staff.voices.splice(voiceNum, 1)
+				}
+			}
+		}
+	}
+}
+
+function noWarnBeforeTitle(tune) {
+	for (var i = 1; i < tune.lines.length; i++) {
+		var line = tune.lines[i]
+		if (line.subtitle) {
+			var previousLine = tune.lines[i-1]
+			if (previousLine.staff) {
+				for (var j = 0; j < previousLine.staff.length; j++) {
+					for (var v = 0; v < previousLine.staff[j].voices.length; v++) {
+						var voice = previousLine.staff[j].voices[v]
+						if (voice[voice.length-1].el_type === "key") {
+							// There was a key change after a subtitle.
+							// Remove the courtesy key change.
+							voice.pop()
+							// Also, the new key signature might have some naturals, remove that.
+							var nextLine = tune.lines[i]
+							while (i < tune.lines.length && !nextLine.staff) {
+								i++
+								nextLine = tune.lines[i]
+							}
+							if (nextLine) {
+								for (var jj = 0; jj < nextLine.staff.length; jj++) {
+									var accidentals = nextLine.staff[jj].key.accidentals
+									var newAccidentals = []
+									for (var a= 0; a < accidentals.length; a++) {
+										if (accidentals[a].acc !== 'natural')
+											newAccidentals.push(accidentals[a])
+									}
+									nextLine.staff[jj].key.accidentals = newAccidentals
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 module.exports = TuneBuilder;

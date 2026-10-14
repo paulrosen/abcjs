@@ -85,7 +85,18 @@ var parseKeyVoice = {};
 		key.accidentals.forEach(function(k) {
 		ret.accidentals.push(Object.assign({},k));
 		});
+		if (key.explicitAccidentals) {
+			ret.explicitAccidentals = [];
+			key.explicitAccidentals.forEach(function(k) {
+				ret.explicitAccidentals.push(Object.assign({},k));
+			});
+		}
 		return ret;
+	};
+
+	var setVoiceKey = function() {
+		if (multilineVars.currentVoice)
+			multilineVars.currentVoice.key = parseKeyVoice.deepCopyKey(multilineVars.key);
 	};
 
 	var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
@@ -230,18 +241,30 @@ var parseKeyVoice = {};
 				multilineVars.key = { root: "HP", accidentals: [], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
+				if (!isInline) {
+					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
+				}
+				setVoiceKey();
 				break;
 			case 'Hp':
 				parseDirective.addDirective("bagpipes");
 				multilineVars.key = { root: "Hp", accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
+				if (!isInline) {
+					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
+				}
+				setVoiceKey();
 				break;
 			case 'none':
 				// we got the none key - that's the same as C to us
 				multilineVars.key = { root: "none", accidentals: [], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
+				if (!isInline) {
+					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
+				}
+				setVoiceKey();
 				break;
 			default:
 				var retPitch = tokenizer.getKeyPitch(tokens[0].token);
@@ -309,6 +332,10 @@ var parseKeyVoice = {};
 							}
 						}
 					}
+					if (!isInline) {
+						multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
+					}
+					setVoiceKey();
 				}
 				break;
 		}
@@ -358,6 +385,10 @@ var parseKeyVoice = {};
 					}
 				}
 			}
+			if (!isInline) {
+				multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
+			}
+			setVoiceKey();
 		}
 
 		// Now see if any optional parameters are present. They have the form "key=value", except that "clef=" is optional
@@ -499,6 +530,10 @@ var parseKeyVoice = {};
 				return // there was no change so don't reset it.
 		}
 		multilineVars.currentVoice = currentVoice;
+		if (currentVoice.key)
+			multilineVars.key = parseKeyVoice.deepCopyKey(currentVoice.key);
+		else if (multilineVars.globalKey)
+			multilineVars.key = parseKeyVoice.deepCopyKey(multilineVars.globalKey);
 		return tuneBuilder.setCurrentVoice(currentVoice.staffNum, currentVoice.index, id);
 	};
 

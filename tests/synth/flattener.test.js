@@ -1880,7 +1880,7 @@ describe("Audio flattener", function() {
 			],
 			[
 				{"cmd":"program","channel":1,"instrument":0},
-				{"cmd":"note","pitch":64,"volume":95,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":65,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":74,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":76,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0},
@@ -1890,11 +1890,87 @@ describe("Audio flattener", function() {
 			],
 			[
 				{"cmd":"program","channel":2,"instrument":0},
-				{"cmd":"note","pitch":77,"volume":95,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":77,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
 				{"cmd":"note","pitch":79,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0}
-			]
+			],
 		]
 	};
+
+	//////////////////////////////////////////////////////////
+
+	var abcPickupOverlay = 'X:1\n' +
+'M: 4/4\n' +
+'L: 1/4\n' +
+'K:C\n' +
+'B, | C4 | D4 |\n' +
+'G4 & E4 | A4 & F4 |\n';
+
+	var expectedPickupOverlay = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":59,"volume":85,"start":0,"duration":0.25,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0.25,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":1.25,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":2.25,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":69,"volume":105,"start":3.25,"duration":1,"instrument":0,"gap":0}
+			],[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":2.25,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":3.25,"duration":1,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":4.25
+	}
+
+	//////////////////////////////////////////////////////////
+
+	var abcRepeatsAndOverlay = `X:1
+L: 1/4
+K: C
+C4 :| D4 & c4 |: E4 | F4 & e4 :| G4|]	
+|: C4 :| 
+D4 & c4 |
+|: E4 | 
+F4 & e4 :| 
+G4|]	
+`
+	var expectedRepeatsAndOverlay = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":5,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":6,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":7,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":8,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":9,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":10,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":11,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":12,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":64,"volume":105,"start":13,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":65,"volume":105,"start":14,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":67,"volume":105,"start":15,"duration":1,"instrument":0,"gap":0}
+			],[
+				{"cmd":"program","channel":1,"instrument":0},
+				{"cmd":"note","pitch":72,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":105,"start":4,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":105,"start":6,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":72,"volume":105,"start":10,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":105,"start":12,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":76,"volume":105,"start":14,"duration":1,"instrument":0,"gap":0},
+			]
+		],
+		"totalDuration":16
+	}
 
 	//////////////////////////////////////////////////////////
 
@@ -7736,6 +7812,101 @@ describe("Audio flattener", function() {
 			{"cmd":"note","pitch":64,"volume":105,"start":33,"duration":1,"instrument":0,"gap":0},
 		]],"totalDuration":34}
 
+	var abcOverlayRepeat = `Q:1/4=90
+[V:2]|:e2|
+|b2:|
+|B,,2 & xF,|
+`
+
+	var expectedOverlayRepeat = {"tempo":90,"instrument":0,"tracks":[
+		[
+			{"cmd":"program","channel":0,"instrument":0},
+			{"cmd":"note","pitch":76,"volume":105,"start":0,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":105,"start":0.25,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":76,"volume":105,"start":0.5,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":83,"volume":105,"start":0.75,"duration":0.25,"instrument":0,"gap":0},
+			{"cmd":"note","pitch":47,"volume":105,"start":1,"duration":0.25,"instrument":0,"gap":0}
+		],[
+			{"cmd":"program","channel":1,"instrument":0},
+			{"cmd":"note","pitch":53,"volume":85,"start":1.125,"duration":0.125,"instrument":0,"gap":0}
+		]],"totalDuration":1.25}
+
+	//////////////////////////////////////////////////////////
+
+	var abcNoStartRepeatPart = `X:1
+L:1/4
+M:4/4
+K:C
+P:A
+C4 |
+P:B
+D4 :|
+`
+
+	var expectedNoStartRepeatPart = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":4
+	}
+
+	var abcNoStartRepeatRepeat = `X:1
+L:1/4
+M:4/4
+K:C
+C4 :|
+D4 :|
+`
+
+	var expectedNoStartRepeatRepeat = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0},
+			]
+		],
+		"totalDuration":4
+	}
+
+	var abcNoStartRepeatTitle = `X:1
+T:medley
+L:1/4
+M:4/4
+K:C
+C4 |
+T: another tune
+D4 :|
+`
+
+	//TODO-PER: maybe the repeat should never go before a subtitle, but I'm not sure if that will break anyone's expectations.
+	var expectedNoStartRepeatTitle = {
+		"tempo":180,
+		"instrument":0,
+		"tracks":[
+			[
+				{"cmd":"program","channel":0,"instrument":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":0,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":1,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":60,"volume":105,"start":2,"duration":1,"instrument":0,"gap":0},
+				{"cmd":"note","pitch":62,"volume":105,"start":3,"duration":1,"instrument":0,"gap":0}
+			]
+		],
+		"totalDuration":4
+	}
+
 	//////////////////////////////////////////////////////////
 
 
@@ -7827,6 +7998,14 @@ describe("Audio flattener", function() {
 
 	it("flatten-overlay", function() {
 		doFlattenTest(abcOverlay, expectedOverlay);
+	})
+
+	it("flatten-pickup-overlay", function() {
+		doFlattenTest(abcPickupOverlay, expectedPickupOverlay);
+	})
+
+	it("flatten-rep-and-over", function() {
+		doFlattenTest(abcRepeatsAndOverlay, expectedRepeatsAndOverlay);
 	})
 
 	it("flatten-perc-map", function() {
@@ -7933,6 +8112,22 @@ describe("Audio flattener", function() {
 
 	it("repeat-3", function() {
 		doFlattenTest(abcRepeat3, expectedRepeat3);
+	})
+
+	it("overlay-repeat", function() {
+		doFlattenTest(abcOverlayRepeat, expectedOverlayRepeat);
+	})
+
+	it("no-start-repeat-part", function() {
+		doFlattenTest(abcNoStartRepeatPart, expectedNoStartRepeatPart);
+	})
+
+	it("no-start-repeat-title", function() {
+		doFlattenTest(abcNoStartRepeatTitle, expectedNoStartRepeatTitle);
+	})
+
+	it("no-start-repeat-repeat", function() {
+		doFlattenTest(abcNoStartRepeatRepeat, expectedNoStartRepeatRepeat);
 	})
 
 })

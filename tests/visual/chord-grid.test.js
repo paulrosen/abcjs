@@ -33,7 +33,54 @@ P:Chorus
 "Bb"FGBd-d4|"F7"zEFA c2d2|"Bb"dB-"Eb7"B6-|"Bb"B2z2z4:|
 `
 
-	const expectedAfter = [{"type":"part","name":"Verse","lines":[[{"chord":["B♭","","",""]},{"chord":["C7","","F7",""]},{"chord":["B♭7","","",""]},{"chord":["E♭","","G7","Cm"]},{"chord":["Edim","","",""]},{"chord":["B♭","","G7",""]},{"chord":["C9","","F7",""]},{"chord":["B♭","","B♭+",""]}]]},{"type":"part","name":"Chorus","lines":[[{"chord":["E♭","","",""],"hasStartRepeat":true},{"chord":["E♭m","","",""]},{"chord":["B♭","","",""]},{"chord":["G7","","",""]},{"chord":["C9","","",""]},{"chord":["F7","","",""]},{"chord":["B♭","","",""]},{"chord":["%","","",""]}],[{"chord":["E♭","","",""]},{"chord":["E♭m","","",""]},{"chord":["B♭","","",""]},{"chord":["G7","","",""]},{"chord":["Cm","","G7",""]},{"chord":["Cm","","Cm7♭5",""]},{"chord":["B♭","","D7",""]},{"chord":["Gm","","Edim",""]}],[{"chord":["B♭","","",""]},{"chord":["F7","","",""]},{"chord":["B♭","E♭7","",""]},{"chord":["B♭","","",""],"hasEndRepeat":true}]]}]
+	const expectedAfter = [
+		{
+			"type":"part",
+			"name":"Verse",
+			"lines":[
+				[
+					{"chord":["B♭","","",""]},
+					{"chord":["C7","","F7",""]},
+					{"chord":["B♭7","","",""]},
+					{"chord":["E♭","","G7","Cm"]},
+					{"chord":["Edim","","",""]},
+					{"chord":["B♭","","G7",""]},
+					{"chord":["C9","","F7",""]},
+					{"chord":["B♭","","B♭+",""]}
+				]
+			]
+		},
+		{
+			"type":"part",
+			"name":"Chorus",
+			"lines":[
+				[
+					{"chord":["E♭","","",""],"hasStartRepeat":true},
+					{"chord":["E♭m","","",""]},
+					{"chord":["B♭","","",""]},
+					{"chord":["G7","","",""]},
+					{"chord":["C9","","",""]},
+					{"chord":["F7","","",""]},
+					{"chord":["B♭","","",""]},
+					{"chord":["%","","",""]}
+				],[
+					{"chord":["E♭","","",""]},
+					{"chord":["E♭m","","",""]},
+					{"chord":["B♭","","",""]},
+					{"chord":["G7","","",""]},
+					{"chord":["Cm","","G7",""]},
+					{"chord":["Cm","","Cm7♭5",""]},
+					{"chord":["B♭","","D7",""]},
+					{"chord":["Gm","","Edim",""]}
+				],[
+					{"chord":["B♭","","",""]},
+					{"chord":["F7","","",""]},
+					{"chord":["B♭","E♭7","",""]},
+					{"chord":["B♭","","",""],"hasEndRepeat":true}
+				]
+			]
+		}
+	]
 
 	const abcAint = `X:1
 M:4/4
@@ -347,7 +394,7 @@ M:4/4
 P:Ending
 !coda!"^3x"|:"G"RB0 RB0 "G7"RB0 RB0  | "C"RB0 RB0 "Cm6"RB0 RB0 :| "G"RB0 z2 "D7"RB0 z2 | "G" z [G^A^c] (3[GBd][Bde][deg] "G"[egb]4|]
 `
-	const expectedYou = []
+	const expectedYou = [{"type":"part","name":"Ending","lines":[[{"chord":["G","","G7",""],"annotations":["coda","3x"],"hasStartRepeat":true},{"chord":["C","","Cm6",""],"hasEndRepeat":true}],[{"chord":["G","","D7",""]},{"chord":["G","","G",""]}]]}]
 
 	////////////////////////////////////
 
@@ -443,6 +490,10 @@ P:Ending
 		parserTest(abcYou, expectedYou);
 	})
 
+	it("1-svg-grid", function () {
+		oneSvgTest(abcAfter, expectedAfter);
+	})
+
 })
 
 function parserTest(abc, expected) {
@@ -458,4 +509,13 @@ function parserTest(abc, expected) {
 	var grid = visualObj[0].chordGrid
 	console.log(JSON.stringify(grid))
 	chai.assert.deepEqual(grid, expected)
+}
+
+function oneSvgTest(abc, expected) {
+	var visualObj = abcjs.renderAbc("paper", abc, { oneSvgPerLine: true, chordGrid: "withMusic", format: {
+		gchordfont: "itim-music, itim, Verdana, sans-serif 18"
+		}
+	});
+	const divs = document.querySelectorAll("#paper > div")
+	chai.assert.equal(divs.length, 9)
 }

@@ -45,6 +45,8 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 				}
 				if (staffgroups.length >= 1)
 					addStaffPadding(renderer, renderer.spacing.staffSeparation, staffgroups[staffgroups.length - 1], abcLine.staffGroup);
+				else if (line > 0) // This happens if there is non-music stuff before the first staff line
+					renderer.moveY(renderer.spacing.staffSeparation)
 				var staffgroup = engraveStaffLine(renderer, abcLine.staffGroup, selectables, line);
 				staffgroup.line = lineOffset + line; // If there are non-music lines then the staffgroup array won't line up with the line array, so this keeps track.
 				staffgroups.push(staffgroup);
@@ -77,7 +79,7 @@ function draw(renderer, classes, abcTune, width, maxWidth, responsive, scale, se
 function engraveStaffLine(renderer, staffGroup, selectables, lineNumber) {
 	drawStaffGroup(renderer, staffGroup, selectables, lineNumber);
 	var height = staffGroup.height * spacing.STEP;
-	renderer.y += height;
+	renderer.moveY(height);
 	return staffGroup;
 }
 

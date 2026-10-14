@@ -1,3 +1,100 @@
+# Version 6.7.1
+
+## Bugs
+
+* Fix position of grace notes when changing the zoom in Safari
+
+* Don't use replaceAll for browser compatibility
+
+# Version 6.7.0
+
+## Bugs
+
+* Don't put a courtesy key sig on the end of lines when the next line is a subtitle.
+
+* Fix vertical spacing after a %%text line when it is appears before any staff lines.
+
+## Features
+
+* allow adding random classes to note elements.
+
+## Documentation
+
+* Remove the dependencies for building docs since that is now a separate project.
+
+## Build
+
+* Remove linting files: put them in the test project instead.
+
+# Version 6.6.4
+
+## Bugs
+
+* Be able to escape the percent sign.
+
+* Make the lines a little thicker in Firefox because it has rendering problems.
+
+* fix inline meter & key signature change rendering in grand staff
+
+* Fix swung note positioning when using pickup notes.
+
+* Fix inline key changes leaking between voices
+
+* Add debugging info for mysterious timing callback crash
+
+* When doing callbacks, respect new tempo when replacing a tune and there isn't an explicit tempo set.
+
+* Fix bug in sequencing repeats when there is a start repeat at the same place as an end repeat.
+
+## Features
+
+* Add many more chords when generating synth. (thx michaeljmachado)
+
+
+## Documentation
+
+* Improve AbcElem typescript definition
+
+# Version 6.6.3
+
+## Bugs
+
+* Fix collisions of rests with notes in multipart music.
+
+* Fix the placement of lyrics that are in a second voice.
+
+* Fix the placement of the triplet brackets when the stems point down.
+
+* Add chord-pos class.
+
+# Version 6.6.2
+
+## Bugs
+
+* Fix beaming when there's a rest.
+
+* Fix direction of partial beam in some cases.
+
+# Version 6.6.1
+
+## Bugs
+
+* fix repeat logic when user forgets to add a start repeat.
+
+* remove duplicate elements when copying repeats
+
+* fix handling of overlays
+
+* fix bug with creating synth with overlays and repeats
+
+* fix links to documentation and examples.
+
+* fix drawing crescendo across lines.
+
+* fix chord grid with slash rhythm notes
+
+* fix chord grid with one svg per line
+
 # Version 6.6.0
 
 ## Features

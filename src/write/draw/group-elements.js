@@ -42,7 +42,7 @@ Group.prototype.addPath = function (path) {
 /**
  * End a group of glyphs that will always be moved, scaled and highlighted together
  */
-Group.prototype.endGroup = function (klass, name) {
+Group.prototype.endGroup = function (klass, name, extraClass) {
 	this.ingroup = false;
 	//if (this.path.length === 0) return null;
 	var path = "";
@@ -52,7 +52,12 @@ Group.prototype.endGroup = function (klass, name) {
 
 	var ret = this.paper.closeGroup();
 	if (ret) {
-		ret.setAttribute("class", this.controller.classes.generate(klass))
+		var c = this.controller.classes.generate(klass)
+		if (c) {
+			if (extraClass)
+				c += ' ' + extraClass
+			ret.setAttribute("class", c)
+		}
 		ret.setAttribute("fill", this.controller.renderer.foregroundColor)
 		ret.setAttribute("stroke", "none")
 		ret.setAttribute("data-name", name)

@@ -225,7 +225,9 @@ MusicParser.prototype.parseMusic = function(line) {
 								this.startNewLine();	// There was a ! in the middle of the line. Start a new line if there is anything after it.
 						} else if (ret[1].length > 0) {
 							if (ret[1].indexOf("style=") === 0) {
-								el.style = ret[1].substr(6);
+								el.style = ret[1].substring(6);
+							} else if (ret[1].indexOf("class=") === 0) {
+								el.extraClass = ret[1].substring(6);
 							} else {
 								if (el.decoration === undefined)
 									el.decoration = [];
@@ -792,7 +794,7 @@ var letter_to_accent = function(line, i) {
 			// Be sure that the accent is recognizable.
 			if (ret[1].length > 1 && (ret[1][0] === '^' || ret[1][0] ==='_'))
 				ret[1] = ret[1].substring(1);	// TODO-PER: The test files have indicators forcing the ornament to the top or bottom, but that isn't in the standard. We'll just ignore them.
-			if (legalAccents.includes(ret[1]))
+			if (legalAccents.includes(ret[1]) || ret[1].indexOf('class=')===0)
 				return ret;
 			if (volumeDecorations.includes(ret[1])) {
 				if (multilineVars.volumePosition === 'hidden' )

@@ -186,6 +186,119 @@ describe("Parsing", function () {
 		{"line":3,"staff":0,"type":"bar","style":"bar_thin"}
 	]
 
+	var abcNoWarn = "X:1\n" +
+		"T:Main\n" +
+		"M: 3/4\n" +
+		"K: Eb\n" +
+		"G|\n" +
+		"K:F\n" +
+		"B|\n" +
+		"T:Sub\n" +
+		"K:D\n" +
+		"d|\n"
+
+	var expectedNoWarn = [
+		{"line":0,"staff":0,"type":"initial-key","name":"E","accidentals":"B flat,e flat,A flat"},
+		{"line":0,"staff":0,"type":"key","name":"F","accidentals":"e natural,A natural,B flat"},
+		{"line":1,"staff":0,"type":"initial-key","name":"F","accidentals":"B flat,e natural,A natural"},
+		{"line":3,"staff":0,"type":"initial-key","name":"D","accidentals":"f sharp,c sharp"}
+	]
+
+	var abcInlineKeyPerVoice = "X:1\n" +
+		"M:4/4\n" +
+		"L:1/8\n" +
+		"K:Edor\n" +
+		"V:1\n" +
+		"C2 D2 E2 F2| [K:F] G2 A2 B2 c2|]\n" +
+		"V:2\n" +
+		"C2 D2 E2 F2| [K:F] G2 A2 B2 c2|]\n" +
+		"V:1\n" +
+		"C2 D2 E2 F2| [K:Bb^f] G2 A2 B2 c2|]\n" +
+		"V:2\n" +
+		"C2 D2 E2 F2| [K:Bb^f] G2 A2 B2 c2|]\n" +
+		"V:1\n" +
+		"C2 D2 E2 F2| G2 A2 B2 c2|]\n" +
+		"V:2\n" +
+		"C2 D2 E2 F2| G2 A2 B2 c2|]\n"
+
+	var expectedInlineKeyPerVoice = [
+		{"line":0,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":0,"staff":0,"type":"initial-key","name":"EDor","accidentals":"f sharp,c sharp"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":0,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":0,"staff":0,"type":"key","name":"F","accidentals":"f natural,c natural,B flat"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":0,"staff":0,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":0,"staff":0,"type":"bar","style":"bar_thin_thick"},
+		{"line":0,"staff":1,"type":"initial-clef","style":"treble"},
+		{"line":0,"staff":1,"type":"initial-key","name":"EDor","accidentals":"f sharp,c sharp"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":0,"staff":1,"type":"bar","style":"bar_thin"},
+		{"line":0,"staff":1,"type":"key","name":"F","accidentals":"f natural,c natural,B flat"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":0,"staff":1,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":0,"staff":1,"type":"bar","style":"bar_thin_thick"},
+		{"line":1,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":1,"staff":0,"type":"initial-key","name":"F","accidentals":"B flat"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":1,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":1,"staff":0,"type":"key","name":"B","accidentals":"B flat,e flat,f sharp"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":1,"staff":0,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":1,"staff":0,"type":"bar","style":"bar_thin_thick"},
+		{"line":1,"staff":1,"type":"initial-clef","style":"treble"},
+		{"line":1,"staff":1,"type":"initial-key","name":"F","accidentals":"B flat"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":1,"staff":1,"type":"bar","style":"bar_thin"},
+		{"line":1,"staff":1,"type":"key","name":"B","accidentals":"B flat,e flat,f sharp"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":1,"staff":1,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":1,"staff":1,"type":"bar","style":"bar_thin_thick"},
+		{"line":2,"staff":0,"type":"initial-clef","style":"treble"},
+		{"line":2,"staff":0,"type":"initial-key","name":"B","accidentals":"B flat,e flat,f sharp"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":2,"staff":0,"type":"bar","style":"bar_thin"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":2,"staff":0,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":2,"staff":0,"type":"bar","style":"bar_thin_thick"},
+		{"line":2,"staff":1,"type":"initial-clef","style":"treble"},
+		{"line":2,"staff":1,"type":"initial-key","name":"B","accidentals":"B flat,e flat,f sharp"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"C"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"D"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"E"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"F"},
+		{"line":2,"staff":1,"type":"bar","style":"bar_thin"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"G"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"A"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"B"},
+		{"line":2,"staff":1,"type":"note","duration":0.25,"pitches":"c"},
+		{"line":2,"staff":1,"type":"bar","style":"bar_thin_thick"}
+	]
 
 	var abcBarNumberSubtitle = "X:1\n" +
 		"T:song\n" +
@@ -216,7 +329,24 @@ K:C
 CDEF|GFED|!pp!!<(!CDEF|
 GFED|!<)!!ff!C4|]`
 
-	const expectedDynamicsHairpin = []
+	const abcGlissandoTwoLine = `X:1
+T:Crescendo Bug
+L:1/4
+M:4/4
+K:C
+CDEF|GFED|CDE!~(!F|
+!~)!GFED|C4|]`
+
+	const abcEscapePercent = `T:100\\% Amazing
+M:4/4
+K:C
+C2 "Play 100\\% awesomely"G4 E2 C2| % comment
+`
+
+	var abcRandomClass = "X:1\n" +
+		"K: C\n" +
+		"!class=alice!A!class=bob!!>!T[dfa]\n" +
+		"w: Carol David\n"
 
 	it("crashes", function () {
 		testParser(abc1, expected1, "abc1");
@@ -264,10 +394,53 @@ GFED|!<)!!ff!C4|]`
 		chai.assert.deepStrictEqual(ret, expectedKeyWarn, "KeyWarn");
 	})
 
+	it("no-warn", function() {
+		const ret = flattenResults(abcNoWarn)
+		var filtered = []
+		for (var i = 0; i < ret.length; i++) {
+			if (ret[i].type === 'initial-key')
+				filtered.push(ret[i])
+			if (ret[i].type === 'key')
+				filtered.push(ret[i])
+		}
+		console.log(JSON.stringify(filtered))
+		// var visualObj = abcjs.renderAbc("paper", abcNoCourtesy);
+		// var keySigs = document.querySelectorAll('#paper .abcjs-key-signature')
+		chai.assert.deepStrictEqual(filtered, expectedNoWarn);
+	})
+
+	it("inline-key-per-voice", function () {
+		const ret = flattenResults(abcInlineKeyPerVoice)
+		chai.assert.deepStrictEqual(ret, expectedInlineKeyPerVoice, "InlineKeyPerVoice");
+	})
+
 	it("dynamics-over-line", function () {
-		const ret = flattenResults(abcDynamicsHairpin)
-		//console.log(JSON.stringify(ret))
-		chai.assert.deepStrictEqual(ret, expectedDynamicsHairpin, "DynamicsHairpin");
+		var visualObj = abcjs.renderAbc("paper", abcDynamicsHairpin);
+
+		var dynamics = document.querySelectorAll('#paper [data-name="dynamics"]')
+		chai.assert.equal(dynamics.length, 4);
+	})
+
+	it("glissando-two-line", function () {
+		var visualObj = abcjs.renderAbc("paper", abcGlissandoTwoLine);
+
+		var glissando = document.querySelectorAll('#paper [data-name="glissando"]')
+		chai.assert.equal(glissando.length, 2);
+	})
+
+	it("escape-percent", function () {
+		var visualObj = abcjs.renderAbc("paper", abcEscapePercent);
+		chai.assert.equal(visualObj[0].metaText.title, "100​％ Amazing");
+		chai.assert.equal(visualObj[0].warnings, undefined)
+		chai.assert.equal(visualObj[0].lines[0].staff[0].voices[0][1].chord[0].name, "Play 100​％ awesomely")
+	})
+
+	it("random-class", function() {
+		var visualObj = abcjs.renderAbc("paper", abcRandomClass, {add_classes: true});
+		var els = document.querySelectorAll('#paper .alice')
+		chai.assert.equal(els.length, 1)
+		els = document.querySelectorAll('#paper .bob')
+		chai.assert.equal(els.length, 1)
 	})
 
 	function testParser(abc, expectedLines, comment) {

@@ -356,7 +356,9 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
 					return [ e-i+1+ws ];
 				case "[M:":
 					var meter = this.setMeter(line.substring(i+3, e));
-					if (tuneBuilder.hasBeginMusic() && meter)
+					if (startLine && multilineVars.currentVoice && meter)
+						multilineVars.staves[multilineVars.currentVoice.staffNum].meter = meter;
+					else if (tuneBuilder.hasBeginMusic() && meter)
 						tuneBuilder.appendStartingElement('meter', startChar, endChar, meter);
 					else
 						multilineVars.meter = meter;

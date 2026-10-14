@@ -508,6 +508,8 @@ var Parse = function() {
 			}
 			strTune = arr.join("  "); //. the split removed two characters, so this puts them back
 		}
+		// If there is an escaped percent, then temporarily change it so it doesn't affect the processing.
+		strTune = strTune.replace(/\\%/g,"\u200B\uFF05")
 		// take care of line continuations right away, but keep the same number of characters
 		strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, function(all, backslash, comment){
 			var padding = comment ? Array(comment.length +1).join(' ') : "";

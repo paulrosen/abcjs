@@ -20,6 +20,12 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 				if (child.type === "symbol" && child.c && child.c.indexOf('notehead') >= 0) {
 					el.setAttribute('class', 'abcjs-notehead')
 				}
+				if (el && child.chordPos && child.name.indexOf('flags.') !== 0) {
+					var klass = el.getAttribute("class")
+					if (klass) klass = klass + ' abcjs-chord-pos-'+child.chordPos
+					else klass = 'abcjs-chord-pos-'+child.chordPos
+					el.setAttribute('class', klass)
+				}
 		}
 	}
 	var klass = params.type;
@@ -33,7 +39,7 @@ function drawAbsolute(renderer, params, bartop, selectables, staffPos) {
 			}
 		}
 	}
-	var g = elementGroup.endGroup(klass, params.type);
+	var g = elementGroup.endGroup(klass, params.type, params.extraClass);
 	if (g) {
 		// TODO-PER-HACK! This corrects the classes because the tablature is not being created at the right time.
 		if (params.cloned) {

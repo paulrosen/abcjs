@@ -13,6 +13,7 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 	this.pitch2 = opt.pitch2;
 	this.linewidth = opt.linewidth;
 	this.klass = opt.klass;
+	this.chordPos = opt.chordPos;
 	this.anchor = opt.anchor ? opt.anchor : 'middle'
 	this.top = pitch;
 	if (this.pitch2 !== undefined && this.pitch2 > this.top) this.top = this.pitch2;
@@ -32,6 +33,8 @@ var RelativeElement = function RelativeElement(c, dx, w, pitch, opt) {
 		this.dim = opt.dim;
 	if (opt.position)
 		this.position = opt.position;
+	if (opt.voiceNumber !== undefined)
+		this.voiceNumber = opt.voiceNumber
 	this.height = opt.height ? opt.height : 4; // The +1 is to give a little bit of padding.
 	if (opt.top)
 		this.top = opt.top;

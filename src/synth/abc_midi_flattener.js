@@ -220,7 +220,7 @@ var pitchesToPerc = require('./pitches-to-perc');
 						break
 					default:
 						// This should never happen
-						console.log("MIDI creation. Unknown el_type: " + element.el_type + "\n");// jshint ignore:line
+						console.log("MIDI creation. Unknown el_type: " + element.el_type + "\n");
 						break;
 				}
 			}

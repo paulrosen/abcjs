@@ -232,6 +232,46 @@ describe("Miscellaneous", function () {
 		{"startX":96.21320343559643,"endX":91.21320343559643,"startY":0.5,"endY":0.5,"dy":-3.875}
 	]
 
+	var abcChordClass = "X: 1\n" +
+		"L: 1/8\n" +
+		"K: C none\n" +
+		'.[ceg] T[gce] [_d^f=b]3 "Dm7".d Te\n'
+
+	var expectedChordClass = [
+		'flags.d8th null',
+		'c abcjs-notehead abcjs-chord-pos-1',
+		'e abcjs-notehead abcjs-chord-pos-2',
+		'g abcjs-notehead abcjs-chord-pos-3',
+		'stem abcjs-stem',
+		'scripts.staccato null',
+		'flags.d8th null',
+		'c abcjs-notehead abcjs-chord-pos-1',
+		'e abcjs-notehead abcjs-chord-pos-2',
+		'g abcjs-notehead abcjs-chord-pos-3',
+		'stem abcjs-stem',
+		'scripts.trill null',
+		'dots.dot abcjs-chord-pos-1',
+		'accidentals.flat abcjs-chord-pos-1',
+		'_d abcjs-notehead abcjs-chord-pos-1',
+		'dots.dot abcjs-chord-pos-2',
+		'accidentals.sharp abcjs-chord-pos-2',
+		'^f abcjs-notehead abcjs-chord-pos-2',
+		'dots.dot abcjs-chord-pos-3',
+		'accidentals.nat abcjs-chord-pos-3',
+		'=b abcjs-notehead abcjs-chord-pos-3',
+		'stem abcjs-stem',
+		'ledger abcjs-ledger',
+		'flags.d8th null',
+		'd abcjs-notehead',
+		'stem abcjs-stem',
+		'scripts.staccato null',
+		'chord ',
+		'flags.d8th null',
+		'e abcjs-notehead',
+		'stem abcjs-stem',
+		'scripts.trill null',
+	]
+
 	it("line-width", function () {
 		abcjs.renderAbc("paper", abcLineWidth, { add_classes: true});
 		var height = extractHeight()
@@ -320,8 +360,72 @@ describe("Miscellaneous", function () {
 		var msg = 'found: '+ JSON.stringify(beams)
 		chai.assert.deepEqual(beams, expectedBeamBr, msg)
 	})
+	
+    function testBeamedRest(pattern, description) {
+		var prelude = "X:1\n" +
+			"M:6/8\n" +
+			"L:1/4\n" +
+			"K:none clef=perc stafflines=1 middle=a\n";
 
+		var abcBeamedRest = prelude + pattern;
+		var visualObj = abcjs.renderAbc("paper", abcBeamedRest, {add_classes:true});
+		// Get the first note in the beamed group
+		var firstNote = visualObj[0].lines[0].staff[0].voices[0][0].abselem;
+		chai.assert.isDefined(firstNote.beam, "Should have a beam - " + description);
+		var beams = firstNote.beam.beams;
+		chai.assert.isArray(beams, "Beams should be an array - " + description);
+		chai.assert.isAbove(beams.length, 0, "Should have at least one beam - " + description);
 
+		// The main beam should span from the first note to the last note
+		// For patterns with 6 sixteenths total (including the rest)
+		// The beam should extend to cover all of them
+		var mainBeam = beams[0];
+		chai.assert.isDefined(mainBeam.startX, "Main beam should have startX - " + description);
+		chai.assert.isDefined(mainBeam.endX, "Main beam should have endX - " + description);
+
+		// Check that the beam extends properly (endX should be greater than startX)
+		chai.assert.isAbove(mainBeam.endX, mainBeam.startX, "Beam should extend from left to right - " + description);
+
+		// Compare with the correct version (without rest) to ensure similar beam structure
+		var patternNoRest = pattern.replace('z', 'a'); // Replace rest with note
+		var abcBeamedNoRest = prelude + patternNoRest;
+		var visualObjNoRest = abcjs.renderAbc("paper2", abcBeamedNoRest, {add_classes:true});
+		var firstNoteNoRest = visualObjNoRest[0].lines[0].staff[0].voices[0][0].abselem;
+		var beamsNoRest = firstNoteNoRest.beam.beams;
+
+		// Both should have the same number of beams (main beam + auxiliary beams)
+		chai.assert.equal(beams.length, beamsNoRest.length, 
+			"Beamed group with rest should have same number of beams as without rest - " + description);
+	}
+
+	it("beamed-rest-second", function () {
+		testBeamedRest("a/4z/4a/2a/4a/4", "rest in second position");
+	})
+
+	it("beamed-rest-third", function () {
+		testBeamedRest("a/4a/4z/4a/2a/4", "rest in third position");
+	})
+
+	it("beamed-rest-fourth", function () {
+		testBeamedRest("a/4a/4a/2z/4a/4", "rest in fourth position");
+	})
+
+	it("beamed-rest-last", function () {
+		testBeamedRest("a/4a/4a/2a/4z/4", "rest at end");
+	})
+
+	it("chord-class", function () {
+		var visualObj = abcjs.renderAbc("paper", abcChordClass);
+		var notes = document.querySelectorAll('[data-name="note"] > *')
+		const results = []
+		notes.forEach(note => {
+			const name = note.dataset.name
+			const klass = note.getAttribute('class')
+			results.push(name + ' ' + klass)
+		})
+		console.log(results.map(r => `'${r}',`).join('\n'))
+		chai.assert.deepEqual(results, expectedChordClass)
+	})
 })
 
 function checkFreeText(abc, expected) {

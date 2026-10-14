@@ -26,6 +26,15 @@ describe("SVG Creation", function() {
 		{"klass":null,"dataName":"8"}
 	]
 
+	var abcGraceNotes = "L:1/4\n" +
+		"%%staffwidth 200\n" +
+		"N: test this in Safari by\n" +
+		"N: changing the browser\n" +
+		"N: magnification\n" +
+		"K:C\n" +
+		"{G,}A, {/C/2}D {EF}G|\n" +
+		"{G,}A, {C/2}D {/EF}G|\n"
+
 	it("single-note-compact", function() {
 		testSvg(abcSingleNote)
 		testCenter("note")
@@ -37,6 +46,9 @@ describe("SVG Creation", function() {
 	it("12-8-group", function() {
 		testSvg(abc128Group)
 		timeSigTest(abc128Results)
+	})
+	it("grace-note-placement", function() {
+		abcjs.renderAbc("paper", abcGraceNotes, { add_classes: true});
 	})
 
 	function testSvg(abc) {

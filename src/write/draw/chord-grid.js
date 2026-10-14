@@ -16,6 +16,7 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
 	const PART_MARGIN_BOTTOM = 20
 	const TEXT_MARGIN = 16
 
+	renderer.paper.openGroup({klass: 'abcjs-chord-grid'})
 	parts.forEach(part => {
 		switch (part.type) {
 			case "text": {
@@ -84,6 +85,7 @@ function drawChordGrid(renderer, parts, leftMargin, pageWidth, fonts) {
 				break;
 		}
 	})
+	renderer.paper.closeGroup()
 }
 
 function drawPercent(renderer, x, y, offset) {

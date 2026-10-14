@@ -1,5 +1,5 @@
 /**!
-Copyright (c) 2009-2024 Paul Rosen and Gregory Dyke
+Copyright (c) 2009-2026 Paul Rosen and Gregory Dyke
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -78,5 +78,11 @@ abcjs.synth = {
 
 abcjs['Editor'] = require('./src/edit/abc_editor');
 abcjs['EditArea'] = require('./src/edit/abc_editarea');
+
+// For testing - probably not needed for most uses
+abcjs.test = {
+	Parse: require('./src/parse/abc_parse'),
+	EngraverController: require('./src/write/engraver-controller')
+}
 
 module.exports = abcjs;

@@ -9,12 +9,16 @@ function Repeats(voice) {
 		var isStartRepeat = elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat"
 		var isEndRepeat = elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat"
 		var startEnding = elem.startEnding ? startEndingNumbers(elem.startEnding) : undefined
-		if (isEndRepeat)
-			this.sections.push({type:"endRepeat", index: thisIndex})
-		if (isStartRepeat)
-			this.sections.push({type:"startRepeat", index: thisIndex})
+		if (isEndRepeat) {
+			// If there are two endRepeats in a row, that is a notation error, but we'll recover by pretending there was a startRepeat right before it.
+			if (this.sections.length > 0 && this.sections[this.sections.length-1].type === 'endRepeat')
+				this.sections.push({type: "startRepeat", index: this.sections[this.sections.length-1].index})
+			this.sections.push({type: "endRepeat", index: thisIndex})
+		}
 		if (startEnding)
 			this.sections.push({type:"startEnding", index: thisIndex, endings: startEnding})
+		if (isStartRepeat)
+			this.sections.push({type:"startRepeat", index: thisIndex})
 	}
 
 	this.resolveRepeats = function() {
@@ -78,7 +82,7 @@ function Repeats(voice) {
 						}
 
 						if (lastUsed < section.index - 1) {
-							console.log("gap", voice.slice(lastUsed+1, section.index))
+							//console.log("gap", voice.slice(lastUsed+1, section.index))
 							repeatInstructions.push({common: {start: lastUsed+1, end: section.index}})
 						}
 					}
@@ -156,8 +160,33 @@ function Repeats(voice) {
 
 function duplicateSpan(input, output, start, end) {
 	//console.log("dup", {start, end})
+	if (start < 0) start = 0
+	// If there is a bar at the end of a line and a bar to start the next line, it would be duplicated.
+	if (output.length > 0 && input[start].el_type === 'bar' && output[output.length-1].el_type === 'bar')
+		start++
+
 	for (var i = start; i <= end; i++) {
-		output.push(duplicateItem(input[i]))
+		// If there is a beginning element, it might be duplicated.
+		var index;
+		var skip = false
+		if (input[i].el_type === 'key' || input[i].el_type === 'meter' || input[i].el_type === 'tempo' || input[i].el_type === 'instrument') {
+			index = output.length-1
+			while (index >= 0 && output[index].el_type !== input[i].el_type)
+				index--
+			if (index >= 0) {
+				if (input[i].el_type === 'key' && areKeysEqual(input[i], output[index])) {
+					skip = true
+				} else if (input[i].el_type === 'meter' && input[i].num === output[index].num && input[i].den === output[index].den) {
+					skip = true
+				} else if (input[i].el_type === 'instrument' && input[i].program === output[index].program) {
+					skip = true
+				} else if (input[i].el_type === 'tempo' && input[i].qpm === output[index].qpm) {
+					skip = true
+				}
+			}
+		}
+		if (!skip)
+			output.push(duplicateItem(input[i]))
 	}
 }
 
@@ -166,6 +195,13 @@ function duplicateItem(src) {
 	if (item.pitches)
 		item.pitches = parseCommon.cloneArray(item.pitches);
 	return item
+}
+
+function areKeysEqual(el1, el2) {
+	if (!el1.accidentals || !el2.accidentals)
+		return false // this shouldn't happen, but if so, we don't want to skip the element
+
+	return JSON.stringify(el1.accidentals) === JSON.stringify(el2.accidentals)
 }
 
 function startEndingNumbers(startEnding) {

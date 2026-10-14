@@ -13,6 +13,7 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
 	var accidentalSlot = (options.accidentalSlot !== undefined) ? options.accidentalSlot : [];
 	var shouldExtendStem = (options.shouldExtendStem !== undefined) ? options.shouldExtendStem : false;
 	var printAccidentals = (options.printAccidentals !== undefined) ? options.printAccidentals : true;
+	var chordPos = options.chordPos
 
 	// TODO scale the dot as well
 	var pitch = pitchelem.verticalPos;
@@ -23,14 +24,14 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
 	if (c === undefined)
 		abselem.addFixed(new RelativeElement("pitch is undefined", 0, 0, 0, { type: "debug" }));
 	else if (c === "") {
-		notehead = new RelativeElement(null, 0, 0, pitch);
+		notehead = new RelativeElement(null, 0, 0, pitch, {chordPos:chordPos});
 	} else {
 		var shiftheadx = headx;
 		if (pitchelem.printer_shift) {
 			var adjust = (pitchelem.printer_shift === "same") ? 1 : 0;
 			shiftheadx = (dir === "down") ? -glyphs.getSymbolWidth(c) * scale + adjust : glyphs.getSymbolWidth(c) * scale - adjust;
 		}
-		var opts = { scalex: scale, scaley: scale, thickness: glyphs.symbolHeightInPitches(c) * scale, name: pitchelem.name };
+		var opts = { scalex: scale, scaley: scale, thickness: glyphs.symbolHeightInPitches(c) * scale, name: pitchelem.name, chordPos: chordPos };
 		notehead = new RelativeElement(c, shiftheadx, glyphs.getSymbolWidth(c) * scale, pitch, opts);
 		notehead.stemDir = dir;
 		if (flag) {
@@ -44,12 +45,12 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
 			}
 			//if (scale===1 && (dir==="down")?(pos>6):(pos<6)) pos=6;
 			var xdelta = (dir === "down") ? headx : headx + notehead.w - 0.6;
-			abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag) * scale, pos, { scalex: scale, scaley: scale }));
+			abselem.addRight(new RelativeElement(flag, xdelta, glyphs.getSymbolWidth(flag) * scale, pos, { scalex: scale, scaley: scale, chordPos: chordPos }));
 		}
 		newDotShiftX = notehead.w + dotshiftx - 2 + 5 * dot;
 		for (; dot > 0; dot--) {
 			var dotadjusty = (1 - Math.abs(pitch) % 2); //PER: take abs value of the pitch. And the shift still happens on ledger lines.
-			abselem.addRight(new RelativeElement("dots.dot", notehead.w + dotshiftx - 2 + 5 * dot, glyphs.getSymbolWidth("dots.dot"), pitch + dotadjusty));
+			abselem.addRight(new RelativeElement("dots.dot", notehead.w + dotshiftx - 2 + 5 * dot, glyphs.getSymbolWidth("dots.dot"), pitch + dotadjusty, {chordPos:chordPos}));
 		}
 	}
 	if (notehead)
@@ -96,7 +97,7 @@ var createNoteHead = function (abselem, c, pitchelem, options) {
 			accidentalshiftx = (glyphs.getSymbolWidth(symb) * scale + 2);
 		}
 		var h = glyphs.symbolHeightInPitches(symb);
-		abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, { scalex: scale, scaley: scale, top: pitch + h / 2, bottom: pitch - h / 2 }));
+		abselem.addExtra(new RelativeElement(symb, accPlace, glyphs.getSymbolWidth(symb), pitch, { scalex: scale, scaley: scale, top: pitch + h / 2, bottom: pitch - h / 2, chordPos: chordPos }));
 		extraLeft = glyphs.getSymbolWidth(symb) / 2; // TODO-PER: We need a little extra width if there is an accidental, but I'm not sure why it isn't the full width of the accidental.
 	}
 
