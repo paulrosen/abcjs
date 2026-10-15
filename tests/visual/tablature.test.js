@@ -1113,6 +1113,60 @@ describe("Tablature", function () {
 		var fiveString = doRender("L:1/4\nM:4/4\nK:C\nC/2 G/2 |]\n", [{ instrument: 'fiveString', stems: true }])
 		chai.assert.equal(countExtras(tabStemExtras(fiveString), 'stem'), 2, "five string stems")
 	})
+
+	it("stems: beamed quavers share one beam line", function() {
+		var visualObj = doRender("L:1/8\nM:2/4\nK:C\nCEGc |]\n", stemParams)
+		var extras = tabStemExtras(visualObj)
+		chai.assert.equal(countExtras(extras, 'stem'), 4, "a stem for each note")
+		chai.assert.equal(countExtras(extras, 'tabbeam'), 1, "one beam joins the quavers")
+		chai.assert.equal(countExtras(extras, 'flags.d8th'), 0, "beamed quavers have no flags")
+	})
+
+	it("stems: beamed semiquavers get a second beam line", function() {
+		var visualObj = doRender("L:1/16\nM:2/4\nK:C\nCDEF |]\n", stemParams)
+		chai.assert.equal(countExtras(tabStemExtras(visualObj), 'tabbeam'), 2, "two beam lines for four semiquavers")
+	})
+
+	it("stems: separate quavers keep their flags", function() {
+		var visualObj = doRender("L:1/8\nM:2/4\nK:C\nC C C C |]\n", stemParams)
+		var extras = tabStemExtras(visualObj)
+		chai.assert.equal(countExtras(extras, 'flags.d8th'), 4, "a flag for each separate quaver")
+		chai.assert.equal(countExtras(extras, 'tabbeam'), 0, "no beams between separate notes")
+	})
+
+	it("stems: each stem starts below its lowest fret number", function() {
+		var visualObj = doRender("L:1/4\nM:4/4\nK:C\n[CG]2 C/2 |]\n", stemParams)
+		var tab = getTabStaff(visualObj[0].lines[0].staff, 0)
+		var checked = 0
+		for (var v = 0; v < tab.length; v++) {
+			for (var c = 0; c < tab[v].length; c++) {
+				var abs = tab[v][c].abselem
+				if (!abs || !abs.extra) continue
+				var lowest = null
+				for (var ch = 0; ch < abs.children.length; ch++) {
+					var child = abs.children[ch]
+					if (child.type === 'tabNumber' && !child.isGrace && (lowest === null || child.pitch < lowest)) lowest = child.pitch
+				}
+				for (var e = 0; e < abs.extra.length; e++) {
+					if (abs.extra[e].type === 'stem') {
+						checked++
+						chai.assert.isBelow(abs.extra[e].pitch2, lowest, "stem top is below the lowest number")
+					}
+				}
+			}
+		}
+		chai.assert.isAbove(checked, 0, "found stems to check")
+	})
+
+	it("stems: five string tabs beam too", function() {
+		var visualObj = doRender("L:1/8\nM:2/4\nK:C\nCEGc |]\n", [{ instrument: 'fiveString', stems: true }])
+		chai.assert.equal(countExtras(tabStemExtras(visualObj), 'tabbeam'), 1, "one beam on a five string tab")
+	})
+
+	it("stems: multi-staff tune gets stems on its tab staff", function() {
+		var visualObj = doRender("L:1/8\nM:4/4\nK:C\nV:1 clef=treble\nV:2 clef=bass\n[V:1] CEGc |\n[V:2] C,E,G,C |]\n", stemParams)
+		chai.assert.equal(countExtras(tabStemExtras(visualObj), 'stem'), 4, "a stem for each note on the tab staff")
+	})
 });
 
 var stemParams = [{ instrument: 'guitar', stems: true }];
