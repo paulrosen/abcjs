@@ -348,6 +348,12 @@ C2 "Play 100\\% awesomely"G4 E2 C2| % comment
 		"!class=alice!A!class=bob!!>!T[dfa]\n" +
 		"w: Carol David\n"
 
+	var abcSpaceInLine = "X:1\n" +
+		"K: C\n" +
+		"A\n" +
+		"\t\n" +
+		"B\n"
+
 	it("crashes", function () {
 		testParser(abc1, expected1, "abc1");
 	})
@@ -441,6 +447,11 @@ C2 "Play 100\\% awesomely"G4 E2 C2| % comment
 		chai.assert.equal(els.length, 1)
 		els = document.querySelectorAll('#paper .bob')
 		chai.assert.equal(els.length, 1)
+	})
+
+	it("space-in-line", function() {
+		var visualObj = abcjs.renderAbc("paper", abcSpaceInLine, {add_classes: true});
+		chai.assert.equal(visualObj[0].lines.length, 1)
 	})
 
 	function testParser(abc, expectedLines, comment) {

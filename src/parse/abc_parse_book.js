@@ -34,7 +34,8 @@ var bookParser = function(book) {
 
 	// Now, the tune ends at a blank line, so truncate it if needed. There may be "intertune" stuff.
 	tunes.forEach(function(tune) {
-		var end = tune.abc.indexOf('\n\n');
+		var m = tune.abc.match(/\n[ \t]*\n/) // blank line includes lines with only white space.
+		var end = m ? m.index : -1
 		if (end > 0)
 			tune.abc = tune.abc.substring(0, end);
 		tune.pure = tune.abc;
@@ -60,4 +61,3 @@ var bookParser = function(book) {
 };
 
 module.exports = bookParser;
-
