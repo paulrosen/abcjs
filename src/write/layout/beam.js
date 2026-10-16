@@ -192,7 +192,11 @@ function createAdditionalBeams(elems, asc, beam, isGrace, dy) {
 			if (i > 0 && elem.abcelem.beambr && elem.abcelem.beambr <= (index + 1)) {
 				if (!auxBeams[index].split)
 					auxBeams[index].split = [auxBeams[index].x];
-				var xPos = calcXPos(asc, elems[i - 1], elem);
+				let prevElemIndex = i - 1
+				while (prevElemIndex >= 0 && elems[prevElemIndex].type === 'rest')
+					prevElemIndex--
+
+				var xPos = calcXPos(asc, elems[prevElemIndex], elem);
 				if (auxBeams[index].split[auxBeams[index].split.length - 1] >= xPos[0]) {
 					// the reduction in beams leaves a note unattached so create a small flag for it.
 					xPos[0] += elem.w;

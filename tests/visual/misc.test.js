@@ -232,6 +232,16 @@ describe("Miscellaneous", function () {
 		{"startX":96.21320343559643,"endX":91.21320343559643,"startY":0.5,"endY":0.5,"dy":-3.875}
 	]
 
+	var abcBeamBrUp = "X: 1\n" +
+		"L: 1/16\n" +
+		"K: C none\n" +
+		"Az!beambr1!AA | AAz!beambr1!A |"
+
+	var expectedBeamBrUp = [
+		{"startX":24.21,"endX":88.44961030678928,"startY":15,"endY":15,"dy":3.875},
+		{"startX":24.21,"endX":88.44961030678928,"startY":13.5,"endY":13.5,"dy":3.875,"split":[24.21,34.02,67.23640687119286,88.44961030678928]}
+	]
+
 	var abcChordClass = "X: 1\n" +
 		"L: 1/8\n" +
 		"K: C none\n" +
@@ -351,6 +361,14 @@ describe("Miscellaneous", function () {
 
 	it("free-text-normal", function () {
 		checkFreeText(abcFreeTextNormal, expectedFreeTextNormal);
+	})
+
+	it("beam-br-up", function () {
+		var visualObj = abcjs.renderAbc("paper", abcBeamBrUp, {add_classes:true});
+		// The beam object is the same for all the notes so just look at the first one
+		var beams = visualObj[0].lines[0].staff[0].voices[0][0].abselem.beam.beams
+		var msg = 'found: '+ JSON.stringify(beams)
+		chai.assert.deepEqual(beams, expectedBeamBrUp, msg)
 	})
 
 	it("beam-br", function () {
