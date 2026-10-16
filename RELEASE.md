@@ -1,3 +1,11 @@
+# Version 6.7.2
+
+## Bugs
+
+* A line that consists only of white space should be considered "blank"
+
+* Fix beambr when there is a rest embedded in the beamed group.
+
 # Version 6.7.1
 
 ## Bugs

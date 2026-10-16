@@ -1,3 +1,3 @@
-var version = '6.7.1';
+var version = '6.7.2';
 
 module.exports = version;
