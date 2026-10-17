@@ -207,6 +207,7 @@ function tabRenderer(plugin, renderer, line, staffIndex) {
 		linePitch: plugin.linePitch,
 		dy: 0.15,
 		top: tabTop,
+		stemDepth: TabAbsoluteElements.getStemDepth(plugin),
 	};
 	var nextTabPos = getNextTabPos(staffIndex, staffGroup.staffs);
 	if (nextTabPos === -1)
@@ -214,7 +215,7 @@ function tabRenderer(plugin, renderer, line, staffIndex) {
 	staffGroupInfos.parentIndex = nextTabPos - 1;
 	staffGroup.staffs.splice(nextTabPos, 0, staffGroupInfos);
 	// staffGroup.staffs.push(staffGroupInfos);
-	staffGroup.height += tabSize + padd;
+	staffGroup.height += tabSize + padd + TabAbsoluteElements.getStemDepth(plugin);
 	var parentStaff = getLastStaff(staffGroup.staffs, nextTabPos);
 	var nbVoices = 1;
 	if (isMultiVoiceSingleStaff(staffGroup.staffs, parentStaff)) {
@@ -230,7 +231,8 @@ function tabRenderer(plugin, renderer, line, staffIndex) {
 		// This was pushing down the top staff by the tab label height
 		//staffGroup.staffs[staffIndex].top += nameHeight;
 		staffGroup.staffs[staffIndex].top += 1;
-		staffGroup.height += nameHeight;
+		// When stems hang below the staff, the name sits under them, so reserve a few pitch steps for its offset.
+		staffGroup.height += nameHeight + (staffGroupInfos.stemDepth ? 4 : 0);
 		tabVoice.staff = staffGroupInfos;
 		var tabVoiceIndex = voices.length
 		voices.splice(voices.length, 0, tabVoice);

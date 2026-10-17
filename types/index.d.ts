@@ -257,6 +257,7 @@ declare module 'abcjs' {
 		label?: string,
 		tuning?: Array<string>,
 		highestNote?: string,
+		stems?: boolean,
 	}
 
 	export interface AbcVisualParams {

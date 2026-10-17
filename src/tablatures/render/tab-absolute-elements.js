@@ -3,6 +3,7 @@
  */
 var AbsoluteElement = require('../../write/creation/elements/absolute-element');
 var RelativeElement = require('../../write/creation/elements/relative-element');
+var glyphs = require('../../write/creation/glyphs');
 
 function isObject(a) { return a != null && a.constructor === Object; }
 function cloneObject(dest, src) {
@@ -127,6 +128,138 @@ function buildRelativeTabNote(plugin, relX, def, curNote, isGrace) {
 	return tabNoteRelative;
 }
 
+// Stems hang from just below the bottom string, so this is how far the staff must extend below it.
+function getStemDepth(plugin) {
+	if (!plugin || !plugin.params || !plugin.params.stems) return 0;
+	return (plugin.linePitch || 3) * 3;
+}
+
+// Duration flags for the tab stem, keyed by the number of tails (3 = quaver).
+var stemFlags = { 3: 'flags.d8th', 4: 'flags.d16th', 5: 'flags.d32nd', 6: 'flags.d64th' };
+
+// Number of augmentation dots, from the ratio of the duration to its base (power of two) value.
+function getDotCount(duration, durlog) {
+	var ratio = duration / Math.pow(2, durlog);
+	if (ratio >= 1.75) return 2;
+	if (ratio >= 1.5) return 1;
+	return 0;
+}
+
+// Stems start just below the lowest fret number in the column, as if that number were the notehead.
+function getStemTop(plugin, abs) {
+	var lowest = null;
+	for (var i = 0; i < abs.children.length; i++) {
+		var child = abs.children[i];
+		if (child.type !== 'tabNumber' || child.isGrace || child.pitch === undefined) continue;
+		if (lowest === null || child.pitch < lowest) lowest = child.pitch;
+	}
+	return lowest - (plugin.linePitch || 3) * 1.5;
+}
+
+// Number of beams a note needs: a quaver has one, a semiquaver two, and so on. Zero or less means no beam.
+function getBeamCount(abs) {
+	var durlog = Math.floor(Math.log(abs.abcelem.duration) / Math.LN2 + 1e-9);
+	return Math.min(-durlog, 6) - 2;
+}
+
+function addStemLine(abs, top, bottom) {
+	var stem = new RelativeElement(null, 0, 0, bottom, { type: 'stem', pitch2: top, linewidth: 0.6 });
+	stem.x = abs.x;
+	abs.addExtra(stem);
+}
+
+// Dots sit to the right of each (non-grace) tab number, on the number's line.
+function addTabDots(abs, duration, durlog) {
+	var dots = getDotCount(duration, durlog);
+	for (var i = 0; i < abs.children.length && dots > 0; i++) {
+		var child = abs.children[i];
+		if (child.type !== 'tabNumber' || child.isGrace || child.pitch === undefined) continue;
+		for (var d = 0; d < dots; d++) {
+			var dot = new RelativeElement('dots.dot', 0, glyphs.getSymbolWidth('dots.dot'), child.pitch + 1.5, { type: 'symbol' });
+			dot.x = child.x + 3 + d * 3;
+			abs.addExtra(dot);
+		}
+	}
+}
+
+// Draws one beam line (a filled bar from x1 to x2) hung from the given stem.
+function addBeamLine(abs, x1, x2, bottom, thickness) {
+	var beam = new RelativeElement(null, 0, x2 - x1, bottom, { type: 'tabbeam', pitch2: bottom + thickness });
+	beam.x = x1;
+	abs.addExtra(beam);
+}
+
+// Beams the group of notes together, like quavers and semiquavers in standard notation.
+// Every beam sits on the same line below the staff; each extra beam level is stacked up toward the numbers.
+function addTabBeams(plugin, group, beamBase) {
+	var thickness = 0.5;
+	var step = 1;
+	var stub = 6;
+	var levels = group.map(getBeamCount);
+	var maxLevel = Math.max.apply(null, levels);
+	for (var lvl = 1; lvl <= maxLevel; lvl++) {
+		var bottom = beamBase - thickness + (lvl - 1) * step;
+		for (var a = 0; a < group.length; a++) {
+			if (levels[a] < lvl) continue;
+			var b = a;
+			while (b + 1 < group.length && levels[b + 1] >= lvl) b++;
+			var x1 = group[a].x;
+			var x2 = group[b].x;
+			if (a === b) {
+				// A lone note at this beam level gets a short stub pointing toward its neighbour.
+				x2 = x1 + (a + 1 < group.length ? stub : -stub);
+			}
+			addBeamLine(group[a], Math.min(x1, x2), Math.max(x1, x2), bottom, thickness);
+			a = b;
+		}
+	}
+}
+
+// Adds the stems for one beam group (a single note is a group of one) and its beams, flags or dots.
+function addTabStemGroup(plugin, group) {
+	var stemLength = (plugin.linePitch || 3) * 1;
+	var beamed = group.length > 1;
+	var tops = group.map(function (abs) { return getStemTop(plugin, abs); });
+	// A beamed group shares one beam line below its lowest stem; a single note hangs its own stem.
+	var beamBase = Math.min.apply(null, tops) - stemLength;
+	for (var i = 0; i < group.length; i++) {
+		var abs = group[i];
+		var duration = abs.abcelem.duration;
+		var durlog = Math.floor(Math.log(duration) / Math.LN2 + 1e-9);
+		addStemLine(abs, tops[i], beamed ? beamBase : tops[i] - stemLength);
+		addTabDots(abs, duration, durlog);
+	}
+	if (beamed) {
+		addTabBeams(plugin, group, beamBase);
+	} else {
+		var beamCount = getBeamCount(group[0]);
+		if (beamCount >= 1) {
+			var flagSymbol = stemFlags[beamCount + 2];
+			var flag = new RelativeElement(flagSymbol, 0, glyphs.getSymbolWidth(flagSymbol), beamBase, { type: 'symbol' });
+			flag.x = group[0].x;
+			group[0].addExtra(flag);
+		}
+	}
+}
+
+function wantsTabStem(plugin, abs) {
+	var duration = abs.abcelem && abs.abcelem.duration;
+	return !!(plugin && plugin.params && plugin.params.stems && duration && duration < 1); // whole notes have no stem
+}
+
+// Adds stems to the notes of a tab voice. Notes that the ABC beams together (startBeam..endBeam) form one group.
+function addTabStems(plugin, abss) {
+	var i = 0;
+	while (i < abss.length) {
+		var end = i;
+		if (abss[i].abcelem.startBeam) {
+			while (end + 1 < abss.length && !abss[end].abcelem.endBeam) end++;
+		}
+		addTabStemGroup(plugin, abss.slice(i, end + 1));
+		i = end + 1;
+	}
+}
+
 function getXGrace(abs, index) {
 	var found = 0;
 	if (abs.extra) {
@@ -195,6 +328,7 @@ TabAbsoluteElements.prototype.build = function (plugin,
 	var dest = staffAbsolute[tabVoiceIndex];
 	var tabPos = null;
 	var defNote = null;
+	var stemNotes = [];
 	if (source.children[0].abcelem.el_type != 'clef') {
 		// keysig missing => provide one for tabs
 		if (keySig != 'none') {
@@ -294,10 +428,14 @@ TabAbsoluteElements.prototype.build = function (plugin,
 					defNote.abselem = abs;
 					tabVoice.push(defNote);
 					dest.children.push(abs);
+					if (wantsTabStem(plugin, abs)) stemNotes.push(abs);
 				}
 				break;
 		}
 	}
+	addTabStems(plugin, stemNotes);
 };
+
+TabAbsoluteElements.getStemDepth = getStemDepth;
 
 module.exports = TabAbsoluteElements;

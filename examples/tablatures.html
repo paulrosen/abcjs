@@ -18,6 +18,9 @@
     <h1>abcjs with tablatures</h1>
   </header>
   <div class="container">
+    <label>
+      <input type="checkbox" id="stems"> Show note stems on tabs
+    </label>
     <h2>Guitar and Editor</h2>
     <textarea id="abc" cols="80" rows="12" spellcheck="false">
 X:1
@@ -43,25 +46,32 @@ w: vas t'en lui por ter u ne le ttre
     <div id="paper5"></div>
   </div>
   <script type="text/javascript">
-    window.onload = function () {
-      // Guitar and Editor
-      new ABCJS.Editor("abc",
-        {
-          canvas_id: "paper1",
-          warnings_id: "warnings",
-          abcjsParams: {
-            tablature: [
-              // first and only staff
-              {
-                  instrument: 'guitar',
-                  label: 'Guitar (%T)',
-                  tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
-                  capo: 0
-              }
-            ]
-          }
-        });
+    // Shared by the editor and the static examples so the checkbox can switch them all at once.
+    var showStems = false;
+    var editor = null;
 
+    function tablaturesWithStems(tablature) {
+      tablature.forEach(function (tab) {
+        tab.stems = showStems;
+      });
+      return tablature;
+    }
+
+    function editorTablature() {
+      var tablature = tablaturesWithStems([
+        // first and only staff
+        {
+          instrument: 'guitar',
+          label: 'Guitar (%T)',
+          tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
+          capo: 0
+        }
+      ]);
+      tablature.warnings_id = "warnings";
+      return tablature;
+    }
+
+    function renderStatic() {
       // Guitar with Capo
       var abc2 = "X:1\n" +
         "T:Andro Guitar\n" +
@@ -69,15 +79,15 @@ w: vas t'en lui por ter u ne le ttre
         "K:F\n" +
         "|: [EE,]^FGA [B2B,]BA | [G2A,]^FE [B,B]^cBA | [G2A,]^FE [B,4^FB]:| \n";
       var options2 = {
-        tablature: [
+        tablature: tablaturesWithStems([
           // first and only staff
           {
-              instrument: 'guitar',
-              label: 'Guitar (%T)',
-              tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
-              capo: 2
+            instrument: 'guitar',
+            label: 'Guitar (%T)',
+            tuning: ['D,', 'A,', 'D', 'G', 'A', 'd'],
+            capo: 2
           }
-        ]
+        ])
       }
       ABCJS.renderAbc("paper2", abc2, options2)
 
@@ -93,14 +103,14 @@ w: vas t'en lui por ter u ne le ttre
         "|:gf|eB B2 efge|eB B2 gedB|A2 FA DAFA|A2 FA defg|\n" +
         "eB B2 eBgB|eB B2 defg|afe^c dBAF|DEFD E2:|\n"
       var options3 = {
-        tablature: [
+        tablature: tablaturesWithStems([
           {
             instrument: 'violin',
             label : 'Violin',
             tuning: ['G,', 'D', 'A', 'e'],
             highestNote: "f'"
           }
-        ]
+        ])
       }
       ABCJS.renderAbc("paper3", abc3, options3)
 
@@ -112,13 +122,13 @@ w: vas t'en lui por ter u ne le ttre
         "K:C clef=alto\n" +
         "G,|G,CE|E2 C/B,/|A,3/2 F/F|F2|]\t\n"
       var options4 = {
-        tablature: [
+        tablature: tablaturesWithStems([
           {
               instrument: 'violin',
               label: 'Viola/Mandola (%T)',
               tuning: ['C,', 'G,', 'D', 'A']
           }
-        ]
+        ])
       }
       ABCJS.renderAbc("paper4", abc4, options4 )
 
@@ -142,8 +152,8 @@ w: vas t'en lui por ter u ne le ttre
         "V:B\n" +
         "z/|G,,G,,G,,B,,|:C,D,G,,z|G,,G,,G,,B,,|\n"
       var options5 = {
-        tablature: 
-          [
+        tablature:
+          tablaturesWithStems([
             {
               instrument: 'violin',
               label: 'Violin I',
@@ -164,9 +174,29 @@ w: vas t'en lui por ter u ne le ttre
               label: 'Cello (%T)',
               tuning: ['C,,', 'G,,', 'D,', 'A,']
             }
-          ],
+          ]),
       }
       ABCJS.renderAbc("paper5", abc5, options5)
+    }
+
+    window.onload = function () {
+      // Guitar and Editor
+      editor = new ABCJS.Editor("abc",
+        {
+          canvas_id: "paper1",
+          warnings_id: "warnings",
+          abcjsParams: {
+            tablature: editorTablature()
+          }
+        });
+
+      renderStatic();
+
+      document.getElementById("stems").addEventListener("change", function (event) {
+        showStems = event.target.checked;
+        renderStatic();
+        editor.paramChanged({ tablature: editorTablature() });
+      });
     }
 
   </script>
