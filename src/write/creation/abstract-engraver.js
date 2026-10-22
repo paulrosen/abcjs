@@ -55,6 +55,7 @@ var AbstractEngraver = function (getTextSize, tuneNumber, options) {
 	this.jazzchords = !!options.jazzchords
 	this.accentAbove = !!options.accentAbove
 	this.germanAlphabet = !!options.germanAlphabet
+	this.lyricExtenders = options.lyricExtenders === 'none' ? 'none' : 'underscore'
 	this.reset();
 };
 
@@ -768,8 +769,10 @@ AbstractEngraver.prototype.addNoteToAbcElement = function (abselem, elem, dot, s
 
 AbstractEngraver.prototype.addLyric = function (abselem, elem, voiceNumber) {
 	var lyricStr = "";
+	var hideExtenders = this.lyricExtenders === 'none';
 	elem.lyric.forEach(function (ly) {
-		var div = ly.divider === ' ' ? "" : ly.divider;
+		var div = ly.divider;
+		if (div === ' ' || (div === '_' && hideExtenders)) div = "";
 		lyricStr += ly.syllable + div + "\n";
 	});
 	var lyricDim = this.getTextSize.calc(lyricStr, 'vocalfont', "lyric");

@@ -72,6 +72,8 @@ var EngraverController = function (paper, params) {
 		this.accentAbove = params.accentAbove;
 	if (params.germanAlphabet)
 		this.germanAlphabet = params.germanAlphabet;
+	if (params.lyricExtenders)
+		this.lyricExtenders = params.lyricExtenders;
 	if (params.lineThickness)
 		this.lineThickness = params.lineThickness;
 	if (params.chordGrid)
@@ -200,7 +202,8 @@ EngraverController.prototype.setupTune = function (abcTune, tuneNumber) {
 		jazzchords: this.jazzchords,
 		timeBasedLayout: this.timeBasedLayout,
 		accentAbove: this.accentAbove,
-		germanAlphabet: this.germanAlphabet
+		germanAlphabet: this.germanAlphabet,
+		lyricExtenders: this.lyricExtenders
 	});
 	this.engraver.setStemHeight(this.renderer.spacing.stemHeight);
 	this.engraver.measureLength = abcTune.getMeterFraction().num / abcTune.getMeterFraction().den;
