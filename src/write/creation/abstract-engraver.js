@@ -855,16 +855,29 @@ AbstractEngraver.prototype.createNote = function (elem, nostem, isSingleLineStaf
 		roomtakenright = ret3.roomTakenRight;
 	}
 
+	// An invisible rest has no note head, so the bracket goes from the first to the last visible note of the tuplet.
 	if (elem.startTriplet) {
 		this.triplet = new TripletElem(elem.startTriplet, notehead, { flatBeams: this.flatBeams }); // above is opposite from case of slurs
 	}
 
 	if (elem.endTriplet && this.triplet) {
-		this.triplet.setCloseAnchor(notehead);
+		var closeAnchor = notehead || this.triplet.middleElems.pop() || this.triplet.anchor1;
+		if (closeAnchor) {
+			if (!this.triplet.anchor1)
+				this.triplet.setStartAnchor(closeAnchor);
+			this.triplet.setCloseAnchor(closeAnchor);
+		} else {
+			// Nothing in the tuplet is visible, so there is no bracket.
+			this.triplet = null;
+			this.tripletmultiplier = 1;
+		}
 	}
 
-	if (this.triplet && !elem.startTriplet && !elem.endTriplet && !(elem.rest && elem.rest.type === "spacer")) {
-		this.triplet.middleNote(notehead);
+	if (this.triplet && notehead && !elem.startTriplet && !elem.endTriplet && !(elem.rest && elem.rest.type === "spacer")) {
+		if (!this.triplet.anchor1)
+			this.triplet.setStartAnchor(notehead);
+		else
+			this.triplet.middleNote(notehead);
 	}
 
 	return abselem;
