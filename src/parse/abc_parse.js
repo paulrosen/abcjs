@@ -288,16 +288,18 @@ var Parse = function() {
 		line.forEach(function(el) {
 			if (word_list.length !== 0) {
 				if (word_list[0].skip) {
-					switch (word_list[0].to) {
+					var skipTo = word_list[0].to;
+					switch (skipTo) {
 						case 'next': if (el.el_type === 'note' && el.pitches !== null && !inSlur) word_list.shift(); break;
 						case 'slur': if (el.el_type === 'note' && el.pitches !== null) word_list.shift(); break;
 						case 'bar': if (el.el_type === 'bar') word_list.shift(); break;
 					}
 					if (el.el_type !== 'bar') {
+						var skipDivider = skipTo === 'slur' ? '_' : ' ';
 						if (el.lyric === undefined)
-							el.lyric = [{syllable: "", divider: " "}];
+							el.lyric = [{syllable: "", divider: skipDivider}];
 						else
-							el.lyric.push({syllable: "", divider: " "});
+							el.lyric.push({syllable: "", divider: skipDivider});
 					}
 				} else {
 					if (el.el_type === 'note' && el.rest === undefined && !inSlur) {
