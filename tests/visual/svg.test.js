@@ -51,6 +51,48 @@ describe("SVG Creation", function() {
 		abcjs.renderAbc("paper", abcGraceNotes, { add_classes: true});
 	})
 
+	describe("key-signature-accidentals", function() {
+		it("double-sharp-in-modified-mode", function() {
+			testKeyAccidentals("K:D#phr ^^f\nC D E F|", ["dblsharp", "sharp", "sharp", "sharp", "sharp"])
+		})
+		it("double-accidentals-match-note-glyphs", function() {
+			testKeyAccidentals("K:C ^^F __B\n^^F __B|", ["dblsharp", "dblflat"])
+			var signature = document.querySelector("#paper .abcjs-key-signature")
+			var accidentals = ["dblsharp", "dblflat"]
+			accidentals.forEach(function(accidental) {
+				var selector = '[data-name="accidentals.' + accidental + '"]'
+				var keyGlyph = signature.querySelector(selector)
+				var noteGlyph = document.querySelector("#paper .abcjs-note " + selector)
+				chai.assert.closeTo(keyGlyph.getBBox().width, noteGlyph.getBBox().width, 0.001)
+				chai.assert.equal(keyGlyph.getAttribute("d").replace(/^M[^a-zA-Z]+/, "M"), noteGlyph.getAttribute("d").replace(/^M[^a-zA-Z]+/, "M"))
+			})
+			var glyphs = signature.querySelectorAll("[data-name]")
+			chai.assert.isBelow(glyphs[0].getBBox().x + glyphs[0].getBBox().width, glyphs[1].getBBox().x)
+		})
+		it("double-accidentals-in-bass-clef", function() {
+			testKeyAccidentals("K:C ^^F __B clef=bass\nF, B,|", ["dblsharp", "dblflat"])
+		})
+		it("double-accidentals-in-inline-key", function() {
+			testKeyAccidentals("K:C\nC [K:C ^^F __B] F B|", ["dblsharp", "dblflat"])
+		})
+		it("double-accidentals-on-following-staff", function() {
+			testKeyAccidentals("K:C ^^F __B\nF B|\nF B|", ["dblsharp", "dblflat", "dblsharp", "dblflat"])
+		})
+		it("ordinary-and-quartertone-accidentals", function() {
+			testKeyAccidentals("K:C ^F =C _B ^/G _/A\nC D E F|", ["sharp", "nat", "flat", "halfsharp", "halfflat"])
+		})
+	})
+
+	function testKeyAccidentals(abc, expected) {
+		abcjs.renderAbc("paper", "X:1\nL:1/4\n" + abc, { add_classes: true })
+		var glyphs = document.querySelectorAll("#paper .abcjs-key-signature [data-name]")
+		chai.assert.deepEqual(Array.from(glyphs, function(glyph) { return glyph.getAttribute("data-name") }), expected.map(function(acc) { return "accidentals." + acc }))
+		Array.from(glyphs).forEach(function(glyph) {
+			chai.assert.isAbove(glyph.getBBox().width, 0)
+			chai.assert.isAbove(glyph.getBBox().height, 0)
+		})
+	}
+
 	function testSvg(abc) {
 		abcjs.renderAbc("paper", abc, { add_classes: true, showDebug: [ 'box', 'grid' ], paddingleft: 0, paddingtop: 0, paddingright: 0, paddingbottom: 0 });
 	}
