@@ -148,17 +148,6 @@ var strTranspose;
 						transposedMeasureAccidentals[newPitch.upper] = newPitch.acc
 					changes.push({note:newPitch.acc+newPitch.name, start: pitchArray[j].index, end: pitchArray[j].index+pitchArray[j].note.length})
 				}
-				if (el.gracenotes) {
-					for (var g = 0; g < el.gracenotes.length; g++) {
-						var grace = parseNote(el.gracenotes[g].name, keyRoot, keyAccidentals, measureAccidentals)
-						if (grace.acc)
-							measureAccidentals[grace.name.toUpperCase()] = grace.acc
-						var newGrace = transposePitch(grace, destinationKey, letterDistance, measureAccidentals)
-						if (newGrace.acc)
-							transposedMeasureAccidentals[newGrace.upper] = newGrace.acc
-						changes.push(replaceGrace(abc, el.startChar, el.endChar, newGrace.acc + newGrace.name, g))
-					}
-				}
 			} else if (el.el_type === "bar") {
 				measureAccidentals = {}
 				transposedMeasureAccidentals = {}
@@ -390,43 +379,6 @@ var strTranspose;
 	// 		note: newPitch
 	// 	};
 	// }
-
-	function replaceGrace(abc, start, end, newGrace, index) {
-		var note = abc.substring(start, end)
-		// I don't know how to capture more than one note, so I'm separating them. There is a limit of the number of notes in a chord depending on the repeats I have here, but it is unlikely to happen in real music.
-		var regOpenBrace = /\{/
-		var regCloseBrace = /\}/
-		var regPreBrace = /([^\{]*)/
-		var regPreNote = /(\/*)/
-		var match = note.match(new RegExp(regPreBrace.source + regOpenBrace.source + regPreNote.source + regOptionalNote.source +
-			regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source +
-			regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source + regPreNote.source + regOptionalNote.source +
-			regPreNote.source + regOptionalNote.source + regCloseBrace.source))
-		if (match) {
-			// This will match all notes inside a grace symbol
-			// Get the number of chars used by the previous graces
-			var count = 1 + match[1].length // one character for the open brace, and whatever comes before the brace
-			for (var i = 0; i < index; i++) { // index is the iteration through the chord. This function gets called for each one.
-				if (match[i * 3 + 2])
-					count += match[i * 3 + 2].length
-				if (match[i * 3 + 3])
-					count += match[i * 3 + 3].length
-				if (match[i * 3 + 4])
-					count += match[i * 3 + 4].length
-				if (match[i * 3 + 5])
-					count += match[i * 3 + 5].length
-			}
-			if (match[index * 3 + 2])
-				count += match[i * 3 + 2].length
-			start += count
-			var endLen = match[index * 3 + 3] ? match[index * 3 + 3].length : 0
-			endLen += match[index * 3 + 4] ? match[index * 3 + 4].length : 0
-			endLen += match[index * 3 + 5] ? match[index * 3 + 5].length : 0
-
-			end = start + endLen
-		}
-		return { start: start, end: end, note: newGrace }
-	}
 
 	function replaceChord(abc, start, end, newChord) {
 		// Isolate the chord and just replace that
