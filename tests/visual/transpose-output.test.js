@@ -492,6 +492,12 @@ E`
 		outputTest(abcDimChords, abcDimChordsExpected11, 11)
 	})
 
+	it("output-negative-octave-same-letter", function () {
+		var abc = "X:1\nL:1/4\nK:Gm\nG A B|"
+		var expected = "X:1\nL:1/4\nK:G#m\nG, A, B,|"
+		outputTest(abc, expected, -11)
+	})
+
 	// it("output-temp", function () {
 	// 	outputTest(abcTemp, abcTempExpected, 2)
 	// })
