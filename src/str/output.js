@@ -101,11 +101,11 @@ var strTranspose;
 			// This could either be a half step (like Eb => E) or almost an octave (like E => Eb)
 			if (steps > 2) // If it is a large leap, then we are going up an octave
 				letterDistance += 7
-			else if (steps === -12) // If it is a large leap, then we are going down an octave	
-			 	letterDistance -= 7
-		} else if (steps > 0 && letterDistance < 0) 
+			else if (steps === -11 || steps === -12) // If it is a large leap, then we are going down an octave
+				letterDistance -= 7
+		} else if (steps > 0 && letterDistance < 0)
 			letterDistance += 7
-		else if (steps < 0 && letterDistance > 0) 
+		else if (steps < 0 && letterDistance > 0)
 			letterDistance -= 7
 
 		if (steps > 12)
