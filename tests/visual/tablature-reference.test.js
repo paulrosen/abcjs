@@ -8,6 +8,9 @@
 // Reentrant tunings: dev rejected them, so there is no previous reference; the
 // expected values were checked by hand (standard ukulele voicings: C 0003,
 // Am 2000, F 2010, G7 0212...).
+//
+// 5-string banjo (g D G B d): the drone string starts at fret 5; it is played
+// open (0) or from fret 6, and full-length strings come first at the same fret.
 
 describe("Tablature reference", function () {
 	var cases = [
@@ -33,6 +36,9 @@ describe("Tablature reference", function () {
 		{ name: "reentrant chord accidental carried in the measure", abc: "X:1\nM:4/4\nL:1/4\nK:C\n|[C^FA] F G F | F G A B |\n", tab: [{"instrument": "violin", "tuning": ["G", "C", "E", "A"]}] },
 		{ name: "reentrant unplayable chords", abc: "X:1\nM:4/4\nL:1/4\nK:C\n|[CDEFG] [C^CD] [B,C] [cegc'] |\n", tab: [{"instrument": "violin", "tuning": ["G", "C", "E", "A"]}] },
 		{ name: "reentrant guitar D A D G A d", abc: "X:1\nM:4/4\nL:1/4\nK:C\n|D, A, D G | A d [D,A,DGAd] [DAd] |\n", tab: [{"instrument": "guitar", "tuning": ["D", "A", "D", "G", "A", "d"]}] },
+		{ name: "banjo open G: single notes and rolls", abc: "X:1\nM:4/4\nL:1/4\nK:G\n|g ^g a b | c' d' e' g' |\n|G B g d | A B g d |\n", tab: [{"instrument": "fiveString", "tuning": ["g", "D", "G", "B", "d"]}] },
+		{ name: "banjo open G: chords", abc: "X:1\nM:4/4\nL:1/4\nK:G\n|[GBdg] [cegc'] [^FAcd] [EGBe] |\n", tab: [{"instrument": "fiveString", "tuning": ["g", "D", "G", "B", "d"]}] },
+		{ name: "banjo with stringStartFret option (full-length 5th string)", abc: "X:1\nM:4/4\nL:1/4\nK:G\n|g ^g a b |\n", tab: [{"instrument": "fiveString", "tuning": ["g", "D", "G", "B", "d"], "stringStartFret": [0, 0, 0, 0, 0]}] },
 	];
 
 	var expected = {
@@ -726,6 +732,54 @@ describe("Tablature reference", function () {
 				{"el_type": "note", "startChar": 37, "endChar": 48, "notes": [{"num": "?", "str": 5, "pitch": "D,"}, {"num": "?", "str": 5, "pitch": "A,"}, {"num": 0, "str": 5, "pitch": "D"}, {"num": 0, "str": 2, "pitch": "G"}, {"num": 0, "str": 4, "pitch": "A"}, {"num": 0, "str": 0, "pitch": "d"}]},
 				{"el_type": "note", "startChar": 48, "endChar": 54, "notes": [{"num": 0, "str": 5, "pitch": "D"}, {"num": 0, "str": 4, "pitch": "A"}, {"num": 0, "str": 0, "pitch": "d"}]},
 				{"el_type": "bar", "type": "bar_thin", "endChar": 55, "startChar": 54},
+			],
+		],
+		"banjo open G: single notes and rolls": [
+			[
+				{"el_type": "bar", "type": "bar_thin", "endChar": 21, "startChar": 20},
+				{"el_type": "note", "startChar": 21, "endChar": 23, "notes": [{"num": 0, "str": 4, "pitch": "g"}]},
+				{"el_type": "note", "startChar": 23, "endChar": 26, "notes": [{"num": 6, "str": 0, "pitch": "^g"}]},
+				{"el_type": "note", "startChar": 26, "endChar": 28, "notes": [{"num": 7, "str": 0, "pitch": "a"}]},
+				{"el_type": "note", "startChar": 28, "endChar": 30, "notes": [{"num": 9, "str": 0, "pitch": "b"}]},
+				{"el_type": "bar", "type": "bar_thin", "endChar": 31, "startChar": 30},
+				{"el_type": "note", "startChar": 31, "endChar": 35, "notes": [{"num": 10, "str": 0, "pitch": "c'"}]},
+				{"el_type": "note", "startChar": 35, "endChar": 38, "notes": [{"num": 12, "str": 0, "pitch": "d'"}]},
+				{"el_type": "note", "startChar": 38, "endChar": 41, "notes": [{"num": 14, "str": 0, "pitch": "e'"}]},
+				{"el_type": "note", "startChar": 41, "endChar": 44, "notes": [{"num": 17, "str": 0, "pitch": "g'"}]},
+				{"el_type": "bar", "type": "bar_thin", "endChar": 45, "startChar": 44},
+			],
+			[
+				{"el_type": "bar", "type": "bar_thin", "endChar": 47, "startChar": 46},
+				{"el_type": "note", "startChar": 47, "endChar": 49, "notes": [{"num": 0, "str": 2, "pitch": "G"}]},
+				{"el_type": "note", "startChar": 49, "endChar": 51, "notes": [{"num": 0, "str": 1, "pitch": "B"}]},
+				{"el_type": "note", "startChar": 51, "endChar": 53, "notes": [{"num": 0, "str": 4, "pitch": "g"}]},
+				{"el_type": "note", "startChar": 53, "endChar": 55, "notes": [{"num": 0, "str": 0, "pitch": "d"}]},
+				{"el_type": "bar", "type": "bar_thin", "endChar": 56, "startChar": 55},
+				{"el_type": "note", "startChar": 56, "endChar": 59, "notes": [{"num": 2, "str": 2, "pitch": "A"}]},
+				{"el_type": "note", "startChar": 59, "endChar": 61, "notes": [{"num": 0, "str": 1, "pitch": "B"}]},
+				{"el_type": "note", "startChar": 61, "endChar": 63, "notes": [{"num": 0, "str": 4, "pitch": "g"}]},
+				{"el_type": "note", "startChar": 63, "endChar": 65, "notes": [{"num": 0, "str": 0, "pitch": "d"}]},
+				{"el_type": "bar", "type": "bar_thin", "endChar": 66, "startChar": 65},
+			],
+		],
+		"banjo open G: chords": [
+			[
+				{"el_type": "bar", "type": "bar_thin", "endChar": 21, "startChar": 20},
+				{"el_type": "note", "startChar": 21, "endChar": 28, "notes": [{"num": 0, "str": 2, "pitch": "G"}, {"num": 0, "str": 1, "pitch": "B"}, {"num": 0, "str": 0, "pitch": "d"}, {"num": 0, "str": 4, "pitch": "g"}]},
+				{"el_type": "note", "startChar": 28, "endChar": 36, "notes": [{"num": 5, "str": 2, "pitch": "c"}, {"num": 5, "str": 1, "pitch": "e"}, {"num": 0, "str": 4, "pitch": "g"}, {"num": 10, "str": 0, "pitch": "c'"}]},
+				{"el_type": "note", "startChar": 36, "endChar": 44, "notes": [{"num": 4, "str": 3, "pitch": "^F"}, {"num": 2, "str": 2, "pitch": "A"}, {"num": 1, "str": 1, "pitch": "c"}, {"num": 0, "str": 0, "pitch": "d"}]},
+				{"el_type": "note", "startChar": 44, "endChar": 51, "notes": [{"num": 2, "str": 3, "pitch": "E"}, {"num": 0, "str": 2, "pitch": "G"}, {"num": 0, "str": 1, "pitch": "B"}, {"num": 2, "str": 0, "pitch": "e"}]},
+				{"el_type": "bar", "type": "bar_thin", "endChar": 52, "startChar": 51},
+			],
+		],
+		"banjo with stringStartFret option (full-length 5th string)": [
+			[
+				{"el_type": "bar", "type": "bar_thin", "endChar": 21, "startChar": 20},
+				{"el_type": "note", "startChar": 21, "endChar": 23, "notes": [{"num": 0, "str": 4, "pitch": "g"}]},
+				{"el_type": "note", "startChar": 23, "endChar": 26, "notes": [{"num": 1, "str": 4, "pitch": "^g"}]},
+				{"el_type": "note", "startChar": 26, "endChar": 28, "notes": [{"num": 2, "str": 4, "pitch": "a"}]},
+				{"el_type": "note", "startChar": 28, "endChar": 30, "notes": [{"num": 4, "str": 4, "pitch": "b"}]},
+				{"el_type": "bar", "type": "bar_thin", "endChar": 31, "startChar": 30},
 			],
 		],
 	};

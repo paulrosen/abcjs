@@ -48,6 +48,22 @@ function buildPatterns(self) {
 }
 
 
+// Fret of the neck where each string starts (0 for full-length strings).
+// Given with the "stringStartFret" tablature option (one value per tuning entry);
+// by default, a five-string tuning whose first string is higher than the second
+// (g D G B d) is a banjo: its first string is the short drone string, starting at 5.
+function buildStartFrets(self, params) {
+	var starts = [];
+	for (var i = 0; i < self.stringPitches.length; i++) {
+		var start = params.stringStartFret ? parseInt(params.stringStartFret[i], 10) : 0;
+		starts.push(start > 0 ? start : 0);
+	}
+	if (!params.stringStartFret && params.instrument === 'fiveString' &&
+		self.stringPitches.length === 5 && self.stringPitches[0] > self.stringPitches[1])
+		starts[0] = 5;
+	return starts;
+}
+
 function buildSecond(first) {
 	var seconds = [];
 	seconds[0] = [];
@@ -96,10 +112,17 @@ function noteCandidates(self, note) {
 	var candidates = [];
 	for (var i = 0; i < self.stringPitches.length; i++) {
 		var fret = pitch - self.stringPitches[i];
-		if (fret >= 0)
-			candidates.push({ arrIndex: i, fret: fret, num: Math.round(fret) });
+		if (fret < 0)
+			continue;
+		// A string that starts further up the neck (5-string banjo drone string) is
+		// numbered as on the neck: open = 0, then startFret + 1, startFret + 2...
+		var start = self.stringStartFrets[i];
+		if (start > 0 && fret > 0)
+			fret += start;
+		candidates.push({ arrIndex: i, fret: fret, num: Math.round(fret), short: start > 0 });
 	}
-	candidates.sort(function (a, b) { return a.fret - b.fret; });
+	// lowest fret; at the same fret, full-length strings before a short string
+	candidates.sort(function (a, b) { return a.fret - b.fret || a.short - b.short; });
 	return candidates;
 }
 
@@ -113,10 +136,12 @@ function toNumber(self, note) {
 			note: note
 		};
 	}
-	// lowest fret; on a tie, the string closest to the previous note
+	// lowest fret; at the same fret, full-length strings first, then the string
+	// closest to the previous note
 	if (self.lastArrIndex != null) {
 		candidates.sort(function (a, b) {
 			if (a.fret !== b.fret) return a.fret - b.fret;
+			if (a.short !== b.short) return a.short - b.short;
 			return Math.abs(a.arrIndex - self.lastArrIndex) - Math.abs(b.arrIndex - self.lastArrIndex);
 		});
 	}
@@ -362,6 +387,7 @@ function StringPatterns(plugin) {
 		var pitch = noteToMidi(this.tuning[i]) + this.capo
 		this.stringPitches.push(pitch)
 	}
+	this.stringStartFrets = buildStartFrets(this, plugin.params);
 	if (this.capo > 0) {
 		this.capoTuning = buildCapo(this);
 	}
