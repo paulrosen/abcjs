@@ -210,12 +210,9 @@ function handleChordNotes(self, notes) {
 	if (activeNotes.length === 0)
 		return [];
 
+	// With more notes than strings, the partial search places as many notes as
+	// possible and marks the others "?" instead of stacking two on one string.
 	var numStrings = self.stringPitches.length;
-	if (activeNotes.length > numStrings) {
-		// more notes than strings: no voicing can exist, place them one by one
-		return activeNotes.map(function (n) { return toNumber(self, n); });
-	}
-
 	var candidateLists = activeNotes.map(function (n) { return noteCandidates(self, n); });
 	var assignment = searchAssignment(candidateLists, false) || searchAssignment(candidateLists, true);
 
@@ -224,8 +221,8 @@ function handleChordNotes(self, notes) {
 		var chosen = assignment[jj];
 		if (chosen)
 			retNotes.push({ num: chosen.num, str: numStrings - 1 - chosen.arrIndex, note: activeNotes[jj] });
-		else // no free string left for this note in this voicing
-			retNotes.push({ num: "?", str: -1, note: activeNotes[jj] });
+		else // no free string left for this note in this voicing: "?" on the bottom string, as before
+			retNotes.push({ num: "?", str: numStrings - 1, note: activeNotes[jj] });
 	}
 	return retNotes;
 }
