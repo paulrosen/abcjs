@@ -78,35 +78,53 @@ function computeStringCandidates(self, note) {
   return candidates;
 }
 
+// Ranking of chord voicings, shared by the complete and partial searches:
+// 1. place as many notes as possible on distinct strings,
+// 2. lowest highest fret,
+// 3. lowest sum of frets (keeps every note as low as possible, like the
+//    original algorithm: each note on the string giving its lowest fret),
+// 4. smallest fret spread,
+// 5. on a perfect tie (unisons), earlier notes on lower strings -- the
+//    original algorithm moved the first of two equal notes down a string.
+function assignmentCost(assignment) {
+  var max = -Infinity, min = Infinity, sum = 0, count = 0;
+  for (var i = 0; i < assignment.length; i++) {
+    if (!assignment[i]) continue;
+    count++;
+    var f = assignment[i].num;
+    if (f > max) max = f;
+    if (f < min) min = f;
+    sum += f;
+  }
+  return { max: max, spread: max - min, sum: sum, count: count };
+}
+
+function isBetterAssignment(a, aCost, b, bCost) {
+  if (aCost.count !== bCost.count) return aCost.count > bCost.count;
+  if (aCost.max !== bCost.max) return aCost.max < bCost.max;
+  if (aCost.sum !== bCost.sum) return aCost.sum < bCost.sum;
+  if (aCost.spread !== bCost.spread) return aCost.spread < bCost.spread;
+  for (var i = 0; i < a.length; i++) {
+    var ai = a[i] ? a[i].arrIndex : Infinity;
+    var bi = b[i] ? b[i].arrIndex : Infinity;
+    if (ai !== bi) return ai < bi;
+  }
+  return false;
+}
+
 function bestChordAssignment(candidateLists) {
-  // Finds the note->string bijection (one note per distinct string)
-  // that minimizes the worst fret used, tie-broken by fret spread,
-  // then by total fret sum. Brute-force backtracking: chords rarely
-  // exceed 6 notes, so this is cheap regardless of tuning shape.
+  // Finds the note->string bijection (one note per distinct string) with the
+  // best rank (see isBetterAssignment). Brute-force backtracking: chords
+  // rarely exceed 6 notes, so this is cheap regardless of tuning shape.
   var n = candidateLists.length;
   var usedStrings = {};
   var current = new Array(n);
   var best = null, bestCost = null;
 
-  function cost(assignment) {
-    var max = -Infinity, min = Infinity, sum = 0;
-    for (var i = 0; i < assignment.length; i++) {
-      var f = assignment[i].num;
-      if (f > max) max = f;
-      if (f < min) min = f;
-      sum += f;
-    }
-    return { max: max, spread: max - min, sum: sum };
-  }
-  function better(a, b) {
-    if (a.max !== b.max) return a.max < b.max;
-    if (a.spread !== b.spread) return a.spread < b.spread;
-    return a.sum < b.sum;
-  }
   function backtrack(noteIdx) {
     if (noteIdx === n) {
-      var c = cost(current);
-      if (!best || better(c, bestCost)) { best = current.slice(); bestCost = c; }
+      var c = assignmentCost(current);
+      if (!best || isBetterAssignment(current, c, best, bestCost)) { best = current.slice(); bestCost = c; }
       return;
     }
     var cands = candidateLists[noteIdx];
@@ -128,43 +146,22 @@ function bestPartialChordAssignment(candidateLists) {
   // unplaced rather than requiring every note to get a distinct string.
   // Used when no complete bijection exists (more notes competing for a
   // string range than there are strings to hold them) -- maximizes the
-  // number of notes placed on distinct strings, then applies the same
-  // worst-fret / spread / sum tie-break among assignments of that size.
+  // number of notes placed on distinct strings, then the same ranking.
   var n = candidateLists.length;
   var usedStrings = {};
   var current = new Array(n);
-  var best = null, bestPlaced = -1, bestCost = null;
+  var best = null, bestCost = null;
 
-  function cost(assignment) {
-    var max = -Infinity, min = Infinity, sum = 0, count = 0;
-    for (var i = 0; i < assignment.length; i++) {
-      if (!assignment[i]) continue;
-      count++;
-      var f = assignment[i].num;
-      if (f > max) max = f;
-      if (f < min) min = f;
-      sum += f;
-    }
-    return { max: max, spread: max - min, sum: sum, count: count };
-  }
-  function better(a, b) {
-    if (a.count !== b.count) return a.count > b.count; // place more notes, always
-    if (a.max !== b.max) return a.max < b.max;
-    if (a.spread !== b.spread) return a.spread < b.spread;
-    return a.sum < b.sum;
-  }
   function backtrack(noteIdx) {
     if (noteIdx === n) {
-      var c = cost(current);
-      if (!best || better(c, bestCost)) { best = current.slice(); bestCost = c; }
+      var c = assignmentCost(current);
+      if (!best || isBetterAssignment(current, c, best, bestCost)) { best = current.slice(); bestCost = c; }
       return;
     }
     var cands = candidateLists[noteIdx];
-    var placedAny = false;
     for (var ii = 0; ii < cands.length; ii++) {
       var cand = cands[ii];
       if (usedStrings[cand.arrIndex]) continue;
-      placedAny = true;
       usedStrings[cand.arrIndex] = true;
       current[noteIdx] = cand;
       backtrack(noteIdx + 1);
@@ -186,6 +183,9 @@ function handleChordNotes(self, notes) {
     if (notes[iiii].endTie) continue;
     var note = new TabNote(notes[iiii].name, self.clefTranspose);
     note.checkKeyAccidentals(self.accidentals, self.measureAccidentals);
+    // as toNumber() did for each chord note before: accidentals in a chord
+    // carry on to the rest of the measure
+    recordMeasureAccidental(self, note);
     activeNotes.push(note);
   }
   if (activeNotes.length === 0) return [];
@@ -226,7 +226,8 @@ function handleChordNotes(self, notes) {
 }
 
 
-function toNumber(self, note) {
+// An explicit accidental applies to the following notes of the same measure.
+function recordMeasureAccidental(self, note) {
   if (note.isAltered || note.natural) {
     var acc;
     if (note.isFlat) {
@@ -236,6 +237,10 @@ function toNumber(self, note) {
     } else if (note.natural) acc = "=";
     self.measureAccidentals[note.name.toUpperCase()] = acc;
   }
+}
+
+function toNumber(self, note) {
+  recordMeasureAccidental(self, note);
 
   var pitch = note.pitch + note.pitchAltered;
   if (note.quarter === '^') pitch -= 0.5;
