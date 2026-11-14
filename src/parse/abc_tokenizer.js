@@ -754,6 +754,8 @@ this.theReverser = function (str) {
 		var used = 1;
 		var num = '';
 		if (tokens[0].token === '-') {
+			// A minus sign has to be followed by the number it negates.
+			if (tokens.length < 2 || tokens[1].type !== 'number') return { used: 0 };
 			tokens.shift();
 			num = '-';
 			used++;
