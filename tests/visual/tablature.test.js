@@ -403,7 +403,7 @@ describe("Tablature", function () {
 		{
 			instrument: 'guitar',
 			label : 'Guitar (%T)',
-			tuning: ['D', 'A', 'D', 'G', 'A', 'd'], 
+			tuning: ['D', 'A', 'D', 'G', 'A', 'd'],
 		}
 	];
 
@@ -1029,7 +1029,7 @@ describe("Tablature", function () {
 		var visualObj = doRender(reentrantTuning, reentrantTuningParams);
 		chai.assert.isUndefined(visualObj[0].warnings);
 	});
-	
+
 	it("subtitle", function() {
 		// Just see it not crash
 		var visualObj = doRender(subTitle, violinParams)
