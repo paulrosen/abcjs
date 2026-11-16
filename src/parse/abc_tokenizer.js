@@ -755,6 +755,7 @@ this.theReverser = function (str) {
 		var num = '';
 		if (tokens[0].token === '-') {
 			tokens.shift();
+			if (tokens.length === 0) return { used: 0 };
 			num = '-';
 			used++;
 		}
