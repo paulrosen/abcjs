@@ -63,6 +63,8 @@ module.exports.legalAccents = [
   'D.C.alfine',
   'D.S.alcoda',
   'D.S.alfine',
+  'dacapo',
+  'dacoda',
   'editorial',
   'courtesy'
 ];

@@ -73,6 +73,16 @@ describe("Miscellaneous", function () {
 		{ c: '5', anchor: 'middle'},
 	]
 	
+	var abcDirectives2 = "X:1\n" +
+	"L:1/4\n" +
+	"CCCC!dacoda!|EEEE!dacapo!|\n"
+
+	var expectedDirectives2 = [
+		{ c: 'Da', anchor: 'end'},
+		{ c: 'scripts.coda', anchor: 'middle'},
+		{ c: 'Da Capo', anchor: 'end'},
+	]
+
 	var abcSetFont = 'X:1\n' +
 		'%%setfont-1 cursive 16 bold\n' +
 		'%%setfont-7 Arial 19 bold\n' +
@@ -329,6 +339,23 @@ describe("Miscellaneous", function () {
 			}
 		}
 		chai.assert.deepEqual(results, expectedDirectives)
+	})
+
+	it("directives2", function () {
+		var visualObj = abcjs.renderAbc("paper", abcDirectives2);
+		var voice = visualObj[0].lines[0].staff[0].voices[0]
+		var results = []
+		for (var i = 0; i < voice.length; i++) {
+			var elem = voice[i].abselem.children;
+			for (var j = 0; j < elem.length; j++) {
+				var rel = elem[j]
+				if (rel.type === 'decoration')
+					results.push({ c: elem[j].c, anchor: elem[j].anchor })
+				if (rel.c === 'scripts.coda')
+					results.push({ c: elem[j].c, anchor: elem[j].anchor })
+			}
+		}
+		chai.assert.deepEqual(results, expectedDirectives2)
 	})
 
 	it("set-font", function() {

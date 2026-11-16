@@ -148,9 +148,11 @@ var stackedDecoration = function (decoration, width, abselem, yPos, positioning,
 		var textFudge = 2;
 		var textHeight = 5;
 		// TODO-PER: Get the height of the current font and use that for the thickness.
-		abselem.addFixedX(new RelativeElement(text, width / 2, 0, y + textFudge, { type: "decoration", klass: 'ornament', thickness: 3, anchor: anchor }));
+		var elem = new RelativeElement(text, width / 2, 0, y + textFudge, { type: "decoration", klass: 'ornament', thickness: 3, anchor: anchor })
+		abselem.addFixedX(elem);
 
 		incrementPlacement(placement, textHeight);
+		return elem
 	}
 	function symbolDecoration(symbol, placement) {
 		var deltaX = width / 2;
@@ -228,6 +230,22 @@ var stackedDecoration = function (decoration, width, abselem, yPos, positioning,
 			case "fine":
 				textDecoration("FINE", positioning, 'middle');
 				hasOne = true;
+				break;
+			case "dacapo":
+				textDecoration("Da Capo", positioning, 'end');
+				hasOne = true;
+				break;
+			case "dacoda": {
+				var saveYpos = yPos.above
+				var elem = textDecoration("Da", positioning, 'end');
+				elem.dx -= 12 // bump it to the left of the coda sign
+				elem.top += 1.2 // center the text with the coda sign
+				elem.bottom += 1.2
+				elem.pitch += 1.2
+				yPos.above = saveYpos
+				symbolDecoration(symbolList['coda'], positioning);
+				hasOne = true;
+			}
 				break;
 			case "+":
 			case "open":

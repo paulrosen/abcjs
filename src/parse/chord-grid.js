@@ -363,6 +363,8 @@ function addDecoration(element, currentBar) {
 				case "D.C.alfine":
 				case "D.S.alcoda":
 				case "D.S.alfine":
+				case "dacapo":
+				case "dacoda":
 				case "fine":
 					if (!currentBar.annotations)
 						currentBar.annotations = []
