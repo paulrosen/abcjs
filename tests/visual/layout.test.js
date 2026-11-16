@@ -270,6 +270,35 @@ K:Gmaj
 		{"x":15,"y":372}
 	]
 
+	var tightLedgerLines = "X:1\n" +
+		"%%staffwidth 100\n" +
+		"K: C\n" +
+		"(3B,A,B, (3G,A,G, (3DCD (3C,D,C, (3B,A,B, (3G,A,G, (3C,D,C,|\n"
+
+	var expectedTightLedgerLines = [
+		{"x":47,"y":68},
+		{"x":63,"y":68},
+		{"x":80,"y":68},
+		{"x":96,"y":72},
+		{"x":112,"y":72},
+		{"x":129,"y":72},
+		{"x":141,"y":60},
+		{"x":150,"y":60},
+		{"x":163,"y":60},
+		{"x":172,"y":72},
+		{"x":188,"y":72},
+		{"x":204,"y":72},
+		{"x":221,"y":68},
+		{"x":237,"y":68},
+		{"x":253,"y":68},
+		{"x":270,"y":72},
+		{"x":286,"y":72},
+		{"x":302,"y":72},
+		{"x":319,"y":72},
+		{"x":335,"y":72},
+		{"x":351,"y":72}
+	]
+
 	it("line-too-wide", function() {
 		var visualObj = doLayoutTest(lineTooWide, {staffwidth: 500, expandToWidest: true }, expectedLineTooWide, 'staffwidth=500');
 		var expected = ['', 313, '', '', 15, 611, '']
@@ -405,6 +434,10 @@ K:Gmaj
 
 	it("text-spacing", function() {
 		doItemPlacementTest(textSpacing, expectedTextSpacing, 'g.abcjs-non-music,g.abcjs-staff-wrapper');
+	})
+
+	it("tight-ledger", function() {
+		doItemPlacementTest(tightLedgerLines, expectedTightLedgerLines, 'g.abcjs-note');
 	})
 
 })

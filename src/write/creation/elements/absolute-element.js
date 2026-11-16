@@ -183,7 +183,7 @@ AbsoluteElement.prototype._addChild = function (child) {
   
   // MAE 30 Sep 2024 - To avoid extra space for chords if there is only a bar number on the clef
   var okToPushTop = true;
-  if ((this.abcelem.el_type == "clef") && (child.type == "barNumber")){
+  if ((this.abcelem.el_type === "clef") && (child.type === "barNumber")){
     okToPushTop = false;
   }
 

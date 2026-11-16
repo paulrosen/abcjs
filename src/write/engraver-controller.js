@@ -247,6 +247,14 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
 		}
 	}
 	abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.classes.shouldAddClasses, this.getTextSize);
+
+	// Be sure that ledger lines don't touch. We only want extra space
+	// for ledger lines when there are ledgers on two notes that are
+	// next to each other. i.e. If there is a "D" then "C" we don't want
+	// extra spacing but if there is "B," and "C" we do. This is a problem
+	// when the music is squished together because there are lots of notes
+	// on a line.
+	spaceOutLedgers(abcTune.lines)
 };
 
 EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOffset) {
@@ -376,7 +384,7 @@ function duplicateSvg(source) {
 	var svg = document.createElementNS(svgNS, "svg");
 	for (var i = 0; i < source.attributes.length; i++) {
 		var attr = source.attributes[i];
-		if (attr.name !== "height" && attr.name != "aria-label")
+		if (attr.name !== "height" && attr.name !== "aria-label")
 			svg.setAttribute(attr.name, attr.value)
 	}
 	return svg;
@@ -394,5 +402,34 @@ EngraverController.prototype.getDim = function (historyEl) {
 EngraverController.prototype.addSelectListener = function (clickListener) {
 	this.listeners[this.listeners.length] = clickListener;
 };
+
+function spaceOutLedgers(lines) {
+	for (var i = 0; i < lines.length; i++) {
+		var line = lines[i]
+		if (line.staffGroup) {
+			for (var j = 0; j < line.staffGroup.voices.length; j++) {
+				var voice = line.staffGroup.voices[j]
+				for (var n = 1; n < voice.children.length; n++) {
+					var lastNote = voice.children[n - 1]
+					var thisNote = voice.children[n]
+					if (hasLedger(lastNote) && hasLedger(thisNote)) {
+						lastNote.w += 5.5
+					}
+				}
+			}
+		}
+	}
+}
+
+function hasLedger(abselem) {
+	if (abselem && abselem.children) {
+		for (var i = 0; i < abselem.children.length; i++) {
+			var child = abselem.children[i]
+			if (child.name === 'ledger')
+				return true
+		}
+	}
+	return false
+}
 
 module.exports = EngraverController;
