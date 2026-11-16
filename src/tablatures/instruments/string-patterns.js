@@ -25,12 +25,19 @@ function buildPatterns(self) {
 	if (self.capo > 0) {
 		tuning = self.capoTuning;
 	}
+	var pitches = self.stringPitches; // already computed, capo-aware
 	var pos = tuning.length - 1;
 	for (var iii = 0; iii < tuning.length; iii++) {
-		var nextNote = self.highestNote; // highest handled note
-		if (iii != tuning.length - 1) {
-			nextNote = tuning[iii + 1];
+		// The notes of a string go up to the next higher string -- searched by
+		// pitch rather than by position, so that reentrant tunings are accepted.
+		var nextNote = self.highestNote; // no higher string
+		var nextIdx = -1;
+		for (var kkk = 0; kkk < tuning.length; kkk++) {
+			if (pitches[kkk] > pitches[iii] && (nextIdx === -1 || pitches[kkk] < pitches[nextIdx]))
+				nextIdx = kkk;
 		}
+		if (nextIdx !== -1)
+			nextNote = tuning[nextIdx];
 		var stringNotes = tabNotes(tuning[iii], nextNote);
 		if (stringNotes.error) {
 			return stringNotes;
@@ -40,6 +47,22 @@ function buildPatterns(self) {
 	return strings;
 }
 
+
+// Fret of the neck where each string starts (0 for full-length strings).
+// Given with the "stringStartFret" tablature option (one value per tuning entry);
+// by default, a five-string tuning whose first string is higher than the second
+// (g D G B d) is a banjo: its first string is the short drone string, starting at 5.
+function buildStartFrets(self, params) {
+	var starts = [];
+	for (var i = 0; i < self.stringPitches.length; i++) {
+		var start = params.stringStartFret ? parseInt(params.stringStartFret[i], 10) : 0;
+		starts.push(start > 0 ? start : 0);
+	}
+	if (!params.stringStartFret && params.instrument === 'fiveString' &&
+		self.stringPitches.length === 5 && self.stringPitches[0] > self.stringPitches[1])
+		starts[0] = 5;
+	return starts;
+}
 
 function buildSecond(first) {
 	var seconds = [];
@@ -51,122 +74,182 @@ function buildSecond(first) {
 	return seconds;
 }
 
-function sameString(self, chord) {
-	for (var jjjj = 0; jjjj < chord.length - 1; jjjj++) {
-		var curPos = chord[jjjj];
-		var nextPos = chord[jjjj + 1];
-		if (curPos.str == nextPos.str) {
-			// same String
-			// => change lower pos 
-			if (curPos.str == self.strings.length - 1) {
-				// Invalid tab Chord position for instrument
-				curPos.num = "?";
-				nextPos.num = "?";
-				return;
+/*
+ * Choosing a string for each note
+ *
+ * 1. noteCandidates(): every string on which a note can be played, with its fret.
+ *    The strings are tested by pitch, not by position, so reentrant tunings
+ *    (high-G ukulele, 5-string banjo...) work.
+ * 2. Single notes (toNumber): the lowest fret; on a tie, the string closest to
+ *    the previous note. For ascending tunings this is the same choice as before.
+ * 3. Chords (handleChordNotes): one note per string, the best voicing according
+ *    to isBetterAssignment(), found by searchAssignment().
+ *
+ * "arrIndex" is the index of the string in the tuning (0 = first string of the
+ * tuning); the "str" returned to the renderer counts from the other end.
+ */
+
+// An explicit accidental applies to the following notes of the same measure.
+function recordMeasureAccidental(self, note) {
+	if (note.isAltered || note.natural) {
+		var acc;
+		if (note.isFlat) {
+			if (note.isDouble) acc = "__"; else acc = "_";
+		} else if (note.isSharp) {
+			if (note.isDouble) acc = "^^"; else acc = "^";
+		} else if (note.natural)
+			acc = "=";
+		self.measureAccidentals[note.name.toUpperCase()] = acc;
+	}
+}
+
+// Every string this note can be played on: { arrIndex, fret (exact), num (displayed) },
+// lowest fret first.
+function noteCandidates(self, note) {
+	var pitch = note.pitch + note.pitchAltered;
+	if (note.quarter === '^') pitch -= 0.5;
+	else if (note.quarter === "v") pitch += 0.5;
+	var candidates = [];
+	for (var i = 0; i < self.stringPitches.length; i++) {
+		var fret = pitch - self.stringPitches[i];
+		if (fret < 0)
+			continue;
+		// A string that starts further up the neck (5-string banjo drone string) is
+		// numbered as on the neck: open = 0, then startFret + 1, startFret + 2...
+		var start = self.stringStartFrets[i];
+		if (start > 0 && fret > 0)
+			fret += start;
+		candidates.push({ arrIndex: i, fret: fret, num: Math.round(fret), short: start > 0 });
+	}
+	// lowest fret; at the same fret, full-length strings before a short string
+	candidates.sort(function (a, b) { return a.fret - b.fret || a.short - b.short; });
+	return candidates;
+}
+
+function toNumber(self, note) {
+	recordMeasureAccidental(self, note);
+	var candidates = noteCandidates(self, note);
+	if (candidates.length === 0) {
+		return {
+			num: "?",
+			str: self.stringPitches.length - 1,
+			note: note
+		};
+	}
+	// lowest fret; at the same fret, full-length strings first, then the string
+	// closest to the previous note
+	if (self.lastArrIndex != null) {
+		candidates.sort(function (a, b) {
+			if (a.fret !== b.fret) return a.fret - b.fret;
+			if (a.short !== b.short) return a.short - b.short;
+			return Math.abs(a.arrIndex - self.lastArrIndex) - Math.abs(b.arrIndex - self.lastArrIndex);
+		});
+	}
+	var chosen = candidates[0];
+	self.lastArrIndex = chosen.arrIndex;
+	return {
+		num: chosen.num,
+		str: self.stringPitches.length - 1 - chosen.arrIndex,
+		note: note
+	};
+}
+
+function assignmentCost(assignment) {
+	var max = -Infinity, min = Infinity, sum = 0, count = 0;
+	for (var i = 0; i < assignment.length; i++) {
+		if (!assignment[i]) continue;
+		count++;
+		var f = assignment[i].num;
+		if (f > max) max = f;
+		if (f < min) min = f;
+		sum += f;
+	}
+	return { max: max, spread: max - min, sum: sum, count: count };
+}
+
+// Ranking of chord voicings:
+// 1. as many notes as possible on distinct strings,
+// 2. the lowest highest fret,
+// 3. the lowest sum of frets (each note as low as possible),
+// 4. the smallest spread,
+// 5. on a perfect tie (unisons), earlier notes on lower strings.
+function isBetterAssignment(a, aCost, b, bCost) {
+	if (aCost.count !== bCost.count) return aCost.count > bCost.count;
+	if (aCost.max !== bCost.max) return aCost.max < bCost.max;
+	if (aCost.sum !== bCost.sum) return aCost.sum < bCost.sum;
+	if (aCost.spread !== bCost.spread) return aCost.spread < bCost.spread;
+	for (var i = 0; i < a.length; i++) {
+		var ai = a[i] ? a[i].arrIndex : Infinity;
+		var bi = b[i] ? b[i].arrIndex : Infinity;
+		if (ai !== bi) return ai < bi;
+	}
+	return false;
+}
+
+// Best voicing: one candidate per note, never two notes on the same string.
+// With allowUnplaced, notes may be left without a string (shown as "?") when
+// no complete voicing exists. Exhaustive backtracking: chords have few notes.
+function searchAssignment(candidateLists, allowUnplaced) {
+	var n = candidateLists.length;
+	var usedStrings = {};
+	var current = new Array(n);
+	var best = null, bestCost = null;
+
+	function backtrack(noteIdx) {
+		if (noteIdx === n) {
+			var cost = assignmentCost(current);
+			if (!best || isBetterAssignment(current, cost, best, bestCost)) {
+				best = current.slice();
+				bestCost = cost;
 			}
-			// change lower pitch on lowest string
-			if (nextPos.num < curPos.num) {
-				nextPos.str++;
-				nextPos = noteToNumber(self,
-					nextPos.note,
-					nextPos.str,
-					self.secondPos,
-					self.strings[nextPos.str].length
-				);
-			} else {
-				curPos.str++;
-				curPos = noteToNumber(self,
-					curPos.note,
-					curPos.str,
-					self.secondPos,
-					self.strings[curPos.str].length
-				);
-			}
-			// update table
-			chord[jjjj] = curPos;
-			chord[jjjj + 1] = nextPos;
+			return;
+		}
+		var cands = candidateLists[noteIdx];
+		for (var ii = 0; ii < cands.length; ii++) {
+			var cand = cands[ii];
+			if (usedStrings[cand.arrIndex]) continue;
+			usedStrings[cand.arrIndex] = true;
+			current[noteIdx] = cand;
+			backtrack(noteIdx + 1);
+			usedStrings[cand.arrIndex] = false;
+		}
+		if (allowUnplaced) {
+			current[noteIdx] = null;
+			backtrack(noteIdx + 1);
 		}
 	}
-	return null;
+	backtrack(0);
+	return best; // null when no voicing exists
 }
 
 function handleChordNotes(self, notes) {
-	var retNotes = [];
+	var activeNotes = [];
 	for (var iiii = 0; iiii < notes.length; iiii++) {
 		if (notes[iiii].endTie)
 			continue;
 		var note = new TabNote(notes[iiii].name, self.clefTranspose);
-		note.checkKeyAccidentals(self.accidentals, self.measureAccidentals)
-		var curPos = toNumber(self, note);
-		retNotes.push(curPos);
+		note.checkKeyAccidentals(self.accidentals, self.measureAccidentals);
+		recordMeasureAccidental(self, note);
+		activeNotes.push(note);
 	}
-	sameString(self, retNotes);
+	if (activeNotes.length === 0)
+		return [];
+
+	// With more notes than strings, the partial search places as many notes as
+	// possible and marks the others "?" instead of stacking two on one string.
+	var numStrings = self.stringPitches.length;
+	var candidateLists = activeNotes.map(function (n) { return noteCandidates(self, n); });
+	var assignment = searchAssignment(candidateLists, false) || searchAssignment(candidateLists, true);
+
+	var retNotes = [];
+	for (var jj = 0; jj < activeNotes.length; jj++) {
+		var chosen = assignment[jj];
+		if (chosen)
+			retNotes.push({ num: chosen.num, str: numStrings - 1 - chosen.arrIndex, note: activeNotes[jj] });
+		else // no free string left for this note in this voicing: "?" on the bottom string, as before
+			retNotes.push({ num: "?", str: numStrings - 1, note: activeNotes[jj] });
+	}
 	return retNotes;
-}
-
-function noteToNumber(self, note, stringNumber, secondPosition, firstSize) {
-	var strings = self.strings;
-	note.checkKeyAccidentals(self.accidentals, self.measureAccidentals);
-	if (secondPosition) {
-		strings = secondPosition;
-	}
-	var noteName = note.emitNoAccidentals();
-	var num = strings[stringNumber].indexOf(noteName);
-	var acc = note.acc;
-	if (num != -1) {
-		if (secondPosition) {
-			num += firstSize;
-		}
-		if ((note.isFlat || note.acc == -1) && (num == 0)) {
-			// flat on 0 pos => previous string 7th position
-			var noteEquiv = note.getAccidentalEquiv();
-			stringNumber++;
-			num = strings[stringNumber].indexOf(noteEquiv.emit());
-			acc = 0;
-		}
-		return {
-			num: (num + acc),
-			str: stringNumber,
-			note: note
-		};
-	}
-	return null;
-}
-
-function toNumber(self, note) {
-	if (note.isAltered || note.natural) {
-		var acc;
-		if (note.isFlat) {
-			if (note.isDouble)
-				acc = "__"
-			else
-				acc = "_"
-		} else if (note.isSharp) {
-			if (note.isDouble)
-				acc = "^^"
-			else
-				acc = "^"
-		} else if (note.natural)
-			acc = "="
-		self.measureAccidentals[note.name.toUpperCase()] = acc
-	}
-	for (var i = self.stringPitches.length - 1; i >= 0; i--) {
-		if (note.pitch + note.pitchAltered >= self.stringPitches[i]) {
-			var num = note.pitch + note.pitchAltered - self.stringPitches[i]
-			if (note.quarter === '^') num -= 0.5
-			else if (note.quarter === "v") num += 0.5
-			return {
-				num: Math.round(num),
-				str: self.stringPitches.length - 1 - i, // reverse the strings because string 0 is on the bottom
-				note: note
-			}
-		}
-	}
-	return {
-		num: "?",
-		str: self.stringPitches.length - 1,
-		note: note,
-	};
 }
 
 StringPatterns.prototype.stringToPitch = function (stringNumber) {
@@ -298,11 +381,13 @@ function StringPatterns(plugin) {
 	}
 	this.transpose = plugin.transpose ? plugin.transpose : 0
 	this.tuning = tuning;
+	this.lastArrIndex = null; // string of the previous note (see toNumber)
 	this.stringPitches = []
 	for (var i = 0; i < this.tuning.length; i++) {
 		var pitch = noteToMidi(this.tuning[i]) + this.capo
 		this.stringPitches.push(pitch)
 	}
+	this.stringStartFrets = buildStartFrets(this, plugin.params);
 	if (this.capo > 0) {
 		this.capoTuning = buildCapo(this);
 	}
