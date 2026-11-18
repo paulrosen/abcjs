@@ -110,6 +110,14 @@ var pitchesToPerc = require('./pitches-to-perc');
 		preProcess(voices, options);
 
 		for (var i = 0; i < voices.length; i++) {
+			// Dynamics and volume commands belong to a single voice.
+			doBeatAccents = true;
+			stressBeat1 = 105;
+			stressBeatDown = 95;
+			stressBeatUp = 85;
+			volumesPerNotePitch = [];
+			nextVolume = undefined;
+			nextVolumeDelta = undefined;
 			transpose = 0;
 			chordTrack.setTranspose(transpose)
 			lastNoteDurationPosition = -1;
