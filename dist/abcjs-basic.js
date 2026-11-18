@@ -7780,7 +7780,7 @@ module.exports = MusicParser;
   \*****************************************/
 /***/ (function(module) {
 
-module.exports.legalAccents = ['trill', 'trillh', 'lowermordent', 'uppermordent', 'mordent', 'pralltriller', 'accent', 'fermata', 'invertedfermata', 'tenuto', '0', '1', '2', '3', '4', '5', '+', 'wedge', 'open', 'thumb', 'snap', 'turn', 'roll', 'breath', 'shortphrase', 'mediumphrase', 'longphrase', 'segno', 'coda', 'D.S.', 'D.C.', 'fine', 'beambr1', 'beambr2', 'slide', 'marcato', 'upbow', 'downbow', '/', '//', '///', '////', 'trem1', 'trem2', 'trem3', 'trem4', 'turnx', 'invertedturn', 'invertedturnx', 'trill(', 'trill)', 'arpeggio', 'xstem', 'mark', 'umarcato', 'style=normal', 'style=harmonic', 'style=rhythm', 'style=x', 'style=triangle', 'D.C.alcoda', 'D.C.alfine', 'D.S.alcoda', 'D.S.alfine', 'editorial', 'courtesy'];
+module.exports.legalAccents = ['trill', 'trillh', 'lowermordent', 'uppermordent', 'mordent', 'pralltriller', 'accent', 'fermata', 'invertedfermata', 'tenuto', '0', '1', '2', '3', '4', '5', '+', 'wedge', 'open', 'thumb', 'snap', 'turn', 'roll', 'breath', 'shortphrase', 'mediumphrase', 'longphrase', 'segno', 'coda', 'D.S.', 'D.C.', 'fine', 'beambr1', 'beambr2', 'slide', 'marcato', 'upbow', 'downbow', '/', '//', '///', '////', 'trem1', 'trem2', 'trem3', 'trem4', 'turnx', 'invertedturn', 'invertedturnx', 'trill(', 'trill)', 'arpeggio', 'xstem', 'mark', 'umarcato', 'style=normal', 'style=harmonic', 'style=rhythm', 'style=x', 'style=triangle', 'D.C.alcoda', 'D.C.alfine', 'D.S.alcoda', 'D.S.alfine', 'dacapo', 'dacoda', 'editorial', 'courtesy'];
 module.exports.volumeDecorations = ['p', 'pp', 'f', 'ff', 'mf', 'mp', 'ppp', 'pppp', 'fff', 'ffff', 'sfz'];
 module.exports.dynamicDecorations = ['crescendo(', 'crescendo)', 'diminuendo(', 'diminuendo)', 'glissando(', 'glissando)', '~(', '~)'];
 module.exports.accentPseudonyms = [['<', 'accent'], ['>', 'accent'], ['tr', 'trill'], ['plus', '+'], ['emphasis', 'accent'], ['^', 'umarcato'], ['marcato', 'umarcato']];
@@ -9094,6 +9094,9 @@ var Tokenizer = function Tokenizer(lines, multilineVars) {
     var num = '';
     if (tokens[0].token === '-') {
       tokens.shift();
+      if (tokens.length === 0) return {
+        used: 0
+      };
       num = '-';
       used++;
     } else if (tokens[0].type !== 'number') return {
@@ -9743,6 +9746,8 @@ function addDecoration(element, currentBar) {
         case "D.C.alfine":
         case "D.S.alcoda":
         case "D.S.alfine":
+        case "dacapo":
+        case "dacoda":
         case "fine":
           if (!currentBar.annotations) currentBar.annotations = [];
           currentBar.annotations.push(element.decoration[i]);
@@ -20501,13 +20506,15 @@ var stackedDecoration = function stackedDecoration(decoration, width, abselem, y
     var textFudge = 2;
     var textHeight = 5;
     // TODO-PER: Get the height of the current font and use that for the thickness.
-    abselem.addFixedX(new RelativeElement(text, width / 2, 0, y + textFudge, {
+    var elem = new RelativeElement(text, width / 2, 0, y + textFudge, {
       type: "decoration",
       klass: 'ornament',
       thickness: 3,
       anchor: anchor
-    }));
+    });
+    abselem.addFixedX(elem);
     incrementPlacement(placement, textHeight);
+    return elem;
   }
   function symbolDecoration(symbol, placement) {
     var deltaX = width / 2;
@@ -20586,6 +20593,23 @@ var stackedDecoration = function stackedDecoration(decoration, width, abselem, y
       case "fine":
         textDecoration("FINE", positioning, 'middle');
         hasOne = true;
+        break;
+      case "dacapo":
+        textDecoration("Da Capo", positioning, 'end');
+        hasOne = true;
+        break;
+      case "dacoda":
+        {
+          var saveYpos = yPos.above;
+          var elem = textDecoration("Da", positioning, 'end');
+          elem.dx -= 12; // bump it to the left of the coda sign
+          elem.top += 1.2; // center the text with the coda sign
+          elem.bottom += 1.2;
+          elem.pitch += 1.2;
+          yPos.above = saveYpos;
+          symbolDecoration(symbolList['coda'], positioning);
+          hasOne = true;
+        }
         break;
       case "+":
       case "open":
@@ -20939,7 +20963,7 @@ AbsoluteElement.prototype._addChild = function (child) {
 
   // MAE 30 Sep 2024 - To avoid extra space for chords if there is only a bar number on the clef
   var okToPushTop = true;
-  if (this.abcelem.el_type == "clef" && child.type == "barNumber") {
+  if (this.abcelem.el_type === "clef" && child.type === "barNumber") {
     okToPushTop = false;
   }
   child.parent = this;
@@ -25633,6 +25657,14 @@ EngraverController.prototype.constructTuneElements = function (abcTune) {
     }
   }
   abcTune.bottomText = new BottomText(abcTune.metaText, this.width, this.renderer.isPrint, this.renderer.padding.left, this.renderer.spacing, this.classes.shouldAddClasses, this.getTextSize);
+
+  // Be sure that ledger lines don't touch. We only want extra space
+  // for ledger lines when there are ledgers on two notes that are
+  // next to each other. i.e. If there is a "D" then "C" we don't want
+  // extra spacing but if there is "B," and "C" we do. This is a problem
+  // when the music is squished together because there are lots of notes
+  // on a line.
+  spaceOutLedgers(abcTune.lines);
 };
 EngraverController.prototype.engraveTune = function (abcTune, tuneNumber, lineOffset) {
   var origJazzChords = this.jazzchords;
@@ -25749,7 +25781,7 @@ function duplicateSvg(source) {
   var svg = document.createElementNS(svgNS, "svg");
   for (var i = 0; i < source.attributes.length; i++) {
     var attr = source.attributes[i];
-    if (attr.name !== "height" && attr.name != "aria-label") svg.setAttribute(attr.name, attr.value);
+    if (attr.name !== "height" && attr.name !== "aria-label") svg.setAttribute(attr.name, attr.value);
   }
   return svg;
 }
@@ -25769,6 +25801,32 @@ EngraverController.prototype.getDim = function (historyEl) {
 EngraverController.prototype.addSelectListener = function (clickListener) {
   this.listeners[this.listeners.length] = clickListener;
 };
+function spaceOutLedgers(lines) {
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (line.staffGroup) {
+      for (var j = 0; j < line.staffGroup.voices.length; j++) {
+        var voice = line.staffGroup.voices[j];
+        for (var n = 1; n < voice.children.length; n++) {
+          var lastNote = voice.children[n - 1];
+          var thisNote = voice.children[n];
+          if (hasLedger(lastNote) && hasLedger(thisNote)) {
+            lastNote.w += 5.5;
+          }
+        }
+      }
+    }
+  }
+}
+function hasLedger(abselem) {
+  if (abselem && abselem.children) {
+    for (var i = 0; i < abselem.children.length; i++) {
+      var child = abselem.children[i];
+      if (child.name === 'ledger') return true;
+    }
+  }
+  return false;
+}
 module.exports = EngraverController;
 
 /***/ }),
@@ -28564,7 +28622,7 @@ module.exports = Svg;
   \********************/
 /***/ (function(module) {
 
-var version = '6.7.2';
+var version = '6.7.3';
 module.exports = version;
 
 /***/ })

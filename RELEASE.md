@@ -1,3 +1,14 @@
+# Version 6.7.3
+
+## Bugs
+
+* Fix crash when typing only a "-" for a measurement.
+
+* Do a little extra spacing when there are ledger lines so that 
+the lines never touch on lines with lots of items.
+
+* Add !dacapo! and !dacoda!.
+
 # Version 6.7.2
 
 ## Bugs
