@@ -1,5 +1,6 @@
 var renderText = require('./text');
 var printStem = require('./print-stem');
+var printPath = require('./print-path');
 var printStaffLine = require('./staff-line');
 var printSymbol = require('./print-symbol');
 
@@ -62,6 +63,12 @@ function drawRelativeElement(renderer, params, bartop) {
 		case "stem":
 			var stemWidth = params.linewidth > 0 ? params.linewidth + renderer.lineThickness : params.linewidth - renderer.lineThickness
 			params.graphelem = printStem(renderer, params.x, stemWidth, y, renderer.calcY(params.pitch2), 'abcjs-stem', 'stem'); break;
+		case "tabbeam":
+			var beamTop = renderer.calcY(params.pitch2);
+			var beamBottom = renderer.calcY(params.pitch);
+			var beamLeft = params.x, beamRight = params.x + params.w;
+			params.graphelem = printPath(renderer, { path: "M" + beamLeft + " " + beamTop + " L" + beamRight + " " + beamTop + " L" + beamRight + " " + beamBottom + " L" + beamLeft + " " + beamBottom + "z", stroke: "none", fill: renderer.foregroundColor, 'class': 'abcjs-tab-beam' });
+			break;
 		case "ledger":
 			params.graphelem = printStaffLine(renderer, params.x, params.x + params.w, params.pitch, "abcjs-ledger", "ledger", 0.35 + renderer.lineThickness); break;
 	}
