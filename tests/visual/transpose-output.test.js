@@ -304,6 +304,16 @@ describe("Transpose Output", function () {
 		"K: A\n" +
 		"{B}A{edc}B|\n"
 
+	var abcGraceAccidentals = "T: Transpose Output\n" +
+		"L: 1/8\n" +
+		"K: G\n" +
+		"{^F}G2|{=F}G2|{/^F}G2|!trill!{^F}G2|{^FG}A2|{_G/A/}A2|{DE}{D}D4|{B,DF}c2|{A/}G4|\n"
+
+	var abcGraceAccidentalsExpected = "T: Transpose Output\n" +
+		"L: 1/8\n" +
+		"K: A\n" +
+		"{^G}A2|{=G}A2|{/^G}A2|!trill!{^G}A2|{^GA}B2|{_A/B/}B2|{EF}{E}E4|{CEG}d2|{B/}A4|\n"
+
 	var abcBagpipes = "T:Scotland The Brave\n" +
 	"L:1/8\n" +
 	"M:4/4\n" +
@@ -455,6 +465,10 @@ E`
 
 	it("output-grace", function () {
 		outputTest(abcGrace, abcGraceExpected, 2)
+	})
+
+	it("output-grace-accidentals", function () {
+		outputTest(abcGraceAccidentals, abcGraceAccidentalsExpected, 2)
 	})
 
 	it("output-key-change", function () {
