@@ -870,10 +870,10 @@ var parseDirective = {};
 				}
 				return null;
 			case "vskip":
-				var vskip = Math.round(getRequiredMeasurement(cmd, tokens));
+				var vskip = getRequiredMeasurement(cmd, tokens);
 				if (vskip.error)
 					return vskip.error;
-				tuneBuilder.addSpacing(vskip);
+				tuneBuilder.addSpacing(Math.round(vskip));
 				return null;
 			case "scale":
 				setScale(cmd, tokens);

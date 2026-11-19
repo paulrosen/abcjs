@@ -45,6 +45,22 @@ describe("Directives", function() {
 		"c4|\n" +
 		"d4|\n"
 
+	it("measurement-without-number", function() {
+		// A minus sign with no number after it used to throw while the line was being typed.
+		var directives = ["%%vskip -", "%%staffsep -", "%%vskip -x", "%%vskip abc"]
+		for (var i = 0; i < directives.length; i++) {
+			var abc = "X:1\nK:G\nGAG GAB|\n" + directives[i] + "\nGAG GAB|\n"
+			var visualObj = abcjs.parseOnly(abc)
+			var warnings = visualObj[0].warnings || []
+			chai.assert.equal(warnings.length, 1, directives[i])
+			chai.assert.include(warnings[0], "requires a measurement as a parameter", directives[i])
+		}
+
+		var spacing = abcjs.parseOnly("X:1\nK:G\nGAG GAB|\n%%vskip -5\nGAG GAB|\n")[0]
+		chai.assert.equal(spacing.warnings, undefined, "negative vskip")
+		chai.assert.equal(spacing.lines[1].vskip, -5, "negative vskip")
+	})
+
 	it("max-staves", function() {
 		var visualObj = abcjs.renderAbc("paper",abcMaxStaves)
 		chai.assert.equal(visualObj[0].lines.length, 5, "Max Staves");
