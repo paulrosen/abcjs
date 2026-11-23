@@ -15,9 +15,11 @@ var createKeySignature = function (elem, tuneNumber) {
 		var symbol;
 		var fudge = 0;
 		switch (acc.acc) {
+			case "dblsharp": symbol = "accidentals.dblsharp"; fudge = -1; break;
 			case "sharp": symbol = "accidentals.sharp"; fudge = -3; break;
 			case "natural": symbol = "accidentals.nat"; break;
 			case "flat": symbol = "accidentals.flat"; fudge = -1.2; break;
+			case "dblflat": symbol = "accidentals.dblflat"; fudge = -1.2; break;
 			case "quartersharp": symbol = "accidentals.halfsharp"; fudge = -2.5; break;
 			case "quarterflat": symbol = "accidentals.halfflat"; fudge = -1.2; break;
 			default: symbol = "accidentals.flat";
