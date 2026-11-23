@@ -16,6 +16,17 @@ function transposeChordName(chord, steps, preferFlats, freeGCchord) {
 	while (steps < 0) steps += 12;
 	if (steps > 11) steps = steps % 12;
 
+	// ABC 2.1 allows an alternate chord in parentheses after the regular chord,
+	// e.g. "G(Em)". Both are real chord names and must be transposed. The main
+	// regex below only captures the leading chord, so the parenthesized chord
+	// would be copied verbatim and never transposed. Handle it recursively:
+	// transpose the base and the parenthesized chord independently, then recombine.
+	var altMatch = chord.match(/^([^()]*)\(([^)]+)\)(.*)$/)
+	if (altMatch)
+		return transposeChordName(altMatch[1], steps, preferFlats, freeGCchord) +
+			"(" + transposeChordName(altMatch[2], steps, preferFlats, freeGCchord) + ")" +
+			altMatch[3]
+
 	// (chord name w/accidental) (a bunch of stuff) (/) (bass note) (anything else)
 	var match = chord.match(/^([A-G][b#♭♯]?)([^\/]+)?\/?([A-G][b#♭♯]?)?(.+)?/)
 	if (!match)

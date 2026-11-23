@@ -222,6 +222,18 @@ describe("Transpose Output", function () {
 		// TODO-PER: the C#, D#, G#, and A# should probably be expressed as flats.
 		'"N.C."d|"D"d"D#"d"Emaj7"d"F"d|"F#"d"G"d"G#"d"A"d|"A#"d"B/G#"d"C"d"C#"d|"D#"d"F"d"G#"d"A#"d|"C"d "D/C#"d "D/C"d "D/C"d | "D/B"d "D/A#"d "D/A#"d "D/A"d ||'
 
+	// ABC 2.1 alternate chords: a chord may carry an alternate chord in
+	// parentheses, e.g. "G(Em)". Both are real chord names and must transpose.
+	var abcAlternateChords = 'X:1\n' +
+		"T: Transpose Output\n" +
+		'K:C\n' +
+		'"Dm(Gm)"c "G(Em)"c "Am(Dm)"c "C(F)"c |"C"c "G/B"c "Cmaj7"c ||'
+
+	var abcAlternateChordsExpected = 'X:1\n' +
+		"T: Transpose Output\n" +
+		'K:D\n' +
+		'"Em(Am)"d "A(F#m)"d "Bm(Em)"d "D(G)"d |"D"d "A/C#"d "Dmaj7"d ||'
+
 	var abcMeasureAccidental = "T: Transpose Output\n" +
 		"L: 1/4\n" +
 		"K: C\n" +
@@ -419,6 +431,10 @@ E`
 
 	it("output-transpose-chord-symbols", function () {
 		outputTest(abcChordSymbols, abcChordSymbolsExpected, 2)
+	})
+
+	it("output-transpose-alternate-chords", function () {
+		outputTest(abcAlternateChords, abcAlternateChordsExpected, 2)
 	})
 
 	it("output-measure-accidental", function () {
