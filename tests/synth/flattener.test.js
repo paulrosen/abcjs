@@ -7926,6 +7926,31 @@ D4 :|
 		doFlattenTest(abcDynamics3, expectedDynamics3);
 	})
 
+	it("does not leak dynamics between voices", function() {
+		var abc = 'X:1\n' +
+			'M:4/4\n' +
+			'L:1/4\n' +
+			'V:1\n' +
+			'V:2\n' +
+			'K:C\n' +
+			'[V:1]!ff! CDEF|\n' +
+			'[V:2] GABc|\n';
+		var visualObj = abcjs.renderAbc("paper", abc, {});
+		var flattened = visualObj[0].setUpAudio({});
+		var volumes = flattened.tracks.map(function(track) {
+			return track.filter(function(event) {
+				return event.cmd === "note";
+			}).map(function(event) {
+				return event.volume;
+			});
+		});
+
+		chai.assert.deepStrictEqual(volumes, [
+			[120, 110, 110, 110],
+			[105, 95, 95, 95]
+		]);
+	})
+
 	it("flatten-six-huit", function() {
 		doFlattenTest(abcSixHuit, expectedSixHuit);
 	})
