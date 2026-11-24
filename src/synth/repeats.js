@@ -15,8 +15,22 @@ function Repeats(voice) {
 				this.sections.push({type: "startRepeat", index: this.sections[this.sections.length-1].index})
 			this.sections.push({type: "endRepeat", index: thisIndex})
 		}
-		if (startEnding)
+		if (startEnding) {
+			// A first ending whose section never declared a start repeat is the common shorthand
+			// "|:A:|B|1x:|2y|" - the section implicitly starts right after the previous end repeat.
+			// Without this the ending would attach to the previous section and everything between
+			// that end repeat and this ending would be dropped from the playback. (An end repeat on
+			// this same bar, like ":|2", is the continuation of an ending group, not a new section.)
+			var lastSection = this.sections[this.sections.length-1]
+			if (startEnding.indexOf(1) >= 0 && lastSection.type === 'endRepeat' && lastSection.index !== thisIndex)
+				this.sections.push({type: "startRepeat", index: lastSection.index})
+			// A first ending arriving while the previous ending group is still open is the same
+			// shorthand continued over another section ("|1x:|2y|z|1x':|2y'|") - there is no bar in
+			// the notation that closes the previous group, so start the new section right after it.
+			else if (startEnding.indexOf(1) >= 0 && lastSection.type === 'startEnding')
+				this.sections.push({type: "startRepeat", index: lastSection.index+1})
 			this.sections.push({type:"startEnding", index: thisIndex, endings: startEnding})
+		}
 		if (isStartRepeat)
 			this.sections.push({type:"startRepeat", index: thisIndex})
 	}
