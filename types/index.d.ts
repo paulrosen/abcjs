@@ -275,7 +275,7 @@ declare module 'abcjs' {
 		initialClef?: boolean;
 		jazzchords?: boolean;
 		germanAlphabet?: boolean;
-		lineBreaks?: Array<number>;
+		lineBreaks?: Array<Array<number>>;
 		lineThickness?: number;
 		minPadding?: number;
 		oneSvgPerLine?: boolean;
@@ -933,7 +933,14 @@ declare module 'abcjs' {
 		deline: () => Array<TuneLine>;
 		findSelectableElement: (target: HTMLElement) => SelectableReturn | null;
 		getSelectableArray: () => Array<Selectable>
-		lineBreaks?: Array<number>;
+		lineBreaks?: Array<{
+			ogLine: number;
+			line: number;
+			staff?: number;
+			voice?: number;
+			start?: number;
+			end?: number;
+		}>;
 		visualTranspose?: number;
 	}
 

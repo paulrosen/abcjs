@@ -1,4 +1,15 @@
 describe("Automatic line wrapping", function() {
+	it("returns line break positions for music and text", function () {
+		var abc = "X:1\nK:C\nC D|E F|\n%%text interlude\nG A|B c|";
+		var tune = abcjs.parseOnly(abc, { lineBreaks: [[0], [0]] })[0];
+		chai.assert.deepEqual(tune.lineBreaks, [
+			{ ogLine: 0, line: 0, staff: 0, voice: 0, start: 0, end: 2 },
+			{ ogLine: 0, line: 1, staff: 0, voice: 0, start: 3, end: 6 },
+			{ ogLine: 1, line: 2 },
+			{ ogLine: 2, line: 3, staff: 0, voice: 0, start: 0, end: 2 },
+			{ ogLine: 2, line: 4, staff: 0, voice: 0, start: 3, end: 6 }
+		]);
+	});
 	var abcSingleLine = "X:1\n" +
 "L:1/4\n" +
 "M:4/4\n" +
