@@ -277,6 +277,7 @@ declare module 'abcjs' {
 		germanAlphabet?: boolean;
 		lineBreaks?: Array<number>;
 		lineThickness?: number;
+		lyricExtenders?: 'underscore' | 'none';
 		minPadding?: number;
 		oneSvgPerLine?: boolean;
 		paddingbottom?: number;
